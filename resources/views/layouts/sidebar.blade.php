@@ -252,6 +252,13 @@
 
     <!-- 4. BOTTOM LOGOUT & QUICK ACTIONS (Apple Clean Minimalist Bar) -->
     <div class="p-3 border-t border-slate-200/70 bg-white/60">
+        <a href="{{ route('portal.index') }}" target="_blank" 
+           class="w-full flex items-center space-x-2 px-3 py-2 rounded-xl text-sky-700 bg-sky-50 hover:bg-sky-100 text-xs font-bold transition-all mb-2 shadow-xs"
+           title="Buka Pratinjau Portal Klien">
+            <svg class="w-4 h-4 flex-shrink-0 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            <span x-show="!sidebarCollapsed" class="truncate">Portal Klien ↗</span>
+        </a>
+
         <form action="{{ route('logout') }}" method="POST">
             @csrf
             <button type="submit" 

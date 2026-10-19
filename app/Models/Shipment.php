@@ -47,6 +47,11 @@ class Shipment extends Model
         'do_email_recipient',
         'ceisa_document_id',
         'status_tahap',
+        'customs_channel',
+        'trucking_vendor_reason',
+        'customs_hold_steps',
+        'pod_signed_at',
+        'closed_at',
         'catatan',
         'created_by_user_id',
     ];
@@ -58,6 +63,9 @@ class Shipment extends Model
         'free_time_expired_at' => 'datetime',
         'do_expired_at' => 'datetime',
         'do_email_sent_at' => 'datetime',
+        'pod_signed_at' => 'datetime',
+        'closed_at' => 'datetime',
+        'customs_hold_steps' => 'array',
         'total_nilai_valuta' => 'decimal:2',
         'total_nilai_idr' => 'decimal:2',
         'ndbm_kurs' => 'decimal:2',
@@ -353,5 +361,74 @@ class Shipment extends Model
         }
 
         return $prefix . str_pad($maxNum + 1, 4, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Definisi 11 Tahapan Pipeline Operasional Genie (STG)
+     */
+    public const STAGES_PIPELINE = [
+        0 => ['key' => 'doc', 'title' => 'Dokumen', 'role' => 'R-DOC', 'role_name' => 'Staf Document', 'action' => 'Verifikasi dokumen', 'sla_hours' => 4],
+        1 => ['key' => 'hs', 'title' => 'HS & Lartas', 'role' => 'R-DOC', 'role_name' => 'Staf Document', 'action' => 'Setujui HS code', 'sla_hours' => 4],
+        2 => ['key' => 'pib', 'title' => 'Dokumen pabean', 'role' => 'R-DOC-SPV', 'role_name' => 'Supervisor Document', 'action' => 'Approve & kirim ke CEISA', 'sla_hours' => 2],
+        3 => ['key' => 'bill', 'title' => 'Billing pabean', 'role' => 'R-FIN', 'role_name' => 'Finance', 'action' => 'Bayar billing', 'sla_hours' => 4],
+        4 => ['key' => 'do', 'title' => 'Pelayaran & DO', 'role' => 'R-DO', 'role_name' => 'Staf Delivery Order', 'action' => 'Terbitkan DO', 'sla_hours' => 8],
+        5 => ['key' => 'arr', 'title' => 'Kedatangan & jalur', 'role' => 'R-TRF', 'role_name' => 'Staf Traffic', 'action' => 'Tetapkan jalur', 'sla_hours' => 2],
+        6 => ['key' => 'hold', 'title' => 'Hold & notul', 'role' => 'R-TRF', 'role_name' => 'Staf Traffic', 'action' => 'Selesaikan hold', 'sla_hours' => 24],
+        7 => ['key' => 'gate', 'title' => 'SPPB & gate out', 'role' => 'R-TRF', 'role_name' => 'Staf Traffic', 'action' => 'Gate out', 'sla_hours' => 4],
+        8 => ['key' => 'send', 'title' => 'Pengiriman', 'role' => 'R-TRF', 'role_name' => 'Staf Traffic', 'action' => 'Berangkatkan truk', 'sla_hours' => 2],
+        9 => ['key' => 'pod', 'title' => 'POD & closing', 'role' => 'R-TRF', 'role_name' => 'Staf Traffic', 'action' => 'Tutup shipment', 'sla_hours' => 24],
+        10 => ['key' => 'inv', 'title' => 'Invoice klien', 'role' => 'R-FIN', 'role_name' => 'Finance', 'action' => 'Kirim invoice', 'sla_hours' => 24],
+    ];
+
+    /**
+     * Hitung Indeks Tahap Pipeline Saat Ini (0 sampai 11)
+     */
+    public function getStageIndexAttribute(): int
+    {
+        if ($this->closed_at !== null || in_array($this->status_tahap, ['INVOICED_P19', 'COMPLETED'])) {
+            return 11; // Selesai Penuh
+        }
+
+        return match ($this->status_tahap) {
+            'DOC_COLLECTING' => 0,
+            'DOC_READY' => 1,
+            'HS_DETECTED', 'DRAFT_REVIEW' => 2,
+            'CEISA_SUBMITTED', 'BILLING_ISSUED' => 3,
+            'DO_PROCESSING' => 4,
+            'DO_RELEASED', 'ARRIVED' => 5,
+            'TRAFFIC_HOLD', 'INSPECTION_CUSTOMS' => 6,
+            'TRAFFIC_SPPB', 'SPPB_RELEASED' => 7,
+            'TRAFFIC_GATE_OUT', 'GATE_OUT' => 8,
+            'DELIVERED_POD' => 10,
+            default => 0,
+        };
+    }
+
+    /**
+     * Cek Apakah Tahap Hold Dilewati Otomatis (Smart Skip Jalur Hijau)
+     */
+    public function getIsHoldSkippedAttribute(): bool
+    {
+        return strtoupper($this->customs_channel ?? '') === 'HIJAU';
+    }
+
+    /**
+     * Dapatkan Metadata Tahap Aktif
+     */
+    public function getCurrentStageMetaAttribute(): array
+    {
+        $idx = $this->stage_index;
+        if ($idx >= 11) {
+            return [
+                'key' => 'done',
+                'title' => 'Selesai & Lunas',
+                'role' => 'R-FIN',
+                'role_name' => 'Finance',
+                'action' => 'Shipment Selesai',
+                'sla_hours' => 0,
+            ];
+        }
+
+        return self::STAGES_PIPELINE[$idx] ?? self::STAGES_PIPELINE[0];
     }
 }

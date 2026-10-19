@@ -21,11 +21,22 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+    Route::get('/login/otp', [AuthController::class, 'showOtpForm'])->name('login.otp');
+    Route::post('/login/otp', [AuthController::class, 'verifyOtp'])->name('login.otp.post');
+
+    Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->name('password.request');
+    Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
+    Route::get('/reset-password/{token}', [AuthController::class, 'showResetPasswordForm'])->name('password.reset');
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 });
 
 // Quick Role Switcher (Bisa diakses untuk testing simulasi RBAC)
 Route::get('/quick-login/{roleCode}', [AuthController::class, 'quickLogin'])->name('quick-login');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Portal Mandiri Klien (Pelacakan Kargo & Upload Dokumen Mandiri)
+Route::get('/portal/{token?}', [\App\Http\Controllers\ClientPortalController::class, 'index'])->name('portal.index');
+Route::post('/portal/{shipmentId}/upload', [\App\Http\Controllers\ClientPortalController::class, 'uploadDocument'])->name('portal.upload');
 
 // Protected Routes (Wajib Login & RBAC Active)
 Route::middleware('auth')->group(function () {
@@ -205,6 +216,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [\App\Http\Controllers\QuotationController::class, 'index'])->name('index');
         Route::post('/store', [\App\Http\Controllers\QuotationController::class, 'store'])->name('store');
         Route::post('/{id}/status', [\App\Http\Controllers\QuotationController::class, 'updateStatus'])->name('status');
+        Route::post('/{id}/convert-to-project', [\App\Http\Controllers\QuotationController::class, 'convertToProject'])->name('convert-to-project');
     });
 
     // ==========================================

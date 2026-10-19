@@ -107,6 +107,9 @@ class ShipmentWorkflowService
             ]);
         }
 
+        // Otomatis tetapkan PIC 11 tahapan berdasarkan beban terendah (autoPic)
+        $this->autoAssignPics($shipment);
+
         return $shipment;
     }
 
@@ -586,26 +589,56 @@ class ShipmentWorkflowService
     }
 
     /**
-     * 9. TIM TRAFFIC: Eksekusi Gate Out, Behandle & POD
+     * 9. TIM TRAFFIC: Eksekusi Gate Out, Behandle & POD dengan Smart Skip Logic
      */
-    public function advanceTraffic(Shipment $shipment, string $actionType): void
+    public function advanceTraffic(Shipment $shipment, string $actionType, ?array $extra = null): void
     {
-        if ($actionType === 'SPPB_UPDATE') {
-            $shipment->update(['status_tahap' => 'TRAFFIC_SPPB']);
+        $updateData = [];
+
+        if (isset($extra['customs_channel'])) {
+            $updateData['customs_channel'] = strtoupper($extra['customs_channel']);
+        }
+
+        if (isset($extra['trucking_vendor_reason'])) {
+            $updateData['trucking_vendor_reason'] = $extra['trucking_vendor_reason'];
+        }
+
+        if (isset($extra['traffic_notes'])) {
+            $updateData['catatan'] = $extra['traffic_notes'];
+        }
+
+        if (in_array($actionType, ['SPPB_UPDATE', 'SPPB_RELEASED'])) {
+            $updateData['status_tahap'] = 'TRAFFIC_SPPB';
+        } elseif ($actionType === 'INSPECTION_CUSTOMS' || $actionType === 'HOLD') {
+            $updateData['status_tahap'] = 'TRAFFIC_HOLD';
+            // Set 4 checklist langkah pemeriksaan awal
+            $updateData['customs_hold_steps'] = [
+                ['name' => 'Kunjungan pemeriksa Bea Cukai', 'is_completed' => false],
+                ['name' => 'Dokumen tambahan / perizinan dipenuhi', 'is_completed' => false],
+                ['name' => 'Bongkar & pemeriksaan fisik kontainer', 'is_completed' => false],
+                ['name' => 'Pengembalian segel pelayaran resmi', 'is_completed' => false],
+            ];
         } elseif ($actionType === 'GATE_OUT') {
-            $shipment->update(['status_tahap' => 'TRAFFIC_GATE_OUT']);
-        } elseif ($actionType === 'DELIVERED_POD') {
-            $shipment->update(['status_tahap' => 'DELIVERED_POD']);
+            $updateData['status_tahap'] = 'TRAFFIC_GATE_OUT';
+        } elseif (in_array($actionType, ['DELIVERED', 'DELIVERED_POD'])) {
+            $updateData['status_tahap'] = 'DELIVERED_POD';
+            $updateData['pod_signed_at'] = now();
+            $updateData['closed_at'] = now(); // Kebijakan Prototipe: Closing operasional tidak menunggu invoice lunas
+
             // Tandai dokumen POD sebagai VERIFIED
             $doc = $shipment->documents()->where('jenis_dokumen', 'POD_SURAT_JALAN')->first();
             if ($doc) {
                 $doc->update([
                     'status' => 'VERIFIED',
                     'nama_file' => 'POD_' . $shipment->project_no . '.pdf',
+                    'file_path' => $extra['pod_file_path'] ?? $doc->file_path,
                     'verified_at' => now(),
+                    'catatan' => 'POD fisik diterima dari ' . ($extra['receiver_name'] ?? 'Penerima Klien'),
                 ]);
             }
         }
+
+        $shipment->update($updateData);
     }
 
     /**
@@ -645,5 +678,78 @@ class ShipmentWorkflowService
         ]);
 
         return $invoice;
+    }
+
+    /**
+     * 11. Penugasan Otomatis PIC Beban Terendah (Lowest Workload Balancing - autoPic)
+     */
+    public function autoAssignPics(Shipment $shipment): array
+    {
+        $assignments = [];
+        $stages = Shipment::STAGES_PIPELINE;
+
+        foreach ($stages as $stg) {
+            $roleCode = $stg['role'];
+            $role = \App\Models\Role::where('code', $roleCode)->first();
+            if (!$role) {
+                continue;
+            }
+
+            // Ambil kandidat user aktif
+            $candidates = $role->users()->where('is_active', true)->get();
+            if ($candidates->isEmpty()) {
+                continue;
+            }
+
+            // Urutkan berdasarkan beban kerja aktif terendah
+            $sorted = $candidates->sortBy(function ($usr) {
+                return \App\Models\ShipmentPic::where('user_id', $usr->id)
+                    ->whereHas('shipment', function ($sq) {
+                        $sq->whereNull('closed_at');
+                    })
+                    ->count();
+            })->values();
+
+            $primaryPic = $sorted->first();
+            $backupPic = $sorted->get(1);
+
+            \App\Models\ShipmentPic::updateOrCreate(
+                [
+                    'shipment_id' => $shipment->id,
+                    'process_code' => $stg['key'],
+                ],
+                [
+                    'user_id' => $primaryPic->id,
+                    'backup_id' => $backupPic?->id,
+                ]
+            );
+
+            $assignments[$stg['key']] = [
+                'primary' => $primaryPic->name,
+                'backup' => $backupPic?->name,
+            ];
+        }
+
+        return $assignments;
+    }
+
+    /**
+     * 12. Ambil Alih PIC Tahap Tertentu (Take Over PIC)
+     */
+    public function takeOverPic(Shipment $shipment, string $processCode, int|string $newUserId): \App\Models\ShipmentPic
+    {
+        $pic = \App\Models\ShipmentPic::firstOrNew([
+            'shipment_id' => $shipment->id,
+            'process_code' => $processCode,
+        ]);
+
+        $oldUserId = $pic->user_id;
+        $pic->user_id = $newUserId;
+        if ($oldUserId && $oldUserId !== $newUserId) {
+            $pic->backup_id = $oldUserId;
+        }
+        $pic->save();
+
+        return $pic;
     }
 }

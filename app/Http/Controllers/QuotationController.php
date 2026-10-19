@@ -4,11 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\Client;
 use App\Models\Quotation;
+use App\Services\Shipment\ShipmentWorkflowService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class QuotationController extends Controller
 {
+    protected ShipmentWorkflowService $workflowService;
+
+    public function __construct(ShipmentWorkflowService $workflowService)
+    {
+        $this->workflowService = $workflowService;
+    }
     /**
      * Daftar Penawaran Harga (CRM)
      * Hak Akses: crm.view
@@ -75,5 +82,47 @@ class QuotationController extends Controller
         $quotation->update(['status' => $request->status]);
 
         return back()->with('success', "Status penawaran diperbarui menjadi {$request->status}.");
+    }
+
+    /**
+     * Konversi 1-Klik Penawaran (Quotation / SO) Menjadi Project Shipment
+     * Hak Akses: crm.deal
+     */
+    public function convertToProject(string $id, Request $request)
+    {
+        Gate::authorize('crm.deal');
+
+        $quotation = Quotation::with('client')->findOrFail($id);
+        $client = $quotation->client;
+
+        // Validasi Surat Kuasa PPJK Klien
+        if (!$client || !$client->surat_kuasa_expired_at) {
+            return back()->with('error', 'Surat kuasa PPJK klien belum terdaftar. Lengkapi surat kuasa di data Klien sebelum membuat project.');
+        }
+
+        if (now()->isAfter($client->surat_kuasa_expired_at)) {
+            return back()->with('error', "Surat kuasa PPJK klien [{$client->name}] telah kedaluwarsa pada " . $client->surat_kuasa_expired_at->format('d/m/Y') . ". Pembukaan project baru diblokir.");
+        }
+
+        $validated = $request->validate([
+            'nomor_bl_awb' => 'required|string|max:50',
+            'eta_date' => 'required|date',
+            'jenis_layanan' => 'nullable|in:IMPORT_BC20,EKSPORT_BC30',
+        ]);
+
+        $shipment = $this->workflowService->createProject([
+            'client_id' => $client->id,
+            'nomor_bl_awb' => $validated['nomor_bl_awb'],
+            'eta_date' => $validated['eta_date'],
+            'jenis_layanan' => $validated['jenis_layanan'] ?? 'IMPORT_BC20',
+            'pelabuhan_muat' => $quotation->origin_port,
+            'pelabuhan_bongkar' => $quotation->destination_port,
+            'catatan' => "Dibuat otomatis dari Penawaran / Sales Order: {$quotation->quotation_number}",
+        ], auth()->id());
+
+        $quotation->update(['status' => 'ACCEPTED']);
+
+        return redirect()->route('core.document.show', $shipment->id)
+            ->with('success', "Project Shipment [{$shipment->project_no}] berhasil dibuka dari Penawaran {$quotation->quotation_number} dengan penugasan PIC 11 tahapan otomatis.");
     }
 }

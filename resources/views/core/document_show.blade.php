@@ -89,6 +89,10 @@
     </div>
     @endif
 
+    <!-- Apple HIG 11-Stage Pipeline Stepper & Interactive Action Card -->
+    @include('core.components.pipeline_stepper')
+    @include('core.components.pipeline_stage_card')
+
     <!-- Banner Deteksi Arah Pengapalan & Rekomendasi Deklarasi Bea Cukai (PIB vs PEB) -->
     <div class="mb-6 p-4 rounded-2xl bg-gradient-to-r {{ $shipment->type === 'EXPORT' ? 'from-amber-500/10 via-amber-500/5 to-slate-50 border border-amber-200' : 'from-sky-500/10 via-sky-500/5 to-slate-50 border border-sky-200' }} flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div class="flex items-start space-x-3.5">
