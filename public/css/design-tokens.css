@@ -1,0 +1,213 @@
+/**
+ * ==============================================================
+ * PATS_CEISA ERP - DESIGN TOKEN ARCHITECTURE
+ * Three-Layer Token Architecture: Primitive -> Semantic -> Component
+ * Conforming to Apple Human Interface Guidelines & design-system skill
+ * ==============================================================
+ */
+
+:root {
+  /* ============================================================
+   * LAYER 1: PRIMITIVE TOKENS (Raw Foundation Values)
+   * ============================================================ */
+  /* Neutral Color Palette */
+  --primitive-slate-50: #f8fafc;
+  --primitive-slate-100: #f1f5f9;
+  --primitive-slate-200: #e2e8f0;
+  --primitive-slate-300: #cbd5e1;
+  --primitive-slate-400: #94a3b8;
+  --primitive-slate-500: #64748b;
+  --primitive-slate-600: #475569;
+  --primitive-slate-700: #334155;
+  --primitive-slate-800: #1e293b;
+  --primitive-slate-900: #0f172a;
+  --primitive-slate-950: #020617;
+
+  /* Brand Blue Palette (Apple System Blue & CEISA Sky) */
+  --primitive-sky-50: #f0f9ff;
+  --primitive-sky-100: #e0f2fe;
+  --primitive-sky-200: #bae6fd;
+  --primitive-sky-300: #7dd3fc;
+  --primitive-sky-400: #38bdf8;
+  --primitive-sky-500: #0ea5e9;
+  --primitive-sky-600: #0284c7;
+  --primitive-sky-700: #0369a1;
+  --primitive-sky-800: #075985;
+  --primitive-sky-900: #0c4a6e;
+
+  /* Functional Status Colors */
+  --primitive-emerald-50: #ecfdf5;
+  --primitive-emerald-100: #d1fae5;
+  --primitive-emerald-500: #10b981;
+  --primitive-emerald-600: #059669;
+  --primitive-emerald-700: #047857;
+
+  --primitive-amber-50: #fffbeb;
+  --primitive-amber-100: #fef3c7;
+  --primitive-amber-500: #f59e0b;
+  --primitive-amber-600: #d97706;
+  --primitive-amber-700: #b45309;
+
+  --primitive-rose-50: #fff1f2;
+  --primitive-rose-100: #ffe4e6;
+  --primitive-rose-500: #f43f5e;
+  --primitive-rose-600: #e11d48;
+  --primitive-rose-700: #be123c;
+
+  --primitive-indigo-50: #eef2ff;
+  --primitive-indigo-100: #e0e7ff;
+  --primitive-indigo-600: #4f46e5;
+  --primitive-indigo-700: #4338ca;
+
+  /* 4px Base Spacing Scale */
+  --space-0-5: 0.125rem; /* 2px */
+  --space-1: 0.25rem;    /* 4px */
+  --space-1-5: 0.375rem; /* 6px */
+  --space-2: 0.5rem;     /* 8px */
+  --space-2-5: 0.625rem; /* 10px */
+  --space-3: 0.75rem;    /* 12px */
+  --space-3-5: 0.875rem; /* 14px */
+  --space-4: 1rem;       /* 16px */
+  --space-5: 1.25rem;    /* 20px */
+  --space-6: 1.5rem;     /* 24px */
+  --space-8: 2rem;       /* 32px */
+  --space-10: 2.5rem;    /* 40px */
+  --space-12: 3rem;      /* 48px */
+
+  /* Typography Scales (Apple SF Pro Font Stack) */
+  --font-family-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", sans-serif;
+  --font-family-mono: "SF Mono", "JetBrains Mono", Menlo, Monaco, monospace;
+  --font-size-2xs: 0.625rem;   /* 10px */
+  --font-size-xs: 0.75rem;      /* 12px */
+  --font-size-sm: 0.8125rem;    /* 13px */
+  --font-size-base: 0.875rem;   /* 14px */
+  --font-size-md: 1rem;         /* 16px */
+  --font-size-lg: 1.125rem;     /* 18px */
+  --font-size-xl: 1.25rem;      /* 20px */
+  --font-size-2xl: 1.5rem;      /* 24px */
+
+  /* Border Radii (Apple Squircle Aesthetics) */
+  --radius-xs: 0.25rem;   /* 4px */
+  --radius-sm: 0.375rem;  /* 6px */
+  --radius-md: 0.5rem;    /* 8px */
+  --radius-lg: 0.75rem;   /* 12px */
+  --radius-xl: 1rem;      /* 16px */
+  --radius-2xl: 1.25rem;  /* 20px */
+  --radius-3xl: 1.5rem;   /* 24px */
+  --radius-full: 9999px;
+
+  /* Elevation Shadows (Soft Natural Depth) */
+  --shadow-hairline: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.06);
+
+  /* Animation Durations */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 350ms;
+
+  /* ============================================================
+   * LAYER 2: SEMANTIC TOKENS (Purpose-based Aliases)
+   * ============================================================ */
+  --color-page-bg: var(--primitive-slate-50);
+  --color-surface: #ffffff;
+  --color-surface-subtle: rgba(255, 255, 255, 0.8);
+  --color-surface-glass: rgba(255, 255, 255, 0.85);
+
+  --color-text-primary: var(--primitive-slate-900);
+  --color-text-secondary: var(--primitive-slate-700);
+  --color-text-muted: var(--primitive-slate-500);
+  --color-text-subtle: var(--primitive-slate-400);
+
+  --color-border-subtle: rgba(226, 232, 240, 0.8);
+  --color-border-default: var(--primitive-slate-200);
+  --color-border-hover: var(--primitive-slate-300);
+
+  --color-primary: var(--primitive-sky-600);
+  --color-primary-hover: var(--primitive-sky-700);
+  --color-primary-subtle: var(--primitive-sky-50);
+  --color-primary-text: var(--primitive-sky-800);
+
+  --color-success: var(--primitive-emerald-600);
+  --color-success-subtle: var(--primitive-emerald-50);
+  --color-success-text: var(--primitive-emerald-700);
+
+  --color-warning: var(--primitive-amber-500);
+  --color-warning-subtle: var(--primitive-amber-50);
+  --color-warning-text: var(--primitive-amber-700);
+
+  --color-danger: var(--primitive-rose-600);
+  --color-danger-subtle: var(--primitive-rose-50);
+  --color-danger-text: var(--primitive-rose-700);
+
+  --color-info: var(--primitive-indigo-600);
+  --color-info-subtle: var(--primitive-indigo-50);
+  --color-info-text: var(--primitive-indigo-700);
+
+  /* Layout Spacings */
+  --spacing-container-px: var(--space-4);
+  --spacing-section-mb: var(--space-6);
+
+  /* ============================================================
+   * LAYER 3: COMPONENT TOKENS (Component-specific Specs)
+   * ============================================================ */
+  /* Sidebar */
+  --sidebar-bg: rgba(248, 250, 252, 0.9);
+  --sidebar-border: var(--color-border-subtle);
+  --sidebar-item-radius: var(--radius-xl);
+  --sidebar-item-active-bg: var(--color-primary);
+  --sidebar-item-active-fg: #ffffff;
+  --sidebar-item-hover-bg: rgba(226, 232, 240, 0.5);
+
+  /* Topbar */
+  --topbar-bg: rgba(255, 255, 255, 0.82);
+  --topbar-border: var(--color-border-subtle);
+  --topbar-height: 4rem;
+
+  /* Card */
+  --card-bg: #ffffff;
+  --card-border: var(--color-border-subtle);
+  --card-radius: var(--radius-2xl);
+  --card-shadow: var(--shadow-sm);
+
+  /* Buttons */
+  --btn-radius: var(--radius-xl);
+  --btn-primary-bg: var(--color-primary);
+  --btn-primary-hover-bg: var(--color-primary-hover);
+  --btn-primary-fg: #ffffff;
+  --btn-secondary-bg: #ffffff;
+  --btn-secondary-border: var(--color-border-default);
+  --btn-secondary-fg: var(--color-text-secondary);
+
+  /* Inputs */
+  --input-bg: #ffffff;
+  --input-border: var(--color-border-default);
+  --input-radius: var(--radius-xl);
+  --input-focus-ring: rgba(2, 132, 199, 0.25);
+
+  /* Bottom Tab Bar (iOS Mobile) */
+  --tabbar-bg: rgba(255, 255, 255, 0.88);
+  --tabbar-border: var(--color-border-subtle);
+}
+
+/* Dark Mode Overrides (Semantic Layer Adaptation) */
+.dark {
+  --color-page-bg: var(--primitive-slate-950);
+  --color-surface: var(--primitive-slate-900);
+  --color-surface-subtle: rgba(15, 23, 42, 0.8);
+  --color-surface-glass: rgba(15, 23, 42, 0.85);
+
+  --color-text-primary: #ffffff;
+  --color-text-secondary: var(--primitive-slate-300);
+  --color-text-muted: var(--primitive-slate-400);
+
+  --color-border-subtle: rgba(51, 65, 85, 0.7);
+  --color-border-default: var(--primitive-slate-800);
+
+  --sidebar-bg: rgba(15, 23, 42, 0.92);
+  --topbar-bg: rgba(15, 23, 42, 0.85);
+  --tabbar-bg: rgba(15, 23, 42, 0.9);
+  --card-bg: var(--primitive-slate-900);
+}
