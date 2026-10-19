@@ -63,27 +63,42 @@
                     @forelse($invoices as $inv)
                         <tr class="hover:bg-slate-50/50">
                             <td class="py-3 px-4 font-mono">
-                                <span class="font-bold text-slate-800">{{ $inv->nomor_aju }}</span>
-                                <div class="text-[10px] text-slate-400">{{ $inv->jenis_dokumen_label }}</div>
+                                <a href="{{ route('finance.invoices.show', $inv->id) }}" class="font-bold text-sky-600 hover:text-sky-800 hover:underline">
+                                    {{ $inv->invoice_number ?? $inv->invoice_no }}
+                                </a>
+                                <div class="text-[10px] text-slate-400">Shipment: {{ $inv->shipment->project_no ?? '-' }}</div>
                             </td>
-                            <td class="py-3 px-4 font-medium text-slate-700">
-                                {{ $inv->nama_mitra_luar_negeri }}
+                            <td class="py-3 px-4 font-medium text-slate-800">
+                                {{ $inv->client->name ?? '-' }}
                             </td>
                             <td class="py-3 px-4 font-mono font-semibold text-amber-700">
-                                Rp {{ number_format($inv->total_billing ?? 0, 0, ',', '.') }}
+                                Rp {{ number_format($inv->talangan_pabean_idr ?? 0, 0, ',', '.') }}
                             </td>
                             <td class="py-3 px-4 font-mono font-bold text-slate-900">
-                                Rp {{ number_format($inv->total_nilai_idr, 0, ',', '.') }}
+                                Rp {{ number_format($inv->total_tagihan_idr ?? 0, 0, ',', '.') }}
                             </td>
                             <td class="py-3 px-4">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">
-                                    AR_OPEN (Menunggu Pelunasan)
-                                </span>
+                                @if($inv->status === 'PAID')
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                                        LUNAS (PAID)
+                                    </span>
+                                @elseif($inv->jatuh_tempo && $inv->jatuh_tempo->isPast())
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800">
+                                        JATUH TEMPO
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">
+                                        MENUNGGU PELUNASAN
+                                    </span>
+                                @endif
                             </td>
-                            <td class="py-3 px-4 text-right">
-                                <button class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs">
-                                    Cetak PDF &rarr;
-                                </button>
+                            <td class="py-3 px-4 text-right space-x-1.5 whitespace-nowrap">
+                                <a href="{{ route('finance.invoices.show', $inv->id) }}" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[11px]">
+                                    Detail &rarr;
+                                </a>
+                                <a href="{{ route('pdf.invoice', $inv->id) }}" target="_blank" class="px-2.5 py-1.5 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-700 font-bold text-[11px]">
+                                    PDF
+                                </a>
                             </td>
                         </tr>
                     @empty

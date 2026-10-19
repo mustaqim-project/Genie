@@ -64,10 +64,11 @@ class ClientInvoiceController extends Controller
         ]);
 
         $invoice = ClientInvoice::findOrFail($id);
+        $keterangan = "Lunas via {$request->payment_method}" . ($request->notes ? " (Ref: {$request->notes})" : "");
         $invoice->update([
             'status' => 'PAID',
             'paid_at' => $request->payment_date,
-            'notes' => ($invoice->notes ? $invoice->notes . ' | ' : '') . "Lunas via {$request->payment_method}: {$request->notes}",
+            'catatan_pembayaran' => $invoice->catatan_pembayaran ? ($invoice->catatan_pembayaran . ' | ' . $keterangan) : $keterangan,
         ]);
 
         return back()->with('success', "Invoice {$invoice->invoice_number} berhasil ditandai LUNAS.");

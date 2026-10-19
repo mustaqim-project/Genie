@@ -213,21 +213,9 @@
             </tr>
             <tr>
                 <td class="text-center">4</td>
-                <td>Terminal Handling Charges (THC) Pelabuhan Tanjung Priok (1x40' HC)</td>
+                <td>Penebusan Delivery Order (DO), THC, & Port Charges Pelayaran</td>
                 <td class="text-center"><small>Pelayaran</small></td>
-                <td class="text-right">2,850,000</td>
-            </tr>
-            <tr>
-                <td class="text-center">5</td>
-                <td>Delivery Order (DO) Administration Fee & Document Release</td>
-                <td class="text-center"><small>Pelayaran</small></td>
-                <td class="text-right">750,000</td>
-            </tr>
-            <tr>
-                <td class="text-center">6</td>
-                <td>Lift On / Lift Off Terminal Petikemas TPS</td>
-                <td class="text-center"><small>Terminal</small></td>
-                <td class="text-right">650,000</td>
+                <td class="text-right">{{ number_format($invoice->biaya_pelayaran_idr, 0, ',', '.') }}</td>
             </tr>
 
             <!-- 3. Jasa PPJK & Transportasi -->
@@ -235,16 +223,16 @@
                 <td colspan="4">C. JASA PENGURUSAN PPJK & TRUCKING (FORWARDING SERVICES)</td>
             </tr>
             <tr>
-                <td class="text-center">7</td>
-                <td>Customs Clearance & EDI Pabean Handling Fee (BC 2.0 PIB)</td>
+                <td class="text-center">5</td>
+                <td>Customs Clearance, EDI Pabean & Penanganan Dokumen PPJK</td>
                 <td class="text-center"><small>Jasa PPJK</small></td>
-                <td class="text-right">1,500,000</td>
+                <td class="text-right">{{ number_format($invoice->jasa_ppjk_idr, 0, ',', '.') }}</td>
             </tr>
             <tr>
-                <td class="text-center">8</td>
-                <td>Trucking Inland Transport Trailer (Pelabuhan Priok &rarr; Cikarang Factory)</td>
+                <td class="text-center">6</td>
+                <td>Trucking Inland Transport Trailer (Pelabuhan Priok &rarr; Gudang Klien)</td>
                 <td class="text-center"><small>Transport</small></td>
-                <td class="text-right">3,200,000</td>
+                <td class="text-right">{{ number_format($invoice->biaya_trucking_idr, 0, ',', '.') }}</td>
             </tr>
         </tbody>
     </table>
@@ -269,23 +257,23 @@
                 <table class="total-box">
                     <tr>
                         <td class="font-bold">Total Talangan Pabean (A):</td>
-                        <td class="text-right font-bold">Rp {{ number_format($invoice->reimbursable_amount ?? 88492625, 0, ',', '.') }}</td>
+                        <td class="text-right font-bold">Rp {{ number_format($invoice->talangan_pabean_idr, 0, ',', '.') }}</td>
                     </tr>
                     <tr>
                         <td class="font-bold">Total Biaya Pelayaran (B):</td>
-                        <td class="text-right font-bold">Rp {{ number_format(4250000, 0, ',', '.') }}</td>
+                        <td class="text-right font-bold">Rp {{ number_format($invoice->biaya_pelayaran_idr, 0, ',', '.') }}</td>
                     </tr>
                     <tr>
                         <td class="font-bold">Jasa PPJK & Trucking (C):</td>
-                        <td class="text-right font-bold">Rp {{ number_format(4700000, 0, ',', '.') }}</td>
+                        <td class="text-right font-bold">Rp {{ number_format($invoice->jasa_ppjk_idr + $invoice->biaya_trucking_idr, 0, ',', '.') }}</td>
                     </tr>
                     <tr>
-                        <td class="font-bold">PPN Jasa (1.1% atas Jasa C):</td>
-                        <td class="text-right">Rp {{ number_format(4700000 * 0.011, 0, ',', '.') }}</td>
+                        <td class="font-bold">PPN Jasa (1.1% DPP Nilai Lain):</td>
+                        <td class="text-right">Rp {{ number_format($invoice->ppn_jasa_idr, 0, ',', '.') }}</td>
                     </tr>
                     <tr class="grand-total">
                         <td style="padding: 8px;">TOTAL TAGIHAN:</td>
-                        <td class="text-right" style="padding: 8px;">Rp {{ number_format($invoice->total_amount, 0, ',', '.') }}</td>
+                        <td class="text-right" style="padding: 8px;">Rp {{ number_format($invoice->total_tagihan_idr, 0, ',', '.') }}</td>
                     </tr>
                 </table>
             </td>

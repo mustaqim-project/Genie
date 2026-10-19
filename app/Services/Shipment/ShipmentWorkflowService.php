@@ -647,13 +647,16 @@ class ShipmentWorkflowService
     public function generateClientInvoice(Shipment $shipment, int|string|null $userId = null): ClientInvoice
     {
         $ceisaDoc = $shipment->ceisaDocument;
-        $talanganPabean = $ceisaDoc ? $ceisaDoc->total_billing : 18500000;
+        $talanganPabean = $ceisaDoc ? ($ceisaDoc->total_billing ?? 18500000) : 18500000;
         $biayaPelayaran = 3850000; // THC + DO fee
-        $jasaPpjk = 1500000;       // Jasa Pengurusan
+        $jasaPpjk = 1500000;       // Jasa Pengurusan PPJK
         $trucking = 2500000;       // Pengiriman Jakarta
 
         $subtotal = $talanganPabean + $biayaPelayaran + $jasaPpjk + $trucking;
-        $ppnJasa = $jasaPpjk * 0.11;
+        
+        // Sesuai PMK No. 71/PMK.03/2022: PPN Jasa Pengurusan Transportasi & PPJK dengan DPP Nilai Lain (efektif 1.1% atas Jasa)
+        $dppJasa = $jasaPpjk + $trucking;
+        $ppnJasa = round($dppJasa * 0.011, 2);
         $total = $subtotal + $ppnJasa;
 
         $invoice = ClientInvoice::create([

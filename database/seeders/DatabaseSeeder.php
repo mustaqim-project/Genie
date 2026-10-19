@@ -71,7 +71,11 @@ class DatabaseSeeder extends Seeder
 
             // Finance
             ['code' => 'finance.view', 'name' => 'Melihat Tagihan & Pembayaran', 'module' => 'Finance'],
-            ['code' => 'finance.manage', 'name' => 'Membuat Invoice Klien & Eksekusi Bayar', 'module' => 'Finance'],
+            ['code' => 'finance.manage', 'name' => 'Mengelola Keuangan & Penagihan', 'module' => 'Finance'],
+            ['code' => 'finance.invoice', 'name' => 'Membuat & Mengelola Invoice Klien', 'module' => 'Finance'],
+            ['code' => 'finance.pay', 'name' => 'Mencatat Pelunasan Tagihan Klien', 'module' => 'Finance'],
+            ['code' => 'finance.bill', 'name' => 'Mengelola Tagihan Vendor Pelayaran & Ekspedisi', 'module' => 'Finance'],
+            ['code' => 'finance.ap_approve', 'name' => 'Menyetujui Tagihan Hutang Vendor (AP Approval)', 'module' => 'Finance'],
 
             // Accounting
             ['code' => 'accounting.view', 'name' => 'Melihat Laporan Laba Rugi & Neraca', 'module' => 'Accounting'],
@@ -135,6 +139,9 @@ class DatabaseSeeder extends Seeder
             $permissions['dashboard.financial']->id,
             $permissions['finance.view']->id,
             $permissions['finance.manage']->id,
+            $permissions['finance.invoice']->id,
+            $permissions['finance.pay']->id,
+            $permissions['finance.bill']->id,
             $permissions['accounting.view']->id,
             $permissions['accounting.manage']->id,
         ]);

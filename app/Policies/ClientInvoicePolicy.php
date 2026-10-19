@@ -21,7 +21,7 @@ class ClientInvoicePolicy
 
     public function viewAny(User $user): bool
     {
-        return $user->hasPermission('finance.view') || $user->hasPermission('accounting.view');
+        return $user->hasPermission('finance.view') || $user->hasPermission('accounting.view') || $user->hasPermission('finance.manage');
     }
 
     public function view(User $user, ClientInvoice $invoice): bool
@@ -31,21 +31,21 @@ class ClientInvoicePolicy
 
     public function create(User $user): bool
     {
-        return $user->hasPermission('finance.invoice');
+        return $user->hasPermission('finance.invoice') || $user->hasPermission('finance.manage');
     }
 
     public function update(User $user, ClientInvoice $invoice): bool
     {
-        return $user->hasPermission('finance.invoice');
+        return $user->hasPermission('finance.invoice') || $user->hasPermission('finance.manage');
     }
 
     public function delete(User $user, ClientInvoice $invoice): bool
     {
-        return $user->isSuperAdmin();
+        return $user->isSuperAdmin() || $user->hasRole('R-OWN');
     }
 
     public function pay(User $user, ClientInvoice $invoice): bool
     {
-        return $user->hasPermission('finance.pay');
+        return $user->hasPermission('finance.pay') || $user->hasPermission('finance.manage');
     }
 }
