@@ -272,7 +272,8 @@
         scanning: false,
         scanned: false,
         showDetails: false,
-        fileNames: { bl: '', invoice: '', pl: '' },
+        showSpecialDocs: false,
+        fileNames: { bl: '', invoice: '', pl: '', coo: '', insurance: '', lartas: '' },
         detected: {
             client_id: '',
             client_name: '',
@@ -492,6 +493,70 @@
                                     class="w-full py-2 px-2.5 rounded-xl border border-emerald-300 bg-white hover:bg-emerald-50 text-emerald-700 font-bold text-[11px] truncate flex items-center justify-center space-x-1.5">
                                 <span x-text="fileNames.pl ? '✓ ' + fileNames.pl : '📂 Pilih Packing List'"></span>
                             </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Collapsible Dokumen Khusus & Perizinan Tambahan -->
+                <div class="mt-0.5">
+                    <button type="button" @click="showSpecialDocs = !showSpecialDocs" 
+                            class="inline-flex items-center space-x-1.5 text-[11px] font-bold text-sky-700 hover:text-sky-900 transition-colors">
+                        <span x-text="showSpecialDocs ? '▾' : '▸'"></span>
+                        <span>📎 Dokumen Pendukung Khusus & Perizinan Lartas (COO Form E, Polis Asuransi, Izin K/L) - Opsional</span>
+                    </button>
+                    <div x-show="showSpecialDocs" x-transition class="mt-2.5 grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-200/80">
+                        <!-- 1. COO / Form E / Form D -->
+                        <div class="p-2.5 rounded-xl border border-slate-200 bg-white flex flex-col justify-between">
+                            <div class="mb-1.5">
+                                <span class="font-bold text-slate-800 text-[11px] flex items-center space-x-1">
+                                    <span>📜</span>
+                                    <span>Certificate of Origin (COO)</span>
+                                </span>
+                                <p class="text-[10px] text-slate-400 mt-0.5">Form E / D / AK untuk fasilitas tarif preferensi bea masuk 0%.</p>
+                            </div>
+                            <div>
+                                <input type="file" id="input-coo-file" name="coo_file" accept=".pdf,.png,.jpg,.jpeg" class="hidden" @change="updateFileName('coo', $event)">
+                                <button type="button" onclick="document.getElementById('input-coo-file').click()" 
+                                        class="w-full py-1.5 px-2 rounded-lg border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold text-[10px] truncate">
+                                    <span x-text="fileNames.coo ? '✓ ' + fileNames.coo : '📂 Upload Form E / COO'"></span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 2. Polis Asuransi Pengapalan -->
+                        <div class="p-2.5 rounded-xl border border-slate-200 bg-white flex flex-col justify-between">
+                            <div class="mb-1.5">
+                                <span class="font-bold text-slate-800 text-[11px] flex items-center space-x-1">
+                                    <span>🛡️</span>
+                                    <span>Polis Asuransi Pengapalan</span>
+                                </span>
+                                <p class="text-[10px] text-slate-400 mt-0.5">Marine cargo insurance / bukti nilai pertanggungan.</p>
+                            </div>
+                            <div>
+                                <input type="file" id="input-insurance-file" name="insurance_file" accept=".pdf,.png,.jpg,.jpeg" class="hidden" @change="updateFileName('insurance', $event)">
+                                <button type="button" onclick="document.getElementById('input-insurance-file').click()" 
+                                        class="w-full py-1.5 px-2 rounded-lg border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold text-[10px] truncate">
+                                    <span x-text="fileNames.insurance ? '✓ ' + fileNames.insurance : '📂 Upload Polis Asuransi'"></span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 3. Surat Perizinan Lartas Khusus -->
+                        <div class="p-2.5 rounded-xl border border-slate-200 bg-white flex flex-col justify-between">
+                            <div class="mb-1.5">
+                                <span class="font-bold text-slate-800 text-[11px] flex items-center space-x-1">
+                                    <span>⚖️</span>
+                                    <span>Izin Lartas / Dokumen Khusus</span>
+                                </span>
+                                <p class="text-[10px] text-slate-400 mt-0.5">LS Kemendag, PI, SNI, SDPPI, Barantan, dll.</p>
+                            </div>
+                            <div>
+                                <input type="file" id="input-lartas-file" name="lartas_file" accept=".pdf,.png,.jpg,.jpeg,.zip" class="hidden" @change="updateFileName('lartas', $event)">
+                                <button type="button" onclick="document.getElementById('input-lartas-file').click()" 
+                                        class="w-full py-1.5 px-2 rounded-lg border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold text-[10px] truncate">
+                                    <span x-text="fileNames.lartas ? '✓ ' + fileNames.lartas : '📂 Upload Izin Lartas'"></span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

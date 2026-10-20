@@ -177,7 +177,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/{id}/download-doc/{docId}', [\App\Http\Controllers\ShipmentProjectController::class, 'downloadDocument'])->name('download-doc');
         Route::post('/{id}/verify-document/{docId}', [\App\Http\Controllers\ShipmentProjectController::class, 'verifyDocument'])->name('verify-document');
         Route::post('/{id}/verify-all', [\App\Http\Controllers\ShipmentProjectController::class, 'verifyAllDocuments'])->name('verify-all');
+        Route::post('/{id}/item-document/store', [\App\Http\Controllers\ShipmentProjectController::class, 'addItemCustomsDocument'])->name('item-document.store');
         Route::post('/{id}/item-document/{docId}', [\App\Http\Controllers\ShipmentProjectController::class, 'updateItemDocument'])->name('item-document.update');
+        Route::delete('/{id}/item-document/{docId}', [\App\Http\Controllers\ShipmentProjectController::class, 'deleteItemDocument'])->name('item-document.destroy');
         Route::post('/{id}/item-document/{docId}/verify', [\App\Http\Controllers\ShipmentProjectController::class, 'verifyItemDocument'])->name('item-document.verify');
         Route::post('/{id}/detect-hs', [\App\Http\Controllers\ShipmentProjectController::class, 'detectHsCode'])->name('detect-hs');
         Route::post('/{id}/items', [\App\Http\Controllers\ShipmentProjectController::class, 'addItem'])->name('items.store');

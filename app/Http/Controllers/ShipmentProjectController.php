@@ -128,6 +128,7 @@ class ShipmentProjectController extends Controller
             || $request->hasFile('packing_list_file') 
             || $request->hasFile('coo_file') 
             || $request->hasFile('insurance_file') 
+            || $request->hasFile('lartas_file') 
             || $request->hasFile('documents');
 
         $validated = $request->validate([
@@ -157,6 +158,7 @@ class ShipmentProjectController extends Controller
             'packing_list_file' => 'nullable|file|max:20480',
             'coo_file' => 'nullable|file|max:20480',
             'insurance_file' => 'nullable|file|max:20480',
+            'lartas_file' => 'nullable|file|max:20480',
             'documents.*' => 'nullable|file|max:20480',
         ]);
 
@@ -167,6 +169,7 @@ class ShipmentProjectController extends Controller
             if ($request->hasFile('packing_list_file')) $files['packing_list_file'] = $request->file('packing_list_file');
             if ($request->hasFile('coo_file')) $files['coo_file'] = $request->file('coo_file');
             if ($request->hasFile('insurance_file')) $files['insurance_file'] = $request->file('insurance_file');
+            if ($request->hasFile('lartas_file')) $files['lartas_file'] = $request->file('lartas_file');
             if ($request->hasFile('documents')) $files['documents'] = $request->file('documents');
 
             $shipment = $this->workflowService->createProjectFromUploadedDocuments($files, $validated, auth()->id());
@@ -576,5 +579,76 @@ class ShipmentProjectController extends Controller
         }
 
         return back()->with('success', "Status dokumen tambahan {$doc->nama_dokumen} berhasil diubah menjadi {$status}.");
+    }
+
+    /**
+     * Tambah Dokumen Khusus / Izin Lartas Manual untuk Item Kargo
+     * Hak Akses: document.create
+     */
+    public function addItemCustomsDocument(Request $request, string $id)
+    {
+        Gate::authorize('document.create');
+
+        $validated = $request->validate([
+            'shipment_item_id' => 'required|uuid|exists:shipment_items,id',
+            'kode_dokumen' => 'required|string|max:10',
+            'nama_dokumen' => 'required|string|max:150',
+            'instansi_penerbit' => 'nullable|string|max:150',
+            'nomor_dokumen' => 'nullable|string|max:100',
+            'tanggal_dokumen' => 'nullable|date',
+            'is_mandatory' => 'nullable|boolean',
+            'catatan' => 'nullable|string|max:255',
+            'document_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png,xlsx,xls|max:10240',
+        ]);
+
+        $shipment = Shipment::findOrFail($id);
+        
+        $filePath = null;
+        $fileName = null;
+        if ($request->hasFile('document_file')) {
+            $file = $request->file('document_file');
+            $fileName = $file->getClientOriginalName();
+            $filePath = $file->store('shipment_item_docs', 'public');
+        }
+
+        $doc = \App\Models\ShipmentItemDocument::create([
+            'shipment_id' => $shipment->id,
+            'shipment_item_id' => $validated['shipment_item_id'],
+            'kode_dokumen' => $validated['kode_dokumen'],
+            'nama_dokumen' => $validated['nama_dokumen'],
+            'instansi_penerbit' => $validated['instansi_penerbit'] ?: 'Kementerian / Lembaga Terkait',
+            'nomor_dokumen' => $validated['nomor_dokumen'] ?? null,
+            'tanggal_dokumen' => $validated['tanggal_dokumen'] ?? null,
+            'file_name' => $fileName,
+            'file_path' => $filePath,
+            'status' => $filePath ? 'UPLOADED' : (!empty($validated['nomor_dokumen']) ? 'UPLOADED' : 'MISSING'),
+            'is_mandatory' => $request->boolean('is_mandatory', true),
+            'catatan' => $validated['catatan'] ?? null,
+        ]);
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Dokumen khusus [{$doc->kode_dokumen}] {$doc->nama_dokumen} berhasil ditambahkan.",
+                'data' => $doc,
+            ]);
+        }
+
+        return back()->with('success', "Dokumen khusus [{$doc->kode_dokumen}] {$doc->nama_dokumen} berhasil ditambahkan ke manifes kargo.");
+    }
+
+    /**
+     * Hapus Dokumen Khusus / Lartas Item
+     * Hak Akses: document.create
+     */
+    public function deleteItemDocument(string $id, string $docId)
+    {
+        Gate::authorize('document.create');
+
+        $shipment = Shipment::findOrFail($id);
+        $doc = \App\Models\ShipmentItemDocument::where('shipment_id', $shipment->id)->findOrFail($docId);
+        $doc->delete();
+
+        return back()->with('success', "Dokumen [{$doc->kode_dokumen}] {$doc->nama_dokumen} berhasil dihapus.");
     }
 }

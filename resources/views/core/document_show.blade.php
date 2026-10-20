@@ -640,26 +640,34 @@
     </div>
 
     <!-- Dokumen Tambahan & Perizinan Lartas per Barang -->
-    @if($shipment->itemCustomsDocuments->isNotEmpty())
     <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 mb-8 text-xs">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3 mb-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3 mb-4">
             <div>
                 <h3 class="font-bold text-sm text-slate-900 flex items-center space-x-2">
                     <span>🛡️</span>
                     <span>Tracking Dokumen Tambahan & Perizinan Lartas per Barang (CEISA 4.0)</span>
                 </h3>
-                <p class="text-slate-500 text-[11px] mt-0.5">Ketentuan dokumen pabean tambahan (LS, PI Kemendag, SNI, SDPPI, V-Legal, Fitosanitari, dll) yang disyaratkan atas pos tarif barang.</p>
+                <p class="text-slate-500 text-[11px] mt-0.5">Ketentuan dokumen pabean tambahan (LS, PI Kemendag, SNI Wajib, SDPPI, V-Legal, Barantan, dll) yang disyaratkan atas pos tarif barang.</p>
             </div>
-            @php
-                $totLartas = $shipment->itemCustomsDocuments->count();
-                $verifiedLartas = $shipment->itemCustomsDocuments->where('status', 'VERIFIED')->count();
-                $uploadedLartas = $shipment->itemCustomsDocuments->where('status', 'UPLOADED')->count();
-                $missingLartas = $shipment->itemCustomsDocuments->where('status', 'MISSING')->count();
-            @endphp
             <div class="flex items-center space-x-2">
+                @php
+                    $totLartas = $shipment->itemCustomsDocuments->count();
+                    $verifiedLartas = $shipment->itemCustomsDocuments->where('status', 'VERIFIED')->count();
+                    $uploadedLartas = $shipment->itemCustomsDocuments->where('status', 'UPLOADED')->count();
+                    $missingLartas = $shipment->itemCustomsDocuments->where('status', 'MISSING')->count();
+                @endphp
+                @if($totLartas > 0)
                 <span class="px-2.5 py-1 rounded-full text-[10px] font-bold font-mono {{ $missingLartas === 0 ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800 border border-amber-300' }}">
                     {{ $verifiedLartas + $uploadedLartas }}/{{ $totLartas }} Dokumen Terpenuhi
                 </span>
+                @endif
+                @can('document.create')
+                <button type="button" 
+                        onclick="document.getElementById('modal-add-item-customs-doc').classList.remove('hidden')"
+                        class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-[11px] shadow-sm transition-all active:scale-95">
+                    <span>+ Tambah Dokumen Khusus / Izin Lartas</span>
+                </button>
+                @endcan
             </div>
         </div>
 
@@ -668,11 +676,29 @@
             <span class="text-lg">⚠️</span>
             <div class="text-[11px]">
                 <strong class="font-bold text-amber-950">Perhatian Kepatuhan Pabean:</strong>
-                Terdapat <strong>{{ $missingLartas }} dokumen perizinan / dokumen tambahan</strong> yang belum dilengkapi nomor atau berkasnya. Lengkapi nomor dokumen dan tanggal sebelum mengirimkan PIB/PEB ke sistem CEISA 4.0 DJBC agar tidak terkena Nota Pembetulan (NP) atau Penolakan Sistem.
+                Terdapat <strong>{{ $missingLartas }} dokumen perizinan / dokumen tambahan</strong> yang belum dilengkapi nomor atau berkas fisiknya. Lengkapi nomor dokumen dan tanggal sebelum mengirimkan PIB/PEB ke sistem CEISA 4.0 DJBC agar tidak terkena Nota Pembetulan (NP) atau Penolakan Sistem.
             </div>
         </div>
         @endif
 
+        @if($shipment->itemCustomsDocuments->isEmpty())
+        <div class="p-6 rounded-2xl bg-slate-50/70 border border-dashed border-slate-200 text-center">
+            <div class="w-10 h-10 rounded-2xl bg-slate-100 text-slate-500 mx-auto flex items-center justify-center text-xl mb-2">
+                📋
+            </div>
+            <div class="font-bold text-slate-800 text-xs">Belum Ada Dokumen Khusus / Perizinan Lartas Terdaftar</div>
+            <p class="text-[11px] text-slate-500 max-w-lg mx-auto mt-1 mb-3">
+                Kargo Anda bebas lartas standar atau dokumen perizinan khusus belum ditambahkan. Jika terdapat kebutuhan perizinan K/L (LS Kemendag, PI, SNI, SDPPI Kominfo, Barantan, Kemenkes, atau Form E), gunakan tombol di bawah untuk mendaftarkannya.
+            </p>
+            @can('document.create')
+            <button type="button" 
+                    onclick="document.getElementById('modal-add-item-customs-doc').classList.remove('hidden')"
+                    class="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-[11px] shadow-sm transition-all">
+                <span>+ Upload & Daftarkan Dokumen Khusus / Izin Lartas</span>
+            </button>
+            @endcan
+        </div>
+        @else
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
                 <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-100">
@@ -724,7 +750,7 @@
                                 {{ $cdoc->status }}
                             </span>
                         </td>
-                        <td class="py-3 px-3 text-right space-x-1">
+                        <td class="py-3 px-3 text-right space-x-1 whitespace-nowrap">
                             @can('document.create')
                             <button type="button" 
                                     onclick='openFulfillDocModal(@json($cdoc), @json($cdoc->item->uraian_barang ?? ""), @json($cdoc->item->kode_hs ?? ""))'
@@ -744,14 +770,24 @@
                                 </form>
                                 @endif
                             @endcan
+
+                            @can('document.create')
+                            <form action="{{ route('core.document.item-document.destroy', ['id' => $shipment->id, 'docId' => $cdoc->id]) }}" method="POST" class="inline" onsubmit="return confirm('Hapus dokumen khusus [{{ $cdoc->kode_dokumen }}] {{ $cdoc->nama_dokumen }}?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-800 font-semibold text-[10px] border border-rose-200">
+                                    Hapus
+                                </button>
+                            </form>
+                            @endcan
                         </td>
                     </tr>
                     @endforeach
                 </tbody>
             </table>
         </div>
+        @endif
     </div>
-    @endif
 
     <!-- Rincian Item Kargo & Pos Tarif HS Code BTKI Engine -->
     <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 mb-8 text-xs">
@@ -1253,7 +1289,124 @@
     </div>
 </div>
 
+<!-- Modal 6: Tambah Dokumen Khusus / Perizinan Lartas Baru -->
+<div id="modal-add-item-customs-doc" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-lg w-full p-6 text-xs">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+            <div>
+                <h3 class="text-sm font-extrabold text-slate-900">Tambah Dokumen Khusus / Izin Lartas</h3>
+                <p class="text-[11px] text-slate-400">Hubungkan surat izin, laporan surveyor, atau perizinan khusus K/L dengan item kargo.</p>
+            </div>
+            <button type="button" onclick="document.getElementById('modal-add-item-customs-doc').classList.add('hidden')" class="p-1 rounded-lg text-slate-400 hover:text-slate-600">
+                ✕
+            </button>
+        </div>
+
+        <form action="{{ route('core.document.item-document.store', $shipment->id) }}" method="POST" enctype="multipart/form-data" class="space-y-3.5">
+            @csrf
+
+            <!-- 1. Pilih Item Barang -->
+            <div>
+                <label class="block font-bold text-slate-700 mb-1">Pilih Item Barang Terkait <span class="text-rose-500">*</span></label>
+                <select name="shipment_item_id" id="add_doc_item_id" required class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold">
+                    <option value="">-- Pilih Barang Manifes --</option>
+                    @foreach($shipment->items as $it)
+                        <option value="{{ $it->id }}">
+                            [{{ $it->kode_hs }}] {{ Str::limit($it->uraian_barang, 45) }} ({{ number_format($it->jumlah_kemasan) }} {{ $it->jenis_kemasan }})
+                        </option>
+                    @endforeach
+                </select>
+                @if($shipment->items->isEmpty())
+                <p class="text-[10px] text-rose-500 mt-1">Belum ada item barang terdaftar. Tambahkan item kargo terlebih dahulu di atas.</p>
+                @endif
+            </div>
+
+            <!-- 2. Preset / Pilihan Kode Dokumen Pabean (CEISA 4.0) -->
+            <div>
+                <label class="block font-bold text-slate-700 mb-1">Jenis & Kode Dokumen Pabean <span class="text-rose-500">*</span></label>
+                <select id="preset_doc_selector" onchange="applyCustomsDocPreset(this.value)" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-medium mb-2">
+                    <option value="">-- Pilih Rekomendasi Jenis Dokumen --</option>
+                    <option value="861|Laporan Surveyor (LS Kemendag)|Kementerian Perdagangan / Surveyor">861 - Laporan Surveyor (LS Kemendag)</option>
+                    <option value="860|Persetujuan Impor (PI Kemendag)|Kementerian Perdagangan">860 - Persetujuan Impor (PI Kemendag)</option>
+                    <option value="810|Sertifikat Standar Nasional Indonesia (SNI)|BSN / Lembaga Sertifikasi Produk (LSPro)">810 - Sertifikat Standar Nasional Indonesia (SNI Wajib)</option>
+                    <option value="853|Sertifikat Alat Telekomunikasi (SDPPI)|Kementerian Komunikasi dan Informatika">853 - Sertifikat Alat & Perangkat Telekomunikasi (SDPPI Kominfo)</option>
+                    <option value="880|Dokumen V-Legal (SVLK)|Kementerian Lingkungan Hidup dan Kehutanan">880 - Dokumen V-Legal Kayu / Kehutanan (KLHK)</option>
+                    <option value="854|Sertifikat Pelepasan Karantina Tumbuhan (KT-9)|Badan Karantina Indonesia (Barantan)">854 - Karantina Tumbuhan / Fitosanitari (Barantan)</option>
+                    <option value="852|Sertifikat Pelepasan Karantina Hewan (KH-12)|Badan Karantina Indonesia (Barantan)">852 - Karantina Hewan / Veteriner (Barantan)</option>
+                    <option value="856|Sertifikat Pelepasan Karantina Ikan (KI-D12)|Badan Karantina Indonesia (Barantan)">856 - Karantina Ikan / Mutu (Barantan)</option>
+                    <option value="831|Surat Rekomendasi K/L Terkait|Kementerian Terkait (Kemenkes / BPOM / Kemenperin)">831 - Rekomendasi Teknis K/L Terkait</option>
+                    <option value="811|Surat Keputusan Pembebasan Bea Masuk|Direktorat Jenderal Bea dan Cukai (BKPM / Masterlist)">811 - Fasilitas Pembebasan Bea Masuk (Masterlist)</option>
+                    <option value="999|Dokumen Khusus Lainnya (COA/MSDS/Form E)|Instansi Penerbit / Lembaga Akreditasi">999 - Dokumen Khusus Lainnya (COA / MSDS / Form E / Fumigasi)</option>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2.5">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Kode Dokumen <span class="text-rose-500">*</span></label>
+                    <input type="text" name="kode_dokumen" id="add_doc_kode" required placeholder="861 / 999" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-mono text-xs">
+                </div>
+                <div class="col-span-2">
+                    <label class="block font-bold text-slate-700 mb-1">Nama Resmi Dokumen <span class="text-rose-500">*</span></label>
+                    <input type="text" name="nama_dokumen" id="add_doc_nama" required placeholder="Contoh: Laporan Surveyor Barang Modal Bukan Baru" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs">
+                </div>
+            </div>
+
+            <div>
+                <label class="block font-semibold text-slate-700 mb-1">Instansi Penerbit</label>
+                <input type="text" name="instansi_penerbit" id="add_doc_instansi" placeholder="Kementerian Perdagangan / PT Surveyor Indonesia / Sucofindo" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Nomor Dokumen / Izin</label>
+                    <input type="text" name="nomor_dokumen" placeholder="Contoh: LS-90281/KMD/X/2026" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-mono text-xs">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Tanggal Dokumen</label>
+                    <input type="date" name="tanggal_dokumen" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs">
+                </div>
+            </div>
+
+            <!-- Upload File -->
+            <div class="p-3 rounded-2xl border-2 border-dashed border-slate-200 hover:border-sky-400 bg-slate-50/50 transition-colors">
+                <label class="block font-bold text-slate-800 mb-1">Unggah Berkas Fisik (PDF, JPG, PNG, XLSX) <span class="text-slate-400 font-normal">(Opsional)</span></label>
+                <p class="text-[10px] text-slate-500 mb-2">Berkas akan tersimpan di cloud storage proyek dan dapat diunduh saat pemeriksaan fisik (Behandle).</p>
+                <input type="file" name="document_file" accept=".pdf,.png,.jpg,.jpeg,.xlsx,.xls"
+                       class="text-xs text-slate-500 w-full file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-[11px] file:bg-sky-600 file:text-white hover:file:bg-sky-700">
+            </div>
+
+            <div>
+                <label class="block font-semibold text-slate-700 mb-1">Catatan Dokumen</label>
+                <input type="text" name="catatan" placeholder="Contoh: Kuota terpakai 50 Ton / Masa berlaku s.d 31 Des 2026" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs">
+            </div>
+
+            <div class="flex items-center space-x-2 pt-1">
+                <input type="checkbox" name="is_mandatory" id="add_doc_is_mandatory" value="1" checked class="rounded border-slate-300 text-sky-600 focus:ring-sky-500">
+                <label for="add_doc_is_mandatory" class="text-[11px] text-slate-700 font-medium">
+                    Dokumen ini wajib dipenuhi sebelum submit ke CEISA 4.0 (Pre-Flight Check)
+                </label>
+            </div>
+
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-end space-x-2">
+                <button type="button" onclick="document.getElementById('modal-add-item-customs-doc').classList.add('hidden')" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold text-xs">
+                    Batal
+                </button>
+                <button type="submit" class="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md">
+                    Simpan Dokumen Khusus
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
+    function applyCustomsDocPreset(presetVal) {
+        if (!presetVal) return;
+        const parts = presetVal.split('|');
+        if (parts[0]) document.getElementById('add_doc_kode').value = parts[0];
+        if (parts[1]) document.getElementById('add_doc_nama').value = parts[1];
+        if (parts[2]) document.getElementById('add_doc_instansi').value = parts[2];
+    }
     function openFulfillDocModal(doc, itemName, hsCode) {
         if (!doc) return;
         const modal = document.getElementById('modal-fulfill-item-doc');
