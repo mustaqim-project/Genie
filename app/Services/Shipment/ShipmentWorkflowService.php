@@ -680,6 +680,14 @@ class ShipmentWorkflowService
             'status_tahap' => 'INVOICED_P19',
         ]);
 
+        // Auto-Journaling Akuntansi Forwarding (DR Piutang AR, CR Pendapatan, CR PPN 1.1%, CR Talangan)
+        try {
+            $accountingService = app(\App\Services\Accounting\AccountingService::class);
+            $accountingService->recordClientInvoiceIssued($invoice, $userId);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning("Gagal auto-journal invoice: " . $e->getMessage());
+        }
+
         return $invoice;
     }
 

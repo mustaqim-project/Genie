@@ -391,13 +391,16 @@
                     </div>
 
                     <div>
-                        <label for="payment_method" class="block font-semibold text-slate-700 mb-1">Rekening / Metode Pembayaran *</label>
-                        <select name="payment_method" id="payment_method" required
+                        <label for="account_id" class="block font-semibold text-slate-700 mb-1">Rekening Bank Tujuan Penerimaan *</label>
+                        <select name="account_id" id="account_id" required
                                 class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none">
-                            <option value="Transfer Bank BCA (KCU Enggano)">Transfer Bank BCA (KCU Enggano)</option>
-                            <option value="Transfer Bank Mandiri (KCP Priok)">Transfer Bank Mandiri (KCP Priok)</option>
-                            <option value="Kas Tunai Operasional">Kas Tunai Operasional</option>
-                            <option value="Cek / Giro Bilyet">Cek / Giro Bilyet</option>
+                            @if(isset($bankAccounts) && $bankAccounts->isNotEmpty())
+                                @foreach($bankAccounts as $acc)
+                                    <option value="{{ $acc->id }}">{{ $acc->name }} ({{ $acc->bank }} - {{ $acc->account_no }})</option>
+                                @endforeach
+                            @else
+                                <option value="">Bank Central Asia (BCA) Operasional</option>
+                            @endif
                         </select>
                     </div>
 

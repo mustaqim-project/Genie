@@ -228,6 +228,12 @@ Route::middleware('auth')->group(function () {
         Route::post('/transactions/{id}/reconcile', [\App\Http\Controllers\CashBankController::class, 'reconcile'])->name('transactions.reconcile');
     });
 
+    // Finance Tax (Perpajakan PPN 1.1% PMK 71/2022 & PPh 23)
+    Route::prefix('finance/tax')->name('finance.tax.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\TaxController::class, 'index'])->name('index');
+        Route::get('/export-efaktur', [\App\Http\Controllers\TaxController::class, 'exportEfaktur'])->name('export');
+    });
+
     // CRM Quotations (Penawaran Harga)
     Route::prefix('crm/quotations')->name('crm.quotations.')->group(function () {
         Route::get('/', [\App\Http\Controllers\QuotationController::class, 'index'])->name('index');

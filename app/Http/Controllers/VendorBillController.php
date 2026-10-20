@@ -172,6 +172,13 @@ class VendorBillController extends Controller
             return back()->with('success', "Tagihan vendor {$bill->ref_no} sebesar Rp " . number_format($amount, 0, ',', '.') . " berhasil diajukan dan membutuhkan persetujuan Pimpinan (R-OWN).");
         }
 
+        // Auto-journal untuk tagihan yang langsung approved (di bawah limit)
+        try {
+            app(\App\Services\Accounting\AccountingService::class)->recordVendorBillApproved($bill, auth()->id());
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning("Gagal auto-journal vendor bill: " . $e->getMessage());
+        }
+
         return back()->with('success', "Tagihan vendor {$bill->ref_no} sebesar Rp " . number_format($amount, 0, ',', '.') . " berhasil dicatat dan siap diproses pembayaran.");
     }
 
@@ -202,6 +209,13 @@ class VendorBillController extends Controller
                 'decided_at' => now(),
                 'reason' => $request->reason ?? 'Disetujui oleh Pimpinan.',
             ]);
+
+        // Auto-journal untuk tagihan yang baru disetujui Pimpinan
+        try {
+            app(\App\Services\Accounting\AccountingService::class)->recordVendorBillApproved($bill, auth()->id());
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning("Gagal auto-journal vendor bill approve: " . $e->getMessage());
+        }
 
         return back()->with('success', "Tagihan {$bill->ref_no} sebesar Rp " . number_format($bill->amount, 0, ',', '.') . " telah disetujui Pimpinan dan siap dicairkan.");
     }
@@ -257,6 +271,19 @@ class VendorBillController extends Controller
         $bill->update([
             'status' => 'PAID',
         ]);
+
+        // 4. Auto-Journaling Pembayaran AP (DR Hutang Vendor, CR Kas/Bank)
+        try {
+            app(\App\Services\Accounting\AccountingService::class)->recordVendorBillPayment(
+                $bill,
+                $amount,
+                $account,
+                $request->paid_at,
+                auth()->id()
+            );
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning("Gagal auto-journal vendor bill payment: " . $e->getMessage());
+        }
 
         return back()->with('success', "Pembayaran tagihan {$bill->ref_no} sebesar Rp " . number_format($amount, 0, ',', '.') . " berhasil dicairkan dari rekening {$account->name}. Saldo kas/bank telah terpotong otomatis.");
     }
