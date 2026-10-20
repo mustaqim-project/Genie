@@ -285,8 +285,9 @@
                 </div>
                 @can('finance.manage')
                 <button type="button" @click="showAccountModal = true"
-                        class="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs">
-                    + Buka Akun Baru
+                        class="inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition-all active:scale-95 shadow-xs">
+                    <svg class="w-3.5 h-3.5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    <span>Buka Akun Rekening Baru</span>
                 </button>
                 @endcan
             </div>

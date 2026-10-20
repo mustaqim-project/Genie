@@ -766,12 +766,14 @@
             <div class="flex items-center space-x-2">
                 @can('document.create')
                 <button type="button" onclick="document.getElementById('modal-ai-ocr-scan').classList.remove('hidden')"
-                        class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-[11px] border border-indigo-200 transition-colors">
-                    <span>🤖 Pindai Packing List (AI & OCR)</span>
+                        class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-[11px] border border-indigo-200 transition-colors">
+                    <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    <span>Pindai Packing List (AI)</span>
                 </button>
                 <button type="button" onclick="document.getElementById('modal-add-item').classList.remove('hidden')"
-                        class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-[11px] transition-colors">
-                    <span>+ Tambah Item Manual</span>
+                        class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-[11px] transition-colors active:scale-95">
+                    <svg class="w-3.5 h-3.5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    <span>Tambah Item Manual</span>
                 </button>
                 @endcan
             </div>

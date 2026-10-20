@@ -25,17 +25,19 @@
         </div>
         <div class="flex items-center space-x-2.5">
             <a href="{{ route('bc20.index') }}" 
-               class="inline-flex items-center space-x-1.5 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all shadow-sm">
-                <span>📑 Daftar BC 2.0</span>
+               class="inline-flex items-center space-x-1.5 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-all shadow-xs active:scale-95">
+                <svg class="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <span>Daftar BC 2.0</span>
             </a>
             <a href="{{ route('bc30.index') }}" 
-               class="inline-flex items-center space-x-1.5 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all shadow-sm">
-                <span>📦 Daftar BC 3.0</span>
+               class="inline-flex items-center space-x-1.5 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-all shadow-xs active:scale-95">
+                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                <span>Daftar BC 3.0</span>
             </a>
             @can('document.create')
             <button onclick="document.getElementById('modal-create-project').classList.remove('hidden')" 
-                    class="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-sky-600 to-brand-700 hover:from-sky-700 hover:to-brand-800 text-white text-xs font-bold shadow-md shadow-sky-600/20 transition-all hover:-translate-y-0.5">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition-all active:scale-95">
+                <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
                 <span>Buka Proyek Baru (P01)</span>
@@ -44,11 +46,11 @@
         </div>
     </div>
 
-    <!-- 4 KPI Stats Cards -->
+    <!-- 4 Apple HIG KPI Stats Cards -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center space-x-3.5">
-            <div class="w-11 h-11 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold text-lg flex-shrink-0">
-                📁
+        <div class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center space-x-3.5 hover:border-slate-300 transition-all">
+            <div class="w-11 h-11 rounded-xl bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
             </div>
             <div class="overflow-hidden">
                 <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Total Proyek</div>
@@ -57,9 +59,9 @@
             </div>
         </div>
 
-        <div class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center space-x-3.5">
-            <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-lg flex-shrink-0">
-                ⏳
+        <div class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center space-x-3.5 hover:border-slate-300 transition-all">
+            <div class="w-11 h-11 rounded-xl bg-[#FF9500]/10 text-[#FF9500] flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
             <div class="overflow-hidden">
                 <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Kumpul Berkas</div>
@@ -68,9 +70,9 @@
             </div>
         </div>
 
-        <div class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center space-x-3.5">
-            <div class="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-lg flex-shrink-0">
-                🤖
+        <div class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center space-x-3.5 hover:border-slate-300 transition-all">
+            <div class="w-11 h-11 rounded-xl bg-[#5856D6]/10 text-[#5856D6] flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
             </div>
             <div class="overflow-hidden">
                 <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Review & HS Code</div>
@@ -79,9 +81,9 @@
             </div>
         </div>
 
-        <div class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center space-x-3.5">
-            <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg flex-shrink-0">
-                🏛️
+        <div class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center space-x-3.5 hover:border-slate-300 transition-all">
+            <div class="w-11 h-11 rounded-xl bg-[#34C759]/10 text-[#34C759] flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
             </div>
             <div class="overflow-hidden">
                 <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Billing Terbit</div>

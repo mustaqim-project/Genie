@@ -17,26 +17,39 @@
     </div>
 
     <!-- Customs Channel Status Tabs -->
+    <!-- 4 Customs Channel Filter Pills (Apple HIG Minimalist Indicators) -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 text-xs font-semibold">
         <a href="{{ route('core.traffic.index', ['channel' => 'HIJAU']) }}" 
-           class="p-3.5 rounded-xl border {{ request('channel') === 'HIJAU' ? 'bg-emerald-50 border-emerald-300 text-emerald-800 shadow-sm' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50' }} flex items-center justify-between">
-            <span>🟢 Jalur Hijau (SPPB)</span>
-            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">Siap Gate Out</span>
+           class="p-3.5 rounded-xl border {{ request('channel') === 'HIJAU' ? 'bg-emerald-50 border-emerald-300 text-emerald-800 shadow-xs' : 'bg-white border-slate-200/80 text-slate-700 hover:bg-slate-50' }} flex items-center justify-between transition-all active:scale-[0.99]">
+            <span class="inline-flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Jalur Hijau (SPPB)</span>
+            </span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100/80 text-emerald-800 font-bold">Siap Gate Out</span>
         </a>
         <a href="{{ route('core.traffic.index', ['channel' => 'KUNING']) }}" 
-           class="p-3.5 rounded-xl border {{ request('channel') === 'KUNING' ? 'bg-amber-50 border-amber-300 text-amber-800 shadow-sm' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50' }} flex items-center justify-between">
-            <span>🟡 Jalur Kuning (SPJK)</span>
-            <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">Periksa Dok</span>
+           class="p-3.5 rounded-xl border {{ request('channel') === 'KUNING' ? 'bg-amber-50 border-amber-300 text-amber-800 shadow-xs' : 'bg-white border-slate-200/80 text-slate-700 hover:bg-slate-50' }} flex items-center justify-between transition-all active:scale-[0.99]">
+            <span class="inline-flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                <span>Jalur Kuning (SPJK)</span>
+            </span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-100/80 text-amber-800 font-bold">Periksa Dok</span>
         </a>
         <a href="{{ route('core.traffic.index', ['channel' => 'MERAH']) }}" 
-           class="p-3.5 rounded-xl border {{ request('channel') === 'MERAH' ? 'bg-rose-50 border-rose-300 text-rose-800 shadow-sm' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50' }} flex items-center justify-between">
-            <span>🔴 Jalur Merah (SPJM)</span>
-            <span class="text-[10px] px-2 py-0.5 rounded-full bg-rose-100 text-rose-800">Behandle Fisik</span>
+           class="p-3.5 rounded-xl border {{ request('channel') === 'MERAH' ? 'bg-rose-50 border-rose-300 text-rose-800 shadow-xs' : 'bg-white border-slate-200/80 text-slate-700 hover:bg-slate-50' }} flex items-center justify-between transition-all active:scale-[0.99]">
+            <span class="inline-flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                <span>Jalur Merah (SPJM)</span>
+            </span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-rose-100/80 text-rose-800 font-bold">Behandle Fisik</span>
         </a>
         <a href="{{ route('core.traffic.index', ['channel' => 'HOLD']) }}" 
-           class="p-3.5 rounded-xl border {{ request('channel') === 'HOLD' ? 'bg-purple-50 border-purple-300 text-purple-800 shadow-sm' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50' }} flex items-center justify-between">
-            <span>🟣 Sengketa / Notul</span>
-            <span class="text-[10px] px-2 py-0.5 rounded-full bg-purple-100 text-purple-800">SPTNP / NPD</span>
+           class="p-3.5 rounded-xl border {{ request('channel') === 'HOLD' ? 'bg-purple-50 border-purple-300 text-purple-800 shadow-xs' : 'bg-white border-slate-200/80 text-slate-700 hover:bg-slate-50' }} flex items-center justify-between transition-all active:scale-[0.99]">
+            <span class="inline-flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+                <span>Sengketa / Notul</span>
+            </span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-purple-100/80 text-purple-800 font-bold">SPTNP / NPD</span>
         </a>
     </div>
 
@@ -127,12 +140,13 @@
 
 </div>
 
-<!-- Modal Gate Out TPS -->
-<div id="modal-gate-out" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full p-6 text-xs">
+<!-- Modal Gate Out TPS (Apple HIG z-[200] Standalone Modal Architecture) -->
+<div id="modal-gate-out" class="hidden fixed inset-0 z-[200] overflow-y-auto bg-slate-950/60 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-[24px] sm:rounded-2xl border border-slate-200/80 shadow-2xl max-w-md w-full p-6 text-xs transform transition-all">
+        <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4 sm:hidden"></div>
         <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
             <h3 class="text-sm font-bold text-slate-900">Eksekusi Pengeluaran Truk (Gate Out TPS)</h3>
-            <button onclick="document.getElementById('modal-gate-out').classList.add('hidden')" class="text-slate-400 hover:text-slate-600">
+            <button onclick="document.getElementById('modal-gate-out').classList.add('hidden')" class="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -157,19 +171,20 @@
             </div>
 
             <div class="pt-3 border-t border-slate-100 flex items-center justify-end space-x-2">
-                <button type="button" onclick="document.getElementById('modal-gate-out').classList.add('hidden')" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-600 font-semibold">Batal</button>
-                <button type="submit" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold">Izin Gate Out</button>
+                <button type="button" onclick="document.getElementById('modal-gate-out').classList.add('hidden')" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-600 font-semibold transition-colors">Batal</button>
+                <button type="submit" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-all shadow-xs active:scale-95">Izin Gate Out</button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Modal POD Delivery -->
-<div id="modal-pod" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full p-6 text-xs">
+<!-- Modal POD Delivery (Apple HIG z-[200] Standalone Modal Architecture) -->
+<div id="modal-pod" class="hidden fixed inset-0 z-[200] overflow-y-auto bg-slate-950/60 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-[24px] sm:rounded-2xl border border-slate-200/80 shadow-2xl max-w-md w-full p-6 text-xs transform transition-all">
+        <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4 sm:hidden"></div>
         <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
             <h3 class="text-sm font-bold text-slate-900">Konfirmasi Bukti Terima (Proof of Delivery / POD)</h3>
-            <button onclick="document.getElementById('modal-pod').classList.add('hidden')" class="text-slate-400 hover:text-slate-600">
+            <button onclick="document.getElementById('modal-pod').classList.add('hidden')" class="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -193,8 +208,8 @@
             </p>
 
             <div class="pt-3 border-t border-slate-100 flex items-center justify-end space-x-2">
-                <button type="button" onclick="document.getElementById('modal-pod').classList.add('hidden')" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-600 font-semibold">Batal</button>
-                <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold">Simpan POD & Terbitkan Invoice</button>
+                <button type="button" onclick="document.getElementById('modal-pod').classList.add('hidden')" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-600 font-semibold transition-colors">Batal</button>
+                <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition-all shadow-xs active:scale-95">Simpan POD & Terbitkan Invoice</button>
             </div>
         </form>
     </div>

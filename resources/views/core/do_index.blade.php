@@ -93,28 +93,35 @@
                                 <!-- Otomasi Kirim Email -->
                                 <form action="{{ route('core.do.send-email', $shp->id) }}" method="POST" class="inline-block">
                                     @csrf
-                                    <button type="submit" class="px-2.5 py-1.5 rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100 font-bold text-[11px]" title="Kirim Email Invoice ke Pelayaran">
-                                        📧 Email Pelayaran
+                                    <button type="submit" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100 font-semibold text-[11px] transition-colors" title="Kirim Email Invoice ke Pelayaran">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                        <span>Email Pelayaran</span>
                                     </button>
                                 </form>
 
                                 <!-- Tombol Rilis DO Modal Trigger -->
                                 <button onclick="openReleaseModal('{{ $shp->id }}', '{{ $shp->shipment_number ?? $shp->project_no }}')"
-                                        class="px-2.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-bold text-[11px]">
+                                        class="px-2.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-semibold text-[11px] transition-all shadow-xs active:scale-95">
                                     Rilis DO
                                 </button>
 
                                 <!-- Cetak Surat Permohonan DO -->
                                 <a href="{{ route('pdf.do-request', $shp->id) }}" target="_blank"
-                                   class="px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 font-semibold text-[11px]">
+                                   class="px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 font-semibold text-[11px] transition-colors">
                                     PDF Surat
                                 </a>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="py-8 text-center text-slate-400">
-                                Belum ada shipment pada antrian Tim DO.
+                            <td colspan="6" class="py-12 text-center">
+                                <div class="max-w-xs mx-auto flex flex-col items-center">
+                                    <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 mb-2">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2m-4-1v8m0 0l3-3m-3 3L9 8m-5 5h2.586a1 1 0 01.707.293l2.414 2.414a1 1 0 00.707.293h3.172a1 1 0 00.707-.293l2.414-2.414a1 1 0 01.707-.293H20"/></svg>
+                                    </div>
+                                    <p class="text-xs font-semibold text-slate-800">Belum Ada Antrian Shipment Tim DO</p>
+                                    <p class="text-[11px] text-slate-400 mt-0.5">Shipment akan muncul otomatis setelah SPPB / Billing pabean terbit dari Tim Document.</p>
+                                </div>
                             </td>
                         </tr>
                     @endforelse
@@ -128,12 +135,13 @@
 
 </div>
 
-<!-- Modal Release DO -->
-<div id="modal-release-do" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full p-6 text-xs">
+<!-- Modal Release DO (Apple HIG z-[200] Standalone Modal Architecture) -->
+<div id="modal-release-do" class="hidden fixed inset-0 z-[200] overflow-y-auto bg-slate-950/60 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-[24px] sm:rounded-2xl border border-slate-200/80 shadow-2xl max-w-md w-full p-6 text-xs transform transition-all">
+        <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4 sm:hidden"></div>
         <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
             <h3 class="text-sm font-bold text-slate-900">Konfirmasi Rilis Delivery Order (DO)</h3>
-            <button onclick="document.getElementById('modal-release-do').classList.add('hidden')" class="text-slate-400 hover:text-slate-600">
+            <button onclick="document.getElementById('modal-release-do').classList.add('hidden')" class="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
