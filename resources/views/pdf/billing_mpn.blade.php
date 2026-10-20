@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Surat Setoran Pabean, Cukai, dan Pajak (SSPCP) - Kode Billing {{ $shipment->billing_code ?? ($shipment->ceisaDocument->billing_code ?? '028192819201928') }}</title>
+    <title>Surat Setoran Pabean, Cukai, dan Pajak (SSPCP) - Kode Billing {{ $shipment->billing_code ?? ($shipment->ceisaDocument?->billing_code ?? '028192819201928') }}</title>
     <style>
         @page {
             size: A4 portrait;
@@ -98,7 +98,7 @@
             KODE BILLING PEMBAYARAN KEPABEANAN (MPN G3)
         </div>
         <div class="billing-code">
-            {{ $shipment->billing_code ?? ($shipment->ceisaDocument->billing_code ?? '028192819201928') }}
+            {{ $shipment->billing_code ?? ($shipment->ceisaDocument?->billing_code ?? '028192819201928') }}
         </div>
         <div style="font-size: 8pt; color: #dc2626; font-weight: bold;">
             BERLAKU SAMPAI DENGAN: {{ now()->addDays(3)->format('d F Y, 23:59:59') }} WIB
@@ -118,7 +118,7 @@
                 <strong>KANTOR PENERBIT & DOKUMEN:</strong><br>
                 Kantor Pabean: 040300 - KPU TIPE A TANJUNG PRIOK<br>
                 Jenis Dokumen: BC 2.0 (Pemberitahuan Impor Barang)<br>
-                Nomor Aju: {{ $shipment->ceisaDocument->nomor_aju ?? '040300-000001-20261012-000189' }}
+                Nomor Aju: {{ $shipment->ceisaDocument?->nomor_aju ?? '040300-000001-20261012-000189' }}
             </td>
         </tr>
     </table>
@@ -135,9 +135,9 @@
         </thead>
         <tbody>
             @php
-                $bm = $shipment->ceisaDocument->bea_masuk ?? 23075000;
-                $ppn = $shipment->ceisaDocument->ppn ?? 53303250;
-                $pph = $shipment->ceisaDocument->pph ?? 12114375;
+                $bm = $shipment->ceisaDocument?->bea_masuk ?? 23075000;
+                $ppn = $shipment->ceisaDocument?->ppn ?? 53303250;
+                $pph = $shipment->ceisaDocument?->pph ?? 12114375;
                 $total = $bm + $ppn + $pph;
             @endphp
             <tr>

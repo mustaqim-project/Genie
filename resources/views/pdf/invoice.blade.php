@@ -192,19 +192,19 @@
                 <td class="text-center">1</td>
                 <td>Bea Masuk (BM) Impor — Sesuai Billing MPN G3 No. {{ $invoice->shipment->billing_code ?? '028192819201928' }}</td>
                 <td class="text-center"><small>Pabean</small></td>
-                <td class="text-right">{{ number_format($invoice->shipment->ceisaDocument->bea_masuk ?? 23075000, 0, ',', '.') }}</td>
+                <td class="text-right">{{ number_format($invoice->shipment?->ceisaDocument?->bea_masuk ?? 23075000, 0, ',', '.') }}</td>
             </tr>
             <tr>
                 <td class="text-center">2</td>
                 <td>PPN Impor (11%) — Sesuai Bukti Penerimaan Negara (BPN SSPCP)</td>
                 <td class="text-center"><small>Pabean</small></td>
-                <td class="text-right">{{ number_format($invoice->shipment->ceisaDocument->ppn ?? 53303250, 0, ',', '.') }}</td>
+                <td class="text-right">{{ number_format($invoice->shipment?->ceisaDocument?->ppn ?? 53303250, 0, ',', '.') }}</td>
             </tr>
             <tr>
                 <td class="text-center">3</td>
                 <td>PPh Pasal 22 Impor (2.5% API)</td>
                 <td class="text-center"><small>Pabean</small></td>
-                <td class="text-right">{{ number_format($invoice->shipment->ceisaDocument->pph ?? 12114375, 0, ',', '.') }}</td>
+                <td class="text-right">{{ number_format($invoice->shipment?->ceisaDocument?->pph ?? 12114375, 0, ',', '.') }}</td>
             </tr>
 
             <!-- 2. Biaya Pelayaran & Terminal -->

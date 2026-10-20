@@ -3,139 +3,147 @@
 @section('title', 'Dashboard Operasional Kepabeanan & Logistik')
 
 @section('content')
-<div class="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-12" x-data="{ docFilter: 'ALL' }">
+<div class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12" x-data="{ docFilter: 'ALL' }">
 
-    <!-- 0. BREADCRUMB -->
-    <nav class="flex items-center gap-1.5 text-xs text-slate-500 py-0.5 whitespace-nowrap print:hidden mb-3" aria-label="Breadcrumb">
-        <span class="text-slate-800 font-semibold">Dashboard Operasional</span>
-    </nav>
-
-    <!-- 1. TOP HEADER & QUICK ACTION BAR -->
-    <div class="relative overflow-hidden rounded-2xl p-6 sm:p-7 text-white shadow-lg mb-8 border border-slate-800 bg-slate-900">
-        <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div class="max-w-2xl">
-                <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-slate-800 text-sky-400 text-xs font-semibold border border-slate-700 mb-3">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                    <span class="tracking-wide">Host-to-Host CEISA 4.0 DJBC Aktif</span>
-                </div>
-
-                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white leading-tight">
+    <!-- 1. TOOLBAR / PAGE HEADER (macOS Sonoma Toolbar Style from Cooca Core) -->
+    <header class="rounded-[16px] backdrop-blur-md bg-white/75 dark:bg-[#1C1C1E]/75 border border-black/5 dark:border-white/10 px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+        <div>
+            <nav class="flex items-center gap-1.5 text-[12px] text-black/50 dark:text-white/50 mb-1" aria-label="Breadcrumb">
+                <a href="{{ route('dashboard') }}" class="hover:text-[#007AFF] transition-colors">GENIE ERP</a>
+                <i data-lucide="chevron-right" class="w-3.5 h-3.5 opacity-40"></i>
+                <span class="text-black dark:text-white font-medium">Dashboard Operasional</span>
+            </nav>
+            <div class="flex items-center gap-2.5">
+                <h1 class="text-[20px] sm:text-[22px] font-bold text-black dark:text-white tracking-tight">
                     Sistem Operasional Kepabeanan & Logistik
                 </h1>
-                <p class="text-slate-300 text-xs sm:text-sm mt-1.5 leading-relaxed">
-                    Pusat kendali proyek pengapalan: penerimaan berkas, draf PIB/PEB, pengajuan CEISA 4.0, penebusan DO pelayaran, dan pengeluaran barang pelabuhan.
-                </p>
+                <span class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#34C759]/12 text-[#248A3D] dark:text-[#30D158] border border-[#34C759]/20">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#34C759] animate-pulse"></span>
+                    <span>CEISA 4.0 Live</span>
+                </span>
             </div>
-
-            <!-- Action Buttons Toolbar -->
-            <div class="flex flex-wrap items-center gap-2.5">
-                <a href="{{ route('core.document.index') }}" 
-                   class="min-h-[42px] px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs sm:text-sm font-semibold shadow-xs transition-all flex items-center gap-2 active:scale-95">
-                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    <span>Proyek Pengapalan</span>
-                </a>
-
-                <a href="{{ route('bc20.index') }}" 
-                   class="min-h-[42px] px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-all flex items-center gap-1.5 active:scale-95">
-                    <span>Daftar BC 2.0 (PIB)</span>
-                </a>
-
-                <a href="{{ route('bc30.index') }}" 
-                   class="min-h-[42px] px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-all flex items-center gap-1.5 active:scale-95">
-                    <span>Daftar BC 3.0 (PEB)</span>
-                </a>
-            </div>
+            <p class="text-[13px] text-black/50 dark:text-white/50 mt-0.5 leading-snug">
+                Pusat kendali proyek pengapalan: penerimaan berkas, draf PIB/PEB, pengajuan CEISA 4.0, penebusan DO pelayaran, dan pengeluaran barang pelabuhan.
+            </p>
         </div>
-    </div>
 
-    <!-- 2. BENTO STATISTICS GRID -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <!-- Action Buttons Toolbar -->
+        <div class="flex items-center gap-2 w-full sm:w-auto flex-wrap sm:flex-nowrap shrink-0">
+            <a href="{{ route('core.document.index') }}" 
+               class="btn-apple-filled w-full sm:w-auto">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                <span>Proyek Pengapalan</span>
+            </a>
+
+            <a href="{{ route('bc20.index') }}" 
+               class="btn-apple-gray w-full sm:w-auto">
+                <i data-lucide="file-down" class="w-4 h-4 text-[#007AFF]"></i>
+                <span>BC 2.0 (PIB)</span>
+            </a>
+
+            <a href="{{ route('bc30.index') }}" 
+               class="btn-apple-gray w-full sm:w-auto">
+                <i data-lucide="file-up" class="w-4 h-4 text-[#5856D6]"></i>
+                <span>BC 3.0 (PEB)</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- 2. BENTO STATISTICS GRID (Apple HIG Standard from Cooca Core) -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
         
         <!-- KPI 1: Proyek Pengapalan Aktif -->
-        <div class="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center gap-4 hover:border-slate-300 transition-all">
-            <div class="w-11 h-11 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                </svg>
+        <div class="rounded-[16px] bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/5 p-4 flex flex-col justify-between shadow-sm">
+            <div class="flex items-center justify-between">
+                <span class="text-[11px] uppercase tracking-wider font-semibold text-black/45 dark:text-white/45">Proyek Pengapalan</span>
+                <div class="w-8 h-8 rounded-[10px] bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center">
+                    <i data-lucide="folder-kanban" class="w-4 h-4"></i>
+                </div>
             </div>
-            <div class="min-w-0 flex-1">
-                <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Proyek Pengapalan</div>
-                <div class="text-xl font-extrabold text-slate-900 font-mono">{{ $totalShipments ?? 0 }}</div>
-                <div class="text-[10px] text-slate-400">
+            <div class="mt-2">
+                <div class="text-[22px] sm:text-[24px] font-bold tabular-nums text-black dark:text-white tracking-tight">
+                    {{ $totalShipments ?? 0 }}
+                </div>
+                <div class="text-[11px] text-black/45 dark:text-white/45 mt-0.5 truncate">
                     {{ $shipmentsCollecting ?? 0 }} kumpul berkas &bull; {{ $shipmentsBilling ?? 0 }} billing
                 </div>
             </div>
         </div>
 
         <!-- KPI 2: BC 2.0 Impor Card -->
-        <div class="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center gap-4 hover:border-slate-300 transition-all">
-            <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                </svg>
+        <div class="rounded-[16px] bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/5 p-4 flex flex-col justify-between shadow-sm">
+            <div class="flex items-center justify-between">
+                <span class="text-[11px] uppercase tracking-wider font-semibold text-black/45 dark:text-white/45">Impor (BC 2.0 PIB)</span>
+                <div class="w-8 h-8 rounded-[10px] bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center">
+                    <i data-lucide="arrow-down-left" class="w-4 h-4"></i>
+                </div>
             </div>
-            <div class="min-w-0 flex-1">
-                <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Impor (BC 2.0 PIB)</div>
-                <div class="text-xl font-extrabold text-slate-900 font-mono">{{ $totalBC20 }}</div>
-                <div class="text-[10px] text-slate-400 truncate">
+            <div class="mt-2">
+                <div class="text-[22px] sm:text-[24px] font-bold tabular-nums text-black dark:text-white tracking-tight">
+                    {{ $totalBC20 }}
+                </div>
+                <div class="text-[11px] text-black/45 dark:text-white/45 mt-0.5 truncate tabular-nums">
                     CIF: Rp {{ number_format($totalCifIdr, 0, ',', '.') }}
                 </div>
             </div>
         </div>
 
         <!-- KPI 3: BC 3.0 Ekspor Card -->
-        <div class="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center gap-4 hover:border-slate-300 transition-all">
-            <div class="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                </svg>
+        <div class="rounded-[16px] bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/5 p-4 flex flex-col justify-between shadow-sm">
+            <div class="flex items-center justify-between">
+                <span class="text-[11px] uppercase tracking-wider font-semibold text-black/45 dark:text-white/45">Ekspor (BC 3.0 PEB)</span>
+                <div class="w-8 h-8 rounded-[10px] bg-[#5856D6]/10 text-[#5856D6] flex items-center justify-center">
+                    <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+                </div>
             </div>
-            <div class="min-w-0 flex-1">
-                <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Ekspor (BC 3.0 PEB)</div>
-                <div class="text-xl font-extrabold text-slate-900 font-mono">{{ $totalBC30 }}</div>
-                <div class="text-[10px] text-slate-400 truncate">
+            <div class="mt-2">
+                <div class="text-[22px] sm:text-[24px] font-bold tabular-nums text-black dark:text-white tracking-tight">
+                    {{ $totalBC30 }}
+                </div>
+                <div class="text-[11px] text-black/45 dark:text-white/45 mt-0.5 truncate tabular-nums">
                     FOB: Rp {{ number_format($totalFobIdr, 0, ',', '.') }}
                 </div>
             </div>
         </div>
 
         <!-- KPI 4: Persetujuan Terbit & Billing -->
-        <div class="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center gap-4 hover:border-slate-300 transition-all">
-            <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+        <div class="rounded-[16px] bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/5 p-4 flex flex-col justify-between shadow-sm">
+            <div class="flex items-center justify-between">
+                <span class="text-[11px] uppercase tracking-wider font-semibold text-black/45 dark:text-white/45">SPPB & NPE Terbit</span>
+                <div class="w-8 h-8 rounded-[10px] bg-[#34C759]/10 text-[#34C759] flex items-center justify-center">
+                    <i data-lucide="badge-check" class="w-4 h-4"></i>
+                </div>
             </div>
-            <div class="min-w-0 flex-1">
-                <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">SPPB & NPE Terbit</div>
-                <div class="text-xl font-extrabold text-emerald-700 font-mono">{{ $totalSppb + $totalNpe }}</div>
-                <div class="text-[10px] text-slate-400 font-mono">
-                    Billing Aktif: <strong class="text-amber-700">{{ $totalBillingAktif }}</strong>
+            <div class="mt-2">
+                <div class="text-[22px] sm:text-[24px] font-bold tabular-nums text-[#248A3D] dark:text-[#30D158] tracking-tight">
+                    {{ $totalSppb + $totalNpe }}
+                </div>
+                <div class="text-[11px] text-black/45 dark:text-white/45 mt-0.5 truncate">
+                    Billing Aktif: <strong class="text-[#FF9500] dark:text-[#FF9F0A] tabular-nums">{{ $totalBillingAktif }}</strong>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- 3. MAIN WORKSPACE GRID: PROYEK PENGAPALAN TERBARU & AUDIT LOG -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         <!-- Kolom Kiri: Proyek Pengapalan Terbaru (2 Kolom) -->
-        <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
-            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+        <div class="lg:col-span-2 rounded-[16px] bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/10 shadow-sm overflow-hidden flex flex-col">
+            <div class="p-4 sm:p-5 border-b border-black/5 dark:border-white/5 flex items-center justify-between">
                 <div>
-                    <h2 class="font-bold text-slate-900 text-sm">Proyek Pengapalan Terkini</h2>
-                    <p class="text-xs text-slate-500 mt-0.5">Daftar berkas pengapalan aktif dan tahap operasional</p>
+                    <h2 class="font-semibold text-black dark:text-white text-[14px]">Proyek Pengapalan Terkini</h2>
+                    <p class="text-[12px] text-black/50 dark:text-white/50 mt-0.5">Daftar berkas pengapalan aktif dan tahap operasional</p>
                 </div>
-                <a href="{{ route('core.document.index') }}" class="text-xs font-bold text-sky-600 hover:underline">
-                    Buka Semua Proyek &rarr;
+                <a href="{{ route('core.document.index') }}" class="btn-apple-plain text-[12px]">
+                    <span>Buka Semua</span>
+                    <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
                 </a>
             </div>
 
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
-                    <thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-100">
+            <div class="table-responsive flex-1">
+                <table class="w-full text-left text-[13px]">
+                    <thead class="text-[11px] font-semibold text-black/50 dark:text-white/50 uppercase tracking-wider bg-black/[0.02] dark:bg-white/[0.02] border-b border-black/5 dark:border-white/10">
                         <tr>
                             <th class="py-3 px-4">No. Proyek & B/L</th>
                             <th class="py-3 px-4">Klien / Importir</th>
@@ -144,47 +152,48 @@
                             <th class="py-3 px-4 text-right">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100">
+                    <tbody class="divide-y divide-black/5 dark:divide-white/5">
                         @forelse($recentShipments as $shp)
-                            <tr class="hover:bg-slate-50/60 transition-colors">
-                                <td class="py-3 px-4 font-mono font-semibold text-slate-900">
-                                    <a href="{{ route('core.document.show', $shp->id) }}" class="text-sky-600 hover:underline">
+                            <tr class="hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
+                                <td class="py-3 px-4 font-mono font-semibold text-black dark:text-white">
+                                    <a href="{{ route('core.document.show', $shp->id) }}" class="text-[#007AFF] hover:underline">
                                         {{ $shp->shipment_number ?? $shp->project_no }}
                                     </a>
-                                    <div class="text-[10px] text-slate-400 font-sans">
+                                    <div class="text-[11px] text-black/40 dark:text-white/40 font-sans mt-0.5">
                                         B/L: {{ $shp->bl_number ?? '-' }}
                                     </div>
                                 </td>
                                 <td class="py-3 px-4">
-                                    <div class="font-semibold text-slate-900 truncate max-w-[150px]">{{ $shp->client->name ?? '-' }}</div>
-                                    <span class="inline-block mt-0.5 px-1.5 py-0.2 rounded text-[9px] font-bold font-sans {{ $shp->type === 'EXPORT' ? 'bg-amber-100 text-amber-800' : 'bg-sky-100 text-sky-800' }}">
+                                    <div class="font-semibold text-black dark:text-white truncate max-w-[150px]">{{ $shp->client->name ?? '-' }}</div>
+                                    <span class="inline-block mt-0.5 px-2 py-0.5 rounded-[6px] text-[10px] font-bold font-mono {{ $shp->type === 'EXPORT' ? 'bg-[#FF9500]/12 text-[#B25E00] dark:text-[#FF9F0A]' : 'bg-[#007AFF]/12 text-[#007AFF]' }}">
                                         {{ $shp->type === 'EXPORT' ? 'BC 3.0' : 'BC 2.0' }}
                                     </span>
                                 </td>
-                                <td class="py-3 px-4 text-slate-700">
+                                <td class="py-3 px-4 text-black/80 dark:text-white/80">
                                     <div class="truncate max-w-[140px]">{{ $shp->vessel_name ?? '-' }}</div>
-                                    <div class="text-[10px] font-mono text-slate-400">{{ $shp->nomor_kontainer ?? '1 Kontainer' }}</div>
+                                    <div class="text-[11px] font-mono text-black/40 dark:text-white/40 mt-0.5">{{ $shp->nomor_kontainer ?? '1 Kontainer' }}</div>
                                 </td>
                                 <td class="py-3 px-4">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold font-mono 
-                                        @if(in_array($shp->status, ['BILLING_ISSUED', 'DO_RELEASED', 'DELIVERED_POD', 'COMPLETED'])) bg-emerald-100 text-emerald-800
-                                        @elseif(in_array($shp->status, ['DOC_READY', 'HS_DETECTED', 'DRAFT_REVIEW'])) bg-indigo-100 text-indigo-800
-                                        @elseif($shp->status === 'DO_PROCESSING') bg-amber-100 text-amber-800
-                                        @else bg-slate-100 text-slate-700 @endif">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold font-mono 
+                                        @if(in_array($shp->status, ['BILLING_ISSUED', 'DO_RELEASED', 'DELIVERED_POD', 'COMPLETED'])) bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158]
+                                        @elseif(in_array($shp->status, ['DOC_READY', 'HS_DETECTED', 'DRAFT_REVIEW'])) bg-[#5856D6]/15 text-[#5856D6] dark:text-[#5E5CE6]
+                                        @elseif($shp->status === 'DO_PROCESSING') bg-[#FF9500]/15 text-[#B25E00] dark:text-[#FF9F0A]
+                                        @else bg-black/[0.06] dark:bg-white/[0.08] text-black/70 dark:text-white/70 @endif">
                                         {{ $shp->status }}
                                     </span>
                                 </td>
                                 <td class="py-3 px-4 text-right">
                                     <a href="{{ route('core.document.show', $shp->id) }}" 
-                                       class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] transition-colors">
-                                        Detail &rarr;
+                                       class="btn-apple-gray !h-8 !px-3 !text-[11px]">
+                                        <span>Detail</span>
+                                        <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
                                     </a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="py-10 text-center text-slate-400">
-                                    Belum ada proyek shipment terdaftar. <a href="{{ route('core.document.index') }}" class="text-sky-600 font-bold hover:underline">Buka proyek baru &rarr;</a>
+                                <td colspan="5" class="py-10 text-center text-black/40 dark:text-white/40">
+                                    Belum ada proyek shipment terdaftar. <a href="{{ route('core.document.index') }}" class="text-[#007AFF] font-bold hover:underline">Buka proyek baru &rarr;</a>
                                 </td>
                             </tr>
                         @endforelse
@@ -194,51 +203,49 @@
         </div>
 
         <!-- Kolom Kanan: Log Respon Gateway CEISA 4.0 (1 Kolom) -->
-        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden flex flex-col">
-            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+        <div class="rounded-[16px] bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/10 shadow-sm overflow-hidden flex flex-col">
+            <div class="p-4 sm:p-5 border-b border-black/5 dark:border-white/5 flex items-center justify-between">
                 <div>
-                    <h2 class="font-bold text-slate-900 text-sm">Audit Gateway CEISA 4.0</h2>
-                    <p class="text-xs text-slate-500 mt-0.5">Riwayat kirim & respon DJBC</p>
+                    <h2 class="font-semibold text-black dark:text-white text-[14px]">Audit Gateway CEISA 4.0</h2>
+                    <p class="text-[12px] text-black/50 dark:text-white/50 mt-0.5">Riwayat kirim & respon DJBC</p>
                 </div>
-                <a href="{{ route('config.index') }}" class="text-xs font-bold text-sky-600 hover:underline">
-                    Konfigurasi
+                <a href="{{ route('config.index') }}" class="btn-apple-plain text-[12px]">
+                    <span>Konfigurasi</span>
                 </a>
             </div>
 
-            <div class="p-4 flex-1 space-y-3 overflow-y-auto max-h-[360px] custom-scrollbar">
+            <div class="p-4 flex-1 space-y-2.5 overflow-y-auto max-h-[360px] custom-scrollbar">
                 @forelse($recentLogs as $log)
-                    <div class="p-3 rounded-xl border border-slate-100 bg-slate-50/60 text-xs hover:border-slate-200 transition-colors">
+                    <div class="p-3 rounded-[12px] border border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02] text-[12px] hover:border-black/10 dark:hover:border-white/10 transition-colors">
                         <div class="flex items-center justify-between mb-1.5">
                             <div class="flex items-center space-x-1.5 truncate">
-                                <span class="px-1.5 py-0.5 rounded font-mono font-bold text-[10px] {{ $log->method === 'POST' ? 'bg-emerald-100 text-emerald-800' : 'bg-sky-100 text-sky-800' }}">
+                                <span class="px-1.5 py-0.5 rounded-[6px] font-mono font-bold text-[10px] {{ $log->method === 'POST' ? 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158]' : 'bg-[#007AFF]/15 text-[#007AFF]' }}">
                                     {{ $log->method }}
                                 </span>
-                                <span class="font-mono text-slate-700 truncate max-w-[140px] text-[11px]">{{ $log->endpoint }}</span>
+                                <span class="font-mono text-black/80 dark:text-white/80 truncate max-w-[140px] text-[11px]">{{ $log->endpoint }}</span>
                             </div>
-                            <span class="px-2 py-0.5 rounded-full font-bold text-[10px] font-mono {{ $log->status_code === 200 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
+                            <span class="px-2 py-0.5 rounded-full font-bold text-[10px] font-mono {{ $log->status_code === 200 ? 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158]' : 'bg-[#FF3B30]/15 text-[#C41E17] dark:text-[#FF453A]' }}">
                                 {{ $log->status_code }}
                             </span>
                         </div>
-                        <div class="flex items-center justify-between text-slate-400 text-[10px] font-mono">
+                        <div class="flex items-center justify-between text-black/40 dark:text-white/40 text-[10px] font-mono">
                             <span>Durasi: {{ $log->duration_ms ?? 0 }} ms</span>
                             <span>{{ $log->created_at ? $log->created_at->diffForHumans() : '-' }}</span>
                         </div>
                     </div>
                 @empty
-                    <div class="py-12 text-center text-slate-400 text-xs">
+                    <div class="py-12 text-center text-black/40 dark:text-white/40 text-[12px]">
                         Belum ada riwayat transmisi CEISA 4.0.
                     </div>
                 @endforelse
             </div>
 
-            <div class="p-4 bg-slate-50 border-t border-slate-100">
+            <div class="p-4 bg-black/[0.02] dark:bg-white/[0.02] border-t border-black/5 dark:border-white/5">
                 <form action="{{ route('config.test-auth') }}" method="POST">
                     @csrf
                     <button type="submit" 
-                            class="w-full py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition-all shadow-xs flex items-center justify-center space-x-2 active:scale-95">
-                        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
+                            class="btn-apple-filled w-full">
+                        <i data-lucide="zap" class="w-4 h-4 text-white"></i>
                         <span>Uji Koneksi Token OAuth DJBC</span>
                     </button>
                 </form>

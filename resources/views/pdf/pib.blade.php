@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>BC 2.0 - Pemberitahuan Impor Barang (PIB) - {{ $shipment->ceisaDocument->nomor_aju ?? $shipment->project_no }}</title>
+    <title>BC 2.0 - Pemberitahuan Impor Barang (PIB) - {{ $shipment->ceisaDocument?->nomor_aju ?? $shipment->project_no }}</title>
     <style>
         @page {
             size: A4 portrait;
@@ -119,12 +119,12 @@
     $totalPages = $itemCount > 1 ? (1 + $totalItemSheets + 1) : 2;
     $client = $shipment->client;
     $ceisa = $shipment->ceisaDocument;
-    $nomorAju = $ceisa->nomor_aju ?? '00002090556620240621000039';
-    $tglAju = $ceisa->tanggal_aju ? date('d-m-Y', strtotime($ceisa->tanggal_aju)) : '03-07-2024';
-    $nomorDaftar = $ceisa->nomor_daftar ?? '600124';
-    $tglDaftar = $ceisa->tanggal_daftar ? date('d-m-Y', strtotime($ceisa->tanggal_daftar)) : '05-07-2024';
-    $kantorPabean = $ceisa->nama_kantor_pendek ?? 'KPPBC TMP B SAMARINDA';
-    $kodeKantor = $ceisa->kode_kantor ?? '100500';
+    $nomorAju = $ceisa?->nomor_aju ?? '00002090556620240621000039';
+    $tglAju = ($ceisa && $ceisa->tanggal_aju) ? date('d-m-Y', strtotime($ceisa->tanggal_aju)) : '03-07-2024';
+    $nomorDaftar = $ceisa?->nomor_daftar ?? '600124';
+    $tglDaftar = ($ceisa && $ceisa->tanggal_daftar) ? date('d-m-Y', strtotime($ceisa->tanggal_daftar)) : '05-07-2024';
+    $kantorPabean = $ceisa?->nama_kantor_pendek ?? 'KPPBC TMP B SAMARINDA';
+    $kodeKantor = $ceisa?->kode_kantor ?? '100500';
     $valuta = $shipment->kode_valuta ?: 'CNY';
     $kursNdbm = (float)($shipment->ndbm_kurs ?: 2249.69);
     $totalCifValuta = (float)($shipment->total_nilai_valuta ?: 487940.90);

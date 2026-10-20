@@ -1,6 +1,22 @@
 <!DOCTYPE html>
-<html lang="id" class="h-full bg-slate-50 antialiased">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
 <head>
+    <!-- No-Flash Theme Bootstrap (Eliminates FOUC) -->
+    <script>
+        (function() {
+            try {
+                var theme = localStorage.getItem('genie-theme') || 'light';
+                var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (theme === 'dark' || (theme === 'system' && prefersDark)) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) {}
+        })();
+    </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -13,72 +29,269 @@
     <!-- Design Token Architecture (Apple HIG & 3-Layer Design System) -->
     <link rel="stylesheet" href="{{ asset('css/design-tokens.css') }}">
 
+    <!-- Google Fonts: Inter fallback & JetBrains Mono (Apple SF Pro Tier) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <!-- Tailwind CSS CDN -->
+    <script>
+        (function() {
+            const _origWarn = console.warn;
+            console.warn = function(...args) {
+                if (typeof args[0] === 'string' && args[0].indexOf('cdn.tailwindcss.com') !== -1) return;
+                _origWarn.apply(console, args);
+            };
+        })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
+                    fontFamily: {
+                        sans: [
+                            '-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', '"SF Pro Display"',
+                            'Inter', 'system-ui', 'sans-serif'
+                        ],
+                        mono: [
+                            '"JetBrains Mono"', '"SF Mono"', 'Menlo', 'Monaco', 'monospace'
+                        ],
+                    },
                     colors: {
-                        surface: 'var(--color-surface)',
-                        'page-bg': 'var(--color-page-bg)',
+                        apple: {
+                            blue: '#007AFF',
+                            'blue-dark': '#0A84FF',
+                            green: '#34C759',
+                            'green-dark': '#30D158',
+                            orange: '#FF9500',
+                            'orange-dark': '#FF9F0A',
+                            red: '#FF3B30',
+                            'red-dark': '#FF453A',
+                            purple: '#AF52DE',
+                            'purple-dark': '#BF5AF2',
+                            teal: '#30B0C7',
+                            'teal-dark': '#40C8E0',
+                            indigo: '#5856D6',
+                            'indigo-dark': '#5E5CE6',
+                            yellow: '#FFCC00',
+                            'yellow-dark': '#FFD60A',
+                            gray: '#8E8E93',
+                            gray2: '#AEAEB2',
+                            gray3: '#C7C7CC',
+                            gray4: '#D1D1D6',
+                            gray5: '#E5E5EA',
+                            gray6: '#F2F2F7',
+                        },
                         brand: {
                             50: '#f0f7ff',
                             100: '#e0effe',
                             200: '#bae0fd',
-                            300: '#7dd3fc',
-                            400: '#38bdf8',
-                            500: '#0284c7',
-                            600: '#0369a1',
-                            700: '#075985',
-                            800: '#0c4a6e',
-                            900: '#082f49',
-                            950: '#051b2c',
+                            300: '#7cc5fb',
+                            400: '#36a6f7',
+                            500: '#007AFF',
+                            600: '#0071E3',
+                            700: '#0056b3',
+                            800: '#00448f',
+                            900: '#00336d',
+                            950: '#001e44',
                         }
                     },
                     borderRadius: {
-                        'squircle-sm': 'var(--radius-sm)',
-                        'squircle-md': 'var(--radius-md)',
-                        'squircle-lg': 'var(--radius-lg)',
-                        'squircle-xl': 'var(--radius-xl)',
-                        'squircle-2xl': 'var(--radius-2xl)',
-                    },
-                    fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', '"SF Pro Display"', 'Inter', 'sans-serif'],
-                        mono: ['"JetBrains Mono"', '"SF Mono"', 'Menlo', 'Monaco', 'monospace'],
+                        'squircle-sm': 'var(--r-sm, 8px)',
+                        'squircle-md': 'var(--r-md, 10px)',
+                        'squircle-lg': 'var(--r-lg, 14px)',
+                        'squircle-xl': 'var(--r-xl, 16px)',
+                        'squircle-2xl': 'var(--r-2xl, 20px)',
                     }
                 }
             }
         }
     </script>
 
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
     <!-- Alpine.js CDN for interactive dropdowns, modals & sidebar -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
 
-    <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono (Linear / Apple Tier) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
     <style>
-        body { 
-            font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", sans-serif; 
-            letter-spacing: -0.015em;
+        /* === PATS_CEISA / GENIE DESIGN SYSTEM (APPLE HIG STANDARD FROM COOCA CORE) === */
+        :root {
+            /* Surface & Background */
+            --bg: #F2F2F7;
+            --surface: #FFFFFF;
+            --surface-2: #F2F2F7;
+            --surface-3: #E5E5EA;
+
+            /* Typography */
+            --text-1: #000000;
+            --text-2: rgba(60, 60, 67, 0.6);
+            --text-3: rgba(60, 60, 67, 0.3);
+            --text-dis: rgba(60, 60, 67, 0.18);
+
+            /* Borders (Hairline Separators) */
+            --border: rgba(60, 60, 67, 0.08);
+            --border-sub: rgba(60, 60, 67, 0.04);
+            --border-str: rgba(60, 60, 67, 0.18);
+
+            /* Brand Colors (System Blue Master Accent) */
+            --brand: #007AFF;
+            --brand-hover: #0071E3;
+            --brand-light: rgba(0, 122, 255, 0.1);
+            --brand-text: #007AFF;
+
+            /* Apple Semantic Status Tokens */
+            --color-accent: #007AFF;
+            --color-success: #34C759;
+            --color-warning: #FF9500;
+            --color-danger: #FF3B30;
+            --color-ai: #AF52DE;
+            --color-info: #5856D6;
+            --color-teal: #30B0C7;
+
+            --success: #34C759;
+            --success-bg: rgba(52, 199, 89, 0.12);
+            --success-border: rgba(52, 199, 89, 0.25);
+            --success-text: #248A3D;
+
+            --warn: #FF9500;
+            --warn-bg: rgba(255, 149, 0, 0.12);
+            --warn-border: rgba(255, 149, 0, 0.25);
+            --warn-text: #B25E00;
+
+            --danger: #FF3B30;
+            --danger-bg: rgba(255, 59, 48, 0.12);
+            --danger-border: rgba(255, 59, 48, 0.25);
+            --danger-text: #C41E17;
+
+            --info: #5856D6;
+            --info-bg: rgba(88, 86, 214, 0.12);
+            --info-border: rgba(88, 86, 214, 0.25);
+            --info-text: #413FA6;
+
+            /* Navigation & Sidebar */
+            --nav-bg: rgba(242, 242, 247, 0.85);
+            --nav-border: rgba(60, 60, 67, 0.08);
+
+            /* Apple Squircle Radius Hierarchy */
+            --r-sm: 8px;
+            --r-md: 10px;
+            --r-lg: 14px;
+            --r-xl: 16px;
+            --r-2xl: 20px;
+
+            /* Elevation Shadows */
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.06);
+            --shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .dark {
+            /* Surface & Background */
+            --bg: #1E1E1E;
+            --surface: #1C1C1E;
+            --surface-2: #2C2C2E;
+            --surface-3: #3A3A3C;
+
+            /* Typography */
+            --text-1: #FFFFFF;
+            --text-2: rgba(235, 235, 245, 0.6);
+            --text-3: rgba(235, 235, 245, 0.3);
+            --text-dis: rgba(235, 235, 245, 0.18);
+
+            /* Borders */
+            --border: rgba(255, 255, 255, 0.08);
+            --border-sub: rgba(255, 255, 255, 0.04);
+            --border-str: rgba(255, 255, 255, 0.15);
+
+            /* Brand Colors */
+            --brand: #0A84FF;
+            --brand-hover: #007AFF;
+            --brand-light: rgba(10, 132, 255, 0.15);
+            --brand-text: #0A84FF;
+
+            /* Apple Semantic Status Tokens */
+            --color-accent: #0A84FF;
+            --color-success: #30D158;
+            --color-warning: #FF9F0A;
+            --color-danger: #FF453A;
+            --color-ai: #BF5AF2;
+            --color-info: #5E5CE6;
+            --color-teal: #40C8E0;
+
+            --success: #30D158;
+            --success-bg: rgba(48, 209, 88, 0.14);
+            --success-border: rgba(48, 209, 88, 0.28);
+            --success-text: #30D158;
+
+            --warn: #FF9F0A;
+            --warn-bg: rgba(255, 159, 10, 0.14);
+            --warn-border: rgba(255, 159, 10, 0.28);
+            --warn-text: #FF9F0A;
+
+            --danger: #FF453A;
+            --danger-bg: rgba(255, 69, 58, 0.14);
+            --danger-border: rgba(255, 69, 58, 0.28);
+            --danger-text: #FF453A;
+
+            --info: #5E5CE6;
+            --info-bg: rgba(94, 92, 230, 0.14);
+            --info-border: rgba(94, 92, 230, 0.28);
+            --info-text: #5E5CE6;
+
+            /* Navigation & Sidebar */
+            --nav-bg: rgba(28, 28, 30, 0.85);
+            --nav-border: rgba(255, 255, 255, 0.08);
+
+            /* Elevation Shadows */
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 12px 30px rgba(0, 0, 0, 0.5);
+            --shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.6);
+        }
+
+        html {
+            color-scheme: light;
+            box-sizing: border-box;
+            -webkit-text-size-adjust: 100%;
+            scroll-behavior: smooth;
+            background-color: var(--bg);
+            color: var(--text-1);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", system-ui, sans-serif;
+        }
+
+        html.dark, .dark {
+            color-scheme: dark;
+        }
+
+        *, *:before, *:after {
+            box-sizing: inherit;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", system-ui, sans-serif;
+            letter-spacing: -0.012em;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            background-color: var(--bg);
+            color: var(--text-1);
         }
-        code, pre, .font-mono { 
-            font-family: "JetBrains Mono", "SF Mono", Menlo, monospace; 
+
+        code, pre, .font-mono {
+            font-family: "JetBrains Mono", "SF Mono", Menlo, Monaco, monospace;
             letter-spacing: -0.02em;
         }
+
         [x-cloak] { display: none !important; }
-        
+
         /* Mobile Safe Areas (iPhone Dynamic Island & Home Indicator) */
         .safe-top { padding-top: max(0.75rem, env(safe-area-inset-top)); }
         .safe-bottom { padding-bottom: max(0.75rem, env(safe-area-inset-bottom)); }
 
-        /* iOS Safari Input Auto-Zoom Prevention (Ensures 16px minimum font on mobile viewports) */
+        /* iOS Safari Input Auto-Zoom Prevention */
         @media screen and (max-width: 639px) {
             input[type="text"],
             input[type="number"],
@@ -96,16 +309,233 @@
         }
 
         /* Apple Minimalist Scrollbar */
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 9999px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(100, 116, 139, 0.55); }
+        ::-webkit-scrollbar-thumb { background: rgba(60, 60, 67, 0.2); border-radius: 999px; }
+        .dark ::-webkit-scrollbar-thumb { background: rgba(235, 235, 245, 0.2); }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(60, 60, 67, 0.35); }
+        .dark ::-webkit-scrollbar-thumb:hover { background: rgba(235, 235, 245, 0.35); }
 
-        /* Double-Bezel Card Highlight & Universal Modal Dialog Engine */
-        .double-bezel {
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.02), 0 4px 16px 0 rgba(0, 0, 0, 0.03);
+        /* Standard Glassmorphic Surfaces */
+        .glass-nav {
+            background: var(--nav-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-right: 1px solid var(--nav-border);
         }
 
+        .glass-header {
+            background: var(--surface);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid var(--nav-border);
+        }
+
+        .glass-card {
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+        }
+
+        .glass-card-interactive {
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+            transition: all 0.15s ease-out;
+        }
+
+        .glass-card-interactive:hover {
+            border-color: rgba(0, 122, 255, 0.3);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Standardized Apple Button Utility Classes */
+        .btn-apple-filled {
+            min-height: 2.25rem;
+            padding-left: 1rem;
+            padding-right: 1rem;
+            border-radius: var(--r-md);
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #ffffff;
+            background-color: #007AFF;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.375rem;
+            box-shadow: 0 1px 2px rgba(0, 122, 255, 0.25);
+            transition: all 0.15s ease-out;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-apple-filled:hover {
+            background-color: #0071E3;
+        }
+        .btn-apple-filled:active {
+            transform: scale(0.97);
+            opacity: 0.85;
+        }
+
+        .btn-apple-tinted {
+            min-height: 2.25rem;
+            padding-left: 1rem;
+            padding-right: 1rem;
+            border-radius: var(--r-md);
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #007AFF;
+            background-color: rgba(0, 122, 255, 0.1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.375rem;
+            transition: all 0.15s ease-out;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-apple-tinted:hover {
+            background-color: rgba(0, 122, 255, 0.15);
+        }
+        .btn-apple-tinted:active {
+            transform: scale(0.97);
+            opacity: 0.8;
+        }
+        .dark .btn-apple-tinted {
+            color: #0A84FF;
+            background-color: rgba(10, 132, 255, 0.15);
+        }
+        .dark .btn-apple-tinted:hover {
+            background-color: rgba(10, 132, 255, 0.22);
+        }
+
+        .btn-apple-gray {
+            min-height: 2.25rem;
+            padding-left: 1rem;
+            padding-right: 1rem;
+            border-radius: var(--r-md);
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: rgba(0, 0, 0, 0.8);
+            background-color: rgba(0, 0, 0, 0.06);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.375rem;
+            transition: all 0.15s ease-out;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-apple-gray:hover {
+            background-color: rgba(0, 0, 0, 0.09);
+        }
+        .btn-apple-gray:active {
+            transform: scale(0.97);
+            opacity: 0.8;
+        }
+        .dark .btn-apple-gray {
+            color: rgba(255, 255, 255, 0.85);
+            background-color: rgba(255, 255, 255, 0.08);
+        }
+        .dark .btn-apple-gray:hover {
+            background-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .btn-apple-plain {
+            min-height: 2.25rem;
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+            border-radius: var(--r-sm);
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: #007AFF;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            transition: all 0.15s ease-out;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+        }
+        .btn-apple-plain:hover {
+            background-color: rgba(0, 122, 255, 0.08);
+        }
+        .btn-apple-plain:active {
+            transform: scale(0.97);
+            opacity: 0.8;
+        }
+        .dark .btn-apple-plain {
+            color: #0A84FF;
+        }
+
+        .btn-apple-danger {
+            min-height: 2.25rem;
+            padding-left: 1rem;
+            padding-right: 1rem;
+            border-radius: var(--r-md);
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #ffffff;
+            background-color: #FF3B30;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.375rem;
+            box-shadow: 0 1px 2px rgba(255, 59, 48, 0.25);
+            transition: all 0.15s ease-out;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-apple-danger:hover {
+            background-color: #E0352B;
+        }
+        .btn-apple-danger:active {
+            transform: scale(0.97);
+            opacity: 0.8;
+        }
+
+        /* Backward compatibility mappings */
+        .btn-brand-primary {
+            background: #007AFF;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.8125rem;
+            padding: 0.5rem 1rem;
+            border-radius: var(--r-md);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.375rem;
+            box-shadow: 0 1px 2px rgba(0, 122, 255, 0.25);
+            transition: all 0.15s ease-out;
+        }
+        .btn-brand-primary:hover { background: #0071E3; }
+        .btn-brand-primary:active { transform: scale(0.97); opacity: 0.8; }
+
+        .btn-brand-secondary {
+            background: rgba(0, 0, 0, 0.06);
+            color: rgba(0, 0, 0, 0.8);
+            font-weight: 500;
+            font-size: 0.8125rem;
+            padding: 0.5rem 1rem;
+            border-radius: var(--r-md);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.375rem;
+            transition: all 0.15s ease-out;
+        }
+        .dark .btn-brand-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        /* Universal Adaptive Modal Dialog Engine (Bento Apple HIG v2.0) */
         .app-modal-dialog {
             width: 100%;
             max-width: min(calc(100vw - 1.5rem), var(--modal-max-width, 32rem));
@@ -118,7 +548,32 @@
         .app-modal-dialog-md { --modal-max-width: 36rem; }
         .app-modal-dialog-lg { --modal-max-width: 48rem; }
         .app-modal-dialog-xl { --modal-max-width: 64rem; }
+        .app-modal-dialog-xxl,
+        .app-modal-dialog-2xl { --modal-max-width: min(95vw, 84.375rem); }
+
+        /* Universal Responsive Table Utilities */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-x: contain;
+        }
+        .table-responsive table {
+            min-width: 580px;
+            width: 100%;
+        }
+        .table-responsive-wide table {
+            min-width: 760px;
+            width: 100%;
+        }
+        .table-responsive th,
+        .table-responsive td.cell-nowrap {
+            white-space: nowrap;
+        }
     </style>
+
+    {{-- Universal Typography Hierarchy (H1 - H6 & Typographic Roles) --}}
+    @include('layouts.partials.typography')
 
     <!-- Global Helpers (from COOCA Design Architecture) -->
     <script>
@@ -203,14 +658,34 @@
                 window.Alpine.data('coocaTableSort', coocaTableSort);
             }
         });
+
+        // Initialize Lucide Icons on DOM & Alpine Ready
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+        });
+        document.addEventListener('alpine:initialized', () => {
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+        });
     </script>
+
+    @stack('styles')
 </head>
-<body class="min-h-[100dvh] text-slate-800 antialiased selection:bg-sky-500 selection:text-white bg-[#F8FAFC] flex flex-col"
+<body class="h-full bg-[#F2F2F7] dark:bg-[#1E1E1E] text-black dark:text-white antialiased selection:bg-[#007AFF]/20 selection:text-[#007AFF] flex flex-col min-h-[100dvh]"
       x-data="{ 
           sidebarOpen: false, 
-          sidebarCollapsed: false,
+          sidebarCollapsed: localStorage.getItem('genie-sidebar-collapsed') === 'true',
           quickSearchOpen: false,
-          searchQuery: '' 
+          searchQuery: '',
+          toggleSidebarCollapse() {
+              this.sidebarCollapsed = !this.sidebarCollapsed;
+              localStorage.setItem('genie-sidebar-collapsed', this.sidebarCollapsed);
+              window.dispatchEvent(new CustomEvent('sidebar-collapsed-changed', { detail: { collapsed: this.sidebarCollapsed } }));
+              this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+          }
       }"
       @keydown.window.prevent.ctrl.k="quickSearchOpen = true"
       @keydown.window.prevent.cmd.k="quickSearchOpen = true"
@@ -226,12 +701,12 @@
         <!-- ============================================================== -->
         <!-- 2. MAIN CONTENT WRAPPER (TOPBAR + BODY + FOOTER)              -->
         <!-- ============================================================== -->
-        <div class="flex-1 flex flex-col min-w-0 w-full bg-[#F8FAFC]">
+        <div class="flex-1 flex flex-col min-w-0 w-full bg-[#F2F2F7] dark:bg-[#1E1E1E]">
 
             <!-- TOPBAR HEADER -->
             @include('layouts.topbar')
 
-            <!-- DYNAMIC FLASH ALERTS (APPLE HIG FLOATING NOTIFICATIONS) -->
+            <!-- DYNAMIC FLASH ALERTS (APPLE HIG NOTIFICATIONS) -->
             <div class="w-full px-4 sm:px-6 lg:px-8 pt-4">
                 @if(session('success'))
                     <div x-data="{ show: true }" 
@@ -242,19 +717,13 @@
                          x-transition:leave="transition ease-in duration-150"
                          x-transition:leave-start="opacity-100 translate-y-0"
                          x-transition:leave-end="opacity-0 -translate-y-2"
-                         class="mb-4 flex items-center justify-between p-3.5 rounded-2xl bg-emerald-50/90 border border-emerald-200/80 text-emerald-900 text-xs shadow-xs backdrop-blur-xs">
+                         class="mb-4 flex items-center justify-between px-4 py-3 rounded-[14px] bg-[#34C759]/12 border border-[#34C759]/20 text-[13px] text-[#248A3D] dark:text-[#30D158] font-medium shadow-2xs backdrop-blur-md">
                         <div class="flex items-center space-x-2.5">
-                            <span class="w-7 h-7 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                </svg>
-                            </span>
-                            <span class="font-semibold leading-relaxed">{{ session('success') }}</span>
+                            <span class="w-2 h-2 rounded-full bg-[#34C759] shrink-0"></span>
+                            <span class="leading-relaxed">{{ session('success') }}</span>
                         </div>
-                        <button @click="show = false" class="p-1 rounded-lg text-emerald-500 hover:text-emerald-700 hover:bg-emerald-100/50 transition-colors" aria-label="Tutup notifikasi">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
+                        <button @click="show = false" class="p-1 rounded-lg text-[#248A3D]/70 hover:text-[#248A3D] hover:bg-[#34C759]/10 transition-colors" aria-label="Tutup notifikasi">
+                            <i data-lucide="x" class="w-4 h-4"></i>
                         </button>
                     </div>
                 @endif
@@ -268,19 +737,13 @@
                          x-transition:leave="transition ease-in duration-150"
                          x-transition:leave-start="opacity-100 translate-y-0"
                          x-transition:leave-end="opacity-0 -translate-y-2"
-                         class="mb-4 flex items-center justify-between p-3.5 rounded-2xl bg-rose-50/90 border border-rose-200/80 text-rose-900 text-xs shadow-xs backdrop-blur-xs">
+                         class="mb-4 flex items-center justify-between px-4 py-3 rounded-[14px] bg-[#FF3B30]/12 border border-[#FF3B30]/20 text-[13px] text-[#C41E17] dark:text-[#FF453A] font-medium shadow-2xs backdrop-blur-md">
                         <div class="flex items-center space-x-2.5">
-                            <span class="w-7 h-7 rounded-xl bg-rose-100 flex items-center justify-center text-rose-600 flex-shrink-0">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                </svg>
-                            </span>
-                            <span class="font-semibold leading-relaxed">{{ session('error') }}</span>
+                            <span class="w-2 h-2 rounded-full bg-[#FF3B30] shrink-0"></span>
+                            <span class="leading-relaxed">{{ session('error') }}</span>
                         </div>
-                        <button @click="show = false" class="p-1 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-100/50 transition-colors" aria-label="Tutup notifikasi">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
+                        <button @click="show = false" class="p-1 rounded-lg text-[#C41E17]/70 hover:text-[#C41E17] hover:bg-[#FF3B30]/10 transition-colors" aria-label="Tutup notifikasi">
+                            <i data-lucide="x" class="w-4 h-4"></i>
                         </button>
                     </div>
                 @endif
@@ -288,19 +751,17 @@
                 @if($errors->any())
                     <div x-data="{ show: true }" 
                          x-show="show" 
-                         class="mb-4 p-4 rounded-2xl bg-rose-50/90 border border-rose-200/80 text-rose-900 text-xs shadow-xs">
+                         class="mb-4 p-4 rounded-[14px] bg-[#FF3B30]/10 border border-[#FF3B30]/20 text-[13px] text-[#C41E17] dark:text-[#FF453A] shadow-2xs">
                         <div class="flex items-center justify-between font-bold mb-1.5">
                             <div class="flex items-center space-x-2">
-                                <svg class="w-4 h-4 text-rose-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
+                                <i data-lucide="alert-circle" class="w-4 h-4 shrink-0 text-[#FF3B30]"></i>
                                 <span>Terdapat beberapa kesalahan validasi input:</span>
                             </div>
-                            <button @click="show = false" class="text-rose-500 hover:text-rose-700">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            <button @click="show = false" class="text-[#C41E17]/70 hover:text-[#C41E17]">
+                                <i data-lucide="x" class="w-4 h-4"></i>
                             </button>
                         </div>
-                        <ul class="list-disc list-inside space-y-0.5 text-rose-800 pl-2">
+                        <ul class="list-disc list-inside space-y-0.5 pl-2 opacity-90 text-[12px]">
                             @foreach($errors->all() as $err)
                                 <li>{{ $err }}</li>
                             @endforeach
@@ -323,7 +784,7 @@
 
     <!-- ============================================================== -->
     <!-- GLOBAL SPOTLIGHT COMMAND PALETTE MODAL (CTRL + K / ⌘K)        -->
-    <!-- ZERO-GAP EDGE-TO-EDGE BACKDROP ARCHITECTURE                    -->
+    <!-- macOS Sonoma Spotlight Architecture                            -->
     <!-- ============================================================== -->
     <div x-show="quickSearchOpen" 
          x-cloak
@@ -331,7 +792,7 @@
          role="dialog" 
          aria-modal="true">
         
-        <!-- Standalone Zero-Gap Backdrop -->
+        <!-- Backdrop Blur Sheet -->
         <div x-show="quickSearchOpen"
              x-transition:enter="ease-out duration-200"
              x-transition:enter-start="opacity-0"
@@ -339,10 +800,10 @@
              x-transition:leave="ease-in duration-150"
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
-             class="fixed inset-0 bg-slate-950/70 backdrop-blur-md" 
+             class="fixed inset-0 bg-black/60 backdrop-blur-md" 
              @click="quickSearchOpen = false"></div>
 
-        <!-- Dialog Card (Double-Bezel Architecture) -->
+        <!-- Dialog Card (macOS Sonoma Spotlight Style) -->
         <div x-show="quickSearchOpen"
              x-transition:enter="ease-out duration-200"
              x-transition:enter-start="opacity-0 scale-95"
@@ -350,78 +811,76 @@
              x-transition:leave="ease-in duration-150"
              x-transition:leave-start="opacity-100 scale-100"
              x-transition:leave-end="opacity-0 scale-95"
-             class="mx-auto max-w-2xl w-full transform divide-y divide-slate-100 overflow-hidden rounded-3xl bg-white/95 backdrop-blur-2xl shadow-2xl ring-1 ring-black/5 transition-all relative z-10 text-xs">
+             class="mx-auto max-w-2xl w-full transform overflow-hidden rounded-[20px] bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-2xl border border-black/10 dark:border-white/10 shadow-2xl transition-all relative z-10 text-[13px]">
             
             <!-- Search Bar Input -->
-            <div class="relative flex items-center px-4 py-3.5 bg-slate-50/50">
-                <svg class="h-5 w-5 text-slate-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+            <div class="relative flex items-center px-4 py-3.5 bg-black/[0.02] dark:bg-white/[0.02] border-b border-black/5 dark:border-white/5">
+                <i data-lucide="search" class="w-5 h-5 text-black/40 dark:text-white/40 mr-3 flex-shrink-0"></i>
                 <input type="text" 
                        x-model="searchQuery"
-                       class="h-10 w-full bg-transparent text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none" 
+                       class="h-10 w-full bg-transparent text-[14px] font-medium text-black dark:text-white placeholder:text-black/40 dark:placeholder:text-white/40 focus:outline-none" 
                        placeholder="Cari Dokumen Pabean, No B/L, Kontainer, Invoice, atau Menu..."
                        autofocus>
-                <button @click="quickSearchOpen = false" class="text-[11px] font-mono px-2 py-1 rounded-lg bg-slate-200/80 text-slate-600 hover:bg-slate-300 font-semibold transition-colors">
+                <button @click="quickSearchOpen = false" class="text-[11px] font-mono px-2 py-1 rounded-[8px] bg-black/[0.06] dark:bg-white/[0.08] text-black/60 dark:text-white/60 font-semibold transition-colors">
                     ESC
                 </button>
             </div>
 
             <!-- Quick Action Shortcuts -->
-            <div class="p-4 text-xs max-h-96 overflow-y-auto">
-                <div class="font-bold text-[10px] text-slate-400 uppercase tracking-wider px-2 py-1">Pintasan Cepat Operasional (Spotlight)</div>
+            <div class="p-4 text-[13px] max-h-96 overflow-y-auto">
+                <div class="font-bold text-[10px] text-black/40 dark:text-white/40 uppercase tracking-wider px-2 py-1">Pintasan Cepat Operasional (Spotlight)</div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1.5">
-                    <a href="{{ route('core.document.index') }}" class="p-2.5 rounded-2xl hover:bg-slate-100/70 border border-transparent hover:border-slate-200 flex items-center space-x-3 text-slate-700 font-medium transition-all group">
-                        <span class="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold text-xs flex-shrink-0 group-hover:scale-105 transition-transform">P01</span>
+                    <a href="{{ route('core.document.index') }}" class="p-2.5 rounded-[12px] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] border border-transparent hover:border-black/5 dark:hover:border-white/5 flex items-center space-x-3 text-black/80 dark:text-white/80 font-medium transition-all group">
+                        <span class="w-8 h-8 rounded-[10px] bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center font-bold text-xs flex-shrink-0 group-hover:scale-105 transition-transform">P01</span>
                         <div class="truncate">
-                            <div class="text-xs font-bold text-slate-900 truncate">Project Lifecycle (P01)</div>
-                            <div class="text-[10px] text-slate-500 truncate">Buat & kelola berkas pengiriman</div>
+                            <div class="text-[13px] font-bold text-black dark:text-white truncate">Project Lifecycle (P01)</div>
+                            <div class="text-[11px] text-black/45 dark:text-white/45 truncate">Buat & kelola berkas pengiriman</div>
                         </div>
                     </a>
-                    <a href="{{ route('bc20.create') }}" class="p-2.5 rounded-2xl hover:bg-slate-100/70 border border-transparent hover:border-slate-200 flex items-center space-x-3 text-slate-700 font-medium transition-all group">
-                        <span class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs flex-shrink-0 group-hover:scale-105 transition-transform">BC20</span>
+                    <a href="{{ route('bc20.create') }}" class="p-2.5 rounded-[12px] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] border border-transparent hover:border-black/5 dark:hover:border-white/5 flex items-center space-x-3 text-black/80 dark:text-white/80 font-medium transition-all group">
+                        <span class="w-8 h-8 rounded-[10px] bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center font-bold text-xs flex-shrink-0 group-hover:scale-105 transition-transform">BC20</span>
                         <div class="truncate">
-                            <div class="text-xs font-bold text-slate-900 truncate">Draft PIB (BC 2.0 Impor)</div>
-                            <div class="text-[10px] text-slate-500 truncate">Integrasi CEISA 4.0 DJBC</div>
+                            <div class="text-[13px] font-bold text-black dark:text-white truncate">Draft PIB (BC 2.0 Impor)</div>
+                            <div class="text-[11px] text-black/45 dark:text-white/45 truncate">Integrasi CEISA 4.0 DJBC</div>
                         </div>
                     </a>
-                    <a href="{{ route('finance.invoices.index') }}" class="p-2.5 rounded-2xl hover:bg-slate-100/70 border border-transparent hover:border-slate-200 flex items-center space-x-3 text-slate-700 font-medium transition-all group">
-                        <span class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xs flex-shrink-0 group-hover:scale-105 transition-transform">INV</span>
+                    <a href="{{ route('finance.invoices.index') }}" class="p-2.5 rounded-[12px] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] border border-transparent hover:border-black/5 dark:hover:border-white/5 flex items-center space-x-3 text-black/80 dark:text-white/80 font-medium transition-all group">
+                        <span class="w-8 h-8 rounded-[10px] bg-[#34C759]/10 text-[#34C759] flex items-center justify-center font-bold text-xs flex-shrink-0 group-hover:scale-105 transition-transform">INV</span>
                         <div class="truncate">
-                            <div class="text-xs font-bold text-slate-900 truncate">Piutang & Invoice (P19)</div>
-                            <div class="text-[10px] text-slate-500 truncate">Penagihan jasa & reimburse outlay</div>
+                            <div class="text-[13px] font-bold text-black dark:text-white truncate">Piutang & Invoice (P19)</div>
+                            <div class="text-[11px] text-black/45 dark:text-white/45 truncate">Penagihan jasa & reimburse outlay</div>
                         </div>
                     </a>
-                    <a href="{{ route('finance.bills.index') }}" class="p-2.5 rounded-2xl hover:bg-slate-100/70 border border-transparent hover:border-slate-200 flex items-center space-x-3 text-slate-700 font-medium transition-all group">
-                        <span class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-xs flex-shrink-0 group-hover:scale-105 transition-transform">AP</span>
+                    <a href="{{ route('finance.bills.index') }}" class="p-2.5 rounded-[12px] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] border border-transparent hover:border-black/5 dark:hover:border-white/5 flex items-center space-x-3 text-black/80 dark:text-white/80 font-medium transition-all group">
+                        <span class="w-8 h-8 rounded-[10px] bg-[#FF3B30]/10 text-[#FF3B30] flex items-center justify-center font-bold text-xs flex-shrink-0 group-hover:scale-105 transition-transform">AP</span>
                         <div class="truncate">
-                            <div class="text-xs font-bold text-slate-900 truncate">Hutang Vendor (AP)</div>
-                            <div class="text-[10px] text-slate-500 truncate">Pelayaran, Trucking, & Depo TPS</div>
+                            <div class="text-[13px] font-bold text-black dark:text-white truncate">Hutang Vendor (AP)</div>
+                            <div class="text-[11px] text-black/45 dark:text-white/45 truncate">Pelayaran, Trucking, & Depo TPS</div>
                         </div>
                     </a>
-                    <a href="{{ route('finance.cash-bank.index') }}" class="p-2.5 rounded-2xl hover:bg-slate-100/70 border border-transparent hover:border-slate-200 flex items-center space-x-3 text-slate-700 font-medium transition-all group">
-                        <span class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs flex-shrink-0 group-hover:scale-105 transition-transform">CB</span>
+                    <a href="{{ route('finance.cash-bank.index') }}" class="p-2.5 rounded-[12px] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] border border-transparent hover:border-black/5 dark:hover:border-white/5 flex items-center space-x-3 text-black/80 dark:text-white/80 font-medium transition-all group">
+                        <span class="w-8 h-8 rounded-[10px] bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center font-bold text-xs flex-shrink-0 group-hover:scale-105 transition-transform">CB</span>
                         <div class="truncate">
-                            <div class="text-xs font-bold text-slate-900 truncate">Buku Kas & Rekening Bank</div>
-                            <div class="text-[10px] text-slate-500 truncate">Mutasi, transfer & rekonsiliasi</div>
+                            <div class="text-[13px] font-bold text-black dark:text-white truncate">Buku Kas & Rekening Bank</div>
+                            <div class="text-[11px] text-black/45 dark:text-white/45 truncate">Mutasi, transfer & rekonsiliasi</div>
                         </div>
                     </a>
-                    <a href="{{ route('accounting.index') }}" class="p-2.5 rounded-2xl hover:bg-slate-100/70 border border-transparent hover:border-slate-200 flex items-center space-x-3 text-slate-700 font-medium transition-all group">
-                        <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs flex-shrink-0 group-hover:scale-105 transition-transform">GL</span>
+                    <a href="{{ route('accounting.index') }}" class="p-2.5 rounded-[12px] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] border border-transparent hover:border-black/5 dark:hover:border-white/5 flex items-center space-x-3 text-black/80 dark:text-white/80 font-medium transition-all group">
+                        <span class="w-8 h-8 rounded-[10px] bg-[#5856D6]/10 text-[#5856D6] flex items-center justify-center font-bold text-xs flex-shrink-0 group-hover:scale-105 transition-transform">GL</span>
                         <div class="truncate">
-                            <div class="text-xs font-bold text-slate-900 truncate">Buku Besar, P&L & Neraca</div>
-                            <div class="text-[10px] text-slate-500 truncate">Laporan keuangan & job costing</div>
+                            <div class="text-[13px] font-bold text-black dark:text-white truncate">Buku Besar, P&L & Neraca</div>
+                            <div class="text-[11px] text-black/45 dark:text-white/45 truncate">Laporan keuangan & job costing</div>
                         </div>
                     </a>
                 </div>
             </div>
 
             <!-- Footer Keyboard Instructions -->
-            <div class="bg-slate-50/80 px-4 py-2.5 text-[11px] text-slate-500 flex items-center justify-between border-t border-slate-100">
+            <div class="bg-black/[0.02] dark:bg-white/[0.02] px-4 py-2.5 text-[11px] text-black/45 dark:text-white/45 flex items-center justify-between border-t border-black/5 dark:border-white/5">
                 <span class="flex items-center gap-1">
-                    Gunakan <kbd class="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-[10px] font-mono">↑</kbd> <kbd class="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-[10px] font-mono">↓</kbd> untuk memilih
+                    Gunakan <kbd class="px-1.5 py-0.5 bg-black/[0.05] dark:bg-white/[0.1] rounded text-[10px] font-mono">↑</kbd> <kbd class="px-1.5 py-0.5 bg-black/[0.05] dark:bg-white/[0.1] rounded text-[10px] font-mono">↓</kbd> untuk navigasi
                 </span>
-                <span>Tekan <kbd class="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-[10px] font-mono">ESC</kbd> untuk keluar</span>
+                <span>Tekan <kbd class="px-1.5 py-0.5 bg-black/[0.05] dark:bg-white/[0.1] rounded text-[10px] font-mono">ESC</kbd> untuk keluar</span>
             </div>
 
         </div>

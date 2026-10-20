@@ -1,47 +1,43 @@
 <!-- ============================================================== -->
-<!-- PATS_CEISA ERP - APPLE DESIGN TOPBAR COMPONENT                 -->
-<!-- Inspired by macOS Toolbar & iOS Glassmorphic Navigation Bar    -->
+<!-- GENIE ERP - APPLE macOS TOOLBAR (TOPBAR COMPONENT)             -->
+<!-- Diadopsi secara lengkap dari Cooca Core (Apple HIG Standards)   -->
+<!-- Spotlight Search, Live Status, Role Switcher, & Profile        -->
 <!-- ============================================================== -->
 
-<header class="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-200/70 shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition-all">
+<header class="sticky top-0 z-30 bg-white/80 dark:bg-[#1C1C1E]/80 backdrop-blur-xl border-b border-black/[0.08] dark:border-white/[0.08] transition-all">
     <div class="px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16 gap-3">
+        <div class="flex items-center justify-between h-14 gap-3">
             
-            <!-- LEFT: HAMBURGER & APPLE-STYLE BREADCRUMBS -->
+            <!-- LEFT: HAMBURGER & APPLE-STYLE CLEAN BREADCRUMBS -->
             <div class="flex items-center space-x-3 min-w-0">
                 <!-- Mobile Drawer Button (44px tap target) -->
                 <button @click="sidebarOpen = true" 
                         type="button"
-                        class="lg:hidden min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors active:scale-95"
-                        aria-label="Buka Navigasi Bilah Samping">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
+                        class="lg:hidden min-w-[40px] min-h-[40px] flex items-center justify-center rounded-[8px] text-black/70 dark:text-white/70 hover:text-black dark:hover:text-white hover:bg-black/[0.05] dark:hover:bg-white/[0.08] transition-colors active:scale-95 cursor-pointer"
+                        aria-label="Buka Bilah Samping">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
                 </button>
 
-                <!-- Breadcrumb Path Indicator -->
-                <div class="flex items-center space-x-2 text-xs truncate">
-                    <a href="{{ route('dashboard') }}" class="font-bold text-slate-900 hover:text-sky-600 flex items-center space-x-1.5 transition-colors">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span class="tracking-tight font-bold">GENIE</span>
+                <!-- Clean Navigational Breadcrumb -->
+                <nav class="flex items-center space-x-2 text-[12px] truncate" aria-label="Breadcrumb">
+                    <a href="{{ route('dashboard') }}" class="font-bold text-black dark:text-white hover:text-[#007AFF] transition-colors truncate">
+                        GENIE
                     </a>
-                    <span class="text-slate-300">/</span>
-                    <span class="text-slate-600 font-medium truncate">@yield('title', 'Admin Panel')</span>
-                </div>
+                    <i data-lucide="chevron-right" class="w-3.5 h-3.5 opacity-30 shrink-0"></i>
+                    <span class="text-black/60 dark:text-white/60 font-medium truncate">@yield('title', 'Admin Panel')</span>
+                </nav>
             </div>
 
             <!-- CENTER: SPOTLIGHT SEARCH (Apple macOS Spotlight Style) -->
-            <div class="hidden md:flex items-center flex-1 max-w-sm mx-2">
+            <div class="hidden md:flex items-center flex-1 max-w-sm mx-3">
                 <button @click="quickSearchOpen = true" 
                         type="button"
-                        class="w-full flex items-center justify-between px-3.5 py-2 rounded-xl bg-slate-100/80 hover:bg-slate-200/70 border border-slate-200/60 text-slate-500 text-xs transition-all group active:scale-[0.99]">
+                        class="w-full flex items-center justify-between h-9 px-3 rounded-[9px] bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] border border-black/[0.06] dark:border-white/[0.08] text-black/45 dark:text-white/45 text-[12px] transition-all group active:scale-[0.99] cursor-pointer">
                     <div class="flex items-center space-x-2 truncate">
-                        <svg class="w-4 h-4 text-slate-400 group-hover:text-sky-600 transition-colors flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                        <span class="truncate">Cari Job, B/L, Kontainer, Invoice...</span>
+                        <i data-lucide="search" class="w-3.5 h-3.5 text-black/40 dark:text-white/40 group-hover:text-[#007AFF] transition-colors flex-shrink-0"></i>
+                        <span class="truncate">Cari nomor aju, B/L, kontainer...</span>
                     </div>
-                    <kbd class="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[9px] font-mono font-bold bg-white text-slate-500 border border-slate-200 rounded-md shadow-2xs">
+                    <kbd class="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono font-medium bg-white dark:bg-[#2C2C2E] text-black/50 dark:text-white/50 border border-black/10 dark:border-white/10 rounded-[5px] shadow-2xs leading-none">
                         ⌘K
                     </kbd>
                 </button>
@@ -53,36 +49,29 @@
                 <!-- Mobile Spotlight Trigger (44px target) -->
                 <button @click="quickSearchOpen = true"
                         type="button"
-                        class="md:hidden min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors active:scale-95"
+                        class="md:hidden min-w-[40px] min-h-[40px] flex items-center justify-center rounded-[8px] text-black/50 dark:text-white/50 hover:text-black dark:hover:text-white hover:bg-black/[0.05] dark:hover:bg-white/[0.08] transition-colors active:scale-95"
                         aria-label="Cari Cepat">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+                    <i data-lucide="search" class="w-4 h-4"></i>
                 </button>
 
-                <!-- CEISA 4.0 Live Status Indicator -->
-                <div class="hidden xl:flex items-center space-x-2 px-3 py-1.5 rounded-full bg-slate-100/90 border border-slate-200/70 text-[11px]">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span class="font-semibold text-slate-700">CEISA 4.0:</span>
-                    <span class="font-mono text-emerald-700 font-bold">Online</span>
-                    <span class="text-slate-300">&bull;</span>
-                    <span class="text-slate-400 font-mono">{{ now()->format('H:i') }} WIB</span>
-                </div>
+                <!-- CEISA 4.0 Live Status Pill (Functional & Focused) -->
+                <a href="{{ route('config.index') }}" 
+                   class="hidden xl:inline-flex items-center space-x-2 px-2.5 py-1 rounded-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/[0.06] dark:border-white/[0.08] text-[11px] hover:border-black/15 dark:hover:border-white/15 transition-colors"
+                   title="Status Gateway CEISA 4.0 DJBC (Klik untuk Diagnostik)">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#34C759]"></span>
+                    <span class="font-medium text-black/50 dark:text-white/50">CEISA 4.0</span>
+                    <span class="font-semibold text-[#248A3D] dark:text-[#30D158]">Online</span>
+                </a>
 
                 <!-- Quick Role Switcher (Apple Segmented Pill) -->
                 <div class="relative" x-data="{ openRole: false }">
                     <button @click="openRole = !openRole" 
                             type="button"
-                            class="min-h-[44px] flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-slate-100/90 hover:bg-slate-200/80 text-slate-700 text-xs font-semibold border border-slate-200/70 transition-all active:scale-95"
+                            class="h-8 flex items-center space-x-1.5 px-2.5 rounded-[8px] bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] text-black/80 dark:text-white/80 text-[12px] font-medium border border-black/[0.06] dark:border-white/[0.08] transition-all cursor-pointer"
                             title="Beralih Peran RBAC Cepat">
-                        <svg class="w-3.5 h-3.5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                        </svg>
-                        <span class="hidden sm:inline text-slate-500 font-medium">Role:</span>
-                        <span class="font-mono font-bold text-sky-700">[{{ auth()->user()->roles->first()?->code ?? 'USER' }}]</span>
-                        <svg class="w-3 h-3 text-slate-400 transition-transform duration-200" :class="{ 'rotate-180': openRole }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
+                        <i data-lucide="shield-check" class="w-3.5 h-3.5 text-[#007AFF]"></i>
+                        <span class="font-mono font-semibold text-[#007AFF] dark:text-[#0A84FF] text-[11px]">{{ auth()->user()->roles->first()?->code ?? 'USER' }}</span>
+                        <i data-lucide="chevron-down" class="w-3 h-3 text-black/40 dark:text-white/40 transition-transform duration-200" :class="{ 'rotate-180': openRole }"></i>
                     </button>
 
                     <!-- Dropdown Role Simulation -->
@@ -95,44 +84,47 @@
                          x-transition:leave="transition ease-in duration-100"
                          x-transition:leave-start="transform opacity-100 scale-100"
                          x-transition:leave-end="transform opacity-0 scale-95"
-                         class="absolute right-0 mt-2 w-72 rounded-2xl bg-white/98 backdrop-blur-2xl border border-slate-200/80 shadow-2xl py-2 z-50 text-xs max-h-96 overflow-y-auto">
-                        <div class="px-3.5 py-2 border-b border-slate-100">
-                            <div class="font-bold text-slate-900">Simulasi Wewenang RBAC</div>
-                            <p class="text-[10px] text-slate-400">Pilih peran untuk menguji hak akses modul.</p>
+                         class="absolute right-0 mt-2 w-64 rounded-[12px] bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-2xl border border-black/10 dark:border-white/10 shadow-xl py-1.5 z-50 text-[12px] max-h-96 overflow-y-auto">
+                        <div class="px-3 py-1.5 border-b border-black/5 dark:border-white/5">
+                            <div class="font-semibold text-black dark:text-white text-[11px]">Simulasi Hak Akses RBAC</div>
+                            <p class="text-[10px] text-black/40 dark:text-white/40">Ganti peran untuk pengujian modul.</p>
                         </div>
-                        <div class="divide-y divide-slate-50 py-1">
-                            <a href="{{ route('quick-login', 'R-ADM') }}" class="block px-3.5 py-2 hover:bg-sky-50 text-slate-700 font-medium transition-colors">
-                                <span class="font-mono font-bold text-slate-900">[R-ADM]</span> Administrator Sistem
+                        <div class="py-1">
+                            <a href="{{ route('quick-login', 'R-ADM') }}" class="flex items-center justify-between px-3 py-1.5 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors">
+                                <span class="font-medium text-black/80 dark:text-white/80">Administrator</span>
+                                <span class="font-mono text-[10px] font-semibold text-black/40 dark:text-white/40">R-ADM</span>
                             </a>
-                            <a href="{{ route('quick-login', 'R-OWN') }}" class="block px-3.5 py-2 hover:bg-sky-50 text-slate-700 font-medium transition-colors">
-                                <span class="font-mono font-bold text-slate-900">[R-OWN]</span> Direktur Utama / Owner
+                            <a href="{{ route('quick-login', 'R-OWN') }}" class="flex items-center justify-between px-3 py-1.5 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors">
+                                <span class="font-medium text-black/80 dark:text-white/80">Pimpinan (Owner)</span>
+                                <span class="font-mono text-[10px] font-semibold text-black/40 dark:text-white/40">R-OWN</span>
                             </a>
-                            <a href="{{ route('quick-login', 'R-DOC-SPV') }}" class="block px-3.5 py-2 hover:bg-sky-50 text-slate-700 font-medium transition-colors">
-                                <span class="font-mono font-bold text-sky-700">[R-DOC-SPV]</span> Supervisor Dokumen
+                            <a href="{{ route('quick-login', 'R-DOC-SPV') }}" class="flex items-center justify-between px-3 py-1.5 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors">
+                                <span class="font-medium text-black/80 dark:text-white/80">Supervisor Dokumen</span>
+                                <span class="font-mono text-[10px] font-semibold text-[#007AFF]">R-DOC-SPV</span>
                             </a>
-                            <a href="{{ route('quick-login', 'R-DOC') }}" class="block px-3.5 py-2 hover:bg-sky-50 text-slate-700 font-medium transition-colors">
-                                <span class="font-mono font-bold text-sky-700">[R-DOC]</span> Staff Dokumen (PIB/PEB)
+                            <a href="{{ route('quick-login', 'R-DOC') }}" class="flex items-center justify-between px-3 py-1.5 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors">
+                                <span class="font-medium text-black/80 dark:text-white/80">Staff Dokumen</span>
+                                <span class="font-mono text-[10px] font-semibold text-[#007AFF]">R-DOC</span>
                             </a>
-                            <a href="{{ route('quick-login', 'R-DO') }}" class="block px-3.5 py-2 hover:bg-sky-50 text-slate-700 font-medium transition-colors">
-                                <span class="font-mono font-bold text-amber-700">[R-DO]</span> Staff Delivery Order
+                            <a href="{{ route('quick-login', 'R-DO') }}" class="flex items-center justify-between px-3 py-1.5 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors">
+                                <span class="font-medium text-black/80 dark:text-white/80">Staff Delivery Order</span>
+                                <span class="font-mono text-[10px] font-semibold text-[#FF9500]">R-DO</span>
                             </a>
-                            <a href="{{ route('quick-login', 'R-TRF') }}" class="block px-3.5 py-2 hover:bg-sky-50 text-slate-700 font-medium transition-colors">
-                                <span class="font-mono font-bold text-emerald-700">[R-TRF]</span> Staff Traffic & Truk
+                            <a href="{{ route('quick-login', 'R-TRF') }}" class="flex items-center justify-between px-3 py-1.5 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors">
+                                <span class="font-medium text-black/80 dark:text-white/80">Staff Traffic</span>
+                                <span class="font-mono text-[10px] font-semibold text-[#34C759]">R-TRF</span>
                             </a>
-                            <a href="{{ route('quick-login', 'R-FLD') }}" class="block px-3.5 py-2 hover:bg-sky-50 text-slate-700 font-medium transition-colors">
-                                <span class="font-mono font-bold text-emerald-700">[R-FLD]</span> Staff Lapangan (Behandle)
+                            <a href="{{ route('quick-login', 'R-FIN') }}" class="flex items-center justify-between px-3 py-1.5 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors">
+                                <span class="font-medium text-black/80 dark:text-white/80">Finance & Pajak</span>
+                                <span class="font-mono text-[10px] font-semibold text-[#34C759]">R-FIN</span>
                             </a>
-                            <a href="{{ route('quick-login', 'R-FIN') }}" class="block px-3.5 py-2 hover:bg-sky-50 text-slate-700 font-medium transition-colors">
-                                <span class="font-mono font-bold text-green-700">[R-FIN]</span> Finance & Tagihan
+                            <a href="{{ route('quick-login', 'R-HR') }}" class="flex items-center justify-between px-3 py-1.5 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors">
+                                <span class="font-medium text-black/80 dark:text-white/80">HR & Payroll</span>
+                                <span class="font-mono text-[10px] font-semibold text-[#AF52DE]">R-HR</span>
                             </a>
-                            <a href="{{ route('quick-login', 'R-HR') }}" class="block px-3.5 py-2 hover:bg-sky-50 text-slate-700 font-medium transition-colors">
-                                <span class="font-mono font-bold text-pink-700">[R-HR]</span> Human Resources (HRM)
-                            </a>
-                            <a href="{{ route('quick-login', 'R-CS') }}" class="block px-3.5 py-2 hover:bg-sky-50 text-slate-700 font-medium transition-colors">
-                                <span class="font-mono font-bold text-teal-700">[R-CS]</span> Customer Service (CRM)
-                            </a>
-                            <a href="{{ route('quick-login', 'R-MGR') }}" class="block px-3.5 py-2 hover:bg-sky-50 text-slate-700 font-medium transition-colors">
-                                <span class="font-mono font-bold text-purple-700">[R-MGR]</span> Operations Manager
+                            <a href="{{ route('quick-login', 'R-CS') }}" class="flex items-center justify-between px-3 py-1.5 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors">
+                                <span class="font-medium text-black/80 dark:text-white/80">Customer Service</span>
+                                <span class="font-mono text-[10px] font-semibold text-[#30B0C7]">R-CS</span>
                             </a>
                         </div>
                     </div>
@@ -142,12 +134,10 @@
                 <div class="relative" x-data="{ openNotif: false }">
                     <button @click="openNotif = !openNotif" 
                             type="button" 
-                            class="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors relative active:scale-95"
+                            class="w-8 h-8 flex items-center justify-center rounded-[8px] text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white hover:bg-black/[0.05] dark:hover:bg-white/[0.08] transition-colors relative cursor-pointer"
                             title="Pemberitahuan Sistem">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                        </svg>
-                        <span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white"></span>
+                        <i data-lucide="bell" class="w-4 h-4"></i>
+                        <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-[#FF3B30]"></span>
                     </button>
 
                     <!-- Dropdown Notifications Menu -->
@@ -160,26 +150,35 @@
                          x-transition:leave="transition ease-in duration-100"
                          x-transition:leave-start="transform opacity-100 scale-100"
                          x-transition:leave-end="transform opacity-0 scale-95"
-                         class="absolute right-0 mt-2 w-80 rounded-2xl bg-white/98 backdrop-blur-2xl border border-slate-200/80 shadow-2xl py-2 z-50 text-xs">
-                        <div class="px-4 py-2 border-b border-slate-100 flex items-center justify-between">
-                            <span class="font-bold text-slate-900">Pemberitahuan</span>
-                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-sky-100 text-sky-800 font-bold font-mono">3 Baru</span>
+                         class="absolute right-0 mt-2 w-72 rounded-[12px] bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-2xl border border-black/10 dark:border-white/10 shadow-xl py-1.5 z-50 text-[12px]">
+                        <div class="px-3 py-2 border-b border-black/5 dark:border-white/5 flex items-center justify-between">
+                            <span class="font-semibold text-black dark:text-white text-[11px]">Pemberitahuan Operasional</span>
+                            <span class="text-[10px] px-1.5 py-0.2 rounded-full bg-[#007AFF]/10 text-[#007AFF] font-medium font-mono">3 Baru</span>
                         </div>
-                        <div class="divide-y divide-slate-100">
-                            <div class="p-3 hover:bg-slate-50 transition-colors">
-                                <div class="text-amber-700 font-bold text-[11px]">⚠️ Peringatan Demurrage</div>
-                                <p class="text-[11px] text-slate-600 mt-0.5">Kontainer BL MAEU-982182910 tersisa 2 hari free time.</p>
-                                <span class="text-[9px] text-slate-400">10 menit yang lalu</span>
+                        <div class="divide-y divide-black/5 dark:divide-white/5">
+                            <div class="p-2.5 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
+                                <div class="text-[#FF9500] font-semibold text-[11px] flex items-center gap-1">
+                                    <i data-lucide="alert-triangle" class="w-3 h-3"></i>
+                                    <span>Peringatan Demurrage</span>
+                                </div>
+                                <p class="text-[11px] text-black/60 dark:text-white/60 mt-0.5 leading-snug">Kontainer BL MAEU-982182910 tersisa 2 hari free time.</p>
+                                <span class="text-[10px] text-black/35 dark:text-white/35 mt-1 block">10 menit yang lalu</span>
                             </div>
-                            <div class="p-3 hover:bg-slate-50 transition-colors">
-                                <div class="text-sky-700 font-bold text-[11px]">📄 Billing MPN G3 Terbit</div>
-                                <p class="text-[11px] text-slate-600 mt-0.5">Kode billing 820260918237192 siap dibayar via Bank Persepsi.</p>
-                                <span class="text-[9px] text-slate-400">45 menit yang lalu</span>
+                            <div class="p-2.5 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
+                                <div class="text-[#007AFF] font-semibold text-[11px] flex items-center gap-1">
+                                    <i data-lucide="receipt" class="w-3 h-3"></i>
+                                    <span>Billing MPN G3 Terbit</span>
+                                </div>
+                                <p class="text-[11px] text-black/60 dark:text-white/60 mt-0.5 leading-snug">Kode billing 820260918237192 siap disetor.</p>
+                                <span class="text-[10px] text-black/35 dark:text-white/35 mt-1 block">45 menit yang lalu</span>
                             </div>
-                            <div class="p-3 hover:bg-slate-50 transition-colors">
-                                <div class="text-emerald-700 font-bold text-[11px]">✅ SPPB Rilis (Jalur Hijau)</div>
-                                <p class="text-[11px] text-slate-600 mt-0.5">Shipment SHP-202610-0001 siap proses Gate Out TPS.</p>
-                                <span class="text-[9px] text-slate-400">2 jam yang lalu</span>
+                            <div class="p-2.5 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
+                                <div class="text-[#34C759] font-semibold text-[11px] flex items-center gap-1">
+                                    <i data-lucide="check-circle" class="w-3 h-3"></i>
+                                    <span>SPPB Rilis (Jalur Hijau)</span>
+                                </div>
+                                <p class="text-[11px] text-black/60 dark:text-white/60 mt-0.5 leading-snug">Shipment SHP-202610-0001 siap Gate Out TPS.</p>
+                                <span class="text-[10px] text-black/35 dark:text-white/35 mt-1 block">2 jam yang lalu</span>
                             </div>
                         </div>
                     </div>
@@ -190,18 +189,16 @@
                 <div class="relative" x-data="{ openProfile: false }">
                     <button @click="openProfile = !openProfile" 
                             type="button"
-                            class="min-h-[44px] flex items-center space-x-2 p-1.5 rounded-xl hover:bg-slate-100 transition-colors active:scale-95"
+                            class="h-8 flex items-center space-x-2 px-1.5 rounded-[8px] hover:bg-black/[0.05] dark:hover:bg-white/[0.08] transition-colors cursor-pointer"
                             aria-label="Menu Pengguna">
-                        <div class="w-8 h-8 rounded-xl bg-slate-900 text-white font-bold text-xs flex items-center justify-center shadow-xs">
+                        <div class="w-7 h-7 rounded-[7px] bg-black dark:bg-white text-white dark:text-black font-semibold text-[11px] flex items-center justify-center">
                             {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                         </div>
-                        <div class="hidden xl:block text-left text-xs">
-                            <div class="font-bold text-slate-900 truncate max-w-[110px]">{{ auth()->user()->name }}</div>
-                            <div class="text-[10px] text-slate-400 truncate">{{ auth()->user()->job_title ?? 'Staff' }}</div>
+                        <div class="hidden xl:block text-left text-[12px] leading-tight pr-1">
+                            <div class="font-semibold text-black dark:text-white truncate max-w-[100px]">{{ auth()->user()->name }}</div>
+                            <div class="text-[10px] text-black/40 dark:text-white/40 truncate">{{ auth()->user()->job_title ?? 'Staff' }}</div>
                         </div>
-                        <svg class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200" :class="{ 'rotate-180': openProfile }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
+                        <i data-lucide="chevron-down" class="w-3 h-3 text-black/40 dark:text-white/40 transition-transform duration-200" :class="{ 'rotate-180': openProfile }"></i>
                     </button>
 
                     <div x-show="openProfile" 
@@ -213,25 +210,21 @@
                          x-transition:leave="transition ease-in duration-100"
                          x-transition:leave-start="transform opacity-100 scale-100"
                          x-transition:leave-end="transform opacity-0 scale-95"
-                         class="absolute right-0 mt-2 w-56 rounded-2xl bg-white/98 backdrop-blur-2xl border border-slate-200/80 shadow-2xl py-2 z-50 text-xs">
-                        <div class="px-4 py-2 border-b border-slate-100">
-                            <div class="font-bold text-slate-900 truncate">{{ auth()->user()->name }}</div>
-                            <div class="text-[11px] text-slate-500 font-mono truncate">{{ auth()->user()->email }}</div>
+                         class="absolute right-0 mt-2 w-52 rounded-[12px] bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-2xl border border-black/10 dark:border-white/10 shadow-xl py-1 z-50 text-[12px]">
+                        <div class="px-3 py-2 border-b border-black/5 dark:border-white/5">
+                            <div class="font-semibold text-black dark:text-white truncate">{{ auth()->user()->name }}</div>
+                            <div class="text-[11px] text-black/45 dark:text-white/45 font-mono truncate">{{ auth()->user()->email }}</div>
                         </div>
-                        <a href="{{ route('profile') }}" class="flex items-center space-x-2 px-4 py-2.5 text-slate-700 hover:bg-slate-50 font-medium transition-colors">
-                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                            <span>Profil & Keamanan Akun</span>
+                        <a href="{{ route('profile') }}" class="flex items-center space-x-2 px-3 py-1.5 text-black/70 dark:text-white/70 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] font-medium transition-colors">
+                            <i data-lucide="user" class="w-3.5 h-3.5 text-black/40 dark:text-white/40"></i>
+                            <span>Profil & Akun</span>
                         </a>
-                        <div class="my-1 border-t border-slate-100"></div>
+                        <div class="my-0.5 border-t border-black/5 dark:border-white/5"></div>
                         <form action="{{ route('logout') }}" method="POST">
                             @csrf
-                            <button type="submit" class="w-full text-left flex items-center space-x-2 px-4 py-2.5 text-rose-600 hover:bg-rose-50 font-bold transition-colors">
-                                <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                </svg>
-                                <span>Keluar (Logout)</span>
+                            <button type="submit" class="w-full text-left flex items-center space-x-2 px-3 py-1.5 text-[#FF3B30] hover:bg-[#FF3B30]/10 font-medium transition-colors cursor-pointer">
+                                <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                                <span>Keluar</span>
                             </button>
                         </form>
                     </div>

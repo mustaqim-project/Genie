@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>BC 3.0 - Pemberitahuan Ekspor Barang (PEB) - {{ $shipment->ceisaDocument->nomor_aju ?? $shipment->shipment_number }}</title>
+    <title>BC 3.0 - Pemberitahuan Ekspor Barang (PEB) - {{ $shipment->ceisaDocument?->nomor_aju ?? $shipment->shipment_number }}</title>
     <style>
         @page {
             size: A4 portrait;
@@ -105,13 +105,13 @@
         <tr>
             <td width="55%">
                 <span class="font-bold">NOMOR PENGAJUAN (NOMOR AJU):</span><br>
-                <span class="barcode">{{ $shipment->ceisaDocument->nomor_aju ?? '040300-000003-20261012-000094' }}</span>
+                <span class="barcode">{{ $shipment->ceisaDocument?->nomor_aju ?? '040300-000003-20261012-000094' }}</span>
             </td>
             <td width="45%">
                 <span class="font-bold">KANTOR PABEAN PEMUATAN:</span><br>
-                {{ $shipment->ceisaDocument->kantor_pabean ?? '040300 - KPU BEA DAN CUKAI TIPE A TANJUNG PRIOK' }}<br>
-                <strong>No. Pendaftaran NPE:</strong> {{ $shipment->ceisaDocument->nomor_daftar ?? '-' }} &nbsp;|&nbsp; 
-                <strong>Tgl NPE:</strong> {{ $shipment->ceisaDocument->tanggal_daftar ?? '-' }}
+                {{ $shipment->ceisaDocument?->kantor_pabean ?? '040300 - KPU BEA DAN CUKAI TIPE A TANJUNG PRIOK' }}<br>
+                <strong>No. Pendaftaran NPE:</strong> {{ $shipment->ceisaDocument?->nomor_daftar ?? '-' }} &nbsp;|&nbsp; 
+                <strong>Tgl NPE:</strong> {{ $shipment->ceisaDocument?->tanggal_daftar ?? '-' }}
             </td>
         </tr>
     </table>
@@ -243,8 +243,8 @@
         <tr>
             <td width="25%"><strong>Valuta:</strong> {{ $shipment->currency ?? 'USD' }}</td>
             <td width="25%"><strong>Nilai FOB Devisa:</strong> {{ number_format($shipment->total_cif ?? 42000.00, 2) }}</td>
-            <td width="25%"><strong>Kurs Devisa (KMK):</strong> Rp {{ number_format($shipment->ceisaDocument->ndbm_kurs ?? 16250, 0, ',', '.') }}</td>
-            <td width="25%"><strong>Nilai FOB (IDR):</strong> Rp {{ number_format(($shipment->total_cif ?? 42000) * ($shipment->ceisaDocument->ndbm_kurs ?? 16250), 0, ',', '.') }}</td>
+            <td width="25%"><strong>Kurs Devisa (KMK):</strong> Rp {{ number_format($shipment->ceisaDocument?->ndbm_kurs ?? 16250, 0, ',', '.') }}</td>
+            <td width="25%"><strong>Nilai FOB (IDR):</strong> Rp {{ number_format(($shipment->total_cif ?? 42000) * ($shipment->ceisaDocument?->ndbm_kurs ?? 16250), 0, ',', '.') }}</td>
         </tr>
     </table>
 
@@ -308,9 +308,9 @@
             </td>
             <td width="50%">
                 <strong>STATUS RESPON CEISA 4.0:</strong><br>
-                Status Terkini: <span class="font-bold" style="color: #047857;">{{ $shipment->ceisaDocument->status ?? 'NPE_ISSUED (PEMBERITAHUAN EKSPOR DIBERIKAN IJIN MUAT)' }}</span><br>
-                No. NPE: <strong>{{ $shipment->ceisaDocument->nomor_daftar ?? 'NPE-040300-20261012-00412' }}</strong><br>
-                Tanggal NPE: <strong>{{ $shipment->ceisaDocument->tanggal_daftar ?? now()->format('Y-m-d') }}</strong>
+                Status Terkini: <span class="font-bold" style="color: #047857;">{{ $shipment->ceisaDocument?->status ?? 'NPE_ISSUED (PEMBERITAHUAN EKSPOR DIBERIKAN IJIN MUAT)' }}</span><br>
+                No. NPE: <strong>{{ $shipment->ceisaDocument?->nomor_daftar ?? 'NPE-040300-20261012-00412' }}</strong><br>
+                Tanggal NPE: <strong>{{ $shipment->ceisaDocument?->tanggal_daftar ?? now()->format('Y-m-d') }}</strong>
             </td>
         </tr>
     </table>

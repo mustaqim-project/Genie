@@ -3,66 +3,88 @@
 @section('title', 'Tim Traffic & Lapangan — Penjaluran, Gate Out & POD')
 
 @section('content')
-<div class="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-12">
+<div class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12">
 
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+    <!-- 1. TOOLBAR / PAGE HEADER (macOS Sonoma Toolbar Style from Cooca Core) -->
+    <header class="rounded-[16px] backdrop-blur-md bg-white/75 dark:bg-[#1C1C1E]/75 border border-black/5 dark:border-white/10 px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
         <div>
-            <div class="text-xs text-slate-500 font-medium mb-1">
-                <a href="{{ route('dashboard') }}" class="hover:underline">Dashboard</a> / Core Bisnis / <span class="text-slate-800">Tim Traffic</span>
+            <nav class="flex items-center gap-1.5 text-[12px] text-black/50 dark:text-white/50 mb-1" aria-label="Breadcrumb">
+                <a href="{{ route('dashboard') }}" class="hover:text-[#007AFF] transition-colors">Dashboard</a>
+                <i data-lucide="chevron-right" class="w-3.5 h-3.5 opacity-40"></i>
+                <span class="text-black/70 dark:text-white/70 font-medium">Core Bisnis</span>
+                <i data-lucide="chevron-right" class="w-3.5 h-3.5 opacity-40"></i>
+                <span class="text-black dark:text-white font-semibold">Tim Traffic</span>
+            </nav>
+            <div class="flex items-center gap-2.5">
+                <h1 class="text-[20px] sm:text-[22px] font-bold text-black dark:text-white tracking-tight">
+                    Traffic, Penjaluran & Lapangan Pelabuhan
+                </h1>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#34C759]/10 text-[#248A3D] dark:text-[#30D158]">
+                    Gate Out & POD
+                </span>
             </div>
-            <h1 class="text-2xl font-bold text-slate-900">Traffic, Penjaluran & Lapangan Pelabuhan</h1>
-            <p class="text-xs text-slate-500 mt-0.5">Monitoring respon penjaluran CEISA (Hijau/Kuning/Merah), behandle, pengeluaran truk (Gate Out) dan POD</p>
+            <p class="text-[13px] text-black/50 dark:text-white/50 mt-0.5 leading-snug">
+                Monitoring respon penjaluran CEISA (Hijau/Kuning/Merah), behandle, pengeluaran truk (Gate Out) dan POD serah terima.
+            </p>
         </div>
-    </div>
 
-    <!-- Customs Channel Status Tabs -->
-    <!-- 4 Customs Channel Filter Pills (Apple HIG Minimalist Indicators) -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 text-xs font-semibold">
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+            <a href="{{ route('core.document.index') }}" class="btn-apple-gray w-full sm:w-auto">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                <span>Kembali ke Dokumen</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- 2. 4 CUSTOMS CHANNEL FILTER PILLS (Apple HIG Status Indicators) -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-[12px] font-semibold">
         <a href="{{ route('core.traffic.index', ['channel' => 'HIJAU']) }}" 
-           class="p-3.5 rounded-xl border {{ request('channel') === 'HIJAU' ? 'bg-emerald-50 border-emerald-300 text-emerald-800 shadow-xs' : 'bg-white border-slate-200/80 text-slate-700 hover:bg-slate-50' }} flex items-center justify-between transition-all active:scale-[0.99]">
+           class="p-3.5 rounded-[14px] border {{ request('channel') === 'HIJAU' ? 'bg-[#34C759]/15 border-[#34C759]/30 text-[#248A3D] dark:text-[#30D158] shadow-xs' : 'bg-white dark:bg-[#1C1C1E] border-black/5 dark:border-white/5 text-black/70 dark:text-white/70 hover:bg-black/[0.02] dark:hover:bg-white/[0.02]' }} flex items-center justify-between transition-all active:scale-[0.99]">
             <span class="inline-flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-[#34C759] animate-pulse"></span>
                 <span>Jalur Hijau (SPPB)</span>
             </span>
-            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100/80 text-emerald-800 font-bold">Siap Gate Out</span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#34C759]/20 text-[#248A3D] dark:text-[#30D158] font-bold">Siap Gate Out</span>
         </a>
         <a href="{{ route('core.traffic.index', ['channel' => 'KUNING']) }}" 
-           class="p-3.5 rounded-xl border {{ request('channel') === 'KUNING' ? 'bg-amber-50 border-amber-300 text-amber-800 shadow-xs' : 'bg-white border-slate-200/80 text-slate-700 hover:bg-slate-50' }} flex items-center justify-between transition-all active:scale-[0.99]">
+           class="p-3.5 rounded-[14px] border {{ request('channel') === 'KUNING' ? 'bg-[#FF9500]/15 border-[#FF9500]/30 text-[#B25E00] dark:text-[#FF9F0A] shadow-xs' : 'bg-white dark:bg-[#1C1C1E] border-black/5 dark:border-white/5 text-black/70 dark:text-white/70 hover:bg-black/[0.02] dark:hover:bg-white/[0.02]' }} flex items-center justify-between transition-all active:scale-[0.99]">
             <span class="inline-flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-[#FF9500]"></span>
                 <span>Jalur Kuning (SPJK)</span>
             </span>
-            <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-100/80 text-amber-800 font-bold">Periksa Dok</span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#FF9500]/20 text-[#B25E00] dark:text-[#FF9F0A] font-bold">Periksa Dok</span>
         </a>
         <a href="{{ route('core.traffic.index', ['channel' => 'MERAH']) }}" 
-           class="p-3.5 rounded-xl border {{ request('channel') === 'MERAH' ? 'bg-rose-50 border-rose-300 text-rose-800 shadow-xs' : 'bg-white border-slate-200/80 text-slate-700 hover:bg-slate-50' }} flex items-center justify-between transition-all active:scale-[0.99]">
+           class="p-3.5 rounded-[14px] border {{ request('channel') === 'MERAH' ? 'bg-[#FF3B30]/15 border-[#FF3B30]/30 text-[#C41E17] dark:text-[#FF453A] shadow-xs' : 'bg-white dark:bg-[#1C1C1E] border-black/5 dark:border-white/5 text-black/70 dark:text-white/70 hover:bg-black/[0.02] dark:hover:bg-white/[0.02]' }} flex items-center justify-between transition-all active:scale-[0.99]">
             <span class="inline-flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-[#FF3B30]"></span>
                 <span>Jalur Merah (SPJM)</span>
             </span>
-            <span class="text-[10px] px-2 py-0.5 rounded-full bg-rose-100/80 text-rose-800 font-bold">Behandle Fisik</span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#FF3B30]/20 text-[#C41E17] dark:text-[#FF453A] font-bold">Behandle Fisik</span>
         </a>
         <a href="{{ route('core.traffic.index', ['channel' => 'HOLD']) }}" 
-           class="p-3.5 rounded-xl border {{ request('channel') === 'HOLD' ? 'bg-purple-50 border-purple-300 text-purple-800 shadow-xs' : 'bg-white border-slate-200/80 text-slate-700 hover:bg-slate-50' }} flex items-center justify-between transition-all active:scale-[0.99]">
+           class="p-3.5 rounded-[14px] border {{ request('channel') === 'HOLD' ? 'bg-[#AF52DE]/15 border-[#AF52DE]/30 text-[#8E44AD] dark:text-[#BF5AF2] shadow-xs' : 'bg-white dark:bg-[#1C1C1E] border-black/5 dark:border-white/5 text-black/70 dark:text-white/70 hover:bg-black/[0.02] dark:hover:bg-white/[0.02]' }} flex items-center justify-between transition-all active:scale-[0.99]">
             <span class="inline-flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-[#AF52DE]"></span>
                 <span>Sengketa / Notul</span>
             </span>
-            <span class="text-[10px] px-2 py-0.5 rounded-full bg-purple-100/80 text-purple-800 font-bold">SPTNP / NPD</span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#AF52DE]/20 text-[#8E44AD] dark:text-[#BF5AF2] font-bold">SPTNP / NPD</span>
         </a>
     </div>
 
-    <!-- Table Traffic Workflow -->
-    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden mb-8">
-        <div class="p-4 border-b border-slate-100 flex items-center justify-between">
-            <span class="font-bold text-xs text-slate-800">Antrian Pergerakan Kargo & Armada Truk</span>
-            <span class="text-xs text-slate-400">Total: {{ $shipments->total() }} kargo</span>
+    <!-- 3. TABLE TRAFFIC WORKFLOW -->
+    <div class="rounded-[16px] bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/10 shadow-sm overflow-hidden flex flex-col">
+        <div class="p-4 sm:p-5 border-b border-black/5 dark:border-white/5 flex items-center justify-between">
+            <div class="font-semibold text-[13px] text-black dark:text-white flex items-center space-x-2">
+                <span>Antrian Pergerakan Kargo & Armada Truk</span>
+                <span class="px-2 py-0.5 rounded-full text-[11px] bg-black/[0.05] dark:bg-white/[0.08] text-black/70 dark:text-white/70 font-mono">{{ $shipments->total() }} Kargo</span>
+            </div>
+            <span class="text-[12px] text-black/45 dark:text-white/45 hidden sm:block">Pergerakan fisik TPS menuju pabrik klien</span>
         </div>
 
-        <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
-                <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-100">
+        <div class="table-responsive flex-1">
+            <table class="w-full text-left text-[13px]">
+                <thead class="text-[11px] font-semibold text-black/50 dark:text-white/50 uppercase tracking-wider bg-black/[0.02] dark:bg-white/[0.02] border-b border-black/5 dark:border-white/10">
                     <tr>
                         <th class="py-3 px-4">No. Shipment & B/L</th>
                         <th class="py-3 px-4">Importir</th>
@@ -72,57 +94,64 @@
                         <th class="py-3 px-4 text-right">Aksi Lapangan & Trucking</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
+                <tbody class="divide-y divide-black/5 dark:divide-white/5">
                     @forelse($shipments as $shp)
-                        <tr class="hover:bg-slate-50/50">
+                        <tr class="hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
                             <td class="py-3 px-4 font-mono">
-                                <span class="font-bold text-slate-800">{{ $shp->shipment_number ?? $shp->project_no }}</span>
-                                <div class="text-[10px] text-slate-400">BL: {{ $shp->bl_number ?? '-' }}</div>
+                                <span class="font-bold text-black dark:text-white">{{ $shp->shipment_number ?? $shp->project_no }}</span>
+                                <div class="text-[11px] text-black/45 dark:text-white/45 font-sans mt-0.5">BL: {{ $shp->bl_number ?? '-' }}</div>
                             </td>
                             <td class="py-3 px-4">
-                                <div class="font-semibold text-slate-800">{{ $shp->client->name ?? '-' }}</div>
-                                <div class="text-[10px] text-slate-400">Tujuan: Gudang Pabrik</div>
+                                <div class="font-semibold text-black dark:text-white">{{ $shp->client->name ?? '-' }}</div>
+                                <div class="text-[11px] text-black/45 dark:text-white/45">Tujuan: Gudang Pabrik</div>
                             </td>
                             <td class="py-3 px-4">
                                 @php $channel = $shp->customs_channel ?? 'HIJAU'; @endphp
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold
-                                    {{ $channel === 'HIJAU' ? 'bg-emerald-100 text-emerald-800' : ($channel === 'MERAH' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800') }}">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold font-mono
+                                    {{ $channel === 'HIJAU' ? 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158]' : ($channel === 'MERAH' ? 'bg-[#FF3B30]/15 text-[#C41E17] dark:text-[#FF453A]' : 'bg-[#FF9500]/15 text-[#B25E00] dark:text-[#FF9F0A]') }}">
                                     JALUR {{ $channel }}
                                 </span>
                             </td>
                             <td class="py-3 px-4">
                                 @if($shp->do_is_released)
-                                    <span class="text-emerald-700 font-bold">&check; RILIS (No: {{ $shp->do_number }})</span>
+                                    <span class="text-[#248A3D] dark:text-[#30D158] font-bold font-mono text-[11px] flex items-center gap-1">
+                                        <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                                        <span>RILIS ({{ $shp->do_number }})</span>
+                                    </span>
                                 @else
-                                    <span class="text-rose-600 font-bold">&times; BELUM RILIS</span>
+                                    <span class="text-[#FF3B30] font-bold font-mono text-[11px] flex items-center gap-1">
+                                        <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                                        <span>BELUM RILIS</span>
+                                    </span>
                                 @endif
                             </td>
                             <td class="py-3 px-4">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold font-mono
-                                    {{ $shp->status === 'DELIVERED' ? 'bg-emerald-100 text-emerald-800' : ($shp->status === 'GATE_OUT' ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-700') }}">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold font-mono
+                                    {{ $shp->status === 'DELIVERED' ? 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158]' : ($shp->status === 'GATE_OUT' ? 'bg-[#007AFF]/15 text-[#007AFF]' : 'bg-black/[0.06] dark:bg-white/[0.08] text-black/70 dark:text-white/70') }}">
                                     {{ $shp->status }}
                                 </span>
                             </td>
                             <td class="py-3 px-4 text-right space-x-1.5 whitespace-nowrap">
                                 @if($shp->status === 'GATE_OUT')
                                     <!-- Tombol Konfirmasi POD Modal Trigger -->
-                                    <button onclick="openPodModal('{{ $shp->id }}', '{{ $shp->shipment_number ?? $shp->project_no }}')"
-                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] shadow-xs transition-all active:scale-95 cursor-pointer">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                    <button type="button" 
+                                            onclick="openPodModal('{{ $shp->id }}', '{{ $shp->shipment_number ?? $shp->project_no }}')"
+                                            class="btn-apple-filled !bg-[#34C759] hover:!bg-[#248A3D] !h-8 !px-3 !text-[11px]">
+                                        <i data-lucide="check" class="w-3.5 h-3.5"></i>
                                         <span>Konfirmasi POD</span>
                                     </button>
                                 @elseif($shp->status !== 'DELIVERED')
                                     <!-- Tombol Gate Out Modal Trigger -->
-                                    <button onclick="openGateOutModal('{{ $shp->id }}', '{{ $shp->shipment_number ?? $shp->project_no }}')"
+                                    <button type="button" 
+                                            onclick="openGateOutModal('{{ $shp->id }}', '{{ $shp->shipment_number ?? $shp->project_no }}')"
                                             {{ !$shp->do_is_released ? 'disabled title="Wajib rilis DO terlebih dahulu"' : '' }}
-                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-[11px] transition-all shadow-xs active:scale-95
-                                                {{ $shp->do_is_released ? 'bg-slate-900 hover:bg-slate-800 text-white cursor-pointer' : 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed' }}">
-                                        <svg class="w-3.5 h-3.5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+                                            class="btn-apple-filled !h-8 !px-3 !text-[11px] {{ !$shp->do_is_released ? 'opacity-40 cursor-not-allowed' : '' }}">
+                                        <i data-lucide="truck" class="w-3.5 h-3.5"></i>
                                         <span>Gate Out TPS</span>
                                     </button>
                                 @else
-                                    <span class="inline-flex items-center gap-1 text-emerald-700 font-bold text-[11px] bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                                        <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                    <span class="inline-flex items-center gap-1 text-[#248A3D] dark:text-[#30D158] font-semibold text-[11px] bg-[#34C759]/15 px-2.5 py-1 rounded-full border border-[#34C759]/25">
+                                        <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
                                         <span>Kargo Selesai (POD)</span>
                                     </span>
                                 @endif
@@ -130,15 +159,16 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="py-8 text-center text-slate-400">
-                                Belum ada shipment pada antrian Tim Traffic.
+                            <td colspan="6" class="py-12 text-center text-black/40 dark:text-white/40 text-[13px]">
+                                <i data-lucide="truck" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+                                <div>Belum ada shipment pada antrian Tim Traffic.</div>
                             </td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        <div class="p-4 border-t border-slate-100">
+        <div class="p-4 border-t border-black/5 dark:border-white/5">
             {{ $shipments->links() }}
         </div>
     </div>
@@ -146,75 +176,77 @@
 </div>
 
 <!-- Modal Gate Out TPS (Apple HIG z-[200] Standalone Modal Architecture) -->
-<div id="modal-gate-out" class="hidden fixed inset-0 z-[200] overflow-y-auto bg-slate-950/60 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-white rounded-t-[24px] sm:rounded-2xl border border-slate-200/80 shadow-2xl max-w-md w-full p-6 text-xs transform transition-all">
-        <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4 sm:hidden"></div>
-        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-            <h3 class="text-sm font-bold text-slate-900">Eksekusi Pengeluaran Truk (Gate Out TPS)</h3>
-            <button onclick="document.getElementById('modal-gate-out').classList.add('hidden')" class="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+<div id="modal-gate-out" class="hidden fixed inset-0 z-[200] overflow-y-auto bg-black/60 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="app-modal-dialog app-modal-dialog-md rounded-t-[20px] sm:rounded-[20px] bg-white dark:bg-[#1C1C1E] border border-black/10 dark:border-white/10 shadow-2xl p-6 text-[13px] transform transition-all">
+        <div class="w-12 h-1.5 bg-black/10 dark:bg-white/10 rounded-full mx-auto mb-4 sm:hidden"></div>
+        <div class="flex items-center justify-between pb-3 border-b border-black/5 dark:border-white/5 mb-4">
+            <h3 class="text-[16px] font-bold text-black dark:text-white">Eksekusi Pengeluaran Truk (Gate Out TPS)</h3>
+            <button type="button" onclick="document.getElementById('modal-gate-out').classList.add('hidden')" class="p-1 rounded-[8px] text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white hover:bg-black/[0.05] dark:hover:bg-white/[0.08] transition-colors cursor-pointer">
+                <i data-lucide="x" class="w-5 h-5"></i>
             </button>
         </div>
 
         <form id="form-gate-out" action="" method="POST" class="space-y-4">
             @csrf
             <div>
-                <label class="block font-semibold text-slate-700 mb-1">Nomor Polisi Truk Trailer <span class="text-rose-500">*</span></label>
-                <input type="text" name="truck_plate_number" required placeholder="Contoh: B 9281 UEM" class="w-full px-3 py-2 rounded-xl border border-slate-200">
+                <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Nomor Polisi Truk Trailer <span class="text-[#FF3B30]">*</span></label>
+                <input type="text" name="truck_plate_number" required placeholder="Contoh: B 9281 UEM" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
             </div>
 
             <div>
-                <label class="block font-semibold text-slate-700 mb-1">Nama Pengemudi / Supir <span class="text-rose-500">*</span></label>
-                <input type="text" name="driver_name" required placeholder="Contoh: Joko Susilo" class="w-full px-3 py-2 rounded-xl border border-slate-200">
+                <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Nama Pengemudi / Supir <span class="text-[#FF3B30]">*</span></label>
+                <input type="text" name="driver_name" required placeholder="Contoh: Joko Susilo" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
             </div>
 
             <div>
-                <label class="block font-semibold text-slate-700 mb-1">Nomor Surat Jalan Ekspedisi <span class="text-rose-500">*</span></label>
-                <input type="text" name="surat_jalan_number" required placeholder="Contoh: SJ-ATS-202610-0081" class="w-full px-3 py-2 rounded-xl border border-slate-200">
+                <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Nomor Surat Jalan Ekspedisi <span class="text-[#FF3B30]">*</span></label>
+                <input type="text" name="surat_jalan_number" required placeholder="Contoh: SJ-ATS-202610-0081" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
             </div>
 
-            <div class="pt-3 border-t border-slate-100 flex items-center justify-end space-x-2">
-                <button type="button" onclick="document.getElementById('modal-gate-out').classList.add('hidden')" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-600 font-semibold transition-colors">Batal</button>
-                <button type="submit" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-all shadow-xs active:scale-95">Izin Gate Out</button>
+            <div class="pt-3 border-t border-black/5 dark:border-white/5 flex items-center justify-end space-x-2">
+                <button type="button" onclick="document.getElementById('modal-gate-out').classList.add('hidden')" class="btn-apple-gray !h-9 text-[12px]">Batal</button>
+                <button type="submit" class="btn-apple-filled !h-9 text-[12px]">
+                    <i data-lucide="check" class="w-4 h-4"></i>
+                    <span>Izin Gate Out</span>
+                </button>
             </div>
         </form>
     </div>
 </div>
 
 <!-- Modal POD Delivery (Apple HIG z-[200] Standalone Modal Architecture) -->
-<div id="modal-pod" class="hidden fixed inset-0 z-[200] overflow-y-auto bg-slate-950/60 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-white rounded-t-[24px] sm:rounded-2xl border border-slate-200/80 shadow-2xl max-w-md w-full p-6 text-xs transform transition-all">
-        <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4 sm:hidden"></div>
-        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-            <h3 class="text-sm font-bold text-slate-900">Konfirmasi Bukti Terima (Proof of Delivery / POD)</h3>
-            <button onclick="document.getElementById('modal-pod').classList.add('hidden')" class="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+<div id="modal-pod" class="hidden fixed inset-0 z-[200] overflow-y-auto bg-black/60 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="app-modal-dialog app-modal-dialog-md rounded-t-[20px] sm:rounded-[20px] bg-white dark:bg-[#1C1C1E] border border-black/10 dark:border-white/10 shadow-2xl p-6 text-[13px] transform transition-all">
+        <div class="w-12 h-1.5 bg-black/10 dark:bg-white/10 rounded-full mx-auto mb-4 sm:hidden"></div>
+        <div class="flex items-center justify-between pb-3 border-b border-black/5 dark:border-white/5 mb-4">
+            <h3 class="text-[16px] font-bold text-black dark:text-white">Konfirmasi Bukti Terima (POD)</h3>
+            <button type="button" onclick="document.getElementById('modal-pod').classList.add('hidden')" class="p-1 rounded-[8px] text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white hover:bg-black/[0.05] dark:hover:bg-white/[0.08] transition-colors cursor-pointer">
+                <i data-lucide="x" class="w-5 h-5"></i>
             </button>
         </div>
 
         <form id="form-pod" action="" method="POST" enctype="multipart/form-data" class="space-y-4">
             @csrf
             <div>
-                <label class="block font-semibold text-slate-700 mb-1">Nama Penerima Barang di Gudang Klien <span class="text-rose-500">*</span></label>
-                <input type="text" name="receiver_name" required placeholder="Contoh: Bpk. Bambang Pamungkas (Warehouse Head)" class="w-full px-3 py-2 rounded-xl border border-slate-200">
+                <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Nama Penerima Barang di Gudang Klien <span class="text-[#FF3B30]">*</span></label>
+                <input type="text" name="receiver_name" required placeholder="Contoh: Bpk. Bambang Pamungkas (Warehouse Head)" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
             </div>
 
             <div>
-                <label class="block font-semibold text-slate-700 mb-1">Unggah Foto Surat Jalan Basah & Serah Terima (POD)</label>
-                <input type="file" name="pod_file" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:bg-slate-100 file:text-slate-700">
+                <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Unggah Foto Surat Jalan Basah & Serah Terima (POD)</label>
+                <input type="file" name="pod_file" class="w-full text-[12px] text-black/60 dark:text-white/60 file:mr-2 file:py-1.5 file:px-3 file:rounded-[8px] file:border-0 file:bg-black/[0.05] dark:file:bg-white/[0.08] file:text-black dark:file:text-white">
             </div>
 
-            <p class="text-[10px] text-slate-400 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+            <p class="text-[11px] text-black/50 dark:text-white/50 bg-black/[0.02] dark:bg-white/[0.02] p-2.5 rounded-[10px] border border-black/5 dark:border-white/5">
                 *Konfirmasi serah terima kargo akan otomatis mengubah status menjadi <strong>DELIVERED</strong> dan menerbitkan draf <strong>Invoice Penagihan Klien</strong> pada modul Finance & Accounting.
             </p>
 
-            <div class="pt-3 border-t border-slate-100 flex items-center justify-end space-x-2">
-                <button type="button" onclick="document.getElementById('modal-pod').classList.add('hidden')" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-600 font-semibold transition-colors">Batal</button>
-                <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition-all shadow-xs active:scale-95">Simpan POD & Terbitkan Invoice</button>
+            <div class="pt-3 border-t border-black/5 dark:border-white/5 flex items-center justify-end space-x-2">
+                <button type="button" onclick="document.getElementById('modal-pod').classList.add('hidden')" class="btn-apple-gray !h-9 text-[12px]">Batal</button>
+                <button type="submit" class="btn-apple-filled !bg-[#34C759] hover:!bg-[#248A3D] !h-9 text-[12px]">
+                    <i data-lucide="check-circle" class="w-4 h-4"></i>
+                    <span>Simpan POD & Terbitkan Invoice</span>
+                </button>
             </div>
         </form>
     </div>
@@ -226,6 +258,7 @@ function openGateOutModal(shipmentId, shipmentNumber) {
     const form = document.getElementById('form-gate-out');
     form.action = `/core/traffic/${shipmentId}/gate-out`;
     modal.classList.remove('hidden');
+    if (window.lucide) window.lucide.createIcons();
 }
 
 function openPodModal(shipmentId, shipmentNumber) {
@@ -233,6 +266,7 @@ function openPodModal(shipmentId, shipmentNumber) {
     const form = document.getElementById('form-pod');
     form.action = `/core/traffic/${shipmentId}/deliver-pod`;
     modal.classList.remove('hidden');
+    if (window.lucide) window.lucide.createIcons();
 }
 </script>
 @endsection
