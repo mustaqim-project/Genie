@@ -72,7 +72,7 @@
             <span class="hidden sm:inline text-slate-300">|</span>
             <span class="text-[11px] font-mono text-indigo-600 font-bold">{{ $activeTokensCount }} Token Aktif</span>
             <span class="hidden sm:inline text-slate-300">|</span>
-            <span class="text-[11px] font-mono text-emerald-600 font-bold">4 Tools Aktif</span>
+            <span class="text-[11px] font-mono text-emerald-600 font-bold">{{ count($tools) }} Tools Aktif (8 Modul ERP)</span>
         </div>
     </div>
 
@@ -729,34 +729,79 @@ print('Hasil Deteksi Pos Tarif:', result['result']['structured_data'])`, 'Kode P
     </div>
 
     <!-- TAB 4: KATALOG TOOL MCP -->
-    <div x-show="activeTab === 'tools'" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        @foreach($tools as $tool)
-            <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex flex-col justify-between">
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="font-mono font-bold text-sky-800 text-sm bg-sky-50 px-2 py-0.5 rounded border border-sky-200">
-                            {{ $tool['name'] }}
-                        </span>
-                        <span class="text-[10px] text-slate-400 font-mono">Tool Schema 2024-11-05</span>
-                    </div>
-                    <p class="text-xs text-slate-600 leading-relaxed mb-3">
-                        {{ $tool['description'] }}
-                    </p>
-                </div>
-                <div class="pt-3 border-t border-slate-100">
-                    <span class="text-[10px] font-bold text-slate-400 block mb-1">PROPERTIES / ARGUMENTS:</span>
-                    <div class="flex flex-wrap gap-1 font-mono text-[10px]">
-                        @if(!empty($tool['inputSchema']['properties']))
-                            @foreach($tool['inputSchema']['properties'] as $propName => $prop)
-                                <span class="px-2 py-0.5 bg-slate-100 rounded text-slate-700">
-                                    {{ $propName }} ({{ $prop['type'] ?? 'any' }})
-                                </span>
-                            @endforeach
-                        @endif
-                    </div>
-                </div>
+    <div x-show="activeTab === 'tools'" class="space-y-4">
+        <!-- Filter Bar & Search -->
+        <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div class="flex items-center space-x-1.5 overflow-x-auto pb-1 md:pb-0">
+                <button type="button" 
+                        @click="toolCategory = 'ALL'" 
+                        :class="toolCategory === 'ALL' ? 'bg-sky-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                        class="px-3 py-1.5 rounded-xl text-xs font-medium transition-all shrink-0 cursor-pointer">
+                    Semua ({{ count($tools) }})
+                </button>
+                @php
+                    $categories = collect($tools)->pluck('category')->filter()->unique()->values();
+                @endphp
+                @foreach($categories as $cat)
+                <button type="button" 
+                        @click="toolCategory = '{{ $cat }}'" 
+                        :class="toolCategory === '{{ $cat }}' ? 'bg-sky-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                        class="px-3 py-1.5 rounded-xl text-xs font-medium transition-all shrink-0 cursor-pointer">
+                    {{ $cat }}
+                </button>
+                @endforeach
             </div>
-        @endforeach
+            <div class="w-full md:w-64">
+                <input type="text" 
+                       x-model="toolSearch" 
+                       placeholder="Cari tool MCP..." 
+                       class="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-sky-500">
+            </div>
+        </div>
+
+        <!-- Tool Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            @foreach($tools as $tool)
+                @php
+                    $cat = $tool['category'] ?? 'General';
+                    $name = $tool['name'];
+                @endphp
+                <div x-show="(toolCategory === 'ALL' || toolCategory === '{{ $cat }}') && ('{{ strtolower($name) }}'.includes(toolSearch.toLowerCase()) || '{{ strtolower($tool['description']) }}'.includes(toolSearch.toLowerCase()))"
+                     class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex flex-col justify-between hover:border-sky-300 transition-all">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="font-mono font-bold text-sky-800 text-sm bg-sky-50 px-2 py-0.5 rounded border border-sky-200">
+                                {{ $tool['name'] }}
+                            </span>
+                            <span class="text-[10px] px-2 py-0.5 rounded-md font-bold bg-slate-100 text-slate-600">
+                                {{ $cat }}
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed mb-3">
+                            {{ $tool['description'] }}
+                        </p>
+                    </div>
+                    <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                        <div class="flex flex-wrap gap-1 font-mono text-[10px]">
+                            @if(!empty($tool['inputSchema']['properties']))
+                                @foreach($tool['inputSchema']['properties'] as $propName => $prop)
+                                    <span class="px-2 py-0.5 bg-slate-100 rounded text-slate-700">
+                                        {{ $propName }} ({{ $prop['type'] ?? 'any' }})
+                                    </span>
+                                @endforeach
+                            @else
+                                <span class="text-slate-400 italic text-[11px] font-sans">Tanpa parameter wajib</span>
+                            @endif
+                        </div>
+                        <button type="button" 
+                                @click="copyToClipboard('{{ $tool['name'] }}', 'Nama tool disalin!')" 
+                                class="text-[11px] text-sky-600 hover:text-sky-800 font-semibold shrink-0 cursor-pointer">
+                            Salin Nama
+                        </button>
+                    </div>
+                </div>
+            @endforeach
+        </div>
     </div>
 
     <!-- MODAL POPUP: BUAT KUNCI AKSES MCP BARU -->
@@ -837,28 +882,44 @@ print('Hasil Deteksi Pos Tarif:', result['result']['structured_data'])`, 'Kode P
                 <!-- Hak Akses / Scopes -->
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                        Hak Akses Tool Kepabeanan (Scopes)
+                        Hak Akses Tool ERP & Kepabeanan (Scopes)
                     </label>
-                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2 max-h-44 overflow-y-auto">
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2 max-h-48 overflow-y-auto">
                         <label class="flex items-center space-x-2 text-xs font-bold text-slate-800 pb-1 border-b border-slate-200 cursor-pointer">
                             <input type="checkbox" name="scope_roles[]" value="*" checked class="rounded text-sky-600 focus:ring-sky-500">
-                            <span>* (Akses Penuh Seluruh Tool Kepabeanan & Logistik)</span>
+                            <span>* (Akses Penuh Seluruh 24 Tool ERP & Kepabeanan)</span>
                         </label>
                         <label class="flex items-center space-x-2 text-xs text-slate-700 cursor-pointer">
-                            <input type="checkbox" name="scope_roles[]" value="customs:classify" checked class="rounded text-sky-600 focus:ring-sky-500">
-                            <span>customs:classify (Parsing Packing List & Klasifikasi HS Code)</span>
+                            <input type="checkbox" name="scope_roles[]" value="customs:*" checked class="rounded text-sky-600 focus:ring-sky-500">
+                            <span>customs:* (Kepabeanan CEISA 4.0, Pos Tarif BTKI, Kurs Pajak)</span>
                         </label>
                         <label class="flex items-center space-x-2 text-xs text-slate-700 cursor-pointer">
-                            <input type="checkbox" name="scope_roles[]" value="customs:read" checked class="rounded text-sky-600 focus:ring-sky-500">
-                            <span>customs:read (Cek Pos Tarif BTKI, Tarif BM/PPN/PPh, & Lartas)</span>
+                            <input type="checkbox" name="scope_roles[]" value="shipment:*" checked class="rounded text-sky-600 focus:ring-sky-500">
+                            <span>shipment:* (Operasional Pengapalan, B/L, Kontainer, Timeline)</span>
                         </label>
                         <label class="flex items-center space-x-2 text-xs text-slate-700 cursor-pointer">
-                            <input type="checkbox" name="scope_roles[]" value="customs:declaration" checked class="rounded text-sky-600 focus:ring-sky-500">
-                            <span>customs:declaration (Pembuatan Draf PIB BC 2.0 / PEB BC 3.0)</span>
+                            <input type="checkbox" name="scope_roles[]" value="do:*" checked class="rounded text-sky-600 focus:ring-sky-500">
+                            <span>do:* (Delivery Order Pelayaran, Free-Time Demurrage, SP2)</span>
                         </label>
                         <label class="flex items-center space-x-2 text-xs text-slate-700 cursor-pointer">
-                            <input type="checkbox" name="scope_roles[]" value="shipment:read" checked class="rounded text-sky-600 focus:ring-sky-500">
-                            <span>shipment:read (Membaca Data Pengapalan & Dokumen Proyek)</span>
+                            <input type="checkbox" name="scope_roles[]" value="traffic:*" checked class="rounded text-sky-600 focus:ring-sky-500">
+                            <span>traffic:* (Tracking Kontainer Lapangan & Penugasan Armada Truk)</span>
+                        </label>
+                        <label class="flex items-center space-x-2 text-xs text-slate-700 cursor-pointer">
+                            <input type="checkbox" name="scope_roles[]" value="finance:*" checked class="rounded text-sky-600 focus:ring-sky-500">
+                            <span>finance:* (Piutang Klien P19, Hutang Vendor AP, Kas & Rekening Bank)</span>
+                        </label>
+                        <label class="flex items-center space-x-2 text-xs text-slate-700 cursor-pointer">
+                            <input type="checkbox" name="scope_roles[]" value="accounting:*" checked class="rounded text-sky-600 focus:ring-sky-500">
+                            <span>accounting:* (Laporan Laba Rugi P&L, Job Costing Margin, Pajak)</span>
+                        </label>
+                        <label class="flex items-center space-x-2 text-xs text-slate-700 cursor-pointer">
+                            <input type="checkbox" name="scope_roles[]" value="crm:*" checked class="rounded text-sky-600 focus:ring-sky-500">
+                            <span>crm:* (Database Klien, PIC, Notifikasi WhatsApp Otomatis)</span>
+                        </label>
+                        <label class="flex items-center space-x-2 text-xs text-slate-700 cursor-pointer">
+                            <input type="checkbox" name="scope_roles[]" value="hrm:*" checked class="rounded text-sky-600 focus:ring-sky-500">
+                            <span>hrm:* (Presensi Kehadiran GPS Tim Operasional & Rekap Payroll)</span>
                         </label>
                     </div>
                 </div>
@@ -889,6 +950,8 @@ function mcpIntegrationApp() {
         activeProvider: 'claude',
         showTokenModal: false,
         customToken: @json(session('plain_token') ?? ''),
+        toolCategory: 'ALL',
+        toolSearch: '',
         
         testQuery: 'HYDRAULIC BREAKER DYB800 STRAIGHT TYPE',
         testDirection: 'IMPORT_BC20',

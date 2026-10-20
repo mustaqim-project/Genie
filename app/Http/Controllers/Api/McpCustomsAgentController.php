@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Domain\Mcp\Tools\McpToolRegistry;
 use App\Http\Controllers\Controller;
 use App\Models\Shipment;
 use App\Services\Ceisa\CeisaHsCodeService;
@@ -16,108 +17,34 @@ class McpCustomsAgentController extends Controller
     protected DocumentExtractionService $extractionService;
     protected CeisaHsCodeService $hsCodeService;
     protected ShipmentWorkflowService $workflowService;
+    protected McpToolRegistry $toolRegistry;
 
     public function __construct(
         DocumentExtractionService $extractionService,
         CeisaHsCodeService $hsCodeService,
-        ShipmentWorkflowService $workflowService
+        ShipmentWorkflowService $workflowService,
+        McpToolRegistry $toolRegistry
     ) {
         $this->extractionService = $extractionService;
         $this->hsCodeService = $hsCodeService;
         $this->workflowService = $workflowService;
+        $this->toolRegistry = $toolRegistry;
     }
 
     /**
      * MCP Tools Definition Specification
-     * Format Model Context Protocol (MCP) untuk AI Agent (Claude, Antigravity, AutoGen, dll)
+     * Format Model Context Protocol (MCP) untuk AI Agent (Claude, Antigravity, AutoGen, Cursor, dll)
      */
     public function tools(): JsonResponse
     {
         return response()->json([
-            'tools' => [
-                [
-                    'name' => 'parse_packing_list',
-                    'description' => 'Mengekstrak berkas Packing List (PDF, XLSX, CSV, TXT, OCR) atau teks mentah. Mendeteksi arah deklarasi pabean (PIB BC 2.0 vs PEB BC 3.0), mengklasifikasikan pos tarif HS Code BTKI 2022 tiap barang, dan memeriksa kepatuhan perizinan Lartas serta dokumen tambahan yang wajib dilampirkan.',
-                    'inputSchema' => [
-                        'type' => 'object',
-                        'properties' => [
-                            'raw_text' => [
-                                'type' => 'string',
-                                'description' => 'Teks mentah hasil OCR atau isi dokumen packing list.',
-                            ],
-                            'direction' => [
-                                'type' => 'string',
-                                'enum' => ['IMPORT', 'EXPORT', 'IMPORT_BC20', 'EKSPORT_BC30'],
-                                'description' => 'Arah pengapalan jika sudah diketahui sebelumnya (opsional, sistem dapat mendeteksi otomatis).',
-                            ],
-                            'file_base64' => [
-                                'type' => 'string',
-                                'description' => 'Konten berkas packing list yang di-encode dalam base64 (opsional jika raw_text tidak disediakan).',
-                            ],
-                            'file_name' => [
-                                'type' => 'string',
-                                'description' => 'Nama file dokumen asli (contoh: PACKING_LIST_PL09.pdf atau packing_list.xlsx).',
-                            ],
-                        ],
-                    ],
-                ],
-                [
-                    'name' => 'check_hs_code',
-                    'description' => 'Pengecekan spesifik pos tarif HS Code (8-digit) atau uraian komoditas barang terhadap database BTKI 2022, tarif pungutan (BM, PPN, PPh, BK), dan daftar izin Lartas / dokumen tambahan wajib Bea Cukai.',
-                    'inputSchema' => [
-                        'type' => 'object',
-                        'properties' => [
-                            'query' => [
-                                'type' => 'string',
-                                'description' => 'Nomor HS Code 8-digit (misal 8504.40.90) atau nama komoditas (misal: Power Inverter, Laptop, CPO, Kayu, Mesin Jahit).',
-                            ],
-                            'direction' => [
-                                'type' => 'string',
-                                'enum' => ['IMPORT', 'EXPORT', 'IMPORT_BC20', 'EKSPORT_BC30'],
-                                'description' => 'Arah impor atau ekspor.',
-                            ],
-                        ],
-                        'required' => ['query'],
-                    ],
-                ],
-                [
-                    'name' => 'detect_shipment_customs',
-                    'description' => 'Memindai packing list pada proyek Shipment GENIE ERP tertentu, mengisi rincian barang, dan secara otomatis menyinkronkan slot tracking izin dokumen tambahan Lartas per barang.',
-                    'inputSchema' => [
-                        'type' => 'object',
-                        'properties' => [
-                            'shipment_id' => [
-                                'type' => 'string',
-                                'description' => 'UUID atau nomor proyek pengapalan di GENIE ERP.',
-                            ],
-                            'raw_text' => [
-                                'type' => 'string',
-                                'description' => 'Teks mentah OCR packing list (opsional jika dokumen sudah terunggah di proyek).',
-                            ],
-                        ],
-                        'required' => ['shipment_id'],
-                    ],
-                ],
-                [
-                    'name' => 'generate_customs_declaration',
-                    'description' => 'Mendeteksi kebutuhan pengapalan dan menghasilkan draf deklarasi pabean resmi Bea Cukai (PIB BC 2.0 untuk impor atau PEB BC 3.0 untuk ekspor) lengkap dengan lampiran dokumen pelengkap pabean dan perizinan lartas.',
-                    'inputSchema' => [
-                        'type' => 'object',
-                        'properties' => [
-                            'shipment_id' => [
-                                'type' => 'string',
-                                'description' => 'UUID atau nomor proyek pengapalan di GENIE ERP.',
-                            ],
-                        ],
-                        'required' => ['shipment_id'],
-                    ],
-                ],
-            ],
+            'tools' => $this->toolRegistry->getFormattedTools(),
             'server' => [
-                'name' => 'GENIE Customs AI & BTKI MCP Server',
-                'version' => '2.5.0',
+                'name' => 'GENIE AI Agent & Enterprise ERP MCP Server',
+                'version' => '3.0.0',
                 'ceisa_openapi_version' => 'v2.0',
                 'status' => 'ONLINE',
+                'total_tools' => count($this->toolRegistry->getAllTools()),
             ],
         ]);
     }
@@ -256,45 +183,26 @@ class McpCustomsAgentController extends Controller
             $toolName = $params['name'] ?? $request->input('tool') ?? null;
             $args = $params['arguments'] ?? $request->input('arguments') ?? $request->input('params', []);
 
-            $toolResult = null;
-            switch ($toolName) {
-                case 'parse_packing_list':
-                    $req = new Request($args);
-                    $toolResult = $this->parsePackingList($req)->getData(true);
-                    break;
+            if (!$toolName || !$this->toolRegistry->hasTool($toolName)) {
+                return response()->json([
+                    'jsonrpc' => '2.0',
+                    'id' => $id,
+                    'error' => [
+                        'code' => -32601,
+                        'message' => "Tool MCP '{$toolName}' tidak ditemukan dalam katalog sistem GENIE.",
+                    ],
+                ], 404);
+            }
 
-                case 'check_hs_code':
-                    $req = new Request($args);
-                    $toolResult = $this->checkHs($req)->getData(true);
-                    break;
-
-                case 'detect_shipment_customs':
-                    $shipmentId = $args['shipment_id'] ?? null;
-                    if (!$shipmentId) {
-                        return response()->json(['error' => 'Argument shipment_id is required'], 422);
-                    }
-                    $req = new Request($args);
-                    $toolResult = $this->detectShipmentCustoms($shipmentId, $req)->getData(true);
-                    break;
-
-                case 'generate_customs_declaration':
-                    $shipmentId = $args['shipment_id'] ?? null;
-                    if (!$shipmentId) {
-                        return response()->json(['error' => 'Argument shipment_id is required'], 422);
-                    }
-                    $req = new Request($args);
-                    $toolResult = $this->generateDeclaration($shipmentId, $req)->getData(true);
-                    break;
-
-                default:
-                    return response()->json([
-                        'jsonrpc' => '2.0',
-                        'id' => $id,
-                        'error' => [
-                            'code' => -32601,
-                            'message' => "Tool MCP '{$toolName}' tidak ditemukan.",
-                        ],
-                    ], 404);
+            try {
+                $tool = $this->toolRegistry->getTool($toolName);
+                $toolResult = $tool->execute(is_array($args) ? $args : []);
+            } catch (\Throwable $e) {
+                Log::error("MCP Tool Execution Error [{$toolName}]: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+                $toolResult = [
+                    'success' => false,
+                    'error' => "Eksekusi tool '{$toolName}' gagal: " . $e->getMessage(),
+                ];
             }
 
             // Catat log audit pemanggilan tool ke database
