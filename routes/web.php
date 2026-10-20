@@ -219,6 +219,15 @@ Route::middleware('auth')->group(function () {
         Route::post('/{id}/pay', [\App\Http\Controllers\VendorBillController::class, 'pay'])->name('pay');
     });
 
+    // Finance Cash & Bank (Buku Kas, Mutasi & Pindah Buku)
+    Route::prefix('finance/cash-bank')->name('finance.cash-bank.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\CashBankController::class, 'index'])->name('index');
+        Route::post('/accounts', [\App\Http\Controllers\CashBankController::class, 'storeAccount'])->name('accounts.store');
+        Route::post('/transactions', [\App\Http\Controllers\CashBankController::class, 'storeTransaction'])->name('transactions.store');
+        Route::post('/transfer', [\App\Http\Controllers\CashBankController::class, 'transfer'])->name('transfer');
+        Route::post('/transactions/{id}/reconcile', [\App\Http\Controllers\CashBankController::class, 'reconcile'])->name('transactions.reconcile');
+    });
+
     // CRM Quotations (Penawaran Harga)
     Route::prefix('crm/quotations')->name('crm.quotations.')->group(function () {
         Route::get('/', [\App\Http\Controllers\QuotationController::class, 'index'])->name('index');
