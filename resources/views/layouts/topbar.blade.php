@@ -130,6 +130,14 @@
                     </div>
                 </div>
 
+                <!-- Theme Mode Toggle (Apple System Button) -->
+                <button type="button" 
+                        @click="toggleTheme()" 
+                        class="w-8 h-8 flex items-center justify-center rounded-[8px] text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white hover:bg-black/[0.05] dark:hover:bg-white/[0.08] transition-colors cursor-pointer"
+                        :title="currentTheme === 'dark' ? 'Beralih ke Mode Terang' : 'Beralih ke Mode Gelap'">
+                    <i :data-lucide="currentTheme === 'dark' ? 'sun' : 'moon'" class="w-4 h-4 text-[#FF9500]"></i>
+                </button>
+
                 <!-- Notifications Bell Popover -->
                 <div class="relative" x-data="{ openNotif: false }">
                     <button @click="openNotif = !openNotif" 
@@ -195,7 +203,7 @@
                             {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                         </div>
                         <div class="hidden xl:block text-left text-[12px] leading-tight pr-1">
-                            <div class="font-semibold text-black dark:text-white truncate max-w-[100px]">{{ auth()->user()->name }}</div>
+                            <div class="font-semibold text-black dark:text-white truncate max-w-[180px]">{{ auth()->user()->name }}</div>
                             <div class="text-[10px] text-black/40 dark:text-white/40 truncate">{{ auth()->user()->job_title ?? 'Staff' }}</div>
                         </div>
                         <i data-lucide="chevron-down" class="w-3 h-3 text-black/40 dark:text-white/40 transition-transform duration-200" :class="{ 'rotate-180': openProfile }"></i>

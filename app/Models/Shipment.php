@@ -53,6 +53,10 @@ class Shipment extends Model
         'pod_signed_at',
         'closed_at',
         'catatan',
+        'portal_token',
+        'portal_expires_at',
+        'portal_last_accessed_at',
+        'portal_duration_days',
         'created_by_user_id',
     ];
 
@@ -65,6 +69,8 @@ class Shipment extends Model
         'do_email_sent_at' => 'datetime',
         'pod_signed_at' => 'datetime',
         'closed_at' => 'datetime',
+        'portal_expires_at' => 'datetime',
+        'portal_last_accessed_at' => 'datetime',
         'customs_hold_steps' => 'array',
         'total_nilai_valuta' => 'decimal:2',
         'total_nilai_idr' => 'decimal:2',
@@ -479,5 +485,52 @@ class Shipment extends Model
         }
 
         return self::STAGES_PIPELINE[$idx] ?? self::STAGES_PIPELINE[0];
+    }
+
+    /**
+     * Cek apakah portal klien masih aktif berdasarkan timer
+     */
+    public function isPortalActive(): bool
+    {
+        return !empty($this->portal_token) && $this->portal_expires_at && $this->portal_expires_at->isFuture();
+    }
+
+    /**
+     * Dapatkan status portal klien (ACTIVE, EXPIRED, NOT_CONFIGURED)
+     */
+    public function getPortalStatusAttribute(): string
+    {
+        if (empty($this->portal_token) || !$this->portal_expires_at) {
+            return 'NOT_CONFIGURED';
+        }
+
+        return $this->portal_expires_at->isFuture() ? 'ACTIVE' : 'EXPIRED';
+    }
+
+    /**
+     * Generate token portal unik baru dengan durasi timer tertentu
+     */
+    public function generatePortalToken(int $durationDays = 7): string
+    {
+        $token = 'TRK-' . strtoupper(\Illuminate\Support\Str::random(6)) . '-' . date('Ymd') . '-' . strtoupper(\Illuminate\Support\Str::random(8));
+        $this->update([
+            'portal_token' => $token,
+            'portal_expires_at' => now()->addDays($durationDays),
+            'portal_duration_days' => $durationDays,
+        ]);
+
+        return $token;
+    }
+
+    /**
+     * URL Portal Klien untuk Shipment ini
+     */
+    public function getPortalUrlAttribute(): ?string
+    {
+        if (empty($this->portal_token)) {
+            return null;
+        }
+
+        return route('portal.track', $this->portal_token);
     }
 }

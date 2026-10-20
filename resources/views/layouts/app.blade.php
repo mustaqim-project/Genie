@@ -680,10 +680,22 @@
           sidebarCollapsed: localStorage.getItem('genie-sidebar-collapsed') === 'true',
           quickSearchOpen: false,
           searchQuery: '',
+          currentTheme: localStorage.getItem('genie-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
           toggleSidebarCollapse() {
               this.sidebarCollapsed = !this.sidebarCollapsed;
               localStorage.setItem('genie-sidebar-collapsed', this.sidebarCollapsed);
               window.dispatchEvent(new CustomEvent('sidebar-collapsed-changed', { detail: { collapsed: this.sidebarCollapsed } }));
+              this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+          },
+          toggleTheme() {
+              this.currentTheme = this.currentTheme === 'dark' ? 'light' : 'dark';
+              localStorage.setItem('genie-theme', this.currentTheme);
+              if (this.currentTheme === 'dark') {
+                  document.documentElement.classList.add('dark');
+              } else {
+                  document.documentElement.classList.remove('dark');
+              }
+              document.documentElement.setAttribute('data-theme', this.currentTheme);
               this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
           }
       }"

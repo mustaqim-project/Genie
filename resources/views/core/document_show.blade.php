@@ -92,6 +92,18 @@
                 <i data-lucide="ship" class="w-3.5 h-3.5 text-amber-600"></i>
                 <span>Surat Permohonan DO</span>
             </a>
+
+            <!-- Portal Pelacakan Klien & Timer Button -->
+            <button type="button" 
+                    onclick="openPortalModalShow()"
+                    class="btn-apple-gray text-xs inline-flex items-center gap-1.5 px-3.5 py-2 {{ $shipment->isPortalActive() ? '!text-[#007AFF] !border-[#007AFF]/30' : '' }}"
+                    title="Bagikan Tautan Pelacakan Portal Klien & Atur Timer">
+                <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+                <span>Portal Klien</span>
+                @if($shipment->isPortalActive())
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#34C759]"></span>
+                @endif
+            </button>
         </div>
     </div>
 
@@ -1401,5 +1413,133 @@
             console.error('Gagal lookup HS:', e);
         }
     }
+
+    function openPortalModalShow() {
+        document.getElementById('modal-portal-share-show').classList.remove('hidden');
+        if (window.lucide) lucide.createIcons();
+    }
+
+    function closePortalModalShow() {
+        document.getElementById('modal-portal-share-show').classList.add('hidden');
+    }
+
+    function copyPortalUrlShow() {
+        var input = document.getElementById('portal-url-input-show');
+        if (!input.value) return;
+        navigator.clipboard.writeText(input.value).then(function() {
+            var btnText = document.getElementById('copy-btn-text-show');
+            btnText.innerText = 'Tersalin!';
+            setTimeout(function() { btnText.innerText = 'Salin'; }, 2000);
+        });
+    }
 </script>
+
+<!-- Modal Share Portal Klien & Pengaturan Timer (Per Proyek) -->
+<div id="modal-portal-share-show" class="hidden fixed inset-0 z-[200] overflow-y-auto bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="max-w-lg w-full bg-white dark:bg-[#1C1C1E] rounded-[20px] border border-black/10 dark:border-white/10 shadow-2xl p-6 space-y-4 animate-in fade-in zoom-in duration-150">
+        <div class="flex items-center justify-between pb-3 border-b border-black/5 dark:border-white/5">
+            <div class="flex items-center space-x-2.5">
+                <div class="w-9 h-9 rounded-[10px] bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center">
+                    <i data-lucide="share-2" class="w-4 h-4"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-[15px] text-black dark:text-white">Portal Pelacakan Klien (Per Proyek)</h3>
+                    <p class="text-[11px] text-black/50 dark:text-white/50 font-mono">{{ $shipment->project_no }} &bull; {{ $shipment->client->name ?? '-' }}</p>
+                </div>
+            </div>
+            <button type="button" onclick="closePortalModalShow()" class="p-1.5 rounded-lg text-black/40 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+
+        <!-- Status Timer Box -->
+        <div class="p-3.5 rounded-[14px] bg-slate-50 dark:bg-white/[0.04] border border-black/5 dark:border-white/5 text-[12px] space-y-1.5">
+            <div class="flex items-center justify-between">
+                <span class="text-black/50 dark:text-white/50">Status Akses:</span>
+                @if($shipment->isPortalActive())
+                    <span class="font-bold px-2 py-0.5 rounded-full text-[10px] font-mono bg-[#34C759]/15 text-[#248A3D]">AKTIF</span>
+                @elseif($shipment->portal_status === 'EXPIRED')
+                    <span class="font-bold px-2 py-0.5 rounded-full text-[10px] font-mono bg-[#FF3B30]/15 text-[#C41E17]">KEDALUWARSA</span>
+                @else
+                    <span class="font-bold px-2 py-0.5 rounded-full text-[10px] font-mono bg-black/10 text-black/60">BELUM DIBUAT</span>
+                @endif
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="text-black/50 dark:text-white/50">Masa Berlaku Timer:</span>
+                <span class="font-semibold text-black dark:text-white font-mono">
+                    {{ $shipment->portal_expires_at ? $shipment->portal_expires_at->format('d/m/Y H:i') . ' WIB' : 'Belum diatur' }}
+                </span>
+            </div>
+            <div class="text-[11px] text-black/40 dark:text-white/40 pt-1 border-t border-black/5 dark:border-white/5 leading-relaxed">
+                Tautan ini aman & hanya memuat data proyek pengapalan ini saja. Jika timer habis, tautan otomatis terkunci demi keamanan data kepabeanan.
+            </div>
+        </div>
+
+        <!-- URL Link & Copy Button -->
+        <div class="space-y-1.5">
+            <label class="block text-[11px] font-semibold text-black/70 dark:text-white/70">Tautan Pelacakan Mandiri Klien</label>
+            <div class="flex items-center gap-2">
+                <input id="portal-url-input-show" type="text" readonly 
+                       value="{{ $shipment->portal_token ? route('portal.track', $shipment->portal_token) : '' }}"
+                       placeholder="Belum ada link, silakan klik 'Generate Link Baru'"
+                       class="flex-1 h-9 px-3 rounded-[9px] bg-black/[0.03] dark:bg-white/[0.06] border border-black/10 dark:border-white/10 text-[12px] font-mono text-black dark:text-white select-all">
+                <button type="button" onclick="copyPortalUrlShow()" class="btn-apple-filled !h-9 !px-3 text-[12px]">
+                    <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                    <span id="copy-btn-text-show">Salin</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Action Quick Share (WhatsApp & Open Tab) -->
+        <div class="grid grid-cols-2 gap-2.5 pt-1">
+            @php
+                $clientPhone = preg_replace('/[^0-9]/', '', $shipment->client->pic_phone ?? ($shipment->client->phone ?? ''));
+                if (str_starts_with($clientPhone, '0')) $clientPhone = '62' . substr($clientPhone, 1);
+                $shareMsg = rawurlencode("Yth. Bapak/Ibu " . ($shipment->client->name ?? 'Klien') . ",\n\nBerikut tautan pelacakan kargo pengapalan proyek " . $shipment->project_no . " (B/L: " . $shipment->nomor_bl_awb . ").\nAnda dapat memantau status kepabeanan & unduh berkas resmi di sini:\n" . ($shipment->portal_token ? route('portal.track', $shipment->portal_token) : '') . "\n\nTautan aktif hingga " . ($shipment->portal_expires_at ? $shipment->portal_expires_at->format('d/m/Y H:i') : '') . " WIB.\nTerima kasih.\n\nPT Agung Trans Solusindo");
+            @endphp
+            <a href="https://wa.me/{{ $clientPhone }}?text={{ $shareMsg }}" target="_blank" class="flex items-center justify-center gap-2 h-9 rounded-[10px] bg-[#34C759] hover:bg-[#2EB84F] text-white text-[12px] font-semibold transition-all">
+                <i data-lucide="message-circle" class="w-4 h-4"></i>
+                <span>Kirim WhatsApp</span>
+            </a>
+            @if($shipment->portal_token)
+            <a href="{{ route('portal.track', $shipment->portal_token) }}" target="_blank" class="flex items-center justify-center gap-2 h-9 rounded-[10px] bg-black/[0.05] dark:bg-white/[0.08] hover:bg-black/[0.1] text-black dark:text-white text-[12px] font-semibold transition-all">
+                <i data-lucide="external-link" class="w-4 h-4"></i>
+                <span>Buka Pratinjau</span>
+            </a>
+            @else
+            <button type="button" disabled class="flex items-center justify-center gap-2 h-9 rounded-[10px] bg-black/[0.03] text-black/30 text-[12px] font-semibold cursor-not-allowed">
+                <i data-lucide="external-link" class="w-4 h-4"></i>
+                <span>Buka Pratinjau</span>
+            </button>
+            @endif
+        </div>
+
+        <!-- Form Generate Token Baru & Atur Durasi Timer -->
+        <div class="border-t border-black/5 dark:border-white/5 pt-3.5 space-y-2">
+            <div class="text-[12px] font-bold text-black dark:text-white flex items-center gap-1.5">
+                <i data-lucide="clock" class="w-3.5 h-3.5 text-[#007AFF]"></i>
+                <span>Atur Timer Kedaluwarsa & Terbitkan Link Baru</span>
+            </div>
+            <p class="text-[11px] text-black/50 dark:text-white/50">Pilih durasi masa aktif baru. Tautan lama otomatis kedaluwarsa digantikan tautan ini:</p>
+            
+            <form method="POST" action="{{ route('core.document.generate-portal', $shipment->id) }}">
+                @csrf
+                <div class="flex items-center gap-2">
+                    <select name="duration_days" class="flex-1 h-9 px-3 rounded-[9px] bg-black/[0.03] dark:bg-white/[0.06] border border-black/10 dark:border-white/10 text-[12px] text-black dark:text-white">
+                        <option value="1" {{ ($shipment->portal_duration_days ?? 7) == 1 ? 'selected' : '' }}>24 Jam (1 Hari)</option>
+                        <option value="3" {{ ($shipment->portal_duration_days ?? 7) == 3 ? 'selected' : '' }}>3 Hari</option>
+                        <option value="7" {{ ($shipment->portal_duration_days ?? 7) == 7 ? 'selected' : '' }}>7 Hari (Standar)</option>
+                        <option value="14" {{ ($shipment->portal_duration_days ?? 7) == 14 ? 'selected' : '' }}>14 Hari (2 Minggu)</option>
+                        <option value="30" {{ ($shipment->portal_duration_days ?? 7) == 30 ? 'selected' : '' }}>30 Hari (1 Bulan)</option>
+                    </select>
+                    <button type="submit" class="btn-apple-gray !h-9 !px-3 text-[12px] font-semibold hover:!bg-[#007AFF] hover:!text-white shrink-0">
+                        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                        <span>Generate Link</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
 @endsection

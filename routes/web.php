@@ -36,9 +36,12 @@ Route::middleware('guest')->group(function () {
 Route::get('/quick-login/{roleCode}', [AuthController::class, 'quickLogin'])->name('quick-login');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Portal Mandiri Klien (Pelacakan Kargo & Upload Dokumen Mandiri)
-Route::get('/portal/{token?}', [\App\Http\Controllers\ClientPortalController::class, 'index'])->name('portal.index');
+// Portal Mandiri Klien (Dedicated Pelacakan Kargo Per Proyek & Upload Dokumen)
+Route::get('/portal', [\App\Http\Controllers\ClientPortalController::class, 'index'])->name('portal.index');
+Route::get('/portal/track/{token}', [\App\Http\Controllers\ClientPortalController::class, 'track'])->name('portal.track');
+Route::post('/portal/track/{token}/upload', [\App\Http\Controllers\ClientPortalController::class, 'uploadDocumentByToken'])->name('portal.upload-token');
 Route::post('/portal/{shipmentId}/upload', [\App\Http\Controllers\ClientPortalController::class, 'uploadDocument'])->name('portal.upload');
+Route::get('/portal/{token}', [\App\Http\Controllers\ClientPortalController::class, 'index']);
 
 // Protected Routes (Wajib Login & RBAC Active)
 Route::middleware('auth')->group(function () {
@@ -281,6 +284,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/{id}/generate-pib-peb', [\App\Http\Controllers\ShipmentProjectController::class, 'generatePibPeb'])->name('generate-pib-peb');
         Route::post('/{id}/generate-pib-peb', [\App\Http\Controllers\ShipmentProjectController::class, 'generatePibPeb'])->name('generate-pib-peb.post');
         Route::post('/{id}/submit-ceisa', [\App\Http\Controllers\ShipmentProjectController::class, 'generateAndSubmitCeisa'])->name('submit-ceisa');
+        Route::post('/{id}/generate-portal', [\App\Http\Controllers\ClientPortalController::class, 'generateToken'])->name('generate-portal');
     });
 
     // Tim DO Lifecycle & Shipping Line Automation

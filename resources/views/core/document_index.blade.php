@@ -8,13 +8,6 @@
     <!-- 1. TOOLBAR / PAGE HEADER (macOS Sonoma Toolbar Style from Cooca Core) -->
     <header class="rounded-[16px] backdrop-blur-md bg-white/75 dark:bg-[#1C1C1E]/75 border border-black/5 dark:border-white/10 px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
         <div>
-            <nav class="flex items-center gap-1.5 text-[12px] text-black/50 dark:text-white/50 mb-1" aria-label="Breadcrumb">
-                <a href="{{ route('dashboard') }}" class="hover:text-[#007AFF] transition-colors">Dashboard</a>
-                <i data-lucide="chevron-right" class="w-3.5 h-3.5 opacity-40"></i>
-                <span class="text-black/70 dark:text-white/70 font-medium">Operasional</span>
-                <i data-lucide="chevron-right" class="w-3.5 h-3.5 opacity-40"></i>
-                <span class="text-black dark:text-white font-semibold">Proyek & Dokumen</span>
-            </nav>
             <div class="flex items-center gap-2.5">
                 <h1 class="text-[20px] sm:text-[22px] font-bold text-black dark:text-white tracking-tight">
                     Tim Document & Dokumen Pabean
@@ -23,25 +16,13 @@
                     Siklus P01–P10
                 </span>
             </div>
-            <p class="text-[13px] text-black/50 dark:text-white/50 mt-0.5 leading-snug">
+            <p class="text-[13px] text-black/50 dark:text-white/50 mt-1 leading-snug">
                 Registrasi pengapalan impor & ekspor, verifikasi berkas (Invoice, Packing List, B/L), pos tarif HS Code, dan integrasi CEISA 4.0 DJBC.
             </p>
         </div>
 
         <!-- Action Buttons Toolbar -->
-        <div class="flex items-center gap-2 w-full sm:w-auto flex-wrap sm:flex-nowrap shrink-0">
-            <a href="{{ route('bc20.index') }}" 
-               class="btn-apple-gray w-full sm:w-auto">
-                <i data-lucide="file-down" class="w-4 h-4 text-[#007AFF]"></i>
-                <span>BC 2.0 (PIB)</span>
-            </a>
-
-            <a href="{{ route('bc30.index') }}" 
-               class="btn-apple-gray w-full sm:w-auto">
-                <i data-lucide="file-up" class="w-4 h-4 text-[#5856D6]"></i>
-                <span>BC 3.0 (PEB)</span>
-            </a>
-
+        <div class="flex items-center gap-2 w-full sm:w-auto shrink-0">
             @can('document.create')
             <button type="button" 
                     onclick="document.getElementById('modal-create-project').classList.remove('hidden')" 
@@ -132,15 +113,15 @@
 
             <div class="sm:col-span-3">
                 <select name="type" class="w-full px-3 py-2 rounded-[10px] bg-black/[0.03] dark:bg-white/[0.06] border border-black/10 dark:border-white/10 text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF] focus:ring-2 focus:ring-[#007AFF]/20 transition-all">
-                    <option value="">-- Semua Tipe Layanan --</option>
-                    <option value="IMPORT" {{ request('type') === 'IMPORT' ? 'selected' : '' }}>IMPOR (BC 2.0 / PIB)</option>
-                    <option value="EXPORT" {{ request('type') === 'EXPORT' ? 'selected' : '' }}>EKSPOR (BC 3.0 / PEB)</option>
+                    <option value="">Semua Layanan</option>
+                    <option value="IMPORT" {{ request('type') === 'IMPORT' ? 'selected' : '' }}>Impor (BC 2.0 / PIB)</option>
+                    <option value="EXPORT" {{ request('type') === 'EXPORT' ? 'selected' : '' }}>Ekspor (BC 3.0 / PEB)</option>
                 </select>
             </div>
 
             <div class="sm:col-span-2">
                 <select name="status" class="w-full px-3 py-2 rounded-[10px] bg-black/[0.03] dark:bg-white/[0.06] border border-black/10 dark:border-white/10 text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF] focus:ring-2 focus:ring-[#007AFF]/20 transition-all">
-                    <option value="">-- Semua Status --</option>
+                    <option value="">Semua Status</option>
                     <option value="DOC_COLLECTING" {{ request('status') === 'DOC_COLLECTING' ? 'selected' : '' }}>Kumpul Berkas</option>
                     <option value="DOC_READY" {{ request('status') === 'DOC_READY' ? 'selected' : '' }}>Dokumen Lengkap</option>
                     <option value="HS_DETECTED" {{ request('status') === 'HS_DETECTED' ? 'selected' : '' }}>HS Terdeteksi</option>
@@ -152,9 +133,9 @@
             </div>
 
             <div class="sm:col-span-2 flex items-center space-x-2">
-                <button type="submit" class="btn-apple-filled w-full !h-9 text-[12px]">
+                <button type="submit" class="btn-apple-gray w-full !h-9 text-[12px] font-semibold hover:!bg-[#007AFF]/10 hover:!text-[#007AFF]">
                     <i data-lucide="filter" class="w-3.5 h-3.5"></i>
-                    <span>Filter</span>
+                    <span>Terapkan</span>
                 </button>
                 <a href="{{ route('core.document.index') }}" class="btn-apple-gray !h-9 !px-3 text-[12px]">
                     <span>Reset</span>
@@ -204,15 +185,17 @@
                             </td>
 
                             <td class="py-3.5 px-4">
-                                <div class="font-semibold text-black dark:text-white truncate max-w-[150px]">{{ $shp->client->name ?? '-' }}</div>
-                                <div class="text-[11px] text-black/45 dark:text-white/45 font-mono">NPWP: {{ $shp->client->npwp ?? '-' }}</div>
+                                <div class="font-semibold text-black dark:text-white text-[13px] leading-tight" title="{{ $shp->client->name ?? '-' }}">
+                                    {{ $shp->client->name ?? '-' }}
+                                </div>
+                                <div class="text-[11px] text-black/45 dark:text-white/45 font-mono mt-0.5">NPWP: {{ $shp->client->npwp ?? '-' }}</div>
                                 @if($shp->shippingVendor)
                                     <div class="text-[11px] text-black/60 dark:text-white/60 mt-0.5">Pelayaran: <strong>{{ $shp->shippingVendor->name }}</strong></div>
                                 @endif
                             </td>
 
                             <td class="py-3.5 px-4 text-black/80 dark:text-white/80">
-                                <div class="font-medium text-black dark:text-white truncate max-w-[140px]">{{ $shp->vessel_name ?? '-' }}</div>
+                                <div class="font-medium text-black dark:text-white truncate max-w-[150px]">{{ $shp->vessel_name ?? '-' }}</div>
                                 <div class="text-[11px] text-black/45 dark:text-white/45">Voy: {{ $shp->voyage_number ?? '-' }} &bull; ETA: {{ $shp->eta ? $shp->eta->format('d/m/Y') : '-' }}</div>
                                 <div class="text-[11px] font-mono text-black/50 dark:text-white/50 mt-0.5">{{ $shp->nomor_kontainer ?? '1 Kontainer' }}</div>
                             </td>
@@ -236,12 +219,28 @@
                             </td>
 
                             <td class="py-3.5 px-4">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold font-mono 
-                                    @if(in_array($shp->status, ['BILLING_ISSUED', 'DO_RELEASED', 'DELIVERED_POD', 'COMPLETED'])) bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158]
-                                    @elseif(in_array($shp->status, ['DOC_READY', 'HS_DETECTED', 'DRAFT_REVIEW'])) bg-[#5856D6]/15 text-[#5856D6] dark:text-[#5E5CE6]
-                                    @elseif($shp->status === 'DO_PROCESSING') bg-[#FF9500]/15 text-[#B25E00] dark:text-[#FF9F0A]
-                                    @else bg-black/[0.06] dark:bg-white/[0.08] text-black/70 dark:text-white/70 @endif">
-                                    {{ $shp->status }}
+                                @php
+                                    $rawStatus = $shp->status ?? $shp->status_tahap;
+                                    $statusMap = [
+                                        'DOC_COLLECTING' => ['label' => 'Kumpul Berkas', 'class' => 'bg-black/[0.05] text-black/70 dark:bg-white/[0.08] dark:text-white/70'],
+                                        'DOC_READY' => ['label' => 'Berkas Lengkap', 'class' => 'bg-[#5856D6]/12 text-[#5856D6] dark:text-[#5E5CE6]'],
+                                        'HS_DETECTED' => ['label' => 'HS Terdeteksi', 'class' => 'bg-[#5856D6]/12 text-[#5856D6] dark:text-[#5E5CE6]'],
+                                        'DRAFT_REVIEW' => ['label' => 'Review SPV', 'class' => 'bg-[#007AFF]/12 text-[#007AFF]'],
+                                        'CEISA_SUBMITTED' => ['label' => 'Terkirim CEISA', 'class' => 'bg-[#007AFF]/12 text-[#007AFF]'],
+                                        'BILLING_ISSUED' => ['label' => 'Billing Terbit', 'class' => 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158] font-bold'],
+                                        'DO_PROCESSING' => ['label' => 'Proses DO', 'class' => 'bg-[#FF9500]/15 text-[#B25E00] dark:text-[#FF9F0A]'],
+                                        'DO_RELEASED' => ['label' => 'DO Rilis', 'class' => 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158] font-bold'],
+                                        'TRAFFIC_HOLD' => ['label' => 'Hold TPS', 'class' => 'bg-[#FF3B30]/15 text-[#C41E17] dark:text-[#FF453A]'],
+                                        'TRAFFIC_SPPB' => ['label' => 'SPPB Rilis', 'class' => 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158] font-bold'],
+                                        'TRAFFIC_GATE_OUT' => ['label' => 'Gate Out TPS', 'class' => 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158] font-bold'],
+                                        'DELIVERED_POD' => ['label' => 'Tiba di Gudang', 'class' => 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158] font-bold'],
+                                        'INVOICED_P19' => ['label' => 'Invoice Terbit', 'class' => 'bg-[#5856D6]/12 text-[#5856D6]'],
+                                        'COMPLETED' => ['label' => 'Selesai', 'class' => 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158] font-bold'],
+                                    ];
+                                    $statusInfo = $statusMap[$rawStatus] ?? ['label' => str_replace('_', ' ', $rawStatus), 'class' => 'bg-black/[0.05] text-black/70'];
+                                @endphp
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold {{ $statusInfo['class'] }}">
+                                    {{ $statusInfo['label'] }}
                                 </span>
                             </td>
 
@@ -265,6 +264,18 @@
                                     <span>Detail</span>
                                     <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
                                 </a>
+
+                                <button type="button" 
+                                        onclick="openPortalModal('{{ $shp->id }}', '{{ $shp->project_no }}', '{{ addslashes($shp->client->name ?? '-') }}', '{{ $shp->portal_token ? route('portal.track', $shp->portal_token) : '' }}', '{{ $shp->portal_status }}', '{{ $shp->portal_expires_at ? $shp->portal_expires_at->format('d/m/Y H:i') : '' }}', '{{ $shp->portal_duration_days ?? 7 }}', '{{ $shp->client->pic_phone ?? ($shp->client->phone ?? '') }}', '{{ $shp->nomor_bl_awb ?? '' }}')"
+                                        class="btn-apple-gray !h-8 !px-2.5 !text-[11px] {{ $shp->isPortalActive() ? '!text-[#007AFF] !border-[#007AFF]/30' : '!text-black/50' }}"
+                                        title="Bagikan Tautan Pelacakan Portal Klien & Atur Timer">
+                                    <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+                                    <span class="hidden xl:inline">Portal</span>
+                                    @if($shp->isPortalActive())
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#34C759]"></span>
+                                    @endif
+                                </button>
+
                                 @if($shp->type === 'EXPORT')
                                     <a href="{{ route('pdf.peb', $shp->id) }}" target="_blank"
                                        class="btn-apple-gray !h-8 !px-2.5 !text-[11px]" title="Cetak PEB BC 3.0">
@@ -905,5 +916,145 @@
         </form>
     </div>
 </div>
+
+<!-- Modal Share Portal Klien & Pengaturan Timer (Per Proyek) -->
+<div id="modal-portal-share" class="hidden fixed inset-0 z-[200] overflow-y-auto bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="max-w-lg w-full bg-white dark:bg-[#1C1C1E] rounded-[20px] border border-black/10 dark:border-white/10 shadow-2xl p-6 space-y-4 animate-in fade-in zoom-in duration-150">
+        <div class="flex items-center justify-between pb-3 border-b border-black/5 dark:border-white/5">
+            <div class="flex items-center space-x-2.5">
+                <div class="w-9 h-9 rounded-[10px] bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center">
+                    <i data-lucide="share-2" class="w-4 h-4"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-[15px] text-black dark:text-white">Portal Pelacakan Klien (Per Proyek)</h3>
+                    <p id="portal-project-label" class="text-[11px] text-black/50 dark:text-white/50 font-mono">SHP-...</p>
+                </div>
+            </div>
+            <button type="button" onclick="closePortalModal()" class="p-1.5 rounded-lg text-black/40 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+
+        <!-- Status Timer Box -->
+        <div class="p-3.5 rounded-[14px] bg-slate-50 dark:bg-white/[0.04] border border-black/5 dark:border-white/5 text-[12px] space-y-1.5">
+            <div class="flex items-center justify-between">
+                <span class="text-black/50 dark:text-white/50">Status Akses:</span>
+                <span id="portal-status-badge" class="font-bold px-2 py-0.5 rounded-full text-[10px] font-mono"></span>
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="text-black/50 dark:text-white/50">Masa Berlaku Timer:</span>
+                <span id="portal-expired-label" class="font-semibold text-black dark:text-white font-mono">-</span>
+            </div>
+            <div class="text-[11px] text-black/40 dark:text-white/40 pt-1 border-t border-black/5 dark:border-white/5 leading-relaxed">
+                Tautan ini aman & hanya memuat data proyek pengapalan ini saja. Jika timer habis, tautan otomatis terkunci demi keamanan data kepabeanan.
+            </div>
+        </div>
+
+        <!-- URL Link & Copy Button -->
+        <div class="space-y-1.5">
+            <label class="block text-[11px] font-semibold text-black/70 dark:text-white/70">Tautan Pelacakan Mandiri Klien</label>
+            <div class="flex items-center gap-2">
+                <input id="portal-url-input" type="text" readonly 
+                       placeholder="Belum ada link, silakan klik 'Generate Link Baru'"
+                       class="flex-1 h-9 px-3 rounded-[9px] bg-black/[0.03] dark:bg-white/[0.06] border border-black/10 dark:border-white/10 text-[12px] font-mono text-black dark:text-white select-all">
+                <button type="button" onclick="copyPortalUrl()" class="btn-apple-filled !h-9 !px-3 text-[12px]">
+                    <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                    <span id="copy-btn-text">Salin</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Action Quick Share (WhatsApp & Open Tab) -->
+        <div class="grid grid-cols-2 gap-2.5 pt-1">
+            <a id="portal-wa-link" href="#" target="_blank" class="flex items-center justify-center gap-2 h-9 rounded-[10px] bg-[#34C759] hover:bg-[#2EB84F] text-white text-[12px] font-semibold transition-all">
+                <i data-lucide="message-circle" class="w-4 h-4"></i>
+                <span>Kirim WhatsApp</span>
+            </a>
+            <a id="portal-preview-link" href="#" target="_blank" class="flex items-center justify-center gap-2 h-9 rounded-[10px] bg-black/[0.05] dark:bg-white/[0.08] hover:bg-black/[0.1] text-black dark:text-white text-[12px] font-semibold transition-all">
+                <i data-lucide="external-link" class="w-4 h-4"></i>
+                <span>Buka Pratinjau</span>
+            </a>
+        </div>
+
+        <!-- Form Generate Token Baru & Atur Durasi Timer -->
+        <div class="border-t border-black/5 dark:border-white/5 pt-3.5 space-y-2">
+            <div class="text-[12px] font-bold text-black dark:text-white flex items-center gap-1.5">
+                <i data-lucide="clock" class="w-3.5 h-3.5 text-[#007AFF]"></i>
+                <span>Atur Timer Kedaluwarsa & Terbitkan Link Baru</span>
+            </div>
+            <p class="text-[11px] text-black/50 dark:text-white/50">Pilih durasi masa aktif baru. Tautan lama otomatis kedaluwarsa digantikan tautan ini:</p>
+            
+            <form id="form-generate-portal" method="POST" action="">
+                @csrf
+                <div class="flex items-center gap-2">
+                    <select name="duration_days" id="portal-duration-select" class="flex-1 h-9 px-3 rounded-[9px] bg-black/[0.03] dark:bg-white/[0.06] border border-black/10 dark:border-white/10 text-[12px] text-black dark:text-white">
+                        <option value="1">24 Jam (1 Hari)</option>
+                        <option value="3">3 Hari</option>
+                        <option value="7" selected>7 Hari (Standar)</option>
+                        <option value="14">14 Hari (2 Minggu)</option>
+                        <option value="30">30 Hari (1 Bulan)</option>
+                    </select>
+                    <button type="submit" class="btn-apple-gray !h-9 !px-3 text-[12px] font-semibold hover:!bg-[#007AFF] hover:!text-white shrink-0">
+                        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                        <span>Generate Link</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function openPortalModal(shipmentId, projectNo, clientName, portalUrl, portalStatus, expiresAt, durationDays, clientPhone, blNumber) {
+        document.getElementById('modal-portal-share').classList.remove('hidden');
+        document.getElementById('portal-project-label').innerText = projectNo + ' • ' + clientName;
+        document.getElementById('portal-url-input').value = portalUrl || '';
+        document.getElementById('form-generate-portal').action = '/core/document/' + shipmentId + '/generate-portal';
+        document.getElementById('portal-duration-select').value = durationDays || '7';
+
+        var statusBadge = document.getElementById('portal-status-badge');
+        var expiredLabel = document.getElementById('portal-expired-label');
+
+        if (portalStatus === 'ACTIVE' && portalUrl) {
+            statusBadge.className = 'font-bold px-2 py-0.5 rounded-full text-[10px] font-mono bg-[#34C759]/15 text-[#248A3D]';
+            statusBadge.innerText = 'AKTIF';
+            expiredLabel.innerText = expiresAt ? expiresAt + ' WIB' : 'Aktif';
+        } else if (portalStatus === 'EXPIRED') {
+            statusBadge.className = 'font-bold px-2 py-0.5 rounded-full text-[10px] font-mono bg-[#FF3B30]/15 text-[#C41E17]';
+            statusBadge.innerText = 'KEDALUWARSA';
+            expiredLabel.innerText = expiresAt ? 'Berakhir pada ' + expiresAt + ' WIB' : 'Kedaluwarsa';
+        } else {
+            statusBadge.className = 'font-bold px-2 py-0.5 rounded-full text-[10px] font-mono bg-black/10 text-black/60';
+            statusBadge.innerText = 'BELUM DIBUAT';
+            expiredLabel.innerText = 'Klik Generate Link di bawah untuk membuat tautan.';
+        }
+
+        // WhatsApp Share Link
+        var waPhone = clientPhone ? clientPhone.replace(/[^0-9]/g, '') : '';
+        if (waPhone.startsWith('0')) waPhone = '62' + waPhone.substring(1);
+        var waMessage = encodeURIComponent('Yth. Bapak/Ibu ' + clientName + ',\n\nBerikut tautan pelacakan pengapalan kargo proyek ' + projectNo + ' (B/L: ' + blNumber + ').\nAnda dapat memantau status kepabeanan & unduh berkas resmi di sini:\n' + portalUrl + '\n\nTautan ini aktif hingga ' + expiresAt + ' WIB.\nTerima kasih.\n\nPT Agung Trans Solusindo');
+        
+        var waUrl = waPhone ? 'https://wa.me/' + waPhone + '?text=' + waMessage : 'https://wa.me/?text=' + waMessage;
+        document.getElementById('portal-wa-link').href = waUrl;
+        document.getElementById('portal-preview-link').href = portalUrl || '#';
+
+        if (window.lucide) lucide.createIcons();
+    }
+
+    function closePortalModal() {
+        document.getElementById('modal-portal-share').classList.add('hidden');
+    }
+
+    function copyPortalUrl() {
+        var input = document.getElementById('portal-url-input');
+        if (!input.value) return;
+        navigator.clipboard.writeText(input.value).then(function() {
+            var btnText = document.getElementById('copy-btn-text');
+            btnText.innerText = 'Tersalin!';
+            setTimeout(function() { btnText.innerText = 'Salin'; }, 2000);
+        });
+    }
+</script>
 
 @endsection
