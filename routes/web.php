@@ -245,6 +245,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/roles/{role}/permissions', [SettingController::class, 'updateRolePermissions'])->name('roles.permissions');
 
         // Centralized Settings for WhatsApp WABA & Social Media Official Channels
+        Route::post('/ceisa', [SettingController::class, 'updateCeisaSettings'])->name('ceisa.update');
         Route::post('/whatsapp', [SettingController::class, 'updateWaSettings'])->name('whatsapp.update');
         Route::post('/social/connect', [SettingController::class, 'connectSocialAccount'])->name('social.connect');
         Route::post('/social/{id}/disconnect', [SettingController::class, 'disconnectSocialAccount'])->name('social.disconnect');

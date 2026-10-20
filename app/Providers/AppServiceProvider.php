@@ -40,5 +40,8 @@ class AppServiceProvider extends ServiceProvider
         Blade::if('permission', function ($permission) {
             return auth()->check() && auth()->user()->hasPermission($permission);
         });
+
+        // Load Dynamic System Settings from Database into Laravel Config
+        \App\Models\SystemSetting::loadIntoConfig();
     }
 }

@@ -47,8 +47,10 @@ class SettingController extends Controller implements HasMiddleware
         ]);
 
         $socialAccounts = \App\Models\SocialMediaAccount::all();
+        $kantorList = config('ceisa.kantor_pabean', []);
+        $settings = \App\Models\SystemSetting::getAllGrouped();
 
-        return view('setting.index', compact('users', 'roles', 'permissions', 'config', 'logs', 'waSetting', 'socialAccounts'));
+        return view('setting.index', compact('users', 'roles', 'permissions', 'config', 'logs', 'waSetting', 'socialAccounts', 'kantorList', 'settings'));
     }
 
     public function storeUser(Request $request)
@@ -240,5 +242,67 @@ class SettingController extends Controller implements HasMiddleware
 
         return redirect()->route('setting.index', ['tab' => 'social'])
             ->with('success', "Koneksi akun {$account->account_name} ({$account->platform}) telah dinonaktifkan.");
+    }
+
+    /**
+     * Simpan Pengaturan Gateway CEISA 4.0 dan Profil Entitas DJBC ke Basis Data (Tanpa .env)
+     */
+    public function updateCeisaSettings(Request $request)
+    {
+        $validated = $request->validate([
+            // Environment & Gateway
+            'ceisa_mode' => 'required|in:sandbox,production',
+            'ceisa_base_url' => 'required|url',
+            'ceisa_auth_url' => 'required|url',
+            'ceisa_refresh_token_url' => 'nullable|url',
+            'ceisa_username' => 'required|string|max:100',
+            'ceisa_password' => 'nullable|string|max:100',
+            'ceisa_api_key' => 'required|string|max:100',
+            'ceisa_application_id' => 'nullable|string|max:100',
+            'ceisa_whatsapp_no' => 'nullable|string|max:50',
+
+            // Profil Perusahaan
+            'company_name' => 'required|string|max:200',
+            'company_nib' => 'required|string|max:50',
+            'company_npwp' => 'required|string|max:50',
+            'company_address' => 'required|string|max:500',
+            'company_kode_kantor' => 'required|string|max:20',
+            'company_id_perusahaan' => 'required|string|max:20',
+        ]);
+
+        $mockMode = $validated['ceisa_mode'] === 'sandbox' ? '1' : '0';
+
+        \App\Models\SystemSetting::set('ceisa_env', $validated['ceisa_mode'], 'ceisa', 'Lingkungan CEISA 4.0');
+        \App\Models\SystemSetting::set('ceisa_mock_mode', $mockMode, 'ceisa', 'Mode Mock Simulator');
+        \App\Models\SystemSetting::set('ceisa_base_url', $validated['ceisa_base_url'], 'ceisa', 'Base URL Gateway DJBC');
+        \App\Models\SystemSetting::set('ceisa_auth_url', $validated['ceisa_auth_url'], 'ceisa', 'Auth Login URL DJBC');
+        if (!empty($validated['ceisa_refresh_token_url'])) {
+            \App\Models\SystemSetting::set('ceisa_refresh_token_url', $validated['ceisa_refresh_token_url'], 'ceisa', 'Refresh Token URL');
+        }
+        \App\Models\SystemSetting::set('ceisa_username', $validated['ceisa_username'], 'ceisa', 'Username API DJBC');
+        if (!empty($validated['ceisa_password'])) {
+            \App\Models\SystemSetting::set('ceisa_password', $validated['ceisa_password'], 'ceisa', 'Password API DJBC');
+        }
+        \App\Models\SystemSetting::set('ceisa_api_key', $validated['ceisa_api_key'], 'ceisa', 'API Key Resmi DJBC');
+        \App\Models\SystemSetting::set('ceisa_application_id', $validated['ceisa_application_id'] ?? '', 'ceisa', 'Application ID Resmi DJBC');
+        \App\Models\SystemSetting::set('ceisa_whatsapp_no', $validated['ceisa_whatsapp_no'] ?? '', 'ceisa', 'Nomor WhatsApp Notifikasi DJBC');
+
+        \App\Models\SystemSetting::set('company_name', $validated['company_name'], 'company', 'Nama Resmi Perusahaan');
+        \App\Models\SystemSetting::set('company_nib', $validated['company_nib'], 'company', 'Nomor Induk Berusaha');
+        \App\Models\SystemSetting::set('company_npwp', $validated['company_npwp'], 'company', 'NPWP 15/16 Digit');
+        \App\Models\SystemSetting::set('company_address', $validated['company_address'], 'company', 'Alamat Resmi Sesuai NIB');
+        \App\Models\SystemSetting::set('company_kode_kantor', $validated['company_kode_kantor'], 'company', 'Kode Kantor Pabean Default');
+        \App\Models\SystemSetting::set('company_id_perusahaan', $validated['company_id_perusahaan'], 'company', 'ID Unik Perusahaan untuk Nomor Aju');
+
+        // Reload configuration into runtime immediately
+        \App\Models\SystemSetting::loadIntoConfig();
+
+        // Clear cached token so new credentials take effect immediately
+        app(\App\Services\Ceisa\CeisaAuthService::class)->clearToken();
+
+        $modeLabel = $validated['ceisa_mode'] === 'production' ? 'LIVE PRODUCTION (Gateway DJBC Asli)' : 'SANDBOX / SIMULASI';
+
+        return redirect()->route('setting.index', ['tab' => 'gateway'])
+            ->with('success', "Pengaturan Gateway CEISA 4.0 dan Profil Entitas berhasil disimpan ke basis data! Mode aktif: {$modeLabel}.");
     }
 }
