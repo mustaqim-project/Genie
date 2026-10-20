@@ -179,8 +179,9 @@
 
                     <div class="flex items-center space-x-2">
                         <button type="button" onclick="executeWorkbenchScan()" id="btn-run-scan"
-                                class="w-full py-2.5 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 text-white font-bold text-xs shadow-md shadow-sky-600/20 flex items-center justify-center space-x-2">
-                            <span>🤖 Jalankan Pengecekan AI & MCP</span>
+                                class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition-all active:scale-95 flex items-center justify-center space-x-2 cursor-pointer">
+                            <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            <span>Jalankan Pengecekan AI & MCP</span>
                         </button>
                     </div>
                 </div>

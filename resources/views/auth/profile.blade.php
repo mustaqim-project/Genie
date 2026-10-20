@@ -142,7 +142,7 @@
                     </div>
 
                     <div class="pt-2 flex justify-end">
-                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-brand-600 text-white font-bold text-xs shadow-md shadow-brand-600/20 hover:bg-brand-700 transition-colors">
+                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs shadow-xs hover:bg-slate-800 transition-all active:scale-95 cursor-pointer">
                             Simpan Perubahan Profil
                         </button>
                     </div>
@@ -179,7 +179,7 @@
                     </div>
 
                     <div class="pt-2 flex justify-end">
-                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs shadow-md hover:bg-slate-800 transition-colors">
+                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs shadow-xs hover:bg-slate-800 transition-all active:scale-95 cursor-pointer">
                             Perbarui Kata Sandi
                         </button>
                     </div>

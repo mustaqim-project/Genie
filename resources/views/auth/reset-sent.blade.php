@@ -35,7 +35,7 @@
             </div>
 
             <a href="{{ route('password.reset', ['token' => $token, 'email' => $email]) }}"
-                class="btn-apple block w-full text-center py-3.5 px-6 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white text-sm font-bold shadow-lg shadow-sky-500/25">
+                class="btn-apple block w-full text-center py-3.5 px-6 bg-white hover:bg-slate-100 text-slate-950 text-sm font-bold shadow-xs active:scale-95 transition-all">
                 Buka Tautan Reset Sandi (Simulasi) &rarr;
             </a>
 

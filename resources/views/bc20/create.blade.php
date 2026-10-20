@@ -399,8 +399,9 @@
             <a href="{{ route('bc20.index') }}" class="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors">
                 &larr; Batal & Kembali
             </a>
-            <button type="submit" class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-lg shadow-brand-600/30 transition-all hover:-translate-y-0.5">
-                Simpan Dokumen BC 2.0 & Siapkan Payload &rarr;
+            <button type="submit" class="inline-flex items-center space-x-2 px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-xs transition-all active:scale-95 cursor-pointer">
+                <span>Simpan Dokumen BC 2.0 & Siapkan Payload</span>
+                <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
             </button>
         </div>
     </form>

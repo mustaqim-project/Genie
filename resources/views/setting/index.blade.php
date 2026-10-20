@@ -70,8 +70,8 @@
                 <span class="text-emerald-700 font-semibold">{{ $users->where('is_active', true)->count() }} Aktif</span>
             </div>
             <div>
-                <button type="button" @click="showAddUserModal = true" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-600/20 flex items-center space-x-1.5 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button type="button" @click="showAddUserModal = true" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs flex items-center space-x-1.5 transition-all active:scale-95 cursor-pointer">
+                    <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
                     <span>Tambah Pengguna Baru</span>
@@ -210,7 +210,7 @@
                 <!-- Role Selector Badges -->
                 <div class="flex flex-wrap gap-2 pb-4 border-b border-slate-100">
                     @foreach($roles as $role)
-                        <button type="button" @click="selectedRole = '{{ $role->code }}'" :class="selectedRole === '{{ $role->code }}' ? 'bg-brand-600 text-white shadow-md shadow-brand-600/20' : 'bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100'" class="px-3 py-1.5 rounded-xl text-xs font-bold font-mono transition-colors">
+                        <button type="button" @click="selectedRole = '{{ $role->code }}'" :class="selectedRole === '{{ $role->code }}' ? 'bg-slate-900 text-white shadow-xs' : 'bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100'" class="px-3 py-1.5 rounded-xl text-xs font-bold font-mono transition-all active:scale-95 cursor-pointer">
                             [{{ $role->code }}] {{ $role->name }}
                         </button>
                     @endforeach
@@ -262,7 +262,7 @@
                             </div>
 
                             <div class="mt-8 pt-4 border-t border-slate-100 flex justify-end">
-                                <button type="submit" class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-600/20 transition-colors">
+                                <button type="submit" class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition-all active:scale-95 cursor-pointer">
                                     Simpan Perubahan Matriks Izin [{{ $role->code }}]
                                 </button>
                             </div>
@@ -284,8 +284,8 @@
                 </div>
                 <form action="{{ route('config.test-auth') }}" method="POST">
                     @csrf
-                    <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 flex items-center space-x-1.5 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition-all active:scale-95 flex items-center space-x-1.5 cursor-pointer">
+                        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                         <span>Uji Koneksi Token OAuth CEISA</span>
@@ -540,8 +540,8 @@
 
                 <div class="pt-6 mt-6 border-t border-slate-100 flex items-center justify-between">
                     <p class="text-xs text-slate-400">Template pesan resmi yang dikirimkan mengacu pada template yang disetujui Meta di menu WhatsApp WABA.</p>
-                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition-colors flex items-center space-x-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition-all active:scale-95 flex items-center space-x-2 cursor-pointer">
+                        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         <span>Simpan Konfigurasi WhatsApp WABA</span>
                     </button>
                 </div>
@@ -561,8 +561,8 @@
                     <span>Buka Komposer & Feed</span>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                 </a>
-                <button type="button" @click="showAddSocialModal = true" class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-600/20 flex items-center space-x-1.5 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button type="button" @click="showAddSocialModal = true" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition-all active:scale-95 flex items-center space-x-1.5 cursor-pointer">
+                    <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                     </svg>
                     <span>Hubungkan Saluran Baru</span>
@@ -719,7 +719,7 @@
                     <button type="button" @click="showAddUserModal = false" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-50 transition-colors">
                         Batal
                     </button>
-                    <button type="submit" class="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-600/20 transition-colors">
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition-all active:scale-95 cursor-pointer">
                         Simpan Pengguna
                     </button>
                 </div>
@@ -774,7 +774,7 @@
                     <button type="button" @click="showAddSocialModal = false" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-50 transition-colors">
                         Batal
                     </button>
-                    <button type="submit" class="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-600/20 transition-colors">
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition-all active:scale-95 cursor-pointer">
                         Hubungkan Akun
                     </button>
                 </div>

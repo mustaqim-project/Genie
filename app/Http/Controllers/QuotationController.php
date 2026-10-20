@@ -32,8 +32,14 @@ class QuotationController extends Controller
 
         $quotations = $query->latest()->paginate(10);
         $clients = Client::orderBy('name')->get();
+        $stats = [
+            'total' => Quotation::count(),
+            'draft' => Quotation::where('status', 'DRAFT')->count(),
+            'sent' => Quotation::where('status', 'SENT')->count(),
+            'accepted' => Quotation::where('status', 'ACCEPTED')->count(),
+        ];
 
-        return view('crm.quotations_index', compact('quotations', 'clients'));
+        return view('crm.quotations_index', compact('quotations', 'clients', 'stats'));
     }
 
     /**
