@@ -53,4 +53,34 @@ class ClientInvoiceTest extends TestCase
         $searchResponse->assertStatus(200);
         $searchResponse->assertSee('INV-TEST-001');
     }
+
+    public function test_can_create_invoice_manually_via_store_endpoint()
+    {
+        $admin = User::where('email', 'admin@agungtrans.co.id')->first();
+        $this->actingAs($admin);
+
+        $client = Client::first() ?? Client::factory()->create();
+
+        $postData = [
+            'client_id' => $client->id,
+            'tanggal' => now()->format('Y-m-d'),
+            'jatuh_tempo' => now()->addDays(14)->format('Y-m-d'),
+            'talangan_pabean_idr' => 5000000,
+            'biaya_pelayaran_idr' => 1500000,
+            'jasa_ppjk_idr' => 1000000,
+            'biaya_trucking_idr' => 2000000,
+            'catatan' => 'Uji coba invoice manual AR',
+        ];
+
+        $response = $this->post(route('finance.invoices.store'), $postData);
+        $response->assertStatus(302);
+
+        $this->assertDatabaseHas('client_invoices', [
+            'client_id' => $client->id,
+            'status' => 'UNPAID',
+            'talangan_pabean_idr' => 5000000,
+            'jasa_ppjk_idr' => 1000000,
+            'biaya_trucking_idr' => 2000000,
+        ]);
+    }
 }

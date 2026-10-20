@@ -306,6 +306,7 @@ Route::middleware('auth')->group(function () {
     // Finance Invoices (P19)
     Route::prefix('finance/invoices')->name('finance.invoices.')->group(function () {
         Route::get('/', [\App\Http\Controllers\ClientInvoiceController::class, 'index'])->name('index');
+        Route::post('/store', [\App\Http\Controllers\ClientInvoiceController::class, 'store'])->name('store');
         Route::get('/{id}', [\App\Http\Controllers\ClientInvoiceController::class, 'show'])->name('show');
         Route::post('/{id}/pay', [\App\Http\Controllers\ClientInvoiceController::class, 'markAsPaid'])->name('pay');
     });

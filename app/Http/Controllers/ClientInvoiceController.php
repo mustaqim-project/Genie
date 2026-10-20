@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Client;
 use App\Models\ClientInvoice;
 use App\Models\Shipment;
 use Illuminate\Http\Request;
@@ -41,7 +42,76 @@ class ClientInvoiceController extends Controller
             'total_amount' => ClientInvoice::sum('total_tagihan_idr'),
         ];
 
-        return view('finance.invoices_index', compact('invoices', 'stats'));
+        $clients = Client::where('is_active', true)->orderBy('name')->get();
+        $shipments = Shipment::whereNull('closed_at')->latest()->take(50)->get();
+
+        return view('finance.invoices_index', compact('invoices', 'stats', 'clients', 'shipments'));
+    }
+
+    /**
+     * Terbitkan Draf Invoice Penagihan Klien (AR) Manual Baru
+     * Hak Akses: finance.invoice / finance.manage (ClientInvoicePolicy::create)
+     */
+    public function store(Request $request)
+    {
+        Gate::authorize('create', ClientInvoice::class);
+
+        $validated = $request->validate([
+            'client_id' => 'required|uuid|exists:clients,id',
+            'shipment_id' => 'nullable|uuid|exists:shipments,id',
+            'tanggal' => 'required|date',
+            'jatuh_tempo' => 'required|date|after_or_equal:tanggal',
+            'talangan_pabean_idr' => 'nullable|numeric|min:0',
+            'biaya_pelayaran_idr' => 'nullable|numeric|min:0',
+            'jasa_ppjk_idr' => 'nullable|numeric|min:0',
+            'biaya_trucking_idr' => 'nullable|numeric|min:0',
+            'ppn_jasa_idr' => 'nullable|numeric|min:0',
+            'catatan' => 'nullable|string|max:500',
+        ]);
+
+        $talangan = (float) ($validated['talangan_pabean_idr'] ?? 0);
+        $pelayaran = (float) ($validated['biaya_pelayaran_idr'] ?? 0);
+        $jasaPpjk = (float) ($validated['jasa_ppjk_idr'] ?? 0);
+        $trucking = (float) ($validated['biaya_trucking_idr'] ?? 0);
+
+        $subtotal = $talangan + $pelayaran + $jasaPpjk + $trucking;
+
+        // PPN Jasa 1.1% default sesuai PMK 71/2022 jika tidak diinput khusus
+        $dppJasa = $jasaPpjk + $trucking;
+        $ppnJasa = isset($validated['ppn_jasa_idr']) && $validated['ppn_jasa_idr'] !== null && $validated['ppn_jasa_idr'] !== ''
+            ? (float) $validated['ppn_jasa_idr']
+            : round($dppJasa * 0.011, 2);
+
+        $totalTagihan = $subtotal + $ppnJasa;
+
+        $invoice = ClientInvoice::create([
+            'invoice_no' => ClientInvoice::generateInvoiceNo(),
+            'shipment_id' => $validated['shipment_id'] ?? null,
+            'client_id' => $validated['client_id'],
+            'tanggal' => $validated['tanggal'],
+            'jatuh_tempo' => $validated['jatuh_tempo'],
+            'talangan_pabean_idr' => $talangan,
+            'biaya_pelayaran_idr' => $pelayaran,
+            'jasa_ppjk_idr' => $jasaPpjk,
+            'biaya_trucking_idr' => $trucking,
+            'subtotal_idr' => $subtotal,
+            'ppn_jasa_idr' => $ppnJasa,
+            'total_tagihan_idr' => $totalTagihan,
+            'status' => 'UNPAID',
+            'catatan_pembayaran' => $validated['catatan'] ?? null,
+            'created_by_user_id' => auth()->id(),
+        ]);
+
+        // Auto-journaling Piutang Usaha
+        try {
+            $accountingService = app(\App\Services\Accounting\AccountingService::class);
+            $accountingService->recordClientInvoiceIssued($invoice, auth()->id());
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning("Gagal auto-journal invoice manual: " . $e->getMessage());
+        }
+
+        return redirect()->route('finance.invoices.show', $invoice->id)
+            ->with('success', "Invoice Penagihan Klien {$invoice->invoice_no} berhasil diterbitkan.");
     }
 
     /**
