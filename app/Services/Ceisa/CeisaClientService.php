@@ -11,6 +11,7 @@ class CeisaClientService
     protected CeisaAuthService $authService;
     protected string $baseUrl;
     protected string $apiKey;
+    protected ?string $applicationId;
     protected bool $mockMode;
 
     public function __construct(CeisaAuthService $authService)
@@ -18,6 +19,7 @@ class CeisaClientService
         $this->authService = $authService;
         $this->baseUrl = rtrim(config('ceisa.api.base_url'), '/');
         $this->apiKey = config('ceisa.api.api_key');
+        $this->applicationId = config('ceisa.api.application_id');
         $this->mockMode = (bool) config('ceisa.api.mock_mode', false);
     }
 
@@ -35,6 +37,10 @@ class CeisaClientService
             'Authorization' => 'Bearer ' . $token,
             'beacukai-api-key' => $this->apiKey,
         ];
+
+        if (!empty($this->applicationId)) {
+            $headers['Application-ID'] = $this->applicationId;
+        }
 
         // MODE MOCK / SIMULASI UNTUK PENGEMBANGAN LOKAL
         if ($this->mockMode) {

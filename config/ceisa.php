@@ -28,6 +28,8 @@ return [
         'username' => env('CEISA_USERNAME', 'agungtrans_api'),
         'password' => env('CEISA_PASSWORD', 'PasswordCeisa123!'),
         'api_key' => env('CEISA_API_KEY', 'pats-ceisa-mock-key-0403'),
+        'application_id' => env('CEISA_APPLICATION_ID', ''),
+        'whatsapp_no' => env('CEISA_WHATSAPP_NO', ''),
         'mock_mode' => env('CEISA_MOCK_MODE', true),
         'timeout' => 30, // detik
         'token_cache_ttl' => 240, // 4 menit (token berlaku ~5 menit)

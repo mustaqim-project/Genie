@@ -312,12 +312,24 @@
                         <span class="text-slate-700 dark:text-slate-300 truncate block">{{ $config['api']['base_url'] }}</span>
                     </div>
                     <div>
-                        <span class="text-slate-400 dark:text-slate-500 block font-medium font-sans">Username API</span>
-                        <span class="text-slate-700 dark:text-slate-300">{{ $config['api']['username'] }}</span>
+                        <span class="text-slate-400 dark:text-slate-500 block font-medium font-sans">Application ID</span>
+                        <span class="text-slate-700 dark:text-slate-300 font-bold block truncate">{{ $config['api']['application_id'] ?: '-' }}</span>
                     </div>
                     <div>
                         <span class="text-slate-400 dark:text-slate-500 block font-medium font-sans">API Key Header</span>
-                        <span class="text-slate-500 dark:text-slate-400">beacukai-api-key: {{ substr($config['api']['api_key'], 0, 8) }}***</span>
+                        <span class="text-slate-500 dark:text-slate-400 truncate block">beacukai-api-key: {{ substr($config['api']['api_key'], 0, 8) }}***</span>
+                    </div>
+                    @if(!empty($config['api']['whatsapp_no']))
+                    <div>
+                        <span class="text-slate-400 dark:text-slate-500 block font-medium font-sans">WhatsApp Alert H2H</span>
+                        <span class="text-emerald-600 dark:text-emerald-400 font-bold">{{ $config['api']['whatsapp_no'] }}</span>
+                    </div>
+                    @endif
+                    <div class="pt-2 border-t border-slate-100 dark:border-white/10">
+                        <span class="text-slate-400 dark:text-slate-500 block font-medium font-sans">Webhook URL Callback DJBC</span>
+                        <span class="text-[#007AFF] font-bold block select-all break-all text-[11px] bg-sky-50 dark:bg-sky-950/40 p-1.5 rounded-lg border border-sky-200 dark:border-sky-800/50 mt-0.5">
+                            {{ url('/api/v1/ceisa/webhook') }}
+                        </span>
                     </div>
                 </div>
             </div>
@@ -327,10 +339,20 @@
         <div class="lg:col-span-2 bg-white dark:bg-[#1C1C1E] rounded-2xl p-6 border border-slate-200/80 dark:border-white/10 shadow-xs">
             <h2 class="text-base font-bold text-slate-900 dark:text-white mb-2">Panduan Integrasi REST API H2H (Server-to-Server)</h2>
             <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">
-                Sistem eksternal (seperti ERP COOCA, WMS, atau In-House System lainnya) dapat mengakses data tarif dan mengirimkan dokumen kepabeanan secara otomatis ke endpoint service <strong>PATS_CEISA</strong>:
+                Sistem eksternal (seperti ERP COOCA, WMS, atau In-House System lainnya) dan Bea Cukai DJBC dapat berkomunikasi secara dua arah (Two-Way H2H) ke endpoint service <strong>PATS_CEISA</strong>:
             </p>
 
             <div class="space-y-3.5 text-xs font-mono">
+                <!-- Endpoint 0: Webhook Listener DJBC -->
+                <div class="p-3 rounded-xl bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800/40">
+                    <div class="flex items-center space-x-2 mb-1.5">
+                        <span class="px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 font-bold text-[10px]">POST</span>
+                        <span class="font-bold text-slate-800 dark:text-white">/api/v1/ceisa/webhook</span>
+                        <span class="px-1.5 py-0.5 rounded bg-purple-200/60 dark:bg-purple-800/50 text-purple-800 dark:text-purple-200 text-[9px] font-sans font-bold">Callback DJBC</span>
+                    </div>
+                    <p class="text-slate-500 dark:text-slate-400 font-sans text-[11px]">Menerima notifikasi push real-time dari Bea Cukai saat SPPB terbit, NPE terbit, penjaluran (Merah/Kuning/Hijau), atau kode billing MPN G3 siap disetor.</p>
+                </div>
+
                 <!-- Endpoint 1: Tarif HS -->
                 <div class="p-3 rounded-xl bg-slate-50 dark:bg-[#2C2C2E]/60 border border-slate-200 dark:border-white/10">
                     <div class="flex items-center space-x-2 mb-1.5">
@@ -340,16 +362,7 @@
                     <p class="text-slate-500 dark:text-slate-400 font-sans text-[11px]">Dapatkan rincian tarif Bea Masuk, PPN 11%, PPh 2.5%, Satuan, dan regulasi Lartas berdasarkan kode pos tarif 8-digit.</p>
                 </div>
 
-                <!-- Endpoint 2: Sinkronisasi Tarif -->
-                <div class="p-3 rounded-xl bg-slate-50 dark:bg-[#2C2C2E]/60 border border-slate-200 dark:border-white/10">
-                    <div class="flex items-center space-x-2 mb-1.5">
-                        <span class="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 font-bold text-[10px]">POST</span>
-                        <span class="font-bold text-slate-800 dark:text-white">/api/v1/ceisa/tarif-hs/sync</span>
-                    </div>
-                    <p class="text-slate-500 dark:text-slate-400 font-sans text-[11px]">Trigger sinkronisasi otomatis seluruh master data HS Code BTKI 2022 Bea Cukai ke database.</p>
-                </div>
-
-                <!-- Endpoint 3: Submit Dokumen Impor BC 2.0 -->
+                <!-- Endpoint 2: Submit Dokumen Impor BC 2.0 -->
                 <div class="p-3 rounded-xl bg-slate-50 dark:bg-[#2C2C2E]/60 border border-slate-200 dark:border-white/10">
                     <div class="flex items-center space-x-2 mb-1.5">
                         <span class="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 font-bold text-[10px]">POST</span>
@@ -358,7 +371,16 @@
                     <p class="text-slate-500 dark:text-slate-400 font-sans text-[11px]">Submit dokumen Impor BC 2.0 (PIB), auto-generate 26-digit Nomor Aju, dan teruskan ke CEISA 4.0.</p>
                 </div>
 
-                <!-- Endpoint 4: Status & Respon -->
+                <!-- Endpoint 2B: Submit Dokumen Ekspor BC 3.0 -->
+                <div class="p-3 rounded-xl bg-slate-50 dark:bg-[#2C2C2E]/60 border border-slate-200 dark:border-white/10">
+                    <div class="flex items-center space-x-2 mb-1.5">
+                        <span class="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 font-bold text-[10px]">POST</span>
+                        <span class="font-bold text-slate-800 dark:text-white">/api/v1/ceisa/bc-30/submit</span>
+                    </div>
+                    <p class="text-slate-500 dark:text-slate-400 font-sans text-[11px]">Submit dokumen Ekspor BC 3.0 (PEB), auto-generate Nomor Aju, dan teruskan ke CEISA 4.0.</p>
+                </div>
+
+                <!-- Endpoint 3: Status & Respon -->
                 <div class="p-3 rounded-xl bg-slate-50 dark:bg-[#2C2C2E]/60 border border-slate-200 dark:border-white/10">
                     <div class="flex items-center space-x-2 mb-1.5">
                         <span class="px-2 py-0.5 rounded bg-sky-100 dark:bg-sky-950/50 text-[#007AFF] font-bold text-[10px]">GET</span>

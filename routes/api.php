@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\CeisaApiController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1/ceisa')->group(function () {
+    Route::post('/webhook', [CeisaApiController::class, 'handleWebhook'])->name('api.ceisa.webhook');
     Route::post('/bc-20/submit', [CeisaApiController::class, 'submitBC20']);
     Route::post('/bc-30/submit', [CeisaApiController::class, 'submitBC30']);
     Route::get('/dokumen/{nomorAju}/status', [CeisaApiController::class, 'getStatus']);

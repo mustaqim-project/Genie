@@ -63,11 +63,27 @@ class CeisaAuthService
         }
 
         try {
-            $response = Http::timeout(config('ceisa.api.timeout', 30))
-                ->post($this->authUrl, [
-                    'username' => $this->username,
-                    'password' => $this->password,
-                ]);
+            $authHeaders = [
+                'Content-Type' => 'application/json',
+            ];
+            if ($apiKey = config('ceisa.api.api_key')) {
+                $authHeaders['beacukai-api-key'] = $apiKey;
+            }
+            if ($appId = config('ceisa.api.application_id')) {
+                $authHeaders['Application-ID'] = $appId;
+            }
+
+            $loginPayload = [
+                'username' => $this->username,
+                'password' => $this->password,
+            ];
+            if ($appId = config('ceisa.api.application_id')) {
+                $loginPayload['application_id'] = $appId;
+            }
+
+            $response = Http::withHeaders($authHeaders)
+                ->timeout(config('ceisa.api.timeout', 30))
+                ->post($this->authUrl, $loginPayload);
 
             if ($response->successful()) {
                 $data = $response->json();
