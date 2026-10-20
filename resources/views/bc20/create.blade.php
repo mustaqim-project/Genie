@@ -3,7 +3,7 @@
 @section('title', 'Form Pengajuan BC 2.0 (PIB)')
 
 @section('content')
-<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-16">
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-16" x-data="bc20FormManager()">
     <!-- Breadcrumb -->
     <x-breadcrumb :items="[
         ['label' => 'Dashboard', 'url' => route('dashboard')],
@@ -24,34 +24,196 @@
         </div>
     </div>
 
-    <!-- Integrasi Cepat: Pilih dari Proyek Shipment Tim Document -->
-    <div class="bg-gradient-to-r from-sky-50 to-indigo-50 dark:from-sky-950/30 dark:to-indigo-950/30 rounded-2xl p-4 border border-sky-200/80 dark:border-sky-800/60 shadow-xs mb-6 text-xs">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div class="flex items-center space-x-3">
-                <i data-lucide="zap" class="w-6 h-6 text-[#007AFF] flex-shrink-0"></i>
-                <div>
-                    <strong class="font-bold text-slate-900 dark:text-white">Import Otomatis dari Proyek Shipment</strong>
-                    <p class="text-[11px] text-slate-600 dark:text-slate-300">Pilih proyek pengapalan aktif untuk mengisi seluruh data sarana pengangkut, valuasi CIF, dan pos tarif HS Code otomatis.</p>
+    <!-- Mode Switcher Tabs (Apple Segmented Pill - Dual Workflow: Otomatis & Manual) -->
+    <div class="inline-flex w-full p-1 rounded-[12px] bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 mb-6 font-semibold text-[13px]">
+        <button type="button" 
+                @click="formMode = 'auto'" 
+                :class="formMode === 'auto' ? 'bg-white dark:bg-[#2C2C2E] text-slate-900 dark:text-white shadow-xs font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-black dark:hover:text-white'"
+                class="flex-1 py-2 px-4 rounded-[10px] transition-all flex items-center justify-center space-x-2 cursor-pointer">
+            <i data-lucide="sparkles" class="w-4 h-4 text-[#007AFF]"></i>
+            <span>Unggah Berkas & Ekstraksi Otomatis</span>
+            <span class="px-2 py-0.5 bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158] font-bold text-[10px] rounded-full">Praktis</span>
+        </button>
+        <button type="button" 
+                @click="formMode = 'manual'" 
+                :class="formMode === 'manual' ? 'bg-white dark:bg-[#2C2C2E] text-slate-900 dark:text-white shadow-xs font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-black dark:hover:text-white'"
+                class="flex-1 py-2 px-4 rounded-[10px] transition-all flex items-center justify-center space-x-2 cursor-pointer">
+            <i data-lucide="file-edit" class="w-4 h-4"></i>
+            <span>Form Input Manual Lengkap</span>
+        </button>
+    </div>
+
+    <!-- PANEL 1: WORKFLOW OTOMATIS (Ekstraksi Berkas & Proyek Shipment) -->
+    <div x-show="formMode === 'auto'" class="space-y-4 mb-6">
+        
+        <!-- Opsi A: Integrasi Proyek Shipment -->
+        <div class="bg-gradient-to-r from-sky-50 to-indigo-50 dark:from-sky-950/30 dark:to-indigo-950/30 rounded-2xl p-4 border border-sky-200/80 dark:border-sky-800/60 shadow-xs text-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center space-x-3">
+                    <i data-lucide="zap" class="w-6 h-6 text-[#007AFF] flex-shrink-0"></i>
+                    <div>
+                        <strong class="font-bold text-slate-900 dark:text-white">Import Otomatis dari Proyek Shipment</strong>
+                        <p class="text-[11px] text-slate-600 dark:text-slate-300">Pilih proyek pengapalan aktif untuk mengisi seluruh data sarana pengangkut, valuasi CIF, dan pos tarif HS Code otomatis.</p>
+                    </div>
+                </div>
+                <div class="w-full sm:w-72">
+                    <select onchange="if(this.value) window.location.href='{{ route('bc20.create') }}?shipment_id=' + this.value; else window.location.href='{{ route('bc20.create') }}';" 
+                            class="w-full px-3 py-2 rounded-xl border border-sky-300 dark:border-sky-700 bg-white dark:bg-[#2C2C2E] font-semibold text-slate-800 dark:text-white focus:ring-2 focus:ring-[#007AFF]">
+                        <option value="">-- Pilih Proyek Shipment --</option>
+                        @foreach($shipments as $s)
+                            <option value="{{ $s->id }}" {{ $selectedShipment?->id === $s->id ? 'selected' : '' }}>
+                                {{ $s->shipment_number }} - BL: {{ $s->bl_number }} ({{ $s->client->name }})
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
-            <div class="w-full sm:w-72">
-                <select onchange="if(this.value) window.location.href='{{ route('bc20.create') }}?shipment_id=' + this.value; else window.location.href='{{ route('bc20.create') }}';" 
-                        class="w-full px-3 py-2 rounded-xl border border-sky-300 dark:border-sky-700 bg-white dark:bg-[#2C2C2E] font-semibold text-slate-800 dark:text-white focus:ring-2 focus:ring-[#007AFF]">
-                    <option value="">-- Pilih Proyek Shipment --</option>
-                    @foreach($shipments as $s)
-                        <option value="{{ $s->id }}" {{ $selectedShipment?->id === $s->id ? 'selected' : '' }}>
-                            {{ $s->shipment_number }} - BL: {{ $s->bl_number }} ({{ $s->client->name }})
-                        </option>
-                    @endforeach
-                </select>
-            </div>
+            @if($selectedShipment)
+                <div class="mt-2.5 pt-2.5 border-t border-sky-200/60 dark:border-sky-800/40 flex items-center justify-between text-[11px] text-sky-900 dark:text-sky-300 font-medium">
+                    <span>&check; Menggunakan data proyek: <strong>{{ $selectedShipment->shipment_number }}</strong> (Klien: {{ $selectedShipment->client->name }})</span>
+                    <a href="{{ route('bc20.create') }}" class="text-rose-600 dark:text-rose-400 hover:underline">Reset Pilihan</a>
+                </div>
+            @endif
         </div>
-        @if($selectedShipment)
-            <div class="mt-2.5 pt-2.5 border-t border-sky-200/60 dark:border-sky-800/40 flex items-center justify-between text-[11px] text-sky-900 dark:text-sky-300 font-medium">
-                <span>&check; Menggunakan data proyek: <strong>{{ $selectedShipment->shipment_number }}</strong> (Klien: {{ $selectedShipment->client->name }})</span>
-                <a href="{{ route('bc20.create') }}" class="text-rose-600 dark:text-rose-400 hover:underline">Reset Pilihan</a>
+
+        <!-- Opsi B: Unggah Berkas & Ekstraksi Otomatis AI (Persis Desain Modal Buka Proyek) -->
+        <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-5 border border-slate-200/80 dark:border-white/10 shadow-xs space-y-4">
+            <div>
+                <div class="flex items-center justify-between">
+                    <h3 class="text-[14px] font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <i data-lucide="file-up" class="w-4 h-4 text-[#007AFF]"></i>
+                        <span>Unggah Berkas Kargo untuk Ekstraksi Otomatis</span>
+                    </h3>
+                    <span class="text-[11px] text-slate-400">PDF, Excel, JPG &bull; Maks 15MB</span>
+                </div>
+                <p class="text-[12px] text-slate-500 dark:text-slate-400 mt-0.5">Unggah berkas kargo (B/L, Invoice, Packing List). Sistem mengekstrak informasi dan mengisi seluruh formulir pabean di bawah secara otomatis.</p>
             </div>
-        @endif
+
+            <!-- 3 Dropzone Upload Dokumen Utama -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                <!-- 1. Bill of Lading (B/L) -->
+                <div class="p-3.5 rounded-[14px] border-2 border-dashed border-[#007AFF]/30 hover:border-[#007AFF] bg-[#007AFF]/5 transition-colors flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-bold text-slate-900 dark:text-white flex items-center space-x-1.5">
+                                <i data-lucide="ship" class="w-4 h-4 text-[#007AFF]"></i>
+                                <span>Bill of Lading (B/L)</span>
+                            </span>
+                            <span class="text-[9px] px-1.5 py-0.5 rounded-[4px] bg-[#007AFF]/15 text-[#007AFF] font-bold">Wajib</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 mb-2">Diekstrak: No. BL, Kapal, Pelayaran, Kontainer, Bobot.</p>
+                    </div>
+                    <div>
+                        <input type="file" id="bc20-bl-file" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx" class="hidden" @change="updateFileName('bl', $event)">
+                        <button type="button" onclick="document.getElementById('bc20-bl-file').click()" 
+                                class="w-full py-1.5 px-2.5 rounded-[8px] border border-[#007AFF]/30 bg-white dark:bg-[#2C2C2E] text-[#007AFF] font-semibold text-[11px] truncate flex items-center justify-center space-x-1.5 cursor-pointer">
+                            <span x-text="fileNames.bl ? '✓ ' + fileNames.bl : '📂 Pilih File B/L'">📂 Pilih File B/L</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2. Commercial Invoice (C/I) -->
+                <div class="p-3.5 rounded-[14px] border-2 border-dashed border-[#5856D6]/30 hover:border-[#5856D6] bg-[#5856D6]/5 transition-colors flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-bold text-slate-900 dark:text-white flex items-center space-x-1.5">
+                                <i data-lucide="receipt" class="w-4 h-4 text-[#5856D6]"></i>
+                                <span>Commercial Invoice</span>
+                            </span>
+                            <span class="text-[9px] px-1.5 py-0.5 rounded-[4px] bg-[#5856D6]/15 text-[#5856D6] font-bold">Wajib</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 mb-2">Diekstrak: Nilai FOB/CIF, Valuta, Pemasok, Termin.</p>
+                    </div>
+                    <div>
+                        <input type="file" id="bc20-inv-file" accept=".pdf,.xlsx,.xls,.png,.jpg,.jpeg,.doc,.docx" class="hidden" @change="updateFileName('invoice', $event)">
+                        <button type="button" onclick="document.getElementById('bc20-inv-file').click()" 
+                                class="w-full py-1.5 px-2.5 rounded-[8px] border border-[#5856D6]/30 bg-white dark:bg-[#2C2C2E] text-[#5856D6] font-semibold text-[11px] truncate flex items-center justify-center space-x-1.5 cursor-pointer">
+                            <span x-text="fileNames.invoice ? '✓ ' + fileNames.invoice : '📂 Pilih Commercial Invoice'">📂 Pilih Commercial Invoice</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3. Packing List (P/L) -->
+                <div class="p-3.5 rounded-[14px] border-2 border-dashed border-[#34C759]/30 hover:border-[#34C759] bg-[#34C759]/5 transition-colors flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-bold text-slate-900 dark:text-white flex items-center space-x-1.5">
+                                <i data-lucide="package" class="w-4 h-4 text-[#34C759]"></i>
+                                <span>Packing List (P/L)</span>
+                            </span>
+                            <span class="text-[9px] px-1.5 py-0.5 rounded-[4px] bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158] font-bold">Wajib</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 mb-2">Diekstrak: Rincian barang, kemasan, klasifikasi HS Code BTKI.</p>
+                    </div>
+                    <div>
+                        <input type="file" id="bc20-pl-file" accept=".pdf,.xlsx,.xls,.png,.jpg,.jpeg,.doc,.docx" class="hidden" @change="updateFileName('pl', $event)">
+                        <button type="button" onclick="document.getElementById('bc20-pl-file').click()" 
+                                class="w-full py-1.5 px-2.5 rounded-[8px] border border-[#34C759]/30 bg-white dark:bg-[#2C2C2E] text-[#248A3D] dark:text-[#30D158] font-semibold text-[11px] truncate flex items-center justify-center space-x-1.5 cursor-pointer">
+                            <span x-text="fileNames.pl ? '✓ ' + fileNames.pl : '📂 Pilih Packing List'">📂 Pilih Packing List</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dokumen Pendukung Khusus (Accordion Opsional) -->
+            <div x-data="{ openDocs: false }" class="border-t border-black/5 dark:border-white/5 pt-3 text-xs">
+                <button type="button" @click="openDocs = !openDocs" class="text-[12px] font-semibold text-[#007AFF] hover:underline flex items-center space-x-1 cursor-pointer">
+                    <i data-lucide="chevron-right" class="w-3.5 h-3.5 transition-transform" :class="openDocs ? 'rotate-90' : ''"></i>
+                    <span>Dokumen Pendukung Khusus & Perizinan Lartas (COO Form E, Polis Asuransi, Izin K/L) - Opsional</span>
+                </button>
+                <div x-show="openDocs" x-collapse class="mt-3 p-3 rounded-[12px] bg-slate-50 dark:bg-[#2C2C2E] border border-black/5 dark:border-white/10 space-y-2">
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 text-[11px]">Unggah Berkas Pendukung Tambahan (PDF/JPG/PNG)</label>
+                    <input type="file" id="bc20-other-file" multiple class="w-full text-xs text-slate-500 file:mr-3 file:py-1 file:px-2.5 file:rounded-[6px] file:border-0 file:text-[11px] file:font-semibold file:bg-[#007AFF]/10 file:text-[#007AFF]">
+                </div>
+            </div>
+
+            <!-- Action Bar: Tombol Scan & Ekstraksi -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-black/5 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02] -mx-5 -mb-5 p-4 rounded-b-2xl">
+                <div class="flex items-center space-x-2.5 text-xs">
+                    <div class="w-8 h-8 rounded-[8px] bg-[#007AFF]/12 text-[#007AFF] flex items-center justify-center shrink-0">
+                        <i data-lucide="cpu" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                        <span class="font-bold text-slate-900 dark:text-white block leading-tight">AI Document Parser & BTKI Classifier</span>
+                        <span class="text-[11px] text-slate-400">Membaca teks dari berkas, mendeteksi kargo, dan mengklasifikasikan pos tarif kepabeanan.</span>
+                    </div>
+                </div>
+
+                <button type="button" 
+                        @click="scanAndExtractFiles()" 
+                        :disabled="scanning" 
+                        class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-[12px] bg-[#007AFF] hover:bg-[#0071E3] text-white text-[12px] font-semibold transition-all shadow-xs active:scale-[0.98] disabled:opacity-50 cursor-pointer shrink-0">
+                    <template x-if="scanning">
+                        <span class="inline-flex items-center gap-2">
+                            <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            <span>Memindai & Mengekstrak...</span>
+                        </span>
+                    </template>
+                    <template x-if="!scanning">
+                        <span class="inline-flex items-center gap-2">
+                            <i data-lucide="sparkles" class="w-4 h-4"></i>
+                            <span>Pindai & Ekstrak Otomatis ke Formulir</span>
+                        </span>
+                    </template>
+                </button>
+            </div>
+
+            <!-- Banner Notifikasi Berhasil Ekstrak -->
+            <div x-show="scanned" x-cloak class="p-3.5 rounded-[12px] bg-[#34C759]/12 border border-[#34C759]/25 text-[#248A3D] dark:text-[#30D158] text-xs flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <i data-lucide="check-circle" class="w-4 h-4 text-[#34C759] shrink-0"></i>
+                    <span><strong>Berkas kargo berhasil diekstrak!</strong> Seluruh seksi formulir pabean di bawah telah terisi otomatis. Anda dapat meninjau, mengoreksi, atau menambahkan item secara manual sebelum submit ke CEISA 4.0.</span>
+                </div>
+                <button type="button" @click="scanned = false" class="text-slate-400 hover:text-slate-600 ml-2">&times;</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- PANEL 2: NOTIFIKASI JIKA DALAM MODE MANUAL -->
+    <div x-show="formMode === 'manual'" class="p-3.5 rounded-xl bg-slate-100 dark:bg-white/[0.04] border border-black/5 dark:border-white/10 text-xs text-slate-600 dark:text-slate-300 flex items-center gap-2.5 mb-6">
+        <i data-lucide="info" class="w-4 h-4 text-[#007AFF] shrink-0"></i>
+        <span><strong>Mode Input Manual Aktif</strong> — Anda dapat mengisi atau merevisi seluruh 10 seksi formulir kepabeanan BC 2.0 di bawah secara mandiri.</span>
     </div>
 
     <form action="{{ route('bc20.store') }}" method="POST" id="bc20Form" class="space-y-6">
@@ -507,6 +669,143 @@
         } catch (e) {
             console.error('Error lookup HS row:', e);
         }
+    }
+
+    function bc20FormManager() {
+        return {
+            formMode: '{{ $selectedShipment ? "auto" : "auto" }}',
+            scanning: false,
+            scanned: false,
+            fileNames: { bl: '', invoice: '', pl: '', other: '' },
+            updateFileName(type, event) {
+                const files = event.target.files;
+                if (files && files[0]) {
+                    this.fileNames[type] = files[0].name;
+                }
+            },
+            async scanAndExtractFiles() {
+                const blInput = document.getElementById('bc20-bl-file');
+                const invInput = document.getElementById('bc20-inv-file');
+                const plInput = document.getElementById('bc20-pl-file');
+
+                if (!blInput?.files?.length && !invInput?.files?.length && !plInput?.files?.length) {
+                    alert('Silakan pilih minimal 1 berkas dokumen (B/L, Commercial Invoice, atau Packing List) untuk dipindai.');
+                    return;
+                }
+
+                this.scanning = true;
+
+                const formData = new FormData();
+                if (blInput?.files?.[0]) formData.append('bl_file', blInput.files[0]);
+                if (invInput?.files?.[0]) formData.append('invoice_file', invInput.files[0]);
+                if (plInput?.files?.[0]) formData.append('packing_list_file', plInput.files[0]);
+
+                try {
+                    const response = await fetch('{{ route('core.document.parse-documents') }}', {
+                        method: 'POST',
+                        headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                        body: formData
+                    });
+                    const res = await response.json();
+                    if (res.status === 'success' && res.data) {
+                        this.applyExtractedData(res.data);
+                        this.scanned = true;
+                        setTimeout(() => {
+                            document.getElementById('bc20Form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 250);
+                    } else {
+                        alert(res.message || 'Gagal memindai dokumen.');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Terjadi kesalahan koneksi saat memindai dokumen.');
+                } finally {
+                    this.scanning = false;
+                }
+            },
+            applyExtractedData(d) {
+                if (d.vessel_name) {
+                    const el = document.querySelector('[name="nama_sarana_pengangkut"]');
+                    if (el) el.value = d.vessel_name + (d.voyage_number ? ' VOY. ' + d.voyage_number : '');
+                }
+                if (d.bl_number) {
+                    const el = document.querySelector('[name="bl_no"]');
+                    if (el) el.value = d.bl_number;
+                }
+                if (d.invoice_number) {
+                    const el = document.querySelector('[name="invoice_no"]');
+                    if (el) el.value = d.invoice_number;
+                }
+                if (d.invoice_date) {
+                    const el = document.querySelector('[name="invoice_date"]');
+                    if (el) el.value = d.invoice_date;
+                }
+                if (d.port_of_loading) {
+                    const el = document.querySelector('[name="pelabuhan_muat"]');
+                    if (el) el.value = d.port_of_loading;
+                }
+                if (d.port_of_discharge) {
+                    const el = document.querySelector('[name="pelabuhan_bongkar"]');
+                    if (el) el.value = d.port_of_discharge;
+                }
+                if (d.supplier_name) {
+                    const el = document.querySelector('[name="supplier_nama"]');
+                    if (el) el.value = d.supplier_name;
+                }
+                if (d.supplier_country) {
+                    const el = document.querySelector('[name="supplier_negara"]');
+                    if (el) el.value = d.supplier_country;
+                }
+                if (d.currency) {
+                    const el = document.querySelector('[name="kode_valuta"]');
+                    if (el) el.value = d.currency;
+                }
+                if (d.ndbm_kurs) {
+                    const el = document.getElementById('ndbm_kurs');
+                    if (el) el.value = parseFloat(d.ndbm_kurs).toFixed(2);
+                }
+                if (d.total_fob) {
+                    const el = document.getElementById('fob');
+                    if (el) el.value = parseFloat(d.total_fob).toFixed(2);
+                }
+                if (d.freight) {
+                    const el = document.getElementById('freight');
+                    if (el) el.value = parseFloat(d.freight).toFixed(2);
+                }
+                if (d.asuransi) {
+                    const el = document.getElementById('asuransi');
+                    if (el) el.value = parseFloat(d.asuransi).toFixed(2);
+                }
+                if (d.total_bruto) {
+                    const el = document.querySelector('[name="bruto"]');
+                    if (el) el.value = parseFloat(d.total_bruto).toFixed(2);
+                }
+                if (d.total_netto) {
+                    const el = document.querySelector('[name="netto"]');
+                    if (el) el.value = parseFloat(d.total_netto).toFixed(2);
+                }
+
+                // Populate HS code / barang jika ada
+                if (d.items && d.items.length > 0) {
+                    const firstItem = d.items[0];
+                    const hsEl = document.querySelector('[name="barang[0][hs_code]"]');
+                    const descEl = document.querySelector('[name="barang[0][uraian]"]');
+                    const qtyEl = document.querySelector('[name="barang[0][jumlah]"]');
+                    const fobEl = document.querySelector('[name="barang[0][fob]"]');
+                    if (hsEl && firstItem.hs_code) {
+                        hsEl.value = firstItem.hs_code.replace(/[^0-9]/g, '');
+                        lookupHsRow(hsEl, 0);
+                    }
+                    if (descEl && firstItem.description) descEl.value = firstItem.description;
+                    if (qtyEl && firstItem.qty) qtyEl.value = firstItem.qty;
+                    if (fobEl && firstItem.cif_price) fobEl.value = parseFloat(firstItem.cif_price).toFixed(2);
+                }
+
+                if (typeof calculateCif === 'function') {
+                    calculateCif();
+                }
+            }
+        };
     }
 
     document.addEventListener('DOMContentLoaded', calculateCif);
