@@ -123,13 +123,58 @@ class McpCustomsAgentController extends Controller
     }
 
     /**
+     * Otentikasi Token Akses MCP dari Request
+     * Mendukung: Header "Authorization: Bearer <token>", "?token=<token>", atau query/body "api_key".
+     * Mengembalikan:
+     * - McpCredential jika token valid
+     * - false jika token dikirim tetapi invalid/kedaluwarsa/dicabut
+     * - null jika tidak ada token yang dikirim (diizinkan untuk session internal dashboard GENIE)
+     */
+    protected function authenticateMcpToken(Request $request): false|null|\App\Models\McpCredential
+    {
+        $rawToken = $request->bearerToken()
+            ?? $request->query('token')
+            ?? $request->query('api_key')
+            ?? $request->input('token')
+            ?? $request->header('X-MCP-Token');
+
+        if (!$rawToken) {
+            return null; // Session internal atau unauthenticated call
+        }
+
+        $token = trim((string) $rawToken);
+        if (str_starts_with($token, 'Bearer ')) {
+            $token = substr($token, 7);
+        }
+
+        $hash = hash('sha256', $token);
+        $credential = \App\Models\McpCredential::where('token_hash', $hash)->first();
+
+        if ($credential && $credential->isValid()) {
+            $credential->markAsUsed();
+            return $credential;
+        }
+
+        return false; // Token diberikan tetapi tidak sah atau sudah dicabut
+    }
+
+    /**
      * MCP Server-Sent Events (SSE) Transport Endpoint
      * Standar resmi Anthropic MCP HTTP SSE Transport untuk Cursor, Claude Desktop Remote, dan Antigravity.
      */
     public function sse(Request $request)
     {
+        $auth = $this->authenticateMcpToken($request);
+        if ($auth === false) {
+            return response()->json([
+                'error' => 'Unauthorized: Token MCP tidak valid atau telah dicabut.',
+                'status' => 401,
+            ], 401);
+        }
+
         $sessionId = (string) \Illuminate\Support\Str::uuid();
-        $postEndpoint = url("/api/mcp/execute?sessionId={$sessionId}");
+        $tokenParam = $request->query('token') ? '&token=' . urlencode($request->query('token')) : '';
+        $postEndpoint = url("/api/mcp/execute?sessionId={$sessionId}{$tokenParam}");
 
         $response = new \Symfony\Component\HttpFoundation\StreamedResponse(function () use ($postEndpoint) {
             echo "event: endpoint\n";
@@ -151,6 +196,18 @@ class McpCustomsAgentController extends Controller
      */
     public function execute(Request $request): JsonResponse
     {
+        $auth = $this->authenticateMcpToken($request);
+        if ($auth === false) {
+            return response()->json([
+                'jsonrpc' => '2.0',
+                'id' => $request->input('id'),
+                'error' => [
+                    'code' => -32001,
+                    'message' => 'Unauthorized: Token MCP tidak valid atau telah dicabut.',
+                ],
+            ], 401);
+        }
+
         $id = $request->input('id');
         $method = $request->input('method') ?? ($request->has('tool') ? 'tools/call' : null);
         $params = $request->input('params', []);
@@ -238,6 +295,20 @@ class McpCustomsAgentController extends Controller
                             'message' => "Tool MCP '{$toolName}' tidak ditemukan.",
                         ],
                     ], 404);
+            }
+
+            // Catat log audit pemanggilan tool ke database
+            try {
+                \App\Models\McpCallLog::create([
+                    'credential_id' => ($auth instanceof \App\Models\McpCredential) ? $auth->id : null,
+                    'tool' => (string) $toolName,
+                    'args' => is_array($args) ? $args : [],
+                    'result_status' => isset($toolResult['error']) ? 'ERROR' : 'SUCCESS',
+                    'provider' => ($auth instanceof \App\Models\McpCredential) ? $auth->provider_hint : 'internal-web',
+                    'created_at' => now(),
+                ]);
+            } catch (\Throwable $e) {
+                Log::warning('Gagal mencatat MCP call log: ' . $e->getMessage());
             }
 
             // Standar format respon MCP tool call

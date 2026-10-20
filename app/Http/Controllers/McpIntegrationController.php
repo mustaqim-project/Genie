@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Api\McpCustomsAgentController;
+use App\Models\McpCallLog;
+use App\Models\McpCredential;
 use App\Models\Shipment;
+use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
@@ -21,7 +25,6 @@ class McpIntegrationController extends Controller
      */
     public function index(Request $request)
     {
-        // Cek otorisasi atau tampilkan untuk admin/staff operasional
         if (auth()->check() && Gate::has('system.settings')) {
             Gate::authorize('system.settings');
         }
@@ -39,6 +42,16 @@ class McpIntegrationController extends Controller
         $executeEndpoint = url('/api/mcp/execute');
         $toolsEndpoint = url('/api/mcp/tools');
         $apiBaseUrl = url('/api/mcp');
+
+        // Daftar Token Akses MCP
+        $tokens = McpCredential::with('user')->latest()->get();
+        $activeTokensCount = $tokens->filter(fn($t) => $t->isValid())->count();
+
+        // Audit Logs Pemanggilan MCP
+        $logs = McpCallLog::with('credential')->latest('created_at')->take(15)->get();
+        $totalCallsThisMonth = McpCallLog::whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count();
 
         // Contoh teks Packing List otentik untuk 1-click testing di UI
         $samplePackingList = "INVOICE NO: HZ20240519 DATE: 19-05-2024
@@ -71,7 +84,64 @@ COMMODITY & PACKING LIST:
             'toolsEndpoint',
             'apiBaseUrl',
             'samplePackingList',
-            'recentShipments'
+            'recentShipments',
+            'tokens',
+            'activeTokensCount',
+            'logs',
+            'totalCallsThisMonth'
         ));
+    }
+
+    /**
+     * Buat Kunci Akses MCP baru untuk Klien AI (Claude / Cursor / Antigravity / dsb)
+     */
+    public function storeToken(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name'          => ['required', 'string', 'max:100'],
+            'provider_hint' => ['required', 'string', 'in:all,claude,cursor,antigravity,openai,gemini,python,custom'],
+            'scope_roles'   => ['required', 'array', 'min:1'],
+            'scope_roles.*' => ['string', 'max:50'],
+            'expires_in'    => ['nullable', 'string', 'in:never,30_days,90_days,1_year'],
+        ]);
+
+        $user = auth()->user() ?? User::first();
+        if (!$user) {
+            return back()->with('error', 'User aktif tidak ditemukan untuk asosiasi token MCP.');
+        }
+
+        $expiresAt = match ($validated['expires_in'] ?? 'never') {
+            '30_days' => now()->addDays(30),
+            '90_days' => now()->addDays(90),
+            '1_year'  => now()->addYear(),
+            default   => null,
+        };
+
+        $result = McpCredential::generateToken(
+            user: $user,
+            name: $validated['name'],
+            scopes: $validated['scope_roles'],
+            providerHint: $validated['provider_hint'],
+            expiresAt: $expiresAt
+        );
+
+        return redirect()
+            ->route('settings.mcp')
+            ->with('success', 'Token Akses MCP berhasil dibuat! Harap simpan token ini sekarang, token hanya ditampilkan satu kali.')
+            ->with('plain_token', $result['token'])
+            ->with('token_name', $result['model']->name);
+    }
+
+    /**
+     * Cabut / Nonaktifkan Kunci Akses MCP
+     */
+    public function revokeToken(Request $request, string $id): RedirectResponse
+    {
+        $token = McpCredential::findOrFail($id);
+        $token->update(['revoked_at' => now()]);
+
+        return redirect()
+            ->route('settings.mcp')
+            ->with('success', "Akses token '{$token->name}' berhasil dicabut.");
     }
 }

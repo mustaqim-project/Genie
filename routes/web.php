@@ -200,6 +200,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [AiAgentController::class, 'index'])->name('index');
     });
     Route::get('/settings/integrations/mcp', [\App\Http\Controllers\McpIntegrationController::class, 'index'])->name('settings.mcp');
+    Route::post('/settings/integrations/mcp/tokens', [\App\Http\Controllers\McpIntegrationController::class, 'storeToken'])->name('settings.mcp.tokens.store');
+    Route::delete('/settings/integrations/mcp/tokens/{id}', [\App\Http\Controllers\McpIntegrationController::class, 'revokeToken'])->name('settings.mcp.tokens.revoke');
     Route::get('/mcp', [\App\Http\Controllers\McpIntegrationController::class, 'index'])->name('mcp.hub');
 
     // 8. Setting & Konfigurasi Gateway (RBAC & User Management)
