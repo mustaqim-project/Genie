@@ -14,6 +14,7 @@ use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\HrmController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\StaffPortalController;
 use App\Http\Controllers\TrafficController;
 use Illuminate\Support\Facades\Route;
 
@@ -86,18 +87,42 @@ Route::middleware('auth')->group(function () {
         Route::get('/{id}', [TrafficController::class, 'show'])->name('show');
     });
 
+    // 2.5 Staff Personal Portal & Attendance Hub (Employee Self-Service / ESS)
+    Route::get('/hrm/portal', [StaffPortalController::class, 'index'])->name('hrm.portal');
+    Route::get('/my-portal', fn() => redirect()->route('hrm.portal'))->name('my-portal');
+    Route::post('/hrm/portal/clock-in', [StaffPortalController::class, 'clockIn'])->name('hrm.portal.clock-in');
+    Route::post('/hrm/portal/clock-out', [StaffPortalController::class, 'clockOut'])->name('hrm.portal.clock-out');
+    Route::post('/hrm/portal/corrections', [StaffPortalController::class, 'storeCorrection'])->name('hrm.portal.corrections.store');
+    Route::post('/hrm/portal/face-register', [StaffPortalController::class, 'registerFace'])->name('hrm.portal.face-register');
+    Route::post('/hrm/portal/face-verify', [StaffPortalController::class, 'verifyFace'])->name('hrm.portal.face-verify');
+    Route::get('/hrm/portal/payslips/{payslip}', [StaffPortalController::class, 'showPayslip'])->name('hrm.portal.payslips.show');
+
     // 3. HRM (Kepegawaian, Presensi Geofencing GPS & Wajah, Cuti, Payroll, Aset)
     Route::prefix('hrm')->name('hrm.')->group(function () {
         Route::get('/', [HrmController::class, 'index'])->name('index');
 
         // Pegawai & Kontrak
+        Route::get('/employees/export', [HrmController::class, 'exportEmployees'])->name('employees.export');
+        Route::get('/employees/template', [HrmController::class, 'employeeTemplate'])->name('employees.template');
+        Route::post('/employees/import/preview', [HrmController::class, 'previewEmployeeImport'])->name('employees.import-preview');
+        Route::post('/employees/import/execute', [HrmController::class, 'executeEmployeeImport'])->name('employees.import-execute');
         Route::post('/employees', [HrmController::class, 'storeEmployee'])->name('employees.store');
         Route::get('/employees/{employee}', [HrmController::class, 'showEmployee'])->name('employees.show');
         Route::put('/employees/{employee}', [HrmController::class, 'updateEmployee'])->name('employees.update');
+        Route::delete('/employees/{employee}', [HrmController::class, 'destroyEmployee'])->name('employees.destroy');
 
         // Presensi & Geofencing GPS Wajah UU PDP
+        Route::get('/attendance/export', [HrmController::class, 'exportAttendance'])->name('attendance.export');
+        Route::get('/attendance/template', [HrmController::class, 'attendanceTemplate'])->name('attendance.template');
+        Route::post('/attendance/import/preview', [HrmController::class, 'previewAttendanceImport'])->name('attendance.import-preview');
+        Route::post('/attendance/import/execute', [HrmController::class, 'executeAttendanceImport'])->name('attendance.import-execute');
         Route::post('/attendance/clock', [HrmController::class, 'clockAttendance'])->name('attendance.clock');
         Route::post('/attendance/consent', [HrmController::class, 'storeConsent'])->name('attendance.consent');
+
+        // Koreksi Presensi (Attendance Corrections)
+        Route::post('/attendance/corrections', [HrmController::class, 'storeCorrection'])->name('attendance.corrections.store');
+        Route::post('/attendance/corrections/{correction}/approve', [HrmController::class, 'approveCorrection'])->name('attendance.corrections.approve');
+        Route::post('/attendance/corrections/{correction}/reject', [HrmController::class, 'rejectCorrection'])->name('attendance.corrections.reject');
 
         // Cuti & Alih Tugas Otomatis PIC Forwarder
         Route::post('/leaves', [HrmController::class, 'storeLeave'])->name('leaves.store');
@@ -109,8 +134,15 @@ Route::middleware('auth')->group(function () {
         Route::post('/overtime/{overtimeRequest}/approve', [HrmController::class, 'approveOvertime'])->name('overtime.approve');
         Route::post('/overtime/{overtimeRequest}/reject', [HrmController::class, 'rejectOvertime'])->name('overtime.reject');
         Route::post('/cash-advances', [HrmController::class, 'storeCashAdvance'])->name('cash-advances.store');
+        Route::post('/loans/{loan}/cancel', [HrmController::class, 'cancelLoan'])->name('loans.cancel');
 
         // Payroll Engine
+        Route::get('/payrolls/create', [HrmController::class, 'createPayroll'])->name('payrolls.create');
+        Route::post('/payrolls', [HrmController::class, 'storePayroll'])->name('payrolls.store');
+        Route::get('/payrolls/{payrollRun}', [HrmController::class, 'showPayroll'])->name('payrolls.show');
+        Route::get('/payrolls/{payrollRun}/export-excel', [HrmController::class, 'exportPayrollExcel'])->name('payrolls.export-excel');
+        Route::get('/payrolls/{payrollRun}/export-bank', [HrmController::class, 'exportPayrollBankCsv'])->name('payrolls.export-bank');
+        Route::get('/payslips/{payslip}/print', [HrmController::class, 'printPayslip'])->name('payslips.print');
         Route::post('/payroll/generate', [HrmController::class, 'generatePayrollRun'])->name('payroll.generate');
         Route::post('/payroll/{payrollRun}/approve', [HrmController::class, 'approvePayrollRun'])->name('payroll.approve');
         Route::post('/payroll/{payrollRun}/disburse', [HrmController::class, 'disbursePayrollRun'])->name('payroll.disburse');
@@ -121,8 +153,17 @@ Route::middleware('auth')->group(function () {
         Route::post('/assets/{asset}/assign', [HrmController::class, 'assignAsset'])->name('assets.assign');
         Route::post('/assets/assignments/{assignment}/return', [HrmController::class, 'returnAsset'])->name('assets.return');
 
-        // Lokasi Geofence & Shift
+        // Lokasi Geofence & Shift & Penjadwalan
         Route::post('/locations', [HrmController::class, 'storeLocation'])->name('locations.store');
+        Route::put('/locations/{location}', [HrmController::class, 'updateLocation'])->name('locations.update');
+        Route::delete('/locations/{location}', [HrmController::class, 'destroyLocation'])->name('locations.destroy');
+
+        Route::post('/shifts', [HrmController::class, 'storeShift'])->name('shifts.store');
+        Route::put('/shifts/{shift}', [HrmController::class, 'updateShift'])->name('shifts.update');
+        Route::delete('/shifts/{shift}', [HrmController::class, 'destroyShift'])->name('shifts.destroy');
+
+        Route::post('/schedules', [HrmController::class, 'storeSchedule'])->name('schedules.store');
+        Route::delete('/schedules/{schedule}', [HrmController::class, 'destroySchedule'])->name('schedules.destroy');
     });
 
     // 4. CRM

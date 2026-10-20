@@ -261,7 +261,7 @@
                 <th width="35%">Uraian Barang, Merk, Tipe, Spek</th>
                 <th width="12%">Negara Asal</th>
                 <th width="12%" class="text-right">Jumlah & Berat</th>
-                <th width="22%" class="text-right">Nilai Pabean (CIF USD)</th>
+                <th width="22%" class="text-right">Nilai Pabean (CIF {{ $shipment->currency ?? 'USD' }})</th>
             </tr>
         </thead>
         <tbody>

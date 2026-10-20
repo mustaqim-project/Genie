@@ -19,7 +19,22 @@ class Shift extends Model
         'name',
         'start_time',
         'end_time',
+        'grace_period_minutes',
+        'is_night_shift',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'grace_period_minutes' => 'integer',
+            'is_night_shift' => 'boolean',
+        ];
+    }
+
+    public function schedules()
+    {
+        return $this->hasMany(EmployeeSchedule::class, 'shift_id');
+    }
 
     public function getFormattedHoursAttribute(): string
     {

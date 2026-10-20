@@ -295,6 +295,7 @@ class Shipment extends Model
         $isFullyMatched = $allDocsPresent && $valueMatch && $weightMatch && $packagesMatch;
 
         return [
+            'currency' => $this->kode_valuta ?? 'USD',
             'is_matched' => $isFullyMatched,
             'all_docs_present' => $allDocsPresent,
             'has_invoice' => $hasInvoice,
@@ -317,7 +318,22 @@ class Shipment extends Model
      */
     public function getEstimatedTaxesAttribute(): array
     {
-        $kurs = (float) ($this->ndbm_kurs ?? 16200);
+        $valuta = $this->kode_valuta ?? 'USD';
+        $kurs = (float) ($this->ndbm_kurs ?? 0);
+        if ($kurs <= 0) {
+            $rates = [
+                'USD' => 15850.00,
+                'EUR' => 17200.00,
+                'CNY' => 2200.00,
+                'JPY' => 105.00,
+                'SGD' => 12100.00,
+                'AUD' => 10400.00,
+                'MYR' => 3600.00,
+                'GBP' => 20200.00,
+            ];
+            $kurs = $rates[$valuta] ?? 15850.00;
+        }
+
         $cifValuta = (float) ($this->total_nilai_valuta ?? 0);
         $cifIdr = $cifValuta * $kurs;
 

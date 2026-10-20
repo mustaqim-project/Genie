@@ -158,8 +158,8 @@
         <h2 class="text-base font-bold text-slate-900 mb-4">Ringkasan Nilai Pabean Ekspor (FOB)</h2>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs mb-6">
             <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                <span class="text-slate-400 block font-medium">Devisa Ekspor FOB (USD)</span>
-                <span class="font-mono font-bold text-slate-800 text-sm">USD {{ number_format($bc30->total_nilai, 2) }}</span>
+                <span class="text-slate-400 block font-medium">Devisa Ekspor FOB ({{ $bc30->kode_valuta }})</span>
+                <span class="font-mono font-bold text-slate-800 text-sm">{{ $bc30->kode_valuta }} {{ number_format($bc30->total_nilai, 2) }}</span>
             </div>
             <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
                 <span class="text-slate-400 block font-medium">Kurs KMK (NDBM)</span>
@@ -228,7 +228,7 @@
                         <th class="py-2.5 px-3">HS Code (BTKI)</th>
                         <th class="py-2.5 px-3">Uraian Barang</th>
                         <th class="py-2.5 px-3">Jumlah Satuan</th>
-                        <th class="py-2.5 px-3">FOB (USD)</th>
+                        <th class="py-2.5 px-3">FOB ({{ $bc30->kode_valuta }})</th>
                         <th class="py-2.5 px-3">Nilai Ekspor (IDR)</th>
                     </tr>
                 </thead>
@@ -258,7 +258,7 @@
                                 @endif
                             </td>
                             <td class="py-2.5 px-3 font-mono">{{ $item['jumlahSatuan'] ?? 0 }} {{ $item['kodeSatuanBarang'] ?? '' }}</td>
-                            <td class="py-2.5 px-3 font-mono">USD {{ number_format($item['fob'] ?? 0, 2) }}</td>
+                            <td class="py-2.5 px-3 font-mono">{{ $bc30->kode_valuta }} {{ number_format($item['fob'] ?? 0, 2) }}</td>
                             <td class="py-2.5 px-3 font-mono font-bold text-slate-800">Rp {{ number_format($item['fobRupiah'] ?? 0, 0, ',', '.') }}</td>
                         </tr>
                     @empty

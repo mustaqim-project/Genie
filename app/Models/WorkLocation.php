@@ -21,6 +21,8 @@ class WorkLocation extends Model
         'lat',
         'lng',
         'radius_m',
+        'address',
+        'is_active',
         'valid_from',
         'valid_to',
     ];
@@ -31,6 +33,7 @@ class WorkLocation extends Model
             'lat' => 'float',
             'lng' => 'float',
             'radius_m' => 'integer',
+            'is_active' => 'boolean',
             'valid_from' => 'date',
             'valid_to' => 'date',
         ];

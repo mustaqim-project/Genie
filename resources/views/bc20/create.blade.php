@@ -301,8 +301,8 @@
                 </div>
                 <div class="p-3 rounded-xl bg-blue-50 border border-blue-200">
                     <span class="block text-[10px] font-bold text-blue-700 uppercase">Total CIF Pabean</span>
-                    <span id="cifDisplay" class="font-mono font-black text-sm text-blue-900">USD 26.350,00</span>
-                    <div id="cifIdrDisplay" class="text-[10px] text-blue-600 font-medium">Rp 426.870.000</div>
+                    <span id="cifDisplay" class="font-mono font-black text-sm text-blue-900">{{ $selectedShipment->currency ?? 'USD' }} {{ number_format(($selectedShipment->total_nilai_valuta ?? 26350.00), 2, ',', '.') }}</span>
+                    <div id="cifIdrDisplay" class="text-[10px] text-blue-600 font-medium">Rp {{ number_format(($selectedShipment->total_nilai_idr ?? 426870000), 0, ',', '.') }}</div>
                 </div>
             </div>
         </div>
@@ -366,7 +366,7 @@
                                    class="w-full px-3 py-1.5 rounded-lg border border-slate-200 font-mono" required>
                         </div>
                         <div>
-                            <label class="block font-semibold text-slate-700 mb-1">CIF Barang (USD)</label>
+                            <label class="block font-semibold text-slate-700 mb-1">CIF Barang ({{ $selectedShipment->currency ?? 'USD' }})</label>
                             <input type="number" step="0.01" name="barang[{{ $idx }}][cif]" 
                                    value="{{ $item->nilai_fob ?? 12500.00 }}" 
                                    class="w-full px-3 py-1.5 rounded-lg border border-slate-200 font-mono font-bold" required>

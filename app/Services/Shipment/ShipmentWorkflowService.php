@@ -47,7 +47,11 @@ class ShipmentWorkflowService
         $freeTimeExpiredAt = (clone $eta)->addDays($freeTimeDays);
 
         $valuta = $data['kode_valuta'] ?? $data['currency'] ?? 'USD';
-        $ndbm = (float) ($data['ndbm_kurs'] ?? 16200);
+        $ndbm = (float) ($data['ndbm_kurs'] ?? 0);
+        if ($ndbm <= 0) {
+            $kursInfo = $this->extractionService->getKursService()->getActiveKurs($valuta);
+            $ndbm = (float) ($kursInfo['nilai_kurs'] ?? ($valuta === 'CNY' ? 2200.0 : 15850.0));
+        }
         $nilaiValuta = (float) ($data['total_nilai_valuta'] ?? $data['total_cif'] ?? 25000);
         $nilaiIdr = $nilaiValuta * $ndbm;
 
@@ -195,10 +199,26 @@ class ShipmentWorkflowService
      */
     public function reSyncShipmentFromDocuments(Shipment $shipment): array
     {
-        $docs = $shipment->documents()->whereNotNull('nama_file')->get();
-        $fileNames = $docs->pluck('nama_file')->toArray();
+        $docs = $shipment->documents()->whereNotNull('file_path')->get();
+        $filesToExtract = [];
+        foreach ($docs as $d) {
+            $fullPath = storage_path('app/public/' . $d->file_path);
+            if (file_exists($fullPath)) {
+                $filesToExtract[$d->jenis_dokumen] = $fullPath;
+            } else {
+                $filesToExtract[$d->jenis_dokumen] = $d->nama_file;
+            }
+        }
 
-        $extracted = $this->extractionService->extractFromDocuments($fileNames, $shipment->client_id);
+        $extracted = $this->extractionService->extractFromDocuments($filesToExtract, $shipment->client_id);
+
+        $currency = $extracted['currency'] ?? ($shipment->kode_valuta ?? 'USD');
+        $cifValuta = (float) ($extracted['total_cif'] ?? $shipment->total_nilai_valuta);
+        $kurs = (float) ($extracted['ndbm_kurs'] ?? ($shipment->ndbm_kurs ?? 0));
+        if ($kurs <= 0) {
+            $kursInfo = $this->extractionService->getKursService()->getActiveKurs($currency);
+            $kurs = (float) ($kursInfo['nilai_kurs'] ?? ($currency === 'CNY' ? 2200.0 : 15850.0));
+        }
 
         $shipment->update([
             'nomor_bl_awb' => $extracted['bl_number'] ?? $shipment->nomor_bl_awb,
@@ -213,7 +233,10 @@ class ShipmentWorkflowService
             'jenis_kemasan' => $extracted['jenis_kemasan'] ?? $shipment->jenis_kemasan,
             'total_bruto' => $extracted['total_bruto'] ?? $shipment->total_bruto,
             'total_netto' => $extracted['total_netto'] ?? $shipment->total_netto,
-            'total_nilai_valuta' => $extracted['total_cif'] ?? $shipment->total_nilai_valuta,
+            'kode_valuta' => $currency,
+            'ndbm_kurs' => $kurs,
+            'total_nilai_valuta' => $cifValuta,
+            'total_nilai_idr' => round($cifValuta * $kurs),
             'status_tahap' => 'HS_DETECTED',
         ]);
 
@@ -356,6 +379,17 @@ class ShipmentWorkflowService
 
         // 3. Jalankan parsing cerdas konten packing list jika teks tersedia
         if (!empty($textToProcess)) {
+            // Deteksi juga mata uang dan nilai komersial langsung dari dokumen
+            $detectedCommercial = $this->extractionService->detectCommercialValues($textToProcess, ($shipment->type ?? '') === 'EXPORT');
+            if (!empty($detectedCommercial['currency'])) {
+                $commercial = $detectedCommercial;
+                $shipment->update([
+                    'kode_valuta' => $detectedCommercial['currency'],
+                    'ndbm_kurs' => $detectedCommercial['kurs'],
+                    'total_nilai_valuta' => $detectedCommercial['value'],
+                    'total_nilai_idr' => round($detectedCommercial['value'] * $detectedCommercial['kurs']),
+                ]);
+            }
             $extractedItems = $this->extractionService->detectCargoItems($textToProcess, $shipment->type ?? 'IMPORT', $packages, $commercial);
         }
 
@@ -388,9 +422,29 @@ class ShipmentWorkflowService
             ]);
         }
 
-        $shipment->update([
-            'status_tahap' => 'HS_DETECTED',
-        ]);
+        $itemsSumFob = (float) $shipment->items()->sum('nilai_fob');
+        if ($itemsSumFob > 0) {
+            $totalCif = max($itemsSumFob, (float) $shipment->total_nilai_valuta);
+            $shipment->update([
+                'total_nilai_valuta' => $totalCif,
+                'total_nilai_idr' => round($totalCif * (float) $shipment->ndbm_kurs),
+                'status_tahap' => 'HS_DETECTED',
+            ]);
+        } else {
+            $shipment->update([
+                'status_tahap' => 'HS_DETECTED',
+            ]);
+        }
+
+        // Sinkronkan dokumen CEISA pabean jika sudah dibuat
+        if ($shipment->ceisaDocument) {
+            $shipment->ceisaDocument->update([
+                'kode_valuta' => $shipment->kode_valuta,
+                'ndbm_kurs' => $shipment->ndbm_kurs,
+                'total_nilai' => $shipment->total_nilai_valuta,
+                'total_nilai_idr' => $shipment->total_nilai_idr,
+            ]);
+        }
 
         // 5. Otomatis sinkronkan dan buat slot perizinan dokumen tambahan (Lartas)
         app(\App\Services\Ceisa\CeisaHsCodeService::class)->verifyPackingList($shipment);

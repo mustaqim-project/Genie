@@ -25,6 +25,11 @@ class AttendanceLog extends Model
         'location_id',
         'face_match',
         'valid',
+        'photo_url',
+        'notes',
+        'is_geofenced',
+        'distance_m',
+        'device_info',
     ];
 
     protected function casts(): array
@@ -35,6 +40,8 @@ class AttendanceLog extends Model
             'lng' => 'float',
             'face_match' => 'float',
             'valid' => 'boolean',
+            'is_geofenced' => 'boolean',
+            'distance_m' => 'integer',
         ];
     }
 

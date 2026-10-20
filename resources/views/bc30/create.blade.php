@@ -264,7 +264,7 @@
                            class="w-full px-3 py-2 rounded-xl border border-slate-200 font-mono font-bold text-emerald-700" required oninput="calculateFob()">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Total Nilai FOB (USD) *</label>
+                    <label class="block font-semibold text-slate-700 mb-1">Total Nilai FOB ({{ $selectedShipment->currency ?? 'USD' }}) *</label>
                     <input type="number" step="0.01" name="fob" id="fob" 
                            value="{{ old('fob', $selectedShipment->total_cif ?? 18000.00) }}" 
                            class="w-full px-3 py-2 rounded-xl border border-slate-200 font-mono font-bold text-indigo-700" required oninput="calculateFob()">
@@ -343,7 +343,7 @@
                                    class="w-full px-3 py-1.5 rounded-lg border border-slate-200 font-mono" required>
                         </div>
                         <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Nilai FOB (USD)</label>
+                            <label class="block font-semibold text-slate-700 mb-1">Nilai FOB ({{ $selectedShipment->currency ?? 'USD' }})</label>
                             <input type="number" step="0.01" name="barang[{{ $idx }}][fob]" 
                                    value="{{ $item->nilai_fob ?? 18000.00 }}" 
                                    class="w-full px-3 py-1.5 rounded-lg border border-slate-200 font-mono font-bold" required>

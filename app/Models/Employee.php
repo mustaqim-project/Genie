@@ -28,6 +28,17 @@ class Employee extends Model
         'start_date',
         'status',
         'base_salary',
+        'bank_name',
+        'bank_account_number',
+        'bank_account_holder',
+        'bpjs_tk_number',
+        'bpjs_kes_number',
+        'tax_ptkp_status',
+        'face_data',
+        'photo_url',
+        'phone',
+        'emergency_contact_name',
+        'emergency_contact_phone',
     ];
 
     protected function casts(): array
@@ -192,5 +203,36 @@ class Employee extends Model
     {
         $consent = $this->biometricConsent;
         return $consent ? $consent->isValid() : false;
+    }
+
+    public function corrections(): HasMany
+    {
+        return $this->hasMany(AttendanceCorrection::class, 'employee_id');
+    }
+
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(EmployeeSchedule::class, 'employee_id');
+    }
+
+    public function todayAttendance(): HasOne
+    {
+        return $this->hasOne(AttendanceLog::class, 'employee_id')
+            ->whereDate('at', now()->toDateString())
+            ->where('kind', 'CLOCK_IN')
+            ->latest('at');
+    }
+
+    public function todayAttendanceOut(): HasOne
+    {
+        return $this->hasOne(AttendanceLog::class, 'employee_id')
+            ->whereDate('at', now()->toDateString())
+            ->where('kind', 'CLOCK_OUT')
+            ->latest('at');
+    }
+
+    public function hasFaceRegistered(): bool
+    {
+        return !empty($this->face_data) || !empty($this->photo_url);
     }
 }

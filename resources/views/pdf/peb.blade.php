@@ -258,7 +258,7 @@
                 <th width="35%">Uraian Barang Ekspor</th>
                 <th width="12%">Negara Tujuan</th>
                 <th width="14%" class="text-right">Jumlah / Netto (Kg)</th>
-                <th width="20%" class="text-right">Nilai FOB (USD)</th>
+                <th width="20%" class="text-right">Nilai FOB ({{ $shipment->currency ?? 'USD' }})</th>
             </tr>
         </thead>
         <tbody>

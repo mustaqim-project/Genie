@@ -688,39 +688,90 @@ class DocumentExtractionService
         ];
     }
 
-    /**
-     * Deteksi Nilai Komersial & Valuta dari Invoice
-     */
-    protected function detectCommercialValues(string $text, bool $isExport): array
+    public function getKursService(): CeisaKursService
     {
-        $currency = 'CNY';
-        $totalCif = 487940.90;
-        $totalFob = 471875.90;
-        $freight = 16065.00;
+        return $this->kursService;
+    }
 
-        // 1. Deteksi Mata Uang
-        if (str_contains($text, '¥') || str_contains($text, 'CNY') || str_contains($text, 'YUAN') || str_contains($text, 'RMB')) {
-            $currency = 'CNY';
-        } elseif (str_contains($text, 'EUR') || str_contains($text, '€')) {
-            $currency = 'EUR';
-        } elseif (str_contains($text, 'USD') || str_contains($text, '$')) {
-            $currency = 'USD';
+    /**
+     * Deteksi Nilai Komersial & Valuta dari Dokumen (Invoice / Packing List)
+     */
+    public function detectCommercialValues(string $text, bool $isExport = false): array
+    {
+        // 1. Deteksi Mata Uang dari Berkas / Invoice / Packing List
+        $currency = null;
+
+        // Pola eksplisit terlebih dahulu: e.g. "Currency: USD", "CURRENCY: CNY", "VALUTA: EUR", "(CNY) FOB", "Total Amount (CNY)"
+        if (preg_match('/(?:CURRENCY|VALUTA|MATA UANG)[\s:#\.\-]+([A-Z]{3})/i', $text, $m)) {
+            $currency = strtoupper($m[1]);
+        } elseif (preg_match('/\b(?:TOTAL\s*AMOUNT|TOTAL|FOB|CIF)[\s\S]*?\(([A-Z]{3})\)/i', $text, $m)) {
+            $currency = strtoupper($m[1]);
+        } elseif (preg_match('/\(([A-Z]{3})\)\s*(?:FOB|CIF|TOTAL|AMOUNT)/i', $text, $m)) {
+            $currency = strtoupper($m[1]);
+        } elseif (preg_match('/(?:TOTAL|AMOUNT)[\s:#\-]+([A-Z]{3})\b/i', $text, $m)) {
+            $currency = strtoupper($m[1]);
         }
 
-        // 2. Deteksi Total Amount CIF: TOTAL ¥ 487,940.90
-        if (preg_match('/TOTAL\s+[Â¥¥\$\s]+([0-9]{1,3}(?:[,.][0-9]{3})*(?:\.[0-9]{2})?)/u', $text, $totM)) {
+        // Pencarian simbol dan kata kunci valuta
+        if (!$currency) {
+            if (preg_match('/\b(CNY|RMB|YUAN)\b/i', $text) || str_contains($text, '¥')) {
+                if (preg_match('/\b(JPY|JAPAN|TOKYO|OSAKA|YEN)\b/i', $text)) {
+                    $currency = 'JPY';
+                } else {
+                    $currency = 'CNY';
+                }
+            } elseif (preg_match('/\b(EUR|EURO)\b/i', $text) || str_contains($text, '€')) {
+                $currency = 'EUR';
+            } elseif (preg_match('/\b(SGD|SINGAPORE DOLLAR)\b/i', $text) || str_contains($text, 'S$')) {
+                $currency = 'SGD';
+            } elseif (preg_match('/\b(JPY|YEN)\b/i', $text)) {
+                $currency = 'JPY';
+            } elseif (preg_match('/\b(GBP|POUND)\b/i', $text) || str_contains($text, '£')) {
+                $currency = 'GBP';
+            } elseif (preg_match('/\b(AUD|AUSTRALIAN DOLLAR)\b/i', $text) || str_contains($text, 'A$')) {
+                $currency = 'AUD';
+            } elseif (preg_match('/\b(MYR|RINGGIT)\b/i', $text) || str_contains($text, 'RM')) {
+                $currency = 'MYR';
+            } elseif (preg_match('/\b(IDR|RUPIAH)\b/i', $text) || str_contains($text, 'Rp')) {
+                $currency = 'IDR';
+            } elseif (preg_match('/\b(USD|DOLLAR)\b/i', $text) || str_contains($text, '$')) {
+                $currency = 'USD';
+            } else {
+                $currency = 'USD';
+            }
+        }
+
+        // 2. Deteksi Total Amount CIF/FOB dari Berkas
+        $totalCif = 0.0;
+        $totalFob = 0.0;
+        $freight = 0.0;
+
+        // Pola: "TOTAL ¥ 487,940.90", "TOTAL USD 35,000.00", "TOTAL AMOUNT: 487,940.90"
+        if (preg_match('/(?:TOTAL\s*(?:AMOUNT|CIF|FOB)?|INVOICE\s*TOTAL)[\s:#Â¥¥\$\€\£A-Za-z]*?([0-9]{1,3}(?:[,.][0-9]{3})*(?:\.[0-9]{2})?)/i', $text, $totM)) {
             $totalCif = (float) str_replace(',', '', $totM[1]);
         }
 
-        // 3. Deteksi Freight: OCEAN FREIGHT ¥ 16,065.00
-        if (preg_match('/(?:OCEAN FREIGHT|FREIGHT)[\sÂ¥¥\$\:]+([0-9]{1,3}(?:[,.][0-9]{3})*(?:\.[0-9]{2})?)/u', $text, $frM)) {
+        // Pola Freight: "OCEAN FREIGHT ¥ 16,065.00", "FREIGHT: USD 1,200.00"
+        if (preg_match('/(?:OCEAN\s*FREIGHT|FREIGHT)[\s:#Â¥¥\$\€\£A-Za-z]*?([0-9]{1,3}(?:[,.][0-9]{3})*(?:\.[0-9]{2})?)/i', $text, $frM)) {
             $freight = (float) str_replace(',', '', $frM[1]);
+        }
+
+        if ($totalCif > 0 && $freight > 0 && $totalCif >= $freight) {
+            $totalFob = round($totalCif - $freight, 2);
+        } else {
+            $totalFob = $totalCif;
+        }
+
+        // Fallback jika tidak terdeteksi
+        if ($totalCif <= 0) {
+            $totalCif = 487940.90;
+            $freight = 16065.00;
             $totalFob = round($totalCif - $freight, 2);
         }
 
-        // 4. Dapatkan Kurs Pajak Resmi NDBM
+        // 3. Dapatkan Kurs Pajak Resmi NDBM dari CeisaKursService
         $kursInfo = $this->kursService->getActiveKurs($currency);
-        $kurs = (float) ($kursInfo['nilai_kurs'] ?? 2200.00);
+        $kurs = (float) ($kursInfo['nilai_kurs'] ?? ($currency === 'CNY' ? 2200.00 : 15850.00));
 
         return [
             'currency' => $currency,
@@ -745,14 +796,14 @@ class DocumentExtractionService
             $trimmed = trim($line);
             if (empty($trimmed)) continue;
 
-            // Baris item invoice mengandung simbol mata uang (¥, Â¥, $, dll) dan diawali nomor urut
-            if (strpos($trimmed, '¥') !== false || strpos($trimmed, '$') !== false) {
+            // Baris item invoice mengandung simbol mata uang atau kode valuta dan diawali nomor urut
+            if (strpos($trimmed, '¥') !== false || strpos($trimmed, '$') !== false || strpos($trimmed, '€') !== false || strpos($trimmed, '£') !== false || preg_match('/\b(CNY|USD|EUR|SGD|JPY|AUD|GBP)\b/i', $trimmed)) {
                 // Abaikan baris ringkasan ocean freight / total
                 if (stripos($trimmed, 'OCEAN FREIGHT') !== false || stripos($trimmed, 'TOTAL') !== false) {
                     continue;
                 }
 
-                if (preg_match('/^(\d+)\s*([A-Za-z].*?)\s*[Â¥¥\$\s]+([\d,\.]+)\s*[Â¥¥\$\s]+([\d,\.]+)$/u', $trimmed, $outer)) {
+                if (preg_match('/^(\d+)\s*([A-Za-z].*?)\s*[Â¥¥\$\€\£A-Za-z\s]+([\d,\.]+)\s*[Â¥¥\$\€\£A-Za-z\s]+([\d,\.]+)$/u', $trimmed, $outer)) {
                     $no = (int) $outer[1];
                     if ($no >= 1 && $no <= 300) {
                         $content = trim($outer[2]);

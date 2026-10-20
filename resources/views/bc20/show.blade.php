@@ -188,8 +188,8 @@
         <h2 class="text-base font-bold text-slate-900 mb-4">Ringkasan Nilai Pabean & Estimasi Pungutan Negara</h2>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs mb-6">
             <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                <span class="text-slate-400 block font-medium">Valuasi CIF (USD)</span>
-                <span class="font-mono font-bold text-slate-800 text-sm">USD {{ number_format($bc20->total_nilai, 2) }}</span>
+                <span class="text-slate-400 block font-medium">Valuasi CIF ({{ $bc20->kode_valuta }})</span>
+                <span class="font-mono font-bold text-slate-800 text-sm">{{ $bc20->kode_valuta }} {{ number_format($bc20->total_nilai, 2) }}</span>
             </div>
             <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
                 <span class="text-slate-400 block font-medium">Kurs KMK (NDBM)</span>
@@ -257,7 +257,7 @@
                         <th class="py-2.5 px-3">HS Code (BTKI)</th>
                         <th class="py-2.5 px-3">Uraian & Merk</th>
                         <th class="py-2.5 px-3">Jumlah Satuan</th>
-                        <th class="py-2.5 px-3">CIF (USD)</th>
+                        <th class="py-2.5 px-3">CIF ({{ $bc20->kode_valuta }})</th>
                         <th class="py-2.5 px-3">Nilai Pabean (IDR)</th>
                     </tr>
                 </thead>
@@ -287,7 +287,7 @@
                                 @endif
                             </td>
                             <td class="py-2.5 px-3 font-mono">{{ $item['jumlahSatuan'] ?? 0 }} {{ $item['kodeSatuanBarang'] ?? '' }}</td>
-                            <td class="py-2.5 px-3 font-mono">USD {{ number_format($item['cif'] ?? 0, 2) }}</td>
+                            <td class="py-2.5 px-3 font-mono">{{ $bc20->kode_valuta }} {{ number_format($item['cif'] ?? 0, 2) }}</td>
                             <td class="py-2.5 px-3 font-mono font-bold text-slate-800">Rp {{ number_format($item['cifRupiah'] ?? 0, 0, ',', '.') }}</td>
                         </tr>
                     @empty

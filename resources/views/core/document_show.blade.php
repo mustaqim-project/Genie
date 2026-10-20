@@ -409,7 +409,7 @@
                         <div>
                             <span class="font-bold text-slate-800">Kesesuaian Nilai Valuta (Invoice vs Item)</span>
                             <div class="text-[10px] text-slate-500">
-                                Deklarasi: USD {{ number_format($threeWay['declared_cif'], 2) }} | Total Item: USD {{ number_format($threeWay['items_fob'], 2) }}
+                                Deklarasi: {{ $threeWay['currency'] ?? $shipment->currency }} {{ number_format($threeWay['declared_cif'], 2) }} | Total Item: {{ $threeWay['currency'] ?? $shipment->currency }} {{ number_format($threeWay['items_fob'], 2) }}
                             </div>
                         </div>
                     </div>
@@ -824,7 +824,7 @@
                         <th class="py-2.5 px-3">Uraian Komoditas & Dasar Hukum</th>
                         <th class="py-2.5 px-3 text-right">Kemasan</th>
                         <th class="py-2.5 px-3 text-right">Bruto/Netto (Kg)</th>
-                        <th class="py-2.5 px-3 text-right">Nilai FOB/CIF</th>
+                        <th class="py-2.5 px-3 text-right">Nilai FOB/CIF ({{ $shipment->currency }})</th>
                         <th class="py-2.5 px-3 text-center">Tarif (BM/PPN/PPh)</th>
                         <th class="py-2.5 px-3 text-right">Aksi</th>
                     </tr>
@@ -1018,7 +1018,7 @@
                     <input type="number" step="0.01" name="berat_netto" value="2500.00" required class="w-full px-3 py-2 rounded-xl border border-slate-200">
                 </div>
                 <div>
-                    <label class="block font-bold text-slate-700 mb-1">Nilai FOB/CIF (USD)</label>
+                    <label class="block font-bold text-slate-700 mb-1">Nilai FOB/CIF ({{ $shipment->currency }})</label>
                     <input type="number" step="0.01" name="nilai_fob" value="12500.00" required class="w-full px-3 py-2 rounded-xl border border-slate-200">
                 </div>
             </div>
@@ -1254,8 +1254,8 @@
                     <span class="text-[10px] text-slate-400">Format teks bebas atau baris tabel</span>
                 </div>
                 <textarea name="raw_text" id="scanner_raw_text" rows="4" placeholder="Contoh:
-1. INDUSTRIAL SEWING MACHINE HEAVY DUTY 50 CTN 2500 KGS USD 12500 (HS: 8452.29.00)
-2. SPARE PARTS AND NEEDLES 100 BOX 5300 KGS USD 12500 (HS: 8452.90.00)" 
+1. INDUSTRIAL SEWING MACHINE HEAVY DUTY 50 CTN 2500 KGS {{ $shipment->currency }} 12500 (HS: 8452.29.00)
+2. SPARE PARTS AND NEEDLES 100 BOX 5300 KGS {{ $shipment->currency }} 12500 (HS: 8452.90.00)" 
                     class="w-full px-3 py-2 rounded-xl border border-slate-200 font-mono text-[11px]"></textarea>
             </div>
 
