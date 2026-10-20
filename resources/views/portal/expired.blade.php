@@ -14,9 +14,17 @@
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", sans-serif;
             background-color: #F2F2F7;
         }
+        .dark body {
+            background-color: #0E0E10;
+        }
     </style>
+    <script>
+        if (localStorage.getItem('genie-portal-theme') === 'dark' || (!('genie-portal-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
+<body class="min-h-screen flex items-center justify-center p-4 bg-[#F2F2F7] dark:bg-[#0E0E10]">
 
     <div class="max-w-md w-full bg-white dark:bg-[#1C1C1E] rounded-[24px] border border-black/[0.08] dark:border-white/[0.08] shadow-2xl p-6 sm:p-8 text-center space-y-5">
         

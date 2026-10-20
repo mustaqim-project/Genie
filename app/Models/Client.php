@@ -46,4 +46,9 @@ class Client extends Model
     {
         return $this->hasMany(ClientInvoice::class);
     }
+
+    public function getNamaPerusahaanAttribute(): string
+    {
+        return $this->name ?? '';
+    }
 }

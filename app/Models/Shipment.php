@@ -533,4 +533,12 @@ class Shipment extends Model
 
         return route('portal.track', $this->portal_token);
     }
+
+    /**
+     * Nomor Aju Kepabeanan CEISA 4.0 (26 digit) atau fallback project_no
+     */
+    public function getNomorAjuAttribute(): string
+    {
+        return $this->ceisaDocument?->nomor_aju ?? $this->project_no;
+    }
 }
