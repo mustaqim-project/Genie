@@ -432,5 +432,6 @@
     <!-- ============================================================== -->
     @include('layouts.bottom-tab-bar')
 
+    @stack('scripts')
 </body>
 </html>

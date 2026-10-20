@@ -3,104 +3,7 @@
 @section('title', 'MCP Server & Integrasi AI Kepabeanan')
 
 @section('content')
-<div x-data="{
-    activeTab: '{{ session('plain_token') ? 'tokens' : 'tester' }}',
-    activeProvider: 'claude',
-    showTokenModal: false,
-    customToken: @json(session('plain_token') ?? ''),
-    
-    testQuery: 'HYDRAULIC BREAKER DYB800 STRAIGHT TYPE',
-    testDirection: 'IMPORT_BC20',
-    testLoading: false,
-    testResult: null,
-    
-    batchText: @json($samplePackingList),
-    batchLoading: false,
-    batchResult: null,
-    
-    copyToast: false,
-    copyMsg: '',
-
-    getToken() {
-        return (this.customToken && this.customToken.trim().length > 0)
-            ? this.customToken.trim()
-            : 'genie_mcp_YOUR_TOKEN';
-    },
-
-    copyToClipboard(text, msg = 'Tersalin ke clipboard!') {
-        navigator.clipboard.writeText(text).then(() => {
-            this.copyMsg = msg;
-            this.copyToast = true;
-            setTimeout(() => { this.copyToast = false; }, 2200);
-        });
-    },
-
-    async runCheckHs() {
-        if (!this.testQuery.trim()) return;
-        this.testLoading = true;
-        this.testResult = null;
-        try {
-            const res = await fetch('{{ route('api.mcp.execute') }}', {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    ...(this.customToken ? { 'Authorization': 'Bearer ' + this.customToken } : {})
-                },
-                body: JSON.stringify({
-                    jsonrpc: '2.0',
-                    id: Date.now(),
-                    method: 'tools/call',
-                    params: {
-                        name: 'check_hs_code',
-                        arguments: {
-                            query: this.testQuery,
-                            direction: this.testDirection
-                        }
-                    }
-                })
-            });
-            const data = await res.json();
-            this.testResult = data.result?.structured_data || data;
-        } catch (e) {
-            this.testResult = { error: 'Gagal terhubung ke MCP Server: ' + e.message };
-        } finally {
-            this.testLoading = false;
-        }
-    },
-
-    async runBatchPackingList() {
-        if (!this.batchText.trim()) return;
-        this.batchLoading = true;
-        this.batchResult = null;
-        try {
-            const res = await fetch('{{ route('api.mcp.execute') }}', {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    ...(this.customToken ? { 'Authorization': 'Bearer ' + this.customToken } : {})
-                },
-                body: JSON.stringify({
-                    jsonrpc: '2.0',
-                    id: Date.now(),
-                    method: 'tools/call',
-                    params: {
-                        name: 'parse_packing_list',
-                        arguments: {
-                            raw_text: this.batchText,
-                            direction: 'IMPORT_BC20'
-                        }
-                    }
-                })
-            });
-            const data = await res.json();
-            this.batchResult = data.result?.structured_data || data;
-        } catch (e) {
-            this.batchResult = { error: 'Gagal memproses parsing packing list: ' + e.message };
-        } finally {
-            this.batchLoading = false;
-        }
-    }
-}" class="space-y-6">
+<div x-data="mcpIntegrationApp()" class="space-y-6">
 
     <!-- Toast Notifikasi Copy -->
     <div x-show="copyToast" 
@@ -977,4 +880,114 @@ print('Hasil Deteksi Pos Tarif:', result['result']['structured_data'])`, 'Kode P
     </div>
 
 </div>
+
+@push('scripts')
+<script>
+function mcpIntegrationApp() {
+    return {
+        activeTab: @json(session('plain_token') ? 'tokens' : 'tester'),
+        activeProvider: 'claude',
+        showTokenModal: false,
+        customToken: @json(session('plain_token') ?? ''),
+        
+        testQuery: 'HYDRAULIC BREAKER DYB800 STRAIGHT TYPE',
+        testDirection: 'IMPORT_BC20',
+        testLoading: false,
+        testResult: null,
+        
+        batchText: @json($samplePackingList),
+        batchLoading: false,
+        batchResult: null,
+        
+        copyToast: false,
+        copyMsg: '',
+
+        getToken() {
+            if (this.customToken && this.customToken.trim().length > 0) {
+                return this.customToken.trim();
+            }
+            return 'genie_mcp_YOUR_TOKEN';
+        },
+
+        copyToClipboard(text, msg = 'Tersalin ke clipboard!') {
+            navigator.clipboard.writeText(text).then(() => {
+                this.copyMsg = msg;
+                this.copyToast = true;
+                setTimeout(() => { this.copyToast = false; }, 2200);
+            });
+        },
+
+        async runCheckHs() {
+            if (!this.testQuery.trim()) return;
+            this.testLoading = true;
+            this.testResult = null;
+            try {
+                const headers = { 'Content-Type': 'application/json' };
+                if (this.customToken && this.customToken.trim().length > 0) {
+                    headers['Authorization'] = 'Bearer ' + this.customToken.trim();
+                }
+
+                const res = await fetch('{{ route('api.mcp.execute') }}', {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({
+                        jsonrpc: '2.0',
+                        id: Date.now(),
+                        method: 'tools/call',
+                        params: {
+                            name: 'check_hs_code',
+                            arguments: {
+                                query: this.testQuery,
+                                direction: this.testDirection
+                            }
+                        }
+                    })
+                });
+                const data = await res.json();
+                this.testResult = data.result?.structured_data || data;
+            } catch (e) {
+                this.testResult = { error: 'Gagal terhubung ke MCP Server: ' + e.message };
+            } finally {
+                this.testLoading = false;
+            }
+        },
+
+        async runBatchPackingList() {
+            if (!this.batchText.trim()) return;
+            this.batchLoading = true;
+            this.batchResult = null;
+            try {
+                const headers = { 'Content-Type': 'application/json' };
+                if (this.customToken && this.customToken.trim().length > 0) {
+                    headers['Authorization'] = 'Bearer ' + this.customToken.trim();
+                }
+
+                const res = await fetch('{{ route('api.mcp.execute') }}', {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({
+                        jsonrpc: '2.0',
+                        id: Date.now(),
+                        method: 'tools/call',
+                        params: {
+                            name: 'parse_packing_list',
+                            arguments: {
+                                raw_text: this.batchText,
+                                direction: 'IMPORT_BC20'
+                            }
+                        }
+                    })
+                });
+                const data = await res.json();
+                this.batchResult = data.result?.structured_data || data;
+            } catch (e) {
+                this.batchResult = { error: 'Gagal memproses parsing packing list: ' + e.message };
+            } finally {
+                this.batchLoading = false;
+            }
+        }
+    };
+}
+</script>
+@endpush
 @endsection
