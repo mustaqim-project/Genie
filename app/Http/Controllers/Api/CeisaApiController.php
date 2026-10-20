@@ -204,4 +204,18 @@ class CeisaApiController extends Controller
 
         return response()->json($result);
     }
+
+    /**
+     * Endpoint: Sinkronisasi Master Pos Tarif BTKI 2022 dari Bea Cukai ke Database
+     */
+    public function syncHsCodes(\App\Services\Ceisa\CeisaBtkiTariffSyncService $syncService): JsonResponse
+    {
+        $result = $syncService->syncFromBtkiRegistry(true);
+
+        return response()->json([
+            'success' => $result['success'] ?? false,
+            'message' => 'Sinkronisasi master data HS Code BTKI 2022 selesai.',
+            'data' => $result,
+        ]);
+    }
 }

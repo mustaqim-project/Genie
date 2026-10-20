@@ -10,6 +10,7 @@ Route::prefix('v1/ceisa')->group(function () {
     Route::get('/kurs/{valuta}', [CeisaApiController::class, 'getKurs']);
     Route::post('/kurs/sync', [CeisaApiController::class, 'syncKurs']);
     Route::get('/tarif-hs/{hsCode}', [CeisaApiController::class, 'getTarifHs']);
+    Route::post('/tarif-hs/sync', [CeisaApiController::class, 'syncHsCodes']);
 });
 
 // MCP (Model Context Protocol) Server & Customs AI Agent Endpoints

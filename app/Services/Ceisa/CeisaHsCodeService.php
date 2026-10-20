@@ -516,57 +516,83 @@ class CeisaHsCodeService
     {
         $cleanCode = str_replace(['.', ' ', '-'], '', trim($hsCode));
 
-        // 1. Cek Built-in Knowledge Base
-        if (isset($this->builtInKnowledgeBase[$cleanCode])) {
-            $data = $this->builtInKnowledgeBase[$cleanCode];
-            $data['required_documents'] = $data['required_documents'] ?? [];
-            return array_merge(['success' => true, 'source' => 'BTKI_KNOWLEDGE_BASE'], $data);
-        }
-
-        // 2. Cek Database Lokal (Tabel hs_codes)
+        // 1. Cek Database Master Lokal (Tabel hs_codes) TERLEBIH DAHULU
         $dbHs = HsCode::where('code', $hsCode)
             ->orWhere('code', $cleanCode)
+            ->orWhereRaw("REPLACE(REPLACE(REPLACE(code, '.', ''), ' ', ''), '-', '') = ?", [$cleanCode])
             ->first();
 
         if ($dbHs) {
-            $regulation = HsRegulation::where('hs_from', '<=', $cleanCode)
-                ->where('hs_to', '>=', $cleanCode)
-                ->first();
+            $regulations = HsRegulation::where(function ($q) use ($cleanCode) {
+                $q->where('hs_from', '<=', $cleanCode)
+                  ->where('hs_to', '>=', $cleanCode);
+            })->orWhere('hs_from', $cleanCode)->get();
 
             $reqDocs = [];
-            if ($regulation) {
+            foreach ($regulations as $reg) {
+                $cond = $reg->doc_condition ?? [];
                 $reqDocs[] = [
-                    'kode_dokumen' => '860',
-                    'nama_dokumen' => $regulation->required_doc ?? 'Dokumen Perizinan Lartas',
-                    'instansi' => $regulation->source_regulation ?? 'Kementerian Teknis Terkait',
+                    'kode_dokumen' => $cond['code'] ?? '860',
+                    'nama_dokumen' => $cond['title'] ?? ($reg->required_doc ?? 'Dokumen Perizinan Lartas'),
+                    'instansi' => $reg->source_regulation ?? 'Kementerian Teknis Terkait',
                     'is_mandatory' => true,
                 ];
             }
 
             return [
                 'success' => true,
-                'source' => 'LOCAL_DATABASE',
+                'source' => $dbHs->source ?? 'DJBC_BTKI_2022',
                 'code' => $dbHs->code,
                 'clean_code' => $cleanCode,
                 'desc' => $dbHs->description,
                 'bm' => (float) $dbHs->duty_bm,
-                'ppn' => 11.0,
-                'pph' => 2.5,
-                'bk' => 0.0,
-                'satuan' => 'PCE',
-                'has_lartas' => !empty($regulation),
-                'lartas' => $regulation ? "Lartas ({$regulation->required_doc})" : 'Bebas Lartas (Non-Lartas)',
-                'legal' => $dbHs->btki ?? ("BTKI 2022 Pos {$cleanCode}"),
+                'ppn' => (float) ($dbHs->duty_ppn ?? 11.0),
+                'pph' => (float) ($dbHs->duty_pph ?? 2.5),
+                'bk' => (float) ($dbHs->duty_bk ?? 0.0),
+                'satuan' => $dbHs->satuan ?? 'PCE',
+                'has_lartas' => (bool) ($dbHs->has_lartas || count($reqDocs) > 0),
+                'lartas' => $dbHs->lartas_desc ?? (count($reqDocs) > 0 ? "Lartas ({$regulations->first()->required_doc})" : 'Bebas Lartas (Non-Lartas)'),
+                'legal' => $dbHs->btki ?? ("BTKI 2022 Pos {$dbHs->code}"),
                 'required_documents' => $reqDocs,
             ];
         }
 
-        // 3. Panggil API CEISA 4.0 Open API (/tarif-hs)
+        // 2. Cek Built-in Knowledge Base
+        if (isset($this->builtInKnowledgeBase[$cleanCode])) {
+            $data = $this->builtInKnowledgeBase[$cleanCode];
+            $data['required_documents'] = $data['required_documents'] ?? [];
+
+            // Simpan ke DB lokal agar persisten untuk query berikutnya
+            try {
+                HsCode::updateOrCreate(
+                    ['code' => $data['code']],
+                    [
+                        'description' => $data['desc'],
+                        'duty_bm' => $data['bm'],
+                        'duty_ppn' => $data['ppn'] ?? 11.0,
+                        'duty_pph' => $data['pph'] ?? 2.5,
+                        'duty_bk' => $data['bk'] ?? 0.0,
+                        'satuan' => $data['satuan'] ?? 'PCE',
+                        'has_lartas' => (bool) ($data['has_lartas'] ?? false),
+                        'lartas_desc' => $data['lartas'] ?? null,
+                        'btki' => $data['legal'] ?? "BTKI 2022 Pos {$cleanCode}",
+                        'source' => 'DJBC_BTKI_2022',
+                        'valid_from' => '2022-04-01',
+                    ]
+                );
+            } catch (\Throwable $e) {
+                Log::warning("Gagal auto-persist HS Code ke DB: {$e->getMessage()}");
+            }
+
+            return array_merge(['success' => true, 'source' => 'BTKI_KNOWLEDGE_BASE'], $data);
+        }
+
+        // 3. Panggil API CEISA 4.0 Open API Live Gateway (/tarif-hs)
         try {
-            $apiRes = $this->client->get("/tarif-hs?posTarif={$cleanCode}");
+            $apiRes = $this->client->send('GET', "/tarif-hs?posTarif={$cleanCode}");
             if ($apiRes['success'] && !empty($apiRes['data'])) {
                 $d = $apiRes['data'];
-                return [
+                $tariffResult = [
                     'success' => true,
                     'source' => 'CEISA_OPENAPI',
                     'code' => $d['posTarif'] ?? $cleanCode,
@@ -577,11 +603,35 @@ class CeisaHsCodeService
                     'pph' => (float) ($d['pph'] ?? 2.5),
                     'bk' => (float) ($d['bk'] ?? 0.0),
                     'satuan' => $d['satuan'] ?? 'PCE',
-                    'has_lartas' => false,
-                    'lartas' => 'Bebas Lartas (Non-Lartas)',
-                    'legal' => "CEISA 4.0 API Pos {$cleanCode}",
+                    'has_lartas' => !empty($d['lartas']),
+                    'lartas' => $d['lartas'] ?? 'Bebas Lartas (Non-Lartas)',
+                    'legal' => "CEISA 4.0 Open API Pos {$cleanCode}",
                     'required_documents' => [],
                 ];
+
+                // Simpan ke database
+                try {
+                    HsCode::updateOrCreate(
+                        ['code' => $tariffResult['code']],
+                        [
+                            'description' => $tariffResult['desc'],
+                            'duty_bm' => $tariffResult['bm'],
+                            'duty_ppn' => $tariffResult['ppn'],
+                            'duty_pph' => $tariffResult['pph'],
+                            'duty_bk' => $tariffResult['bk'],
+                            'satuan' => $tariffResult['satuan'],
+                            'has_lartas' => $tariffResult['has_lartas'],
+                            'lartas_desc' => $tariffResult['lartas'],
+                            'btki' => $tariffResult['legal'],
+                            'source' => 'CEISA_OPENAPI',
+                            'valid_from' => now()->toDateString(),
+                        ]
+                    );
+                } catch (\Throwable $e) {
+                    Log::warning("Gagal persist HS dari API ke DB: {$e->getMessage()}");
+                }
+
+                return $tariffResult;
             }
         } catch (\Throwable $e) {
             Log::warning("Gagal fetch tarif HS dari CEISA: {$e->getMessage()}");
@@ -882,6 +932,18 @@ class CeisaHsCodeService
                 $tariff = $this->getTariffAndLartas($code);
                 $tariff['confidence_score'] = 0.96;
                 $tariff['classification_source'] = 'AI_KEYWORD_MATCH';
+                return $tariff;
+            }
+        }
+
+        // 3b. Pencocokan cerdas via Database Master Pos Tarif BTKI 2022 Bea Cukai
+        $words = array_filter(explode(' ', preg_replace('/[^A-Z0-9\s]/', ' ', $upper)), fn($w) => strlen($w) >= 3);
+        foreach ($words as $w) {
+            $matchedDb = HsCode::where('description', 'like', "%{$w}%")->first();
+            if ($matchedDb) {
+                $tariff = $this->getTariffAndLartas($matchedDb->code);
+                $tariff['confidence_score'] = 0.94;
+                $tariff['classification_source'] = 'DATABASE_BTKI_LOOKUP';
                 return $tariff;
             }
         }

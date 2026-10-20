@@ -17,13 +17,24 @@ class HsCode extends Model
         'code',
         'description',
         'duty_bm',
+        'duty_ppn',
+        'duty_pph',
+        'duty_bk',
+        'satuan',
+        'has_lartas',
+        'lartas_desc',
         'btki',
+        'source',
         'valid_from',
         'valid_to',
     ];
 
     protected $casts = [
         'duty_bm' => 'decimal:2',
+        'duty_ppn' => 'decimal:2',
+        'duty_pph' => 'decimal:2',
+        'duty_bk' => 'decimal:2',
+        'has_lartas' => 'boolean',
         'valid_from' => 'date',
         'valid_to' => 'date',
     ];

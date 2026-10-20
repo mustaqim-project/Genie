@@ -161,6 +161,8 @@ Route::middleware('auth')->group(function () {
     Route::prefix('config')->name('config.')->group(function () {
         Route::get('/', [CeisaConfigController::class, 'index'])->name('index');
         Route::post('/test-auth', [CeisaConfigController::class, 'testAuth'])->name('test-auth');
+        Route::post('/sync-hs-codes', [CeisaConfigController::class, 'syncHsCodes'])->name('sync-hs-codes');
+        Route::post('/test-hs', [CeisaConfigController::class, 'testHsCode'])->name('test-hs');
     });
 
     // ==========================================

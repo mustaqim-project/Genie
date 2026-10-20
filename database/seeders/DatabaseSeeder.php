@@ -710,6 +710,9 @@ class DatabaseSeeder extends Seeder
         $this->call(ChartOfAccountSeeder::class);
         $this->call(CashBankAccountSeeder::class);
         $this->call(VendorBillSeeder::class);
+
+        // 11. MASTER HS CODE & BTKI 2022 BEA CUKAI (F2 & CEISA 4.0)
+        $this->call(Btki2022DatabaseSeeder::class);
     }
 }
 
