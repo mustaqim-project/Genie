@@ -61,6 +61,11 @@ class ClientInvoice extends Model
         return $this->belongsTo(User::class, 'created_by_user_id');
     }
 
+    public function lines()
+    {
+        return $this->hasMany(ClientInvoiceLine::class, 'invoice_id');
+    }
+
     public function getInvoiceNumberAttribute()
     {
         return $this->attributes['invoice_no'] ?? null;

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CashBankAccount;
 use App\Models\CeisaDocument;
 use App\Models\ClientInvoice;
 use Illuminate\Http\Request;
@@ -23,7 +24,8 @@ class FinanceController extends Controller implements HasMiddleware
         $invoices = ClientInvoice::with(['client', 'shipment'])->latest()->paginate(10);
         $totalAr = ClientInvoice::where('status', '!=', 'PAID')->sum('total_tagihan_idr');
         $totalBilling = CeisaDocument::whereNotNull('kode_billing')->sum('total_billing');
+        $totalCashBank = CashBankAccount::all()->sum(fn($acc) => $acc->current_balance);
 
-        return view('finance.index', compact('invoices', 'totalAr', 'totalBilling'));
+        return view('finance.index', compact('invoices', 'totalAr', 'totalBilling', 'totalCashBank'));
     }
 }

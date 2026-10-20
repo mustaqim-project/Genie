@@ -705,6 +705,10 @@ class DatabaseSeeder extends Seeder
 
         // 9. HRM & PAYROLL SEEDER (F8)
         $this->call(HrmSeeder::class);
+
+        // 10. FINANCE & ACCOUNTING SEEDERS (F7)
+        $this->call(ChartOfAccountSeeder::class);
+        $this->call(CashBankAccountSeeder::class);
     }
 }
 

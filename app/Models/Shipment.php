@@ -127,6 +127,16 @@ class Shipment extends Model
         return $this->hasOne(ClientInvoice::class);
     }
 
+    public function costItems()
+    {
+        return $this->hasMany(CostItem::class);
+    }
+
+    public function vendorBills()
+    {
+        return $this->hasMany(VendorBill::class);
+    }
+
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by_user_id');

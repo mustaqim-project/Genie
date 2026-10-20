@@ -36,7 +36,7 @@
         </div>
         <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
             <span class="text-slate-400 font-bold uppercase block mb-1">Kas & Bank Tersedia</span>
-            <span class="text-2xl font-black text-blue-600">Rp 850.000.000</span>
+            <span class="text-2xl font-black text-blue-600">Rp {{ number_format($totalCashBank ?? 850000000, 0, ',', '.') }}</span>
             <span class="text-[10px] text-slate-500 block mt-2">BCA Operasional & Mandiri Pabean</span>
         </div>
     </div>
