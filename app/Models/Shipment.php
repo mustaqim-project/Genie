@@ -366,7 +366,7 @@ class Shipment extends Model
     public static function generateProjectNo(): string
     {
         $prefix = 'SHP-' . date('Ym') . '-';
-        $existing = self::where('project_no', 'like', "{$prefix}%")->pluck('project_no')->toArray();
+        $existing = self::withTrashed()->where('project_no', 'like', "{$prefix}%")->pluck('project_no')->toArray();
         $maxNum = 0;
         foreach ($existing as $pNo) {
             $num = (int) substr($pNo, strlen($prefix));
