@@ -26,8 +26,9 @@ class ClientInvoiceController extends Controller
         if ($request->filled('search')) {
             $s = $request->search;
             $query->where(function ($q) use ($s) {
-                $q->where('invoice_number', 'like', "%{$s}%")
-                  ->orWhereHas('client', fn($cq) => $cq->where('name', 'like', "%{$s}%"));
+                $q->where('invoice_no', 'like', "%{$s}%")
+                  ->orWhereHas('client', fn($cq) => $cq->where('name', 'like', "%{$s}%"))
+                  ->orWhereHas('shipment', fn($sq) => $sq->where('shipment_number', 'like', "%{$s}%")->orWhere('bl_number', 'like', "%{$s}%"));
             });
         }
 
@@ -37,7 +38,7 @@ class ClientInvoiceController extends Controller
             'total' => ClientInvoice::count(),
             'paid' => ClientInvoice::where('status', 'PAID')->count(),
             'unpaid' => ClientInvoice::where('status', 'UNPAID')->count(),
-            'total_amount' => ClientInvoice::sum('total_amount'),
+            'total_amount' => ClientInvoice::sum('total_tagihan_idr'),
         ];
 
         return view('finance.invoices_index', compact('invoices', 'stats'));
