@@ -211,6 +211,14 @@ Route::middleware('auth')->group(function () {
         Route::post('/{id}/pay', [\App\Http\Controllers\ClientInvoiceController::class, 'markAsPaid'])->name('pay');
     });
 
+    // Finance Bills (AP - Hutang Vendor Pelayaran, Trucking, TPS)
+    Route::prefix('finance/bills')->name('finance.bills.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\VendorBillController::class, 'index'])->name('index');
+        Route::post('/store', [\App\Http\Controllers\VendorBillController::class, 'store'])->name('store');
+        Route::post('/{id}/approve', [\App\Http\Controllers\VendorBillController::class, 'approve'])->name('approve');
+        Route::post('/{id}/pay', [\App\Http\Controllers\VendorBillController::class, 'pay'])->name('pay');
+    });
+
     // CRM Quotations (Penawaran Harga)
     Route::prefix('crm/quotations')->name('crm.quotations.')->group(function () {
         Route::get('/', [\App\Http\Controllers\QuotationController::class, 'index'])->name('index');

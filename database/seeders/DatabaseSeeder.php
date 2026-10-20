@@ -709,6 +709,7 @@ class DatabaseSeeder extends Seeder
         // 10. FINANCE & ACCOUNTING SEEDERS (F7)
         $this->call(ChartOfAccountSeeder::class);
         $this->call(CashBankAccountSeeder::class);
+        $this->call(VendorBillSeeder::class);
     }
 }
 

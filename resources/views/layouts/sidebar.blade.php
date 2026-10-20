@@ -176,15 +176,28 @@
             <!-- FINANCE (INVOICE P19) -->
             @if(!auth()->check() || auth()->user()->hasPermission('finance.view'))
             <a href="{{ route('finance.invoices.index') }}" 
-               class="flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all group {{ request()->routeIs('finance.*') ? 'bg-sky-600 text-white font-semibold shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
+               class="flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all group {{ request()->routeIs('finance.invoices.*') ? 'bg-sky-600 text-white font-semibold shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
                title="Finance & Invoicing (P19)">
                 <div class="flex items-center space-x-3 truncate">
-                    <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('finance.*') ? 'text-white' : 'text-slate-500 group-hover:text-emerald-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('finance.invoices.*') ? 'text-white' : 'text-slate-500 group-hover:text-emerald-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span x-show="!sidebarCollapsed" class="truncate">Finance & Tagihan</span>
+                    <span x-show="!sidebarCollapsed" class="truncate">Piutang & Invoice</span>
                 </div>
                 <span x-show="!sidebarCollapsed" class="text-[9px] font-mono px-1 rounded bg-emerald-100 text-emerald-800 font-bold">P19</span>
+            </a>
+
+            <!-- FINANCE (HUTANG VENDOR AP) -->
+            <a href="{{ route('finance.bills.index') }}" 
+               class="flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all group {{ request()->routeIs('finance.bills.*') ? 'bg-sky-600 text-white font-semibold shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
+               title="Hutang Vendor & Biaya Operasional (AP)">
+                <div class="flex items-center space-x-3 truncate">
+                    <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('finance.bills.*') ? 'text-white' : 'text-slate-500 group-hover:text-rose-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z" />
+                    </svg>
+                    <span x-show="!sidebarCollapsed" class="truncate">Hutang Vendor</span>
+                </div>
+                <span x-show="!sidebarCollapsed" class="text-[9px] font-mono px-1 rounded bg-rose-100 text-rose-800 font-bold">AP</span>
             </a>
             @endif
 
