@@ -240,14 +240,27 @@
             <!-- HRM SDM -->
             @if(!auth()->check() || auth()->user()->hasPermission('hrm.view'))
             <a href="{{ route('hrm.index') }}" 
-               class="flex items-center space-x-2.5 px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('hrm.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
+               class="flex items-center space-x-2.5 px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('hrm.index') || (request()->routeIs('hrm.*') && !request()->routeIs('hrm.portal*')) ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
                title="HRM, Absensi & Gaji">
-                <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('hrm.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-pink-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('hrm.index') || (request()->routeIs('hrm.*') && !request()->routeIs('hrm.portal*')) ? 'text-sky-400' : 'text-slate-500 group-hover:text-pink-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
                 <span x-show="!sidebarCollapsed" class="truncate font-semibold">HRM (Kepegawaian)</span>
             </a>
             @endif
+
+            <!-- PORTAL KARYAWAN (ESS) -->
+            <a href="{{ route('hrm.portal') }}" 
+               class="flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('hrm.portal*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
+               title="Portal Mandiri Karyawan (Absensi GPS, Selfie & Slip Gaji)">
+                <div class="flex items-center space-x-2.5 min-w-0 flex-1 mr-1.5">
+                    <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('hrm.portal*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-indigo-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span x-show="!sidebarCollapsed" class="truncate font-semibold">Portal Karyawan</span>
+                </div>
+                <span x-show="!sidebarCollapsed" class="flex-shrink-0 text-[9px] font-mono px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-800 font-bold">ESS</span>
+            </a>
         </div>
 
         <!-- GRUP 5: SISTEM & AI -->

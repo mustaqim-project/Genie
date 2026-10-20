@@ -1,1226 +1,1474 @@
 @extends('layouts.app')
 
-@section('title', 'HRM - Human Resource Management | Genie ERP')
+@section('title', 'SDM & Penggajian (HRM Hub) — GENIE ERP')
 
 @section('content')
-<div class="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-12"
+<div class="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 pb-24"
      x-data="{
-        activeTab: '{{ $activeTab ?? 'employees' }}',
+        activeTab: '{{ request('tab', $activeTab ?? 'employees') }}',
+        setTab(tab) {
+            this.activeTab = tab;
+            const url = new URL(window.location.href);
+            url.searchParams.set('tab', tab);
+            window.history.replaceState({}, '', url.toString());
+        },
+
+        // Modals
         showCreateEmployeeModal: false,
-        showClockModal: false,
-        showConsentModal: false,
-        showLeaveModal: false,
-        showOvertimeModal: false,
-        showCashAdvanceModal: false,
-        showPayrollModal: false,
+        showCreateLocationModal: false,
+        showCreateShiftModal: false,
+        showCreateScheduleModal: false,
         showCreateAssetModal: false,
         showAssignAssetModal: false,
+        showCashAdvanceModal: false,
+        showPhotoModal: false,
+        activePhotoUrl: '',
         selectedAssetId: '',
         selectedAssetName: '',
-        gpsLat: -6.2297,
-        gpsLng: 106.8294,
-        gpsStatus: 'Siap mengambil koordinat GPS',
-        getLocation() {
-            if (navigator.geolocation) {
-                this.gpsStatus = 'Mendeteksi titik koordinat akurat...';
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        this.gpsLat = position.coords.latitude;
-                        this.gpsLng = position.coords.longitude;
-                        this.gpsStatus = 'GPS Terkunci: ' + this.gpsLat.toFixed(4) + ', ' + this.gpsLng.toFixed(4);
-                    },
-                    (error) => {
-                        this.gpsStatus = 'Izin GPS ditolak, gunakan koordinat default kantor/TPS';
-                    }
-                );
-            } else {
-                this.gpsStatus = 'Browser tidak mendukung GPS Geolocation';
+
+        // Import Employee State
+        showImportEmployeeModal: false,
+        importEmployeeFile: null,
+        importEmployeeFileName: '',
+        importEmployeePreview: null,
+        importEmployeeDuplicateStrategy: 'skip',
+        importEmployeeLoading: false,
+
+        handleImportEmployeeFile(e) {
+            const file = e.target.files[0];
+            if (file) {
+                this.importEmployeeFile = file;
+                this.importEmployeeFileName = file.name;
+                this.previewEmployeeUpload();
             }
+        },
+
+        previewEmployeeUpload() {
+            if (!this.importEmployeeFile) return;
+            this.importEmployeeLoading = true;
+            const formData = new FormData();
+            formData.append('file', this.importEmployeeFile);
+            formData.append('_token', '{{ csrf_token() }}');
+
+            fetch('{{ route('hrm.employees.import-preview') }}', {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(res => {
+                this.importEmployeeLoading = false;
+                if (res.success) {
+                    this.importEmployeePreview = res.data;
+                } else {
+                    alert(res.message || 'Gagal memproses file import');
+                }
+            })
+            .catch(err => {
+                this.importEmployeeLoading = false;
+                alert('Terjadi kesalahan unggah: ' + err.message);
+            });
+        },
+
+        executeEmployeeImport() {
+            if (!this.importEmployeePreview || !this.importEmployeePreview.rows) return;
+            if (!confirm('Proses ' + this.importEmployeePreview.valid_count + ' data pegawai baru?')) return;
+
+            fetch('{{ route('hrm.employees.import-execute') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    rows: this.importEmployeePreview.rows,
+                    duplicate_strategy: this.importEmployeeDuplicateStrategy
+                })
+            })
+            .then(res => res.json())
+            .then(res => {
+                alert(res.message);
+                window.location.reload();
+            });
+        },
+
+        // Import Attendance State
+        showImportAttendanceModal: false,
+        importAttendanceFile: null,
+        importAttendanceFileName: '',
+        importAttendancePreview: null,
+        importAttendanceLoading: false,
+
+        handleImportAttendanceFile(e) {
+            const file = e.target.files[0];
+            if (file) {
+                this.importAttendanceFile = file;
+                this.importAttendanceFileName = file.name;
+                this.previewAttendanceUpload();
+            }
+        },
+
+        previewAttendanceUpload() {
+            if (!this.importAttendanceFile) return;
+            this.importAttendanceLoading = true;
+            const formData = new FormData();
+            formData.append('file', this.importAttendanceFile);
+            formData.append('_token', '{{ csrf_token() }}');
+
+            fetch('{{ route('hrm.attendance.import-preview') }}', {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(res => {
+                this.importAttendanceLoading = false;
+                if (res.success) {
+                    this.importAttendancePreview = res.data;
+                } else {
+                    alert(res.message || 'Gagal memproses file log presensi');
+                }
+            })
+            .catch(err => {
+                this.importAttendanceLoading = false;
+                alert('Terjadi kesalahan: ' + err.message);
+            });
+        },
+
+        executeAttendanceImport() {
+            if (!this.importAttendancePreview || !this.importAttendancePreview.rows) return;
+            fetch('{{ route('hrm.attendance.import-execute') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ rows: this.importAttendancePreview.rows })
+            })
+            .then(res => res.json())
+            .then(res => {
+                alert(res.message);
+                window.location.reload();
+            });
         }
      }">
 
-    <!-- Page Header & Title -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+    <!-- ============================================================== -->
+    <!-- 1. PAGE TITLE & EXECUTIVE ACTION CTA                           -->
+    <!-- ============================================================== -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <div class="text-xs text-slate-500 font-medium mb-1">
                 <a href="{{ route('dashboard') }}" class="hover:underline text-slate-500">Dashboard</a>
                 <span class="text-slate-400 mx-1">/</span>
                 <span class="text-slate-800 font-semibold">HRM & Kepegawaian</span>
             </div>
-            <div class="flex items-center space-x-2">
-                <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Human Resource Management</h1>
+            <div class="flex items-center space-x-2.5">
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Manajemen SDM & Penggajian</h1>
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-800 border border-sky-200">
-                    Genie ERP
+                    Genie Hub
                 </span>
             </div>
             <p class="text-xs text-slate-500 mt-1">
-                Manajemen staf forwarder/PPJK, kontrak PKWT/PKWTT, presensi GPS & verifikasi wajah (<span class="font-semibold text-slate-700">UU PDP No. 27/2022</span>), alih tugas PIC cuti, dan payroll bulanan.
+                Kelola profil staf forwarder/PPJK, presensi geofencing pelabuhan & wajah, persetujuan koreksi, shift kerja, dan siklus penggajian otomatis.
             </p>
         </div>
 
-        <!-- Header Actions -->
-        <div class="flex items-center flex-wrap gap-2.5">
-            <button type="button"
-                    @click="showClockModal = true; getLocation()"
-                    class="min-h-[44px] px-4 py-2 bg-white text-slate-700 border border-slate-200/80 rounded-xl text-xs font-semibold hover:bg-slate-50 shadow-sm transition-all flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-sky-500/20">
-                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
-                <span>Presensi GPS & Wajah</span>
-            </button>
+        <div class="flex items-center space-x-2 flex-wrap">
+            <a href="{{ route('hrm.portal') }}" target="_blank"
+               class="min-h-[42px] px-4 py-2 bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold shadow-md shadow-sky-600/20 transition-all flex items-center space-x-2 active:scale-[0.98]">
+                <svg class="w-4 h-4 text-sky-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                <span>Buka Portal Mandiri Staf (ESS) &rarr;</span>
+            </a>
 
-            <button type="button"
-                    @click="showCreateEmployeeModal = true"
-                    class="min-h-[44px] px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-semibold shadow-sm shadow-sky-600/20 transition-all flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-sky-500/40">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                <span>Tambah Pegawai Baru</span>
+            <button type="button" @click="showCreateEmployeeModal = true"
+                    class="min-h-[42px] px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-xs transition-all flex items-center space-x-2 active:scale-[0.98]">
+                <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                <span>Tambah Pegawai</span>
             </button>
         </div>
     </div>
 
-    <!-- Flash Feedback Alerts -->
-    @if(session('success'))
-        <div class="mb-5 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center justify-between shadow-sm animate-fadeIn">
-            <div class="flex items-center space-x-2.5">
-                <svg class="w-5 h-5 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <span class="font-medium">{{ session('success') }}</span>
-            </div>
-            <button type="button" @click="$el.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700 p-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="mb-5 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center justify-between shadow-sm animate-fadeIn">
-            <div class="flex items-center space-x-2.5">
-                <svg class="w-5 h-5 text-rose-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <span class="font-medium">{{ session('error') }}</span>
-            </div>
-            <button type="button" @click="$el.parentElement.remove()" class="text-rose-500 hover:text-rose-700 p-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
-        </div>
-    @endif
-
-    @if(session('warning'))
-        <div class="mb-5 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-center justify-between shadow-sm animate-fadeIn">
-            <div class="flex items-center space-x-2.5">
-                <svg class="w-5 h-5 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                </svg>
-                <span class="font-medium">{{ session('warning') }}</span>
-            </div>
-            <button type="button" @click="$el.parentElement.remove()" class="text-amber-500 hover:text-amber-700 p-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
-        </div>
-    @endif
-
-    <!-- Bento Grid Metrics (Apple HIG Architecture) -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4 mb-6">
-        <!-- Metric 1: Kehadiran Radar -->
-        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
+    <!-- ============================================================== -->
+    <!-- 2. BENTO GRID METRICS SUMMARY (Apple HIG Architecture)          -->
+    <!-- ============================================================== -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Card 1: Kehadiran Hari Ini -->
+        <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs flex flex-col justify-between space-y-3">
             <div class="flex items-center justify-between">
-                <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Hadir Hari Ini</span>
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Hadir Hari Ini</span>
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
             </div>
-            <div class="my-2">
-                <span class="text-2xl font-bold text-emerald-600 tracking-tight">{{ $metrics['attendance_rate'] ?? 100 }}%</span>
-                <span class="text-xs text-slate-500 block font-normal mt-0.5">
-                    {{ $metrics['today_clock_ins'] ?? 0 }} dari {{ $metrics['total_employees'] ?? 0 }} staf aktif
+            <div>
+                <div class="text-2xl sm:text-3xl font-extrabold text-emerald-600 tracking-tight font-mono">
+                    {{ $metrics['attendance_rate'] ?? 100 }}%
+                </div>
+                <p class="text-xs text-slate-500 font-medium mt-0.5">
+                    {{ $todayPresentCount }} dari {{ $totalStaff }} staf aktif
+                </p>
+            </div>
+            <div class="text-[10px] text-slate-400 font-medium">Valid Radius TPS Pelabuhan & Kantor</div>
+        </div>
+
+        <!-- Card 2: Beban Gaji & BPJS -->
+        <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs flex flex-col justify-between space-y-3">
+            <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Beban Gaji Pokok</span>
+                <svg class="w-4 h-4 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+            </div>
+            <div>
+                <div class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight font-mono">
+                    Rp {{ number_format($totalBaseSalary, 0, ',', '.') }}
+                </div>
+                <p class="text-xs text-slate-500 font-medium mt-0.5">
+                    BPJS TK: Rp {{ number_format($totalBpjsTk, 0, ',', '.') }} &bull; Kes: Rp {{ number_format($totalBpjsKes, 0, ',', '.') }}
+                </p>
+            </div>
+            <div class="text-[10px] text-slate-400 font-medium">Iuran 2% JHT & 1% BPJS Kes</div>
+        </div>
+
+        <!-- Card 3: Saldo Kasbon Berjalan -->
+        <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs flex flex-col justify-between space-y-3">
+            <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Saldo Kasbon Aktif</span>
+                <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+            </div>
+            <div>
+                <div class="text-xl sm:text-2xl font-extrabold text-amber-600 tracking-tight font-mono">
+                    Rp {{ number_format($totalActiveLoans, 0, ',', '.') }}
+                </div>
+                <p class="text-xs text-slate-500 font-medium mt-0.5">
+                    Dipotong otomatis di siklus payroll bulanan
+                </p>
+            </div>
+            <div class="text-[10px] text-slate-400 font-medium">Cicilan kasbon aktif staf</div>
+        </div>
+
+        <!-- Card 4: Status Payroll Terakhir -->
+        <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs flex flex-col justify-between space-y-3">
+            <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Payroll Terakhir</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800">
+                    {{ $latestPaidPayroll ? 'LUNAS (DISBURSED)' : ($metrics['latest_payroll']?->status ?? 'DRAFT') }}
                 </span>
             </div>
-            <div class="text-[10px] text-slate-400 font-medium">Valid Geofence Pelabuhan TPS & Kantor</div>
-        </div>
-
-        <!-- Metric 2: Kontrak PKWT Warning -->
-        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
-            <div class="flex items-center justify-between">
-                <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Kontrak PKWT Segera Jatuh Tempo</span>
-                <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <div>
+                <div class="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight font-mono">
+                    Periode {{ $latestPaidPayroll?->period ?? ($metrics['latest_payroll']?->period ?? date('Y-m')) }}
+                </div>
+                <p class="text-xs text-slate-500 font-medium mt-0.5">
+                    THP: Rp {{ number_format((float) ($latestPaidPayroll?->total_net ?? $metrics['latest_payroll']?->total_net ?? 0), 0, ',', '.') }}
+                </p>
             </div>
-            <div class="my-2">
-                <span class="text-2xl font-bold {{ ($metrics['expiring_contracts'] ?? 0) > 0 ? 'text-amber-600' : 'text-slate-800' }} tracking-tight">
-                    {{ $metrics['expiring_contracts'] ?? 0 }}
-                </span>
-                <span class="text-xs text-slate-500 block font-normal mt-0.5">Peringatan 30 hari ke depan</span>
-            </div>
-            <div class="text-[10px] text-slate-400 font-medium">Kepatuhan PP No. 35/2021</div>
-        </div>
-
-        <!-- Metric 3: Cuti & Backup PIC Siaga -->
-        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
-            <div class="flex items-center justify-between">
-                <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Cuti & Auto-PIC</span>
-                <svg class="w-4 h-4 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-            </div>
-            <div class="my-2">
-                <span class="text-2xl font-bold text-sky-600 tracking-tight">{{ $metrics['pending_leaves'] ?? 0 }}</span>
-                <span class="text-xs text-slate-500 block font-normal mt-0.5">Permohonan cuti menunggu</span>
-            </div>
-            <div class="text-[10px] text-slate-400 font-medium">Alih tugas otomatis ke backup PIC</div>
-        </div>
-
-        <!-- Metric 4: Status Payroll Bulanan -->
-        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
-            <div class="flex items-center justify-between">
-                <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Payroll Bulanan</span>
-                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">
-                    {{ $metrics['latest_payroll']?->status ?? 'DRAFT' }}
-                </span>
-            </div>
-            <div class="my-2">
-                <span class="text-2xl font-bold text-slate-900 tracking-tight">
-                    {{ $metrics['latest_payroll'] ? 'Rp ' . number_format($metrics['latest_payroll']->total_net, 0, ',', '.') : 'Rp 0' }}
-                </span>
-                <span class="text-xs text-slate-500 block font-normal mt-0.5">Periode: {{ $metrics['latest_payroll']?->period ?? date('Y-m') }}</span>
-            </div>
-            <div class="text-[10px] text-slate-400 font-medium">Gaji pokok + tunjangan operasional</div>
+            <a href="{{ route('hrm.payrolls.create') }}" class="text-[10px] text-sky-600 font-bold hover:underline">
+                Buat Siklus Payroll Baru &rarr;
+            </a>
         </div>
     </div>
 
-    <!-- Apple HIG Segmented Control (Pills with Min 44px Touch Target) -->
-    <div class="bg-slate-200/70 p-1.5 rounded-2xl mb-6 overflow-x-auto no-scrollbar shadow-inner">
+    <!-- ============================================================== -->
+    <!-- 3. APPLE HIG SEGMENTED NAVIGATION CONTROLS (8 TABS)            -->
+    <!-- ============================================================== -->
+    <div class="bg-slate-200/80 p-1.5 rounded-2xl overflow-x-auto no-scrollbar shadow-inner">
         <div class="flex items-center space-x-1 min-w-max">
-            <button type="button"
-                    @click="activeTab = 'employees'"
-                    :class="activeTab === 'employees' ? 'bg-white text-slate-900 shadow-sm font-semibold' : 'text-slate-600 hover:text-slate-900 font-medium'"
-                    class="min-h-[44px] px-4 py-2 rounded-xl text-xs transition-all flex items-center space-x-2 focus:outline-none">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                <span>Pegawai & Kontrak</span>
-                <span class="ml-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold"
-                      :class="activeTab === 'employees' ? 'bg-sky-100 text-sky-800' : 'bg-slate-300 text-slate-700'">
-                    {{ $employees->total() }}
-                </span>
+            <button type="button" @click="setTab('employees')"
+                    :class="activeTab === 'employees' ? 'bg-white text-slate-900 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
+                    class="min-h-[44px] px-3.5 py-2 rounded-xl text-xs transition-all flex items-center space-x-2">
+                <svg class="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                <span>Data Pegawai</span>
+                <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-100 text-slate-700 font-bold">{{ $totalStaff }}</span>
             </button>
 
-            <button type="button"
-                    @click="activeTab = 'attendance'"
-                    :class="activeTab === 'attendance' ? 'bg-white text-slate-900 shadow-sm font-semibold' : 'text-slate-600 hover:text-slate-900 font-medium'"
-                    class="min-h-[44px] px-4 py-2 rounded-xl text-xs transition-all flex items-center space-x-2 focus:outline-none">
+            <button type="button" @click="setTab('attendance')"
+                    :class="activeTab === 'attendance' ? 'bg-white text-slate-900 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
+                    class="min-h-[44px] px-3.5 py-2 rounded-xl text-xs transition-all flex items-center space-x-2">
                 <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                <span>Presensi Geofence & Wajah</span>
+                <span>Log Presensi</span>
+                <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-100 text-emerald-800 font-bold">{{ $todayPresentCount }}</span>
             </button>
 
-            <button type="button"
-                    @click="activeTab = 'leaves'"
-                    :class="activeTab === 'leaves' ? 'bg-white text-slate-900 shadow-sm font-semibold' : 'text-slate-600 hover:text-slate-900 font-medium'"
-                    class="min-h-[44px] px-4 py-2 rounded-xl text-xs transition-all flex items-center space-x-2 focus:outline-none">
-                <svg class="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                <span>Cuti & Backup PIC</span>
-                @if(($metrics['pending_leaves'] ?? 0) > 0)
-                    <span class="w-2 h-2 rounded-full bg-sky-500"></span>
+            <button type="button" @click="setTab('corrections')"
+                    :class="activeTab === 'corrections' ? 'bg-white text-slate-900 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
+                    class="min-h-[44px] px-3.5 py-2 rounded-xl text-xs transition-all flex items-center space-x-2">
+                <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                <span>Koreksi Presensi</span>
+                @if($pendingCorrectionsCount > 0)
+                    <span class="px-2 py-0.5 rounded-full text-[10px] bg-rose-600 text-white font-bold animate-pulse">{{ $pendingCorrectionsCount }}</span>
+                @else
+                    <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-100 text-slate-700 font-bold">{{ $corrections->total() }}</span>
                 @endif
             </button>
 
-            <button type="button"
-                    @click="activeTab = 'overtime'"
-                    :class="activeTab === 'overtime' ? 'bg-white text-slate-900 shadow-sm font-semibold' : 'text-slate-600 hover:text-slate-900 font-medium'"
-                    class="min-h-[44px] px-4 py-2 rounded-xl text-xs transition-all flex items-center space-x-2 focus:outline-none">
-                <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                <span>Lembur & Kasbon</span>
+            <button type="button" @click="setTab('locations')"
+                    :class="activeTab === 'locations' ? 'bg-white text-slate-900 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
+                    class="min-h-[44px] px-3.5 py-2 rounded-xl text-xs transition-all flex items-center space-x-2">
+                <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <span>Titik Geofence (TPS)</span>
+                <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-100 text-slate-700 font-bold">{{ $allLocations->count() }}</span>
             </button>
 
-            <button type="button"
-                    @click="activeTab = 'assets'"
-                    :class="activeTab === 'assets' ? 'bg-white text-slate-900 shadow-sm font-semibold' : 'text-slate-600 hover:text-slate-900 font-medium'"
-                    class="min-h-[44px] px-4 py-2 rounded-xl text-xs transition-all flex items-center space-x-2 focus:outline-none">
-                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                <span>Aset Inventaris</span>
+            <button type="button" @click="setTab('shifts')"
+                    :class="activeTab === 'shifts' ? 'bg-white text-slate-900 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
+                    class="min-h-[44px] px-3.5 py-2 rounded-xl text-xs transition-all flex items-center space-x-2">
+                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span>Shift Kerja</span>
+                <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-100 text-slate-700 font-bold">{{ $workShifts->count() }}</span>
             </button>
 
-            <button type="button"
-                    @click="activeTab = 'payroll'"
-                    :class="activeTab === 'payroll' ? 'bg-white text-slate-900 shadow-sm font-semibold' : 'text-slate-600 hover:text-slate-900 font-medium'"
-                    class="min-h-[44px] px-4 py-2 rounded-xl text-xs transition-all flex items-center space-x-2 focus:outline-none">
-                <svg class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+            <button type="button" @click="setTab('schedules')"
+                    :class="activeTab === 'schedules' ? 'bg-white text-slate-900 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
+                    class="min-h-[44px] px-3.5 py-2 rounded-xl text-xs transition-all flex items-center space-x-2">
+                <svg class="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <span>Jadwal Staf</span>
+                <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-100 text-slate-700 font-bold">{{ $employeeSchedules->total() }}</span>
+            </button>
+
+            <button type="button" @click="setTab('payrolls')"
+                    :class="activeTab === 'payrolls' ? 'bg-white text-slate-900 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
+                    class="min-h-[44px] px-3.5 py-2 rounded-xl text-xs transition-all flex items-center space-x-2">
+                <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                 <span>Payroll Engine</span>
+                <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-100 text-slate-700 font-bold">{{ $payrolls->total() }}</span>
+            </button>
+
+            <button type="button" @click="setTab('loans')"
+                    :class="activeTab === 'loans' ? 'bg-white text-slate-900 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
+                    class="min-h-[44px] px-3.5 py-2 rounded-xl text-xs transition-all flex items-center space-x-2">
+                <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span>Kasbon Staf</span>
+                <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-100 text-slate-700 font-bold">{{ $loans->total() }}</span>
+            </button>
+
+            <button type="button" @click="setTab('assets')"
+                    :class="activeTab === 'assets' ? 'bg-white text-slate-900 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
+                    class="min-h-[44px] px-3.5 py-2 rounded-xl text-xs transition-all flex items-center space-x-2">
+                <svg class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                <span>Aset Inventaris</span>
+                <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-100 text-slate-700 font-bold">{{ $assets->count() }}</span>
             </button>
         </div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- TAB 1: PEGAWAI & KONTRAK KERJA (PKWT / PKWTT)                             -->
-    <!-- ========================================================================= -->
-    <div x-show="activeTab === 'employees'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
-        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-            <!-- Filter Bar -->
-            <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <form method="GET" action="{{ route('hrm.index') }}" class="flex items-center flex-wrap gap-2 w-full sm:w-auto">
-                    <input type="hidden" name="tab" value="employees">
-                    <div class="relative w-full sm:w-64">
-                        <input type="text"
-                               name="search"
-                               value="{{ request('search') }}"
-                               placeholder="Cari NIK, Nama, Posisi..."
-                               class="w-full text-xs rounded-xl border border-slate-200/80 pl-9 pr-3 py-2 focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 outline-none">
-                        <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    </div>
-
-                    <select name="team" onchange="this.form.submit()" class="text-xs rounded-xl border border-slate-200/80 px-3 py-2 bg-white text-slate-600 focus:outline-none">
-                        <option value="">Semua Divisi / Tim</option>
-                        @foreach($teams as $t)
-                            <option value="{{ $t }}" {{ request('team') == $t ? 'selected' : '' }}>Tim {{ $t }}</option>
-                        @endforeach
-                    </select>
-
-                    @if(request('search') || request('team'))
-                        <a href="{{ route('hrm.index', ['tab' => 'employees']) }}" class="text-xs text-rose-600 hover:underline px-2 py-1">Reset</a>
-                    @endif
-                </form>
-
-                <div class="text-xs text-slate-500 font-medium">
-                    Total: <span class="font-bold text-slate-900">{{ $employees->total() }}</span> Karyawan Terdaftar
+    <!-- ============================================================== -->
+    <!-- TAB 1: DATA PEGAWAI & KONTRAK (EMPLOYEES)                      -->
+    <!-- ============================================================== -->
+    <div x-show="activeTab === 'employees'" class="space-y-4">
+        <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <!-- Filter & Search -->
+            <form method="GET" action="{{ route('hrm.index') }}" class="flex items-center space-x-2 flex-1 max-w-lg">
+                <input type="hidden" name="tab" value="employees">
+                <div class="relative flex-1">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari NIK, Nama Pegawai, Posisi..."
+                           class="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:ring-2 focus:ring-sky-500/20">
+                    <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </div>
-            </div>
+                <select name="team" onchange="this.form.submit()" class="px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-700">
+                    <option value="">Semua Divisi</option>
+                    @foreach($teams as $t)
+                        <option value="{{ $t }}" {{ request('team') === $t ? 'selected' : '' }}>{{ $t }}</option>
+                    @endforeach
+                </select>
+            </form>
 
-            <!-- Table Desktop (Hidden on mobile) -->
-            <div class="hidden sm:block overflow-x-auto">
-                <table class="w-full text-left text-xs">
-                    <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-100">
+            <!-- Export / Import Actions -->
+            <div class="flex items-center space-x-2 flex-wrap">
+                <a href="{{ route('hrm.employees.export') }}"
+                   class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center space-x-1.5"
+                   title="Export Data ke Excel/CSV">
+                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    <span>Export Excel</span>
+                </a>
+
+                <a href="{{ route('hrm.employees.template') }}"
+                   class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold transition"
+                   title="Download Template CSV">
+                    Template
+                </a>
+
+                <button type="button" @click="showImportEmployeeModal = true"
+                        class="px-3.5 py-2 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 text-xs font-bold transition flex items-center space-x-1.5 cursor-pointer">
+                    <svg class="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                    <span>Import Excel / CSV</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabel Data Pegawai -->
+        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-600">
+                    <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200">
                         <tr>
-                            <th class="py-3 px-4">Nama Pegawai & Jabatan</th>
-                            <th class="py-3 px-4">Divisi / Tim</th>
-                            <th class="py-3 px-4">Kontrak Kerja</th>
-                            <th class="py-3 px-4">Gaji Pokok</th>
-                            <th class="py-3 px-4">Biometrik Wajah</th>
-                            <th class="py-3 px-4">Status</th>
+                            <th class="px-5 py-3.5">Pegawai</th>
+                            <th class="px-4 py-3.5">Divisi & Jabatan</th>
+                            <th class="px-4 py-3.5">Kontrak Kerja</th>
+                            <th class="px-4 py-3.5">Gaji Pokok</th>
+                            <th class="px-4 py-3.5">Rekening Bank</th>
+                            <th class="px-4 py-3.5">Biometrik Wajah</th>
+                            <th class="px-4 py-3.5 text-right">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
                         @forelse($employees as $emp)
-                            <tr class="hover:bg-slate-50/60 transition-colors">
-                                <td class="py-3 px-4">
-                                    <div class="font-bold text-slate-900">{{ $emp->full_name }}</div>
-                                    <div class="text-[10px] text-slate-400 font-mono">{{ $emp->nik }} &bull; {{ $emp->position }}</div>
-                                </td>
-                                <td class="py-3 px-4">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-200">
-                                        {{ $emp->team }}
-                                    </span>
-                                </td>
-                                <td class="py-3 px-4">
-                                    @php $latestCtr = $emp->latestContract; @endphp
-                                    @if($latestCtr)
-                                        <div class="font-semibold text-slate-700">{{ $latestCtr->kind }}</div>
-                                        <div class="text-[10px] text-slate-400">
-                                            {{ $latestCtr->end_date ? 'S/d ' . $latestCtr->end_date->format('d M Y') : 'Karyawan Tetap' }}
+                            <tr class="hover:bg-slate-50/70 transition">
+                                <td class="px-5 py-3.5">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-9 h-9 rounded-xl bg-sky-100 text-sky-800 font-bold flex items-center justify-center text-xs shrink-0 overflow-hidden">
+                                            @if($emp->photo_url)
+                                                <img src="{{ $emp->photo_url }}" class="w-full h-full object-cover">
+                                            @else
+                                                {{ $emp->initials }}
+                                            @endif
                                         </div>
-                                    @else
-                                        <span class="text-slate-400 italic">Belum Ada</span>
-                                    @endif
+                                        <div>
+                                            <div class="font-bold text-slate-900">{{ $emp->full_name }}</div>
+                                            <div class="font-mono text-[10px] text-slate-400">{{ $emp->nik }}</div>
+                                        </div>
+                                    </div>
                                 </td>
-                                <td class="py-3 px-4 font-mono font-semibold text-slate-800">
-                                    {{ $emp->formatted_salary }}
+                                <td class="px-4 py-3.5">
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-800">{{ $emp->team }}</span>
+                                    <div class="text-[11px] text-slate-500 mt-0.5">{{ $emp->position }}</div>
                                 </td>
-                                <td class="py-3 px-4">
-                                    @if($emp->hasValidBiometricConsent())
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            ✓ UU PDP Sah
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                                            Belum Consent
-                                        </span>
-                                    @endif
-                                </td>
-                                <td class="py-3 px-4">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold {{ $emp->status === 'ACTIVE' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600' }}">
-                                        {{ $emp->status }}
+                                <td class="px-4 py-3.5">
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-50 text-sky-800 border border-sky-100">
+                                        {{ $emp->latestContract?->kind ?? 'PKWT' }}
                                     </span>
+                                    <div class="text-[10px] text-slate-400 mt-0.5">Mulai: {{ $emp->start_date ? $emp->start_date->format('d/m/Y') : '-' }}</div>
+                                </td>
+                                <td class="px-4 py-3.5 font-mono font-bold text-slate-800">
+                                    Rp {{ number_format((float) $emp->base_salary, 0, ',', '.') }}
+                                </td>
+                                <td class="px-4 py-3.5 font-mono text-[11px] text-slate-600">
+                                    {{ $emp->bank_name ?: 'BCA' }} - {{ $emp->bank_account_number ?: '-' }}
+                                </td>
+                                <td class="px-4 py-3.5">
+                                    @if($emp->hasFaceRegistered())
+                                        <span class="inline-flex items-center space-x-1 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                            <span>Terverifikasi</span>
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center space-x-1 text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                                            <span>Belum Rekam</span>
+                                        </span>
+                                    @endif
+                                </td>
+                                <td class="px-4 py-3.5 text-right">
+                                    <div class="flex items-center justify-end space-x-1.5">
+                                        <form method="POST" action="{{ route('hrm.employees.destroy', $emp->id) }}" onsubmit="return confirm('Hapus/nonaktifkan pegawai ini?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition" title="Hapus Pegawai">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="py-8 text-center text-slate-400">Tidak ada data pegawai yang sesuai.</td>
+                                <td colspan="7" class="px-5 py-8 text-center text-slate-400">
+                                    Belum ada data pegawai yang cocok dengan pencarian.
+                                </td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
 
-            <!-- Mobile Cards Presentation (<768px) -->
-            <div class="sm:hidden divide-y divide-slate-100">
-                @forelse($employees as $emp)
-                    <div class="p-4 flex flex-col space-y-2">
-                        <div class="flex items-start justify-between">
-                            <div>
-                                <div class="font-bold text-slate-900 text-sm">{{ $emp->full_name }}</div>
-                                <div class="text-xs text-slate-500">{{ $emp->position }}</div>
-                                <div class="text-[10px] text-slate-400 font-mono">{{ $emp->nik }}</div>
-                            </div>
-                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-200">
-                                {{ $emp->team }}
-                            </span>
-                        </div>
-                        <div class="flex items-center justify-between text-xs pt-1">
-                            <span class="font-mono text-slate-700 font-semibold">{{ $emp->formatted_salary }}</span>
-                            @if($emp->hasValidBiometricConsent())
-                                <span class="text-[10px] text-emerald-600 font-medium">✓ Biometrik UU PDP</span>
-                            @else
-                                <span class="text-[10px] text-rose-500 font-medium">Perlu Consent Wajah</span>
-                            @endif
-                        </div>
-                    </div>
-                @empty
-                    <div class="p-6 text-center text-slate-400 text-xs">Belum ada data pegawai.</div>
-                @endforelse
-            </div>
-
-            <!-- Pagination Links -->
-            @if($employees->hasPages())
-                <div class="p-4 border-t border-slate-100">
-                    {{ $employees->links() }}
-                </div>
-            @endif
-        </div>
-    </div>
-
-    <!-- ========================================================================= -->
-    <!-- TAB 2: PRESENSI GEOFENCE GPS & BIOMETRIK WAJAH (UU PDP)                   -->
-    <!-- ========================================================================= -->
-    <div x-show="activeTab === 'attendance'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-            <!-- Left: Radar Titik Geofencing TPS & Kantor -->
-            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
-                <div>
-                    <div class="flex items-center justify-between mb-3">
-                        <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center space-x-2">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                            <span>Radar Geofencing Aktif</span>
-                        </h3>
-                        <span class="text-[10px] text-slate-400 font-medium">Haversine GPS Engine</span>
-                    </div>
-                    <p class="text-xs text-slate-500 mb-4">
-                        Staf lapangan & operasional hanya dapat absen jika berada di dalam batas radius resmi berikut:
-                    </p>
-
-                    <div class="space-y-3">
-                        @foreach($workLocations as $loc)
-                            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/60">
-                                <div class="flex items-center justify-between">
-                                    <span class="font-bold text-xs text-slate-800">{{ $loc->name }}</span>
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
-                                        Radius {{ $loc->radius_m }}m
-                                    </span>
-                                </div>
-                                <div class="text-[10px] text-slate-400 font-mono mt-1">
-                                    Lat: {{ number_format($loc->lat, 4) }}, Lng: {{ number_format($loc->lng, 4) }}
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-
-                <!-- UU PDP Consent Notice -->
-                <div class="mt-4 p-3.5 rounded-xl bg-sky-50 border border-sky-200 text-xs">
-                    <div class="flex items-start space-x-2">
-                        <svg class="w-4 h-4 text-sky-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <div>
-                            <span class="font-bold text-sky-900 block mb-0.5">Kepatuhan UU PDP No. 27/2022</span>
-                            <span class="text-[11px] text-sky-800 leading-relaxed block">
-                                Pemrosesan data biometrik pengenalan wajah wajib memiliki persetujuan eksplisit karyawan. Staf berhak mencabut persetujuan kapan saja.
-                            </span>
-                            <button type="button" @click="showConsentModal = true" class="mt-2 text-[11px] text-sky-700 font-bold hover:underline inline-flex items-center gap-1">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                <span>Isi Formulir Persetujuan Biometrik Pegawai</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right: Log Presensi Masuk / Pulang Terbaru -->
-            <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col">
-                <div class="p-4 border-b border-slate-100 flex items-center justify-between">
-                    <span class="font-bold text-xs text-slate-800">Log Presensi Face Recognition & GPS Hari Ini</span>
-                    <span class="text-[10px] text-slate-400">{{ count($recentAttendances) }} rekaman terakhir</span>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-100">
-                            <tr>
-                                <th class="py-3 px-4">Waktu</th>
-                                <th class="py-3 px-4">Nama Pegawai</th>
-                                <th class="py-3 px-4">Jenis</th>
-                                <th class="py-3 px-4">Skor Wajah</th>
-                                <th class="py-3 px-4">Status Geofence</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100">
-                            @forelse($recentAttendances as $att)
-                                <tr class="hover:bg-slate-50/60">
-                                    <td class="py-3 px-4 font-mono text-slate-600">
-                                        {{ $att->at->format('H:i:s') }}
-                                        <div class="text-[10px] text-slate-400">{{ $att->at->format('d M Y') }}</div>
-                                    </td>
-                                    <td class="py-3 px-4 font-semibold text-slate-900">
-                                        {{ $att->employee->full_name }}
-                                        <div class="text-[10px] text-slate-400 font-normal">{{ $att->employee->team }}</div>
-                                    </td>
-                                    <td class="py-3 px-4">
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold {{ $att->kind === 'CLOCK_IN' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-700 border border-slate-200' }}">
-                                            {{ $att->kind === 'CLOCK_IN' ? 'MASUK' : 'PULANG' }}
-                                        </span>
-                                    </td>
-                                    <td class="py-3 px-4 font-mono">
-                                        <span class="text-emerald-600 font-bold">{{ $att->face_match_percentage }}</span>
-                                    </td>
-                                    <td class="py-3 px-4">
-                                        @if($att->valid)
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
-                                                ✓ Valid ({{ $att->location?->name ?? 'Radius Geofence' }})
-                                            </span>
-                                        @else
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
-                                                ⚠ Luar Radius
-                                            </span>
-                                        @endif
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="py-8 text-center text-slate-400">Belum ada presensi masuk hari ini.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+            <div class="p-4 border-t border-slate-100">
+                {{ $employees->links() }}
             </div>
         </div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- TAB 3: CUTI & ALIH TUGAS OTOMATIS PIC OPERASIONAL FORWARDER               -->
-    <!-- ========================================================================= -->
-    <div x-show="activeTab === 'leaves'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
-        <!-- Banner Kontinuitas SLA Forwarder -->
-        <div class="mb-5 p-4 rounded-2xl bg-sky-50 border border-sky-200 text-sky-950 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
-            <div class="flex items-start space-x-3">
-                <div class="w-8 h-8 rounded-xl bg-sky-600 text-white flex items-center justify-center flex-shrink-0 font-bold">
-                    PIC
-                </div>
-                <div>
-                    <h3 class="text-xs font-bold text-sky-950">Aturan Logistik Forwarder: Auto-Reassignment PIC</h3>
-                    <p class="text-xs text-sky-800 mt-0.5">
-                        Saat permohonan cuti disetujui, sistem Genie ERP otomatis mengalihkan tugas PIC operasional shipment (<span class="font-semibold">PIB, PEB, Delivery Order, Behandle</span>) ke <span class="font-semibold">Backup PIC</span> yang terdaftar. SLA pabean tidak akan terputus.
-                    </p>
-                </div>
+    <!-- ============================================================== -->
+    <!-- TAB 2: LOG PRESENSI HARIAN & BULANAN (ATTENDANCE)              -->
+    <!-- ============================================================== -->
+    <div x-show="activeTab === 'attendance'" class="space-y-4">
+        <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <h2 class="text-base font-bold text-slate-900">Log Presensi Harian Satelit & Geofencing</h2>
+                <p class="text-xs text-slate-500">Rekaman presensi masuk/pulang, foto selfie verifikasi, dan jarak toleransi meter.</p>
             </div>
-            <button type="button" @click="showLeaveModal = true" class="min-h-[44px] px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold shadow-xs transition-all whitespace-nowrap inline-flex items-center gap-1.5 active:scale-95">
-                <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                <span>Ajukan Cuti Baru</span>
-            </button>
+
+            <div class="flex items-center space-x-2 flex-wrap">
+                <a href="{{ route('hrm.attendance.export') }}"
+                   class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center space-x-1.5">
+                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    <span>Export Presensi</span>
+                </a>
+
+                <button type="button" @click="showImportAttendanceModal = true"
+                        class="px-3.5 py-2 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 text-xs font-bold transition flex items-center space-x-1.5 cursor-pointer">
+                    <svg class="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                    <span>Import Mesin Absensi</span>
+                </button>
+            </div>
         </div>
 
-        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-            <div class="p-4 border-b border-slate-100 flex items-center justify-between">
-                <span class="font-bold text-xs text-slate-800">Daftar Pengajuan Cuti & Izin Karyawan</span>
-            </div>
+        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
-                    <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-100">
+                <table class="w-full text-left text-xs text-slate-600">
+                    <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200">
                         <tr>
-                            <th class="py-3 px-4">Nama Pegawai</th>
-                            <th class="py-3 px-4">Jenis Cuti</th>
-                            <th class="py-3 px-4">Tanggal Mulai - Selesai</th>
-                            <th class="py-3 px-4">Durasi Hari</th>
-                            <th class="py-3 px-4">Status</th>
-                            <th class="py-3 px-4 text-right">Aksi Approval</th>
+                            <th class="px-4 py-3.5">Waktu</th>
+                            <th class="px-4 py-3.5">Pegawai</th>
+                            <th class="px-4 py-3.5">Tipe</th>
+                            <th class="px-4 py-3.5">Titik Geofence</th>
+                            <th class="px-4 py-3.5">Jarak Radius</th>
+                            <th class="px-4 py-3.5">Foto Selfie</th>
+                            <th class="px-4 py-3.5">Status Validasi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
-                        @forelse($leaveRequests as $lr)
-                            <tr class="hover:bg-slate-50/60">
-                                <td class="py-3 px-4 font-semibold text-slate-900">
-                                    {{ $lr->employee->full_name }}
-                                    <div class="text-[10px] text-slate-400 font-normal">Tim: {{ $lr->employee->team }}</div>
+                        @forelse($recentAttendances as $log)
+                            <tr class="hover:bg-slate-50/70 transition">
+                                <td class="px-4 py-3.5 font-mono text-slate-800">
+                                    {{ $log->at?->format('d/m/Y H:i') }}
                                 </td>
-                                <td class="py-3 px-4">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">
-                                        {{ $lr->kind }}
-                                    </span>
+                                <td class="px-4 py-3.5">
+                                    <div class="font-bold text-slate-900">{{ $log->employee?->full_name }}</div>
+                                    <div class="text-[10px] font-mono text-slate-400">{{ $log->employee?->nik }}</div>
                                 </td>
-                                <td class="py-3 px-4 font-mono text-slate-600">
-                                    {{ $lr->from_date->format('d M Y') }} s/d {{ $lr->to_date->format('d M Y') }}
-                                </td>
-                                <td class="py-3 px-4 font-bold text-slate-800">
-                                    {{ $lr->duration_days }} Hari
-                                </td>
-                                <td class="py-3 px-4">
-                                    @if($lr->status === 'APPROVED')
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
-                                            DISETUJUI
-                                        </span>
-                                    @elseif($lr->status === 'REJECTED')
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800">
-                                            DITOLAK
-                                        </span>
+                                <td class="px-4 py-3.5 font-bold">
+                                    @if($log->kind === 'CLOCK_IN')
+                                        <span class="text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded text-[10px]">MASUK</span>
                                     @else
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
-                                            MENUNGGU
-                                        </span>
+                                        <span class="text-sky-700 bg-sky-100 px-2 py-0.5 rounded text-[10px]">PULANG</span>
                                     @endif
                                 </td>
-                                <td class="py-3 px-4 text-right">
-                                    @if($lr->isPending())
+                                <td class="px-4 py-3.5 text-slate-700">
+                                    {{ $log->location?->name ?? 'Titik Bebas' }}
+                                </td>
+                                <td class="px-4 py-3.5 font-mono">
+                                    {{ $log->distance_m ?? 0 }} m
+                                </td>
+                                <td class="px-4 py-3.5">
+                                    @if($log->photo_url)
+                                        <button type="button" @click="activePhotoUrl = '{{ $log->photo_url }}'; showPhotoModal = true"
+                                                class="w-8 h-8 rounded-lg overflow-hidden border border-slate-200 shadow-xs hover:scale-110 transition cursor-pointer">
+                                            <img src="{{ $log->photo_url }}" class="w-full h-full object-cover">
+                                        </button>
+                                    @else
+                                        <span class="text-slate-400 text-[10px]">Tidak ada</span>
+                                    @endif
+                                </td>
+                                <td class="px-4 py-3.5 font-bold">
+                                    @if($log->is_geofenced)
+                                        <span class="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded text-[10px]">DALAM RADIUS</span>
+                                    @else
+                                        <span class="text-amber-600 bg-amber-50 px-2 py-0.5 rounded text-[10px]">LUAR RADIUS</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7" class="px-5 py-8 text-center text-slate-400">
+                                    Belum ada log presensi tercatat.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- TAB 3: APPROVAL KOREKSI PRESENSI (CORRECTIONS)                 -->
+    <!-- ============================================================== -->
+    <div x-show="activeTab === 'corrections'" class="space-y-4">
+        <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+            <div>
+                <h2 class="text-base font-bold text-slate-900">Pusat Persetujuan Koreksi Presensi</h2>
+                <p class="text-xs text-slate-500">Tinjau permohonan koreksi jam masuk/pulang yang diajukan oleh staf.</p>
+            </div>
+            <span class="px-3 py-1 rounded-xl text-xs font-bold bg-amber-100 text-amber-800">
+                {{ $pendingCorrectionsCount }} Menunggu Review
+            </span>
+        </div>
+
+        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-600">
+                    <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200">
+                        <tr>
+                            <th class="px-4 py-3.5">Tanggal Usulan</th>
+                            <th class="px-4 py-3.5">Pegawai</th>
+                            <th class="px-4 py-3.5">Usulan Jam</th>
+                            <th class="px-4 py-3.5">Alasan Koreksi</th>
+                            <th class="px-4 py-3.5">Status</th>
+                            <th class="px-4 py-3.5 text-right">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @forelse($corrections as $corr)
+                            <tr class="hover:bg-slate-50/70 transition">
+                                <td class="px-4 py-3.5 font-bold font-mono text-slate-900">
+                                    {{ $corr->correction_date?->format('d/m/Y') }}
+                                </td>
+                                <td class="px-4 py-3.5">
+                                    <div class="font-bold text-slate-900">{{ $corr->employee?->full_name }}</div>
+                                    <div class="text-[10px] text-slate-400">{{ $corr->employee?->position }}</div>
+                                </td>
+                                <td class="px-4 py-3.5 font-mono">
+                                    In: <span class="font-bold text-emerald-700">{{ $corr->proposed_clock_in ?: '--:--' }}</span> |
+                                    Out: <span class="font-bold text-sky-700">{{ $corr->proposed_clock_out ?: '--:--' }}</span>
+                                </td>
+                                <td class="px-4 py-3.5 max-w-xs truncate" title="{{ $corr->reason }}">
+                                    {{ $corr->reason }}
+                                </td>
+                                <td class="px-4 py-3.5 font-bold">
+                                    @if($corr->status === 'APPROVED')
+                                        <span class="text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded text-[10px]">DISETUJUI</span>
+                                    @elseif($corr->status === 'REJECTED')
+                                        <span class="text-rose-700 bg-rose-100 px-2 py-0.5 rounded text-[10px]">DITOLAK</span>
+                                    @else
+                                        <span class="text-amber-700 bg-amber-100 px-2 py-0.5 rounded text-[10px] animate-pulse">MENUNGGU</span>
+                                    @endif
+                                </td>
+                                <td class="px-4 py-3.5 text-right">
+                                    @if($corr->status === 'PENDING')
                                         <div class="flex items-center justify-end space-x-1.5">
-                                            <form method="POST" action="{{ route('hrm.leaves.approve', $lr->id) }}">
+                                            <form method="POST" action="{{ route('hrm.attendance.corrections.approve', $corr->id) }}">
                                                 @csrf
-                                                <button type="submit" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-semibold transition-all">
-                                                    Setujui & Alihkan PIC
+                                                <button type="submit" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] shadow-xs">
+                                                    Setujui
                                                 </button>
                                             </form>
-                                            <form method="POST" action="{{ route('hrm.leaves.reject', $lr->id) }}">
+                                            <form method="POST" action="{{ route('hrm.attendance.corrections.reject', $corr->id) }}">
                                                 @csrf
-                                                <button type="submit" class="px-2 py-1.5 bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-600 rounded-lg text-[11px] font-semibold transition-all">
+                                                <button type="submit" class="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-[11px] shadow-xs">
                                                     Tolak
                                                 </button>
                                             </form>
                                         </div>
                                     @else
-                                        <span class="text-[10px] text-slate-400">Diproses oleh {{ $lr->approver?->name ?? 'Admin' }}</span>
+                                        <span class="text-slate-400 text-[10px]">Selesai ditinjau</span>
                                     @endif
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="py-8 text-center text-slate-400">Tidak ada pengajuan cuti yang tertunda.</td>
+                                <td colspan="6" class="px-5 py-8 text-center text-slate-400">
+                                    Tidak ada pengajuan koreksi presensi.
+                                </td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
-        </div>
-    </div>
-
-    <!-- ========================================================================= -->
-    <!-- TAB 4: LEMBUR & KASBON PEGAWAI                                            -->
-    <!-- ========================================================================= -->
-    <div x-show="activeTab === 'overtime'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Lembur Operasional Pelabuhan -->
-            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col justify-between">
-                <div>
-                    <div class="p-4 border-b border-slate-100 flex items-center justify-between">
-                        <span class="font-bold text-xs text-slate-800">Lembur Behandle & Operasional Lapangan TPS</span>
-                        <button type="button" @click="showOvertimeModal = true" class="text-xs font-semibold text-sky-600 hover:text-sky-800 transition-colors inline-flex items-center gap-1">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                            <span>Catat Lembur</span>
-                        </button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs">
-                            <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-100">
-                                <tr>
-                                    <th class="py-3 px-4">Pegawai</th>
-                                    <th class="py-3 px-4">Tanggal</th>
-                                    <th class="py-3 px-4">Durasi Jam</th>
-                                    <th class="py-3 px-4">Status</th>
-                                    <th class="py-3 px-4 text-right">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100">
-                                @forelse($overtimeRequests as $or)
-                                    <tr class="hover:bg-slate-50/60">
-                                        <td class="py-3 px-4 font-semibold text-slate-900">{{ $or->employee->full_name }}</td>
-                                        <td class="py-3 px-4 font-mono text-slate-600">{{ $or->work_date->format('d M Y') }}</td>
-                                        <td class="py-3 px-4 font-bold text-slate-800">{{ $or->hours }} Jam</td>
-                                        <td class="py-3 px-4">
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold {{ $or->status === 'APPROVED' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' }}">
-                                                {{ $or->status }}
-                                            </span>
-                                        </td>
-                                        <td class="py-3 px-4 text-right">
-                                            @if($or->isPending())
-                                                <form method="POST" action="{{ route('hrm.overtime.approve', $or->id) }}" class="inline">
-                                                    @csrf
-                                                    <button type="submit" class="px-2 py-1 bg-emerald-600 text-white rounded text-[10px] font-semibold">Setujui</button>
-                                                </form>
-                                            @else
-                                                <span class="text-[10px] text-slate-400">Selesai</span>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="5" class="py-6 text-center text-slate-400">Belum ada pengajuan lembur.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Kasbon & Cicilan Karyawan -->
-            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col justify-between">
-                <div>
-                    <div class="p-4 border-b border-slate-100 flex items-center justify-between">
-                        <span class="font-bold text-xs text-slate-800">Kasbon Karyawan & Cicilan Payroll</span>
-                        <button type="button" @click="showCashAdvanceModal = true" class="text-xs font-semibold text-sky-600 hover:text-sky-800 transition-colors inline-flex items-center gap-1">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                            <span>Kasbon Baru</span>
-                        </button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs">
-                            <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-100">
-                                <tr>
-                                    <th class="py-3 px-4">Pegawai</th>
-                                    <th class="py-3 px-4">Total Kasbon</th>
-                                    <th class="py-3 px-4">Sisa Saldo</th>
-                                    <th class="py-3 px-4">Tenor</th>
-                                    <th class="py-3 px-4">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100">
-                                @forelse($cashAdvances as $ca)
-                                    <tr class="hover:bg-slate-50/60">
-                                        <td class="py-3 px-4 font-semibold text-slate-900">{{ $ca->employee->full_name }}</td>
-                                        <td class="py-3 px-4 font-mono font-semibold text-slate-800">{{ $ca->formatted_amount }}</td>
-                                        <td class="py-3 px-4 font-mono font-bold text-rose-600">{{ $ca->formatted_balance }}</td>
-                                        <td class="py-3 px-4 text-slate-600">{{ $ca->installments }} Bulan</td>
-                                        <td class="py-3 px-4">
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
-                                                AKTIF (Cicilan)
-                                            </span>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="5" class="py-6 text-center text-slate-400">Tidak ada kasbon aktif saat ini.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+            <div class="p-4 border-t border-slate-100">
+                {{ $corrections->links() }}
             </div>
         </div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- TAB 5: ASET INVENTARIS PELABUHAN & KANTOR                                 -->
-    <!-- ========================================================================= -->
-    <div x-show="activeTab === 'assets'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
-        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-            <div class="p-4 border-b border-slate-100 flex items-center justify-between">
-                <div>
-                    <span class="font-bold text-xs text-slate-800 block">Inventaris Perangkat & Aset Lapangan Pelabuhan</span>
-                    <span class="text-[10px] text-slate-400">Laptop ThinkPad, Walkie-Talkie HT TPS Koja/JICT, Kartu Pass Pelindo</span>
-                </div>
-                <button type="button" @click="showCreateAssetModal = true" class="min-h-[44px] px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold shadow-xs transition-all inline-flex items-center gap-1.5 active:scale-95">
-                    <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                    <span>Tambah Aset Baru</span>
-                </button>
+    <!-- ============================================================== -->
+    <!-- TAB 4: TITIK GEOFENCE MULTI-LOKASI (LOCATIONS)                 -->
+    <!-- ============================================================== -->
+    <div x-show="activeTab === 'locations'" class="space-y-4">
+        <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+            <div>
+                <h2 class="text-base font-bold text-slate-900">Titik Geofencing & Penugasan Lapangan</h2>
+                <p class="text-xs text-slate-500">Koordinat GPS kantor pusat, TPS JICT Tanjung Priok, TPS Bandara Soetta, dan depo kontainer.</p>
             </div>
+            <button type="button" @click="showCreateLocationModal = true"
+                    class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center space-x-1.5">
+                <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                <span>Tambah Lokasi Baru</span>
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            @foreach($allLocations as $loc)
+                <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs flex flex-col justify-between space-y-3">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Titik Geofence</span>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ $loc->is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500' }}">
+                                {{ $loc->is_active ? 'AKTIF' : 'NON-AKTIF' }}
+                            </span>
+                        </div>
+                        <h3 class="text-base font-bold text-slate-900 leading-snug">{{ $loc->name }}</h3>
+                        <p class="text-xs text-slate-500 mt-1">{{ $loc->address ?: 'Alamat belum diatur' }}</p>
+                    </div>
+
+                    <div class="p-3 rounded-2xl bg-slate-50 border border-slate-100 space-y-1.5 text-xs font-mono">
+                        <div class="flex justify-between">
+                            <span class="text-slate-400 font-sans">Koordinat Lat/Lng:</span>
+                            <span class="text-slate-800 font-bold">{{ number_format((float) $loc->lat, 4) }}, {{ number_format((float) $loc->lng, 4) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400 font-sans">Radius Toleransi:</span>
+                            <span class="text-sky-700 font-bold">{{ $loc->radius_m }} meter</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end space-x-2 pt-2 border-t border-slate-50">
+                        <form method="POST" action="{{ route('hrm.locations.destroy', $loc->id) }}" onsubmit="return confirm('Hapus titik lokasi ini?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 transition" title="Hapus Lokasi">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- TAB 5: MASTER SHIFT KERJA (SHIFTS)                             -->
+    <!-- ============================================================== -->
+    <div x-show="activeTab === 'shifts'" class="space-y-4">
+        <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+            <div>
+                <h2 class="text-base font-bold text-slate-900">Master Shift Jam Kerja</h2>
+                <p class="text-xs text-slate-500">Atur jam masuk, jam pulang, toleransi keterlambatan, dan shift 24 jam operasional.</p>
+            </div>
+            <button type="button" @click="showCreateShiftModal = true"
+                    class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center space-x-1.5">
+                <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                <span>Tambah Shift Baru</span>
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            @foreach($workShifts as $sh)
+                <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs flex flex-col justify-between space-y-3">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Shift Jam Kerja</span>
+                            @if($sh->is_night_shift)
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800">SHIFT MALAM (24H)</span>
+                            @else
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">REGULER</span>
+                            @endif
+                        </div>
+                        <h3 class="text-base font-bold text-slate-900">{{ $sh->name }}</h3>
+                        <div class="text-xl font-mono font-extrabold text-sky-700 mt-2">
+                            {{ $sh->formatted_hours }}
+                        </div>
+                    </div>
+
+                    <div class="text-xs text-slate-500 flex justify-between pt-2 border-t border-slate-100">
+                        <span>Toleransi Keterlambatan:</span>
+                        <span class="font-bold text-slate-800">{{ $sh->grace_period_minutes ?? 15 }} Menit</span>
+                    </div>
+
+                    <div class="flex items-center justify-end space-x-2 pt-2">
+                        <form method="POST" action="{{ route('hrm.shifts.destroy', $sh->id) }}" onsubmit="return confirm('Hapus shift ini?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 transition" title="Hapus Shift">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- TAB 6: PENUGASAN JADWAL STAF (SCHEDULES)                       -->
+    <!-- ============================================================== -->
+    <div x-show="activeTab === 'schedules'" class="space-y-4">
+        <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+            <div>
+                <h2 class="text-base font-bold text-slate-900">Jadwal Kerja Karyawan</h2>
+                <p class="text-xs text-slate-500">Tugaskan shift khusus untuk petugas lapangan, checker dokumen, dan tim traffic.</p>
+            </div>
+            <button type="button" @click="showCreateScheduleModal = true"
+                    class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center space-x-1.5">
+                <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                <span>Tugaskan Jadwal</span>
+            </button>
+        </div>
+
+        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
-                    <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-100">
+                <table class="w-full text-left text-xs text-slate-600">
+                    <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200">
                         <tr>
-                            <th class="py-3 px-4">Kode Aset</th>
-                            <th class="py-3 px-4">Nama Barang & Spesifikasi</th>
-                            <th class="py-3 px-4">Nilai Perolehan</th>
-                            <th class="py-3 px-4">Status</th>
-                            <th class="py-3 px-4">Pegawai Pemegang Saat Ini</th>
-                            <th class="py-3 px-4 text-right">Aksi</th>
+                            <th class="px-4 py-3.5">Tanggal Kerja</th>
+                            <th class="px-4 py-3.5">Nama Pegawai</th>
+                            <th class="px-4 py-3.5">Shift yang Ditugaskan</th>
+                            <th class="px-4 py-3.5">Jam Operasional</th>
+                            <th class="px-4 py-3.5">Catatan</th>
+                            <th class="px-4 py-3.5 text-right">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
-                        @forelse($assets as $asset)
-                            <tr class="hover:bg-slate-50/60">
-                                <td class="py-3 px-4 font-mono font-bold text-slate-800">{{ $asset->code }}</td>
-                                <td class="py-3 px-4 font-semibold text-slate-900">{{ $asset->name }}</td>
-                                <td class="py-3 px-4 font-mono text-slate-600">{{ $asset->formatted_value }}</td>
-                                <td class="py-3 px-4">
-                                    @if($asset->status === 'AVAILABLE')
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
-                                            TERSEDIA (Gudang/Kantor)
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-800">
-                                            DIPINJAM (Staf)
-                                        </span>
-                                    @endif
+                        @forelse($employeeSchedules as $sch)
+                            <tr class="hover:bg-slate-50/70 transition">
+                                <td class="px-4 py-3.5 font-bold font-mono text-slate-900">
+                                    {{ $sch->work_date?->format('d/m/Y') }}
                                 </td>
-                                <td class="py-3 px-4">
-                                    @if($asset->currentAssignment)
-                                        <div class="font-bold text-slate-800">{{ $asset->currentAssignment->employee->full_name }}</div>
-                                        <div class="text-[10px] text-slate-400">Sejak: {{ $asset->currentAssignment->assigned_at?->format('d M Y') }}</div>
-                                    @else
-                                        <span class="text-slate-400 italic">-</span>
-                                    @endif
+                                <td class="px-4 py-3.5">
+                                    <div class="font-bold text-slate-900">{{ $sch->employee?->full_name }}</div>
+                                    <div class="text-[10px] text-slate-400">{{ $sch->employee?->position }}</div>
                                 </td>
-                                <td class="py-3 px-4 text-right">
-                                    @if($asset->status === 'AVAILABLE')
-                                        <button type="button"
-                                                @click="selectedAssetId = '{{ $asset->id }}'; selectedAssetName = '{{ $asset->name }} ({{ $asset->code }})'; showAssignAssetModal = true"
-                                                class="px-2.5 py-1.5 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-[11px] font-semibold transition-all">
-                                            Pinjamkan
+                                <td class="px-4 py-3.5 font-bold text-slate-800">
+                                    {{ $sch->shift?->name }}
+                                </td>
+                                <td class="px-4 py-3.5 font-mono text-sky-700 font-bold">
+                                    {{ $sch->shift?->formatted_hours }}
+                                </td>
+                                <td class="px-4 py-3.5 text-slate-500">
+                                    {{ $sch->notes ?: '-' }}
+                                </td>
+                                <td class="px-4 py-3.5 text-right">
+                                    <form method="POST" action="{{ route('hrm.schedules.destroy', $sch->id) }}" onsubmit="return confirm('Hapus jadwal kerja ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 transition" title="Hapus Jadwal">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                         </button>
-                                    @elseif($asset->currentAssignment)
-                                        <form method="POST" action="{{ route('hrm.assets.return', $asset->currentAssignment->id) }}" class="inline">
-                                            @csrf
-                                            <button type="submit" class="px-2.5 py-1.5 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-700 rounded-lg text-[11px] font-semibold transition-all">
-                                                Kembalikan
-                                            </button>
-                                        </form>
-                                    @else
-                                        <span class="text-slate-400 italic text-[10px]">-</span>
-                                    @endif
+                                    </form>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="py-8 text-center text-slate-400">Belum ada inventaris aset.</td>
+                                <td colspan="6" class="px-5 py-8 text-center text-slate-400">
+                                    Belum ada penugasan jadwal kerja harian staf.
+                                </td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
+            <div class="p-4 border-t border-slate-100">
+                {{ $employeeSchedules->links() }}
+            </div>
         </div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- TAB 6: PAYROLL ENGINE BULANAN                                             -->
-    <!-- ========================================================================= -->
-    <div x-show="activeTab === 'payroll'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
-        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden mb-6">
-            <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                    <span class="font-bold text-xs text-slate-800 block">Siklus Penggajian Bulanan Forwarder (Payroll Run)</span>
-                    <span class="text-[10px] text-slate-400">Otomatisasi insentif pabean PPJK, uang makan, transport pelabuhan, BPJS, & cicilan kasbon</span>
+    <!-- ============================================================== -->
+    <!-- TAB 7: PAYROLL ENGINE BULANAN & BATCH RUN                      -->
+    <!-- ============================================================== -->
+    <div x-show="activeTab === 'payrolls'" class="space-y-4">
+        <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+            <div>
+                <h2 class="text-base font-bold text-slate-900">Riwayat Batch Penggajian (Payroll Engine)</h2>
+                <p class="text-xs text-slate-500">Kalkulasi bulanan kompensasi staf, cetak slip gaji digital, dan ekspor transfer BCA/Mandiri.</p>
+            </div>
+            <a href="{{ route('hrm.payrolls.create') }}"
+               class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shadow-sm">
+                <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                <span>Buat Batch Payroll Baru (Wizard)</span>
+            </a>
+        </div>
+
+        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-600">
+                    <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200">
+                        <tr>
+                            <th class="px-4 py-3.5">Periode Penggajian</th>
+                            <th class="px-4 py-3.5">Status Siklus</th>
+                            <th class="px-4 py-3.5">Jumlah Staf</th>
+                            <th class="px-4 py-3.5">Total Take Home Pay (Net)</th>
+                            <th class="px-4 py-3.5 text-right">Aksi & Ekspor</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @forelse($payrolls as $run)
+                            <tr class="hover:bg-slate-50/70 transition">
+                                <td class="px-4 py-3.5 font-bold font-mono text-base text-slate-900">
+                                    {{ $run->period }}
+                                </td>
+                                <td class="px-4 py-3.5">
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold
+                                        {{ $run->status === 'DISBURSED' ? 'bg-emerald-100 text-emerald-800' : ($run->status === 'APPROVED' ? 'bg-sky-100 text-sky-800' : 'bg-slate-100 text-slate-700') }}">
+                                        {{ $run->status }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3.5 font-bold text-slate-700">
+                                    {{ $run->payslips->count() }} Orang
+                                </td>
+                                <td class="px-4 py-3.5 font-mono font-extrabold text-slate-900 text-sm">
+                                    Rp {{ number_format((float) $run->payslips->sum('net'), 0, ',', '.') }}
+                                </td>
+                                <td class="px-4 py-3.5 text-right">
+                                    <div class="flex items-center justify-end space-x-2">
+                                        <a href="{{ route('hrm.payrolls.show', $run->id) }}"
+                                           class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition">
+                                            Rincian & Audit &rarr;
+                                        </a>
+                                        <a href="{{ route('hrm.payrolls.export-bank', $run->id) }}"
+                                           class="px-2.5 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold text-xs border border-purple-200 transition"
+                                           title="Download CSV Bank BCA">
+                                            CSV BCA
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="px-5 py-8 text-center text-slate-400">
+                                    Belum ada batch payroll yang dibuat. Klik tombol di atas untuk memulai.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-4 border-t border-slate-100">
+                {{ $payrolls->links() }}
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- TAB 8: KASBON & PINJAMAN KARYAWAN (LOANS)                      -->
+    <!-- ============================================================== -->
+    <div x-show="activeTab === 'loans'" class="space-y-4">
+        <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+            <div>
+                <h2 class="text-base font-bold text-slate-900">Manajemen Kasbon & Pinjaman Karyawan</h2>
+                <p class="text-xs text-slate-500">Plafon kasbon, tenor cicilan, sisa saldo, dan riwayat pemotongan gaji otomatis.</p>
+            </div>
+            <button type="button" @click="showCashAdvanceModal = true"
+                    class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center space-x-1.5">
+                <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                <span>Terbitkan Kasbon Baru</span>
+            </button>
+        </div>
+
+        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-600">
+                    <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200">
+                        <tr>
+                            <th class="px-4 py-3.5">Tanggal</th>
+                            <th class="px-4 py-3.5">Pegawai</th>
+                            <th class="px-4 py-3.5">Plafon Nominal</th>
+                            <th class="px-4 py-3.5">Tenor</th>
+                            <th class="px-4 py-3.5">Sisa Saldo Pinjaman</th>
+                            <th class="px-4 py-3.5">Status</th>
+                            <th class="px-4 py-3.5 text-right">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @forelse($loans as $loan)
+                            <tr class="hover:bg-slate-50/70 transition">
+                                <td class="px-4 py-3.5 font-mono text-slate-800">
+                                    {{ $loan->created_at?->format('d/m/Y') }}
+                                </td>
+                                <td class="px-4 py-3.5">
+                                    <div class="font-bold text-slate-900">{{ $loan->employee?->full_name }}</div>
+                                    <div class="text-[10px] text-slate-400">{{ $loan->employee?->position }}</div>
+                                </td>
+                                <td class="px-4 py-3.5 font-mono font-bold text-slate-900">
+                                    Rp {{ number_format((float) $loan->amount, 0, ',', '.') }}
+                                </td>
+                                <td class="px-4 py-3.5 font-bold text-slate-700">
+                                    {{ $loan->installments }} Bulan
+                                </td>
+                                <td class="px-4 py-3.5 font-mono font-bold text-amber-700">
+                                    Rp {{ number_format((float) $loan->balance, 0, ',', '.') }}
+                                </td>
+                                <td class="px-4 py-3.5">
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold {{ $loan->status === 'ACTIVE' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800' }}">
+                                        {{ $loan->status }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3.5 text-right">
+                                    @if($loan->status === 'ACTIVE')
+                                        <form method="POST" action="{{ route('hrm.loans.cancel', $loan->id) }}" onsubmit="return confirm('Selesaikan/lunaskan kasbon ini secara manual?')">
+                                            @csrf
+                                            <button type="submit" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[11px] transition">
+                                                Lunaskan
+                                            </button>
+                                        </form>
+                                    @else
+                                        <span class="text-slate-400 text-[10px]">Tuntas</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7" class="px-5 py-8 text-center text-slate-400">
+                                    Belum ada catatan kasbon karyawan.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-4 border-t border-slate-100">
+                {{ $loans->links() }}
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- TAB 9: INVENTARIS ASET PERUSAHAAN (ASSETS)                     -->
+    <!-- ============================================================== -->
+    <div x-show="activeTab === 'assets'" class="space-y-4">
+        <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+            <div>
+                <h2 class="text-base font-bold text-slate-900">Aset & Inventaris Staf Lapangan</h2>
+                <p class="text-xs text-slate-500">Laptop kantor, Handy Talkie (HT) TPS Pelabuhan, ID Card Pass Bandara, dan perlengkapan dinas.</p>
+            </div>
+            <button type="button" @click="showCreateAssetModal = true"
+                    class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center space-x-1.5">
+                <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                <span>Tambah Aset Baru</span>
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            @forelse($assets as $asset)
+                <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs flex flex-col justify-between space-y-3">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-mono text-[10px] font-bold text-slate-400">{{ $asset->code }}</span>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ $asset->status === 'AVAILABLE' ? 'bg-emerald-100 text-emerald-800' : 'bg-sky-100 text-sky-800' }}">
+                                {{ $asset->status }}
+                            </span>
+                        </div>
+                        <h3 class="text-base font-bold text-slate-900 leading-snug">{{ $asset->name }}</h3>
+                        <div class="text-xs text-slate-500 mt-1">
+                            Nilai Beli: Rp {{ number_format((float) ($asset->purchase_value ?? 0), 0, ',', '.') }}
+                        </div>
+                    </div>
+
+                    <div class="p-3 rounded-2xl bg-slate-50 border border-slate-100 text-xs">
+                        @if($asset->currentAssignment)
+                            <div class="text-[10px] text-slate-400 uppercase font-bold">Dipinjam Oleh:</div>
+                            <div class="font-bold text-slate-800 mt-0.5">{{ $asset->currentAssignment->employee?->full_name }}</div>
+                            <div class="text-[10px] text-slate-500">Sejak: {{ $asset->currentAssignment->assigned_at ? $asset->currentAssignment->assigned_at->format('d/m/Y') : '-' }}</div>
+                        @else
+                            <div class="text-slate-400 italic">Siap diserahterimakan (Tersedia)</div>
+                        @endif
+                    </div>
+
+                    <div class="flex items-center justify-end space-x-2 pt-2 border-t border-slate-50">
+                        @if($asset->status === 'AVAILABLE')
+                            <button type="button" @click="selectedAssetId = '{{ $asset->id }}'; selectedAssetName = '{{ $asset->name }}'; showAssignAssetModal = true"
+                                    class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition">
+                                Serahkan ke Staf
+                            </button>
+                        @elseif($asset->currentAssignment)
+                            <form method="POST" action="{{ route('hrm.assets.return', $asset->currentAssignment->id) }}">
+                                @csrf
+                                <button type="submit" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition">
+                                    Catat Pengembalian
+                                </button>
+                            </form>
+                        @endif
+                    </div>
                 </div>
-                <button type="button" @click="showPayrollModal = true" class="min-h-[44px] px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold shadow-xs transition-all whitespace-nowrap inline-flex items-center gap-1.5 active:scale-95">
-                    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <span>Generate Periode Payroll Baru</span>
+            @empty
+                <div class="col-span-full py-12 text-center text-slate-400">
+                    Belum ada data inventaris aset perusahaan.
+                </div>
+            @endforelse
+        </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- MODAL: IMPORT PEGAWAI DENGAN LIVE PREVIEW                      -->
+    <!-- ============================================================== -->
+    <div x-show="showImportEmployeeModal" x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div @click.away="showImportEmployeeModal = false"
+             class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                <h3 class="text-base font-bold text-slate-900">Import Data Pegawai dari Excel / CSV</h3>
+                <button type="button" @click="showImportEmployeeModal = false" class="text-slate-400 hover:text-slate-600 p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
 
-            <!-- List Payroll Runs -->
-            <div class="divide-y divide-slate-100">
-                @forelse($payrollRuns as $run)
-                    <div class="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/50 transition-colors">
-                        <div>
-                            <div class="flex items-center space-x-2.5">
-                                <span class="text-sm font-bold text-slate-900 font-mono">{{ $run->formatted_period }} ({{ $run->period }})</span>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold {{ $run->status === 'DISBURSED' ? 'bg-emerald-100 text-emerald-800' : ($run->status === 'APPROVED' ? 'bg-sky-100 text-sky-800' : 'bg-amber-100 text-amber-800') }}">
-                                    {{ $run->status }}
-                                </span>
-                            </div>
-                            <div class="text-xs text-slate-500 mt-1">
-                                Total Slip: <span class="font-semibold text-slate-700">{{ $run->payslips->count() }} Karyawan</span> &bull;
-                                Dibuat: {{ $run->created_at->format('d M Y') }}
-                            </div>
-                        </div>
+            <!-- Upload Area -->
+            <div class="border-2 border-dashed border-slate-200 hover:border-sky-400 rounded-2xl p-6 text-center cursor-pointer transition bg-slate-50/50">
+                <input type="file" @change="handleImportEmployeeFile($event)" accept=".csv,.txt" class="hidden" id="empFileInput">
+                <label for="empFileInput" class="cursor-pointer block space-y-2">
+                    <svg class="w-10 h-10 text-sky-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                    <div class="text-xs font-bold text-slate-800" x-text="importEmployeeFileName || 'Pilih atau Tarik File CSV Pegawai ke Sini'"></div>
+                    <div class="text-[11px] text-slate-400">Gunakan format template yang sesuai untuk mapping otomatis NIK, Nama, dan Gaji.</div>
+                </label>
+            </div>
 
-                        <div class="flex items-center flex-wrap gap-4 sm:gap-6">
-                            <div class="text-right">
-                                <span class="text-[10px] text-slate-400 block font-medium">Total Bersih (Take Home Pay)</span>
-                                <span class="text-base font-bold text-emerald-600 font-mono">
-                                    Rp {{ number_format($run->total_net, 0, ',', '.') }}
-                                </span>
-                            </div>
+            <!-- Preview Data Table -->
+            <template x-if="importEmployeeLoading">
+                <div class="py-8 text-center text-xs font-bold text-slate-500 animate-pulse">
+                    Menganalisa dan memvalidasi baris CSV...
+                </div>
+            </template>
 
-                            <div class="flex items-center space-x-2">
-                                @if($run->status === 'DRAFT')
-                                    <form method="POST" action="{{ route('hrm.payroll.approve', $run->id) }}">
-                                        @csrf
-                                        <button type="submit" class="px-3 py-1.5 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-semibold transition-all">
-                                            Setujui Draf
-                                        </button>
-                                    </form>
-                                @elseif($run->status === 'APPROVED')
-                                    <form method="POST" action="{{ route('hrm.payroll.disburse', $run->id) }}">
-                                        @csrf
-                                        <button type="submit" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold transition-all shadow-sm">
-                                            Cairkan Gaji (Disburse)
-                                        </button>
-                                    </form>
-                                @else
-                                    <span class="inline-flex items-center px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold">
-                                        ✓ Sudah Dicairkan
-                                    </span>
-                                @endif
-                            </div>
+            <template x-if="importEmployeePreview">
+                <div class="space-y-3 flex-1 overflow-y-auto custom-scrollbar">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="font-bold text-slate-800">
+                            Total: <span x-text="importEmployeePreview.total_count"></span> |
+                            Valid: <span class="text-emerald-600" x-text="importEmployeePreview.valid_count"></span> |
+                            Duplikat: <span class="text-amber-600" x-text="importEmployeePreview.duplicate_count"></span>
+                        </span>
+
+                        <div class="flex items-center space-x-2">
+                            <span class="text-[11px] text-slate-500 font-bold">Jika Duplikat:</span>
+                            <select x-model="importEmployeeDuplicateStrategy" class="text-xs font-bold px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50">
+                                <option value="skip">Lewati (Skip)</option>
+                                <option value="overwrite">Timpa (Overwrite)</option>
+                            </select>
                         </div>
                     </div>
-                @empty
-                    <div class="p-8 text-center text-slate-400 text-xs">Belum ada periode penggajian yang digenerate.</div>
-                @endforelse
+
+                    <div class="overflow-x-auto rounded-xl border border-slate-200">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-50 text-slate-500 font-bold text-[10px] uppercase border-b border-slate-200">
+                                <tr>
+                                    <th class="px-3 py-2">NIK</th>
+                                    <th class="px-3 py-2">Nama</th>
+                                    <th class="px-3 py-2">Jabatan</th>
+                                    <th class="px-3 py-2">Divisi</th>
+                                    <th class="px-3 py-2">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                <template x-for="r in importEmployeePreview.rows.slice(0, 8)" :key="r.nik">
+                                    <tr>
+                                        <td class="px-3 py-2 font-mono" x-text="r.nik"></td>
+                                        <td class="px-3 py-2 font-bold" x-text="r.name"></td>
+                                        <td class="px-3 py-2 text-slate-600" x-text="r.position"></td>
+                                        <td class="px-3 py-2" x-text="r.team"></td>
+                                        <td class="px-3 py-2">
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold"
+                                                  :class="r.is_duplicate ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'"
+                                                  x-text="r.is_duplicate ? 'DUPLIKAT' : 'SIAP'"></span>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Modal Action Buttons -->
+            <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100">
+                <button type="button" @click="showImportEmployeeModal = false" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold">
+                    Batal
+                </button>
+                <button type="button" @click="executeEmployeeImport()" :disabled="!importEmployeePreview"
+                        class="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-sm disabled:opacity-40">
+                    Eksekusi Import Sekarang &rarr;
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- MODALS SECTION (Alpine.js Interactive Popups)                             -->
-    <!-- ========================================================================= -->
-
-    <!-- Modal 1: Tambah Pegawai Baru -->
-    <div x-show="showCreateEmployeeModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div @click.away="showCreateEmployeeModal = false" class="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-lg w-full p-6 animate-scaleIn">
-            <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
-                <h3 class="font-bold text-slate-900 text-sm">Pendaftaran Karyawan Baru Forwarder</h3>
-                <button type="button" @click="showCreateEmployeeModal = false" class="text-slate-400 hover:text-slate-600">&times;</button>
+    <!-- ============================================================== -->
+    <!-- MODAL: IMPORT PRESENSI MESIN                                   -->
+    <!-- ============================================================== -->
+    <div x-show="showImportAttendanceModal" x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div @click.away="showImportAttendanceModal = false"
+             class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                <h3 class="text-base font-bold text-slate-900">Import Log Mesin Presensi / Fingerprint</h3>
+                <button type="button" @click="showImportAttendanceModal = false" class="text-slate-400 hover:text-slate-600 p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
             </div>
-            <form method="POST" action="{{ route('hrm.employees.store') }}" class="space-y-3.5 text-xs">
+
+            <div class="border-2 border-dashed border-slate-200 hover:border-sky-400 rounded-2xl p-6 text-center cursor-pointer transition bg-slate-50/50">
+                <input type="file" @change="handleImportAttendanceFile($event)" accept=".csv,.txt" class="hidden" id="attFileInput">
+                <label for="attFileInput" class="cursor-pointer block space-y-2">
+                    <svg class="w-10 h-10 text-emerald-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <div class="text-xs font-bold text-slate-800" x-text="importAttendanceFileName || 'Pilih File CSV Presensi Mesin'"></div>
+                    <div class="text-[11px] text-slate-400">Format: NIK, Tanggal (YYYY-MM-DD), Jam Masuk (HH:MM), Jam Pulang (HH:MM).</div>
+                </label>
+            </div>
+
+            <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100">
+                <button type="button" @click="showImportAttendanceModal = false" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold">
+                    Batal
+                </button>
+                <button type="button" @click="executeAttendanceImport()" :disabled="!importAttendancePreview"
+                        class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-sm disabled:opacity-40">
+                    Proses Log Presensi &rarr;
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- MODAL: TAMBAH PEGAWAI BARU                                     -->
+    <!-- ============================================================== -->
+    <div x-show="showCreateEmployeeModal" x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div @click.away="showCreateEmployeeModal = false"
+             class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                <h3 class="text-base font-bold text-slate-900">Tambah Pegawai & Buat Kontrak Kerja</h3>
+                <button type="button" @click="showCreateEmployeeModal = false" class="text-slate-400 hover:text-slate-600 p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <form method="POST" action="{{ route('hrm.employees.store') }}" class="space-y-4 text-xs">
                 @csrf
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">NIK (Nomor Induk Karyawan) *</label>
-                    <input type="text" name="nik" placeholder="PATS-2026-0201" required class="w-full rounded-xl border border-slate-200 p-2.5 focus:border-sky-500 outline-none font-mono">
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Nama Lengkap *</label>
-                    <input type="text" name="full_name" placeholder="Nama Karyawan..." required class="w-full rounded-xl border border-slate-200 p-2.5 focus:border-sky-500 outline-none">
-                </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Email Login (Opsional)</label>
-                        <input type="email" name="email" placeholder="staff@agungtrans.co.id" class="w-full rounded-xl border border-slate-200 p-2.5 focus:border-sky-500 outline-none">
+                        <label class="block font-bold text-slate-700 mb-1">NIK (Nomor Induk Karyawan)</label>
+                        <input type="text" name="nik" placeholder="Contoh: GENIE-00105" required
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-sky-500/20 font-mono">
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Divisi / Tim *</label>
-                        <select name="team" required class="w-full rounded-xl border border-slate-200 p-2.5 bg-white focus:border-sky-500 outline-none">
+                        <label class="block font-bold text-slate-700 mb-1">Nama Lengkap</label>
+                        <input type="text" name="full_name" placeholder="Nama lengkap karyawan" required
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-sky-500/20">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Email Akun (Opsional)</label>
+                        <input type="email" name="email" placeholder="nama@genie.test"
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-sky-500/20">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Divisi / Tim Operasional</label>
+                        <select name="team" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-sky-500/20 font-bold">
                             @foreach($teams as $t)
-                                <option value="{{ $t }}">Tim {{ $t }}</option>
+                                <option value="{{ $t }}">{{ $t }}</option>
                             @endforeach
                         </select>
                     </div>
                 </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Jabatan Operasional *</label>
-                    <input type="text" name="position" placeholder="Staff Dokumen / Petugas Behandle..." required class="w-full rounded-xl border border-slate-200 p-2.5 focus:border-sky-500 outline-none">
-                </div>
+
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Tanggal Mulai Bekerja *</label>
-                        <input type="date" name="start_date" value="{{ date('Y-m-d') }}" required class="w-full rounded-xl border border-slate-200 p-2.5 focus:border-sky-500 outline-none">
+                        <label class="block font-bold text-slate-700 mb-1">Jabatan / Posisi</label>
+                        <input type="text" name="position" placeholder="Contoh: Customs Specialist PPJK" required
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-sky-500/20">
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Gaji Pokok (Rp) *</label>
-                        <input type="number" name="base_salary" placeholder="8500000" required class="w-full rounded-xl border border-slate-200 p-2.5 font-mono focus:border-sky-500 outline-none">
+                        <label class="block font-bold text-slate-700 mb-1">Gaji Pokok (Nominal Rp)</label>
+                        <input type="number" name="base_salary" placeholder="5000000" required
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-sky-500/20 font-mono">
                     </div>
                 </div>
+
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Jenis Kontrak *</label>
-                        <select name="contract_kind" required class="w-full rounded-xl border border-slate-200 p-2.5 bg-white focus:border-sky-500 outline-none">
+                        <label class="block font-bold text-slate-700 mb-1">Jenis Perjanjian Kerja</label>
+                        <select name="contract_kind" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold">
                             <option value="PKWT">PKWT (Kontrak Waktu Tertentu)</option>
-                            <option value="PKWTT">PKWTT (Karyawan Tetap)</option>
-                            <option value="INTERNSHIP">Magang / Internship</option>
+                            <option value="PKWTT">PKWTT (Pegawai Tetap)</option>
+                            <option value="INTERNSHIP">Magang (Internship)</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Batas Akhir Kontrak (Jika PKWT)</label>
-                        <input type="date" name="contract_end_date" class="w-full rounded-xl border border-slate-200 p-2.5 focus:border-sky-500 outline-none">
+                        <label class="block font-bold text-slate-700 mb-1">Tanggal Mulai Bekerja</label>
+                        <input type="date" name="start_date" value="{{ date('Y-m-d') }}" required
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-sky-500/20">
                     </div>
                 </div>
 
-                <div class="pt-4 flex items-center justify-end space-x-2">
-                    <button type="button" @click="showCreateEmployeeModal = false" class="px-4 py-2 border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl shadow-sm">Simpan Karyawan</button>
+                <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100">
+                    <button type="button" @click="showCreateEmployeeModal = false" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold shadow-sm shadow-sky-600/20">
+                        Simpan Pegawai
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal 2: Clock In / Out GPS & Wajah -->
-    <div x-show="showClockModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div @click.away="showClockModal = false" class="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-md w-full p-6 animate-scaleIn">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-                <h3 class="font-bold text-slate-900 text-sm">Presensi GPS Geofencing & Face Match</h3>
-                <button type="button" @click="showClockModal = false" class="text-slate-400 hover:text-slate-600">&times;</button>
+    <!-- ============================================================== -->
+    <!-- MODAL: TAMBAH TITIK GEOFENCE LOKASI KERJA                      -->
+    <!-- ============================================================== -->
+    <div x-show="showCreateLocationModal" x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div @click.away="showCreateLocationModal = false"
+             class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                <h3 class="text-base font-bold text-slate-900">Tambah Titik Geofence Baru</h3>
+                <button type="button" @click="showCreateLocationModal = false" class="text-slate-400 hover:text-slate-600 p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
             </div>
-            <form method="POST" action="{{ route('hrm.attendance.clock') }}" class="space-y-4 text-xs">
+
+            <form method="POST" action="{{ route('hrm.locations.store') }}" class="space-y-4 text-xs">
                 @csrf
                 <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Pilih Karyawan *</label>
-                    <select name="employee_id" required class="w-full rounded-xl border border-slate-200 p-2.5 bg-white focus:border-sky-500 outline-none">
-                        @foreach($employees as $emp)
-                            <option value="{{ $emp->id }}">{{ $emp->full_name }} ({{ $emp->nik }} - {{ $emp->team }})</option>
-                        @endforeach
-                    </select>
+                    <label class="block font-bold text-slate-700 mb-1">Nama Lokasi Titik Tugas</label>
+                    <input type="text" name="name" placeholder="Contoh: Terminal Petikemas Koja TPS Priok" required
+                           class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-sky-500/20">
                 </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Latitude</label>
+                        <input type="number" step="0.000001" name="lat" value="-6.1038" required
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-mono">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Longitude</label>
+                        <input type="number" step="0.000001" name="lng" value="106.8837" required
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-mono">
+                    </div>
+                </div>
+
                 <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Jenis Presensi *</label>
-                    <div class="grid grid-cols-2 gap-2">
-                        <label class="p-2.5 rounded-xl border border-slate-200 flex items-center space-x-2 cursor-pointer hover:bg-slate-50">
-                            <input type="radio" name="kind" value="CLOCK_IN" checked class="text-sky-600">
-                            <span class="font-bold text-slate-800">Masuk (Clock In)</span>
+                    <label class="block font-bold text-slate-700 mb-1">Radius Toleransi (Meter)</label>
+                    <input type="number" name="radius_m" value="300" min="20" max="5000" required
+                           class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-mono">
+                </div>
+
+                <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100">
+                    <button type="button" @click="showCreateLocationModal = false" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold">
+                        Simpan Titik Geofence
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- MODAL: TAMBAH MASTER SHIFT                                     -->
+    <!-- ============================================================== -->
+    <div x-show="showCreateShiftModal" x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div @click.away="showCreateShiftModal = false"
+             class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                <h3 class="text-base font-bold text-slate-900">Tambah Master Shift Jam Kerja</h3>
+                <button type="button" @click="showCreateShiftModal = false" class="text-slate-400 hover:text-slate-600 p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <form method="POST" action="{{ route('hrm.shifts.store') }}" class="space-y-4 text-xs">
+                @csrf
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Nama Shift</label>
+                    <input type="text" name="name" placeholder="Contoh: Shift 3 Bongkar Muat Malam" required
+                           class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Jam Masuk (HH:MM)</label>
+                        <input type="time" name="start_time" value="08:00" required
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Jam Pulang (HH:MM)</label>
+                        <input type="time" name="end_time" value="17:00" required
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 items-center">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Toleransi (Menit)</label>
+                        <input type="number" name="grace_period_minutes" value="15" min="0" max="120"
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs">
+                    </div>
+                    <div class="pt-4">
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" name="is_night_shift" value="1" class="rounded border-slate-300 text-indigo-600">
+                            <span class="text-xs font-bold text-slate-700">Shift Malam (24 Jam)</span>
                         </label>
-                        <label class="p-2.5 rounded-xl border border-slate-200 flex items-center space-x-2 cursor-pointer hover:bg-slate-50">
-                            <input type="radio" name="kind" value="CLOCK_OUT" class="text-sky-600">
-                            <span class="font-bold text-slate-800">Pulang (Clock Out)</span>
-                        </label>
                     </div>
                 </div>
 
-                <!-- GPS Coordinates Radar Panel -->
-                <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="font-bold text-slate-800">Status Koordinat GPS:</span>
-                        <button type="button" @click="getLocation()" class="text-[11px] text-sky-600 font-bold hover:underline">
-                            ⟳ Refresh GPS
-                        </button>
-                    </div>
-                    <div class="text-[11px] text-slate-600 mb-2 font-mono" x-text="gpsStatus"></div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <span class="text-[10px] text-slate-400 block">Latitude</span>
-                            <input type="number" step="any" name="lat" x-model="gpsLat" required class="w-full font-mono text-[11px] rounded-lg border border-slate-200 p-1.5 bg-white">
-                        </div>
-                        <div>
-                            <span class="text-[10px] text-slate-400 block">Longitude</span>
-                            <input type="number" step="any" name="lng" x-model="gpsLng" required class="w-full font-mono text-[11px] rounded-lg border border-slate-200 p-1.5 bg-white">
-                        </div>
-                    </div>
-                    <input type="hidden" name="face_match" value="0.975">
-                </div>
-
-                <div class="pt-2 flex items-center justify-end space-x-2">
-                    <button type="button" @click="showClockModal = false" class="px-4 py-2 border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-sm">Kirim Presensi</button>
+                <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100">
+                    <button type="button" @click="showCreateShiftModal = false" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold">
+                        Simpan Shift
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal 3: Formulir Persetujuan Biometrik Wajah UU PDP No. 27/2022 -->
-    <div x-show="showConsentModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div @click.away="showConsentModal = false" class="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-md w-full p-6 animate-scaleIn">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-                <h3 class="font-bold text-slate-900 text-sm">Persetujuan Biometrik (UU PDP No. 27/2022)</h3>
-                <button type="button" @click="showConsentModal = false" class="text-slate-400 hover:text-slate-600">&times;</button>
+    <!-- ============================================================== -->
+    <!-- MODAL: PENUGASAN JADWAL KERJA STAF                             -->
+    <!-- ============================================================== -->
+    <div x-show="showCreateScheduleModal" x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div @click.away="showCreateScheduleModal = false"
+             class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                <h3 class="text-base font-bold text-slate-900">Tugaskan Shift ke Karyawan</h3>
+                <button type="button" @click="showCreateScheduleModal = false" class="text-slate-400 hover:text-slate-600 p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
             </div>
-            <form method="POST" action="{{ route('hrm.attendance.consent') }}" class="space-y-4 text-xs">
+
+            <form method="POST" action="{{ route('hrm.schedules.store') }}" class="space-y-4 text-xs">
                 @csrf
                 <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Pilih Karyawan *</label>
-                    <select name="employee_id" required class="w-full rounded-xl border border-slate-200 p-2.5 bg-white focus:border-sky-500 outline-none">
+                    <label class="block font-bold text-slate-700 mb-1">Pilih Pegawai</label>
+                    <select name="employee_id" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold">
                         @foreach($employees as $emp)
-                            <option value="{{ $emp->id }}">{{ $emp->full_name }} ({{ $emp->nik }})</option>
+                            <option value="{{ $emp->id }}">{{ $emp->full_name }} ({{ $emp->nik }} - {{ $emp->position }})</option>
                         @endforeach
                     </select>
                 </div>
-                <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 leading-relaxed text-[11px]">
-                    Sesuai Pasal 20 UU No. 27/2022 tentang Perlindungan Data Pribadi, data biometrik wajah hanya digunakan untuk verifikasi kehadiran kerja forwarder dan kepabeanan, tidak akan dibagikan ke pihak ketiga tanpa izin, serta disimpan terenkripsi selama masa kontrak aktif.
-                </div>
-                <label class="flex items-start space-x-2.5 cursor-pointer">
-                    <input type="checkbox" name="agree" value="1" required class="mt-0.5 rounded text-sky-600 focus:ring-sky-500">
-                    <span class="text-[11px] text-slate-800 font-medium">Saya memahami dan memberikan persetujuan eksplisit pemrosesan data biometrik wajah untuk presensi Genie ERP.</span>
-                </label>
-                <div class="pt-2 flex items-center justify-end space-x-2">
-                    <button type="button" @click="showConsentModal = false" class="px-4 py-2 border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl shadow-sm">Simpan Persetujuan UU PDP</button>
-                </div>
-            </form>
-        </div>
-    </div>
 
-    <!-- Modal 4: Pengajuan Cuti Baru -->
-    <div x-show="showLeaveModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div @click.away="showLeaveModal = false" class="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-md w-full p-6 animate-scaleIn">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-                <h3 class="font-bold text-slate-900 text-sm">Pengajuan Cuti / Izin Pegawai</h3>
-                <button type="button" @click="showLeaveModal = false" class="text-slate-400 hover:text-slate-600">&times;</button>
-            </div>
-            <form method="POST" action="{{ route('hrm.leaves.store') }}" class="space-y-3.5 text-xs">
-                @csrf
                 <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Karyawan Pemohon *</label>
-                    <select name="employee_id" required class="w-full rounded-xl border border-slate-200 p-2.5 bg-white focus:border-sky-500 outline-none">
-                        @foreach($employees as $emp)
-                            <option value="{{ $emp->id }}">{{ $emp->full_name }} ({{ $emp->team }})</option>
+                    <label class="block font-bold text-slate-700 mb-1">Pilih Shift</label>
+                    <select name="shift_id" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold">
+                        @foreach($workShifts as $sh)
+                            <option value="{{ $sh->id }}">{{ $sh->name }} ({{ $sh->formatted_hours }})</option>
                         @endforeach
                     </select>
                 </div>
+
                 <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Jenis Cuti *</label>
-                    <select name="kind" required class="w-full rounded-xl border border-slate-200 p-2.5 bg-white focus:border-sky-500 outline-none">
-                        <option value="TAHUNAN">Cuti Tahunan (Potong Saldo Kuota)</option>
-                        <option value="SAKIT">Izin Sakit (Surat Dokter)</option>
-                        <option value="MELAHIRKAN">Cuti Melahirkan (3 Bulan)</option>
-                        <option value="IZIN_KELUARGA">Izin Khusus / Keperluan Keluarga</option>
-                    </select>
+                    <label class="block font-bold text-slate-700 mb-1">Tanggal Tugas</label>
+                    <input type="date" name="work_date" value="{{ date('Y-m-d') }}" required
+                           class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs">
                 </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Dari Tanggal *</label>
-                        <input type="date" name="from_date" value="{{ date('Y-m-d') }}" required class="w-full rounded-xl border border-slate-200 p-2.5 outline-none">
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Sampai Tanggal *</label>
-                        <input type="date" name="to_date" value="{{ date('Y-m-d') }}" required class="w-full rounded-xl border border-slate-200 p-2.5 outline-none">
-                    </div>
-                </div>
-                <div class="pt-3 flex items-center justify-end space-x-2">
-                    <button type="button" @click="showLeaveModal = false" class="px-4 py-2 border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl shadow-sm">Kirim Pengajuan</button>
+
+                <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100">
+                    <button type="button" @click="showCreateScheduleModal = false" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold">
+                        Tugaskan Shift
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal 5: Catat Lembur -->
-    <div x-show="showOvertimeModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div @click.away="showOvertimeModal = false" class="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-md w-full p-6 animate-scaleIn">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-                <h3 class="font-bold text-slate-900 text-sm">Pencatatan Lembur Operasional TPS</h3>
-                <button type="button" @click="showOvertimeModal = false" class="text-slate-400 hover:text-slate-600">&times;</button>
-            </div>
-            <form method="POST" action="{{ route('hrm.overtime.store') }}" class="space-y-3.5 text-xs">
-                @csrf
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Karyawan *</label>
-                    <select name="employee_id" required class="w-full rounded-xl border border-slate-200 p-2.5 bg-white outline-none">
-                        @foreach($employees as $emp)
-                            <option value="{{ $emp->id }}">{{ $emp->full_name }} ({{ $emp->team }})</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Tanggal Lembur *</label>
-                        <input type="date" name="work_date" value="{{ date('Y-m-d') }}" required class="w-full rounded-xl border border-slate-200 p-2.5 outline-none">
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Durasi (Jam) *</label>
-                        <input type="number" step="0.5" name="hours" placeholder="3.5" required class="w-full rounded-xl border border-slate-200 p-2.5 font-mono outline-none">
-                    </div>
-                </div>
-                <div class="pt-3 flex items-center justify-end space-x-2">
-                    <button type="button" @click="showOvertimeModal = false" class="px-4 py-2 border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl">Simpan Lembur</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal 6: Kasbon Baru -->
-    <div x-show="showCashAdvanceModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div @click.away="showCashAdvanceModal = false" class="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-md w-full p-6 animate-scaleIn">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-                <h3 class="font-bold text-slate-900 text-sm">Penerbitan Kasbon Pegawai</h3>
-                <button type="button" @click="showCashAdvanceModal = false" class="text-slate-400 hover:text-slate-600">&times;</button>
-            </div>
-            <form method="POST" action="{{ route('hrm.cash-advances.store') }}" class="space-y-3.5 text-xs">
-                @csrf
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Karyawan *</label>
-                    <select name="employee_id" required class="w-full rounded-xl border border-slate-200 p-2.5 bg-white outline-none">
-                        @foreach($employees as $emp)
-                            <option value="{{ $emp->id }}">{{ $emp->full_name }} ({{ $emp->team }})</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Nominal Pinjaman (Rp) *</label>
-                        <input type="number" name="amount" placeholder="2000000" required class="w-full rounded-xl border border-slate-200 p-2.5 font-mono outline-none">
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Tenor Cicilan (Bulan) *</label>
-                        <input type="number" name="installments" min="1" max="12" value="2" required class="w-full rounded-xl border border-slate-200 p-2.5 font-mono outline-none">
-                    </div>
-                </div>
-                <div class="pt-3 flex items-center justify-end space-x-2">
-                    <button type="button" @click="showCashAdvanceModal = false" class="px-4 py-2 border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl">Terbitkan Kasbon</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal 7: Generate Payroll Run Baru -->
-    <div x-show="showPayrollModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div @click.away="showPayrollModal = false" class="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-sm w-full p-6 animate-scaleIn">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-                <h3 class="font-bold text-slate-900 text-sm">Generate Payroll Periode Baru</h3>
-                <button type="button" @click="showPayrollModal = false" class="text-slate-400 hover:text-slate-600">&times;</button>
-            </div>
-            <form method="POST" action="{{ route('hrm.payroll.generate') }}" class="space-y-4 text-xs">
-                @csrf
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Periode Penggajian (YYYY-MM) *</label>
-                    <input type="text" name="period" value="{{ date('Y-m', strtotime('+1 month')) }}" placeholder="2026-11" required pattern="\d{4}-\d{2}" class="w-full rounded-xl border border-slate-200 p-2.5 font-mono text-center text-sm font-bold focus:border-sky-500 outline-none">
-                    <span class="text-[10px] text-slate-400 block mt-1">Format: 4 digit tahun - 2 digit bulan (contoh: 2026-11)</span>
-                </div>
-                <div class="pt-2 flex items-center justify-end space-x-2">
-                    <button type="button" @click="showPayrollModal = false" class="px-4 py-2 border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl">Hitung Payroll</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal 8: Tambah Aset Baru -->
-    <div x-show="showCreateAssetModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div @click.away="showCreateAssetModal = false" class="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-md w-full p-6 animate-scaleIn">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-                <h3 class="font-bold text-slate-900 text-sm">Tambah Aset Inventaris Baru</h3>
-                <button type="button" @click="showCreateAssetModal = false" class="text-slate-400 hover:text-slate-600">&times;</button>
-            </div>
-            <form method="POST" action="{{ route('hrm.assets.store') }}" class="space-y-3.5 text-xs">
-                @csrf
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Kode Aset *</label>
-                    <input type="text" name="code" placeholder="AST-HT-03" required class="w-full rounded-xl border border-slate-200 p-2.5 font-mono focus:border-sky-500 outline-none">
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Nama Barang & Tipe *</label>
-                    <input type="text" name="name" placeholder="Walkie Talkie Motorola CP1660..." required class="w-full rounded-xl border border-slate-200 p-2.5 focus:border-sky-500 outline-none">
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Nilai Perolehan / Beli (Rp)</label>
-                    <input type="number" name="purchase_value" placeholder="3800000" class="w-full rounded-xl border border-slate-200 p-2.5 font-mono focus:border-sky-500 outline-none">
-                </div>
-                <div class="pt-3 flex items-center justify-end space-x-2">
-                    <button type="button" @click="showCreateAssetModal = false" class="px-4 py-2 border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl">Simpan Aset</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal 9: Serah Terima Peminjaman Aset -->
-    <div x-show="showAssignAssetModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div @click.away="showAssignAssetModal = false" class="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-md w-full p-6 animate-scaleIn">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-                <h3 class="font-bold text-slate-900 text-sm">Serah Terima Peminjaman Aset</h3>
-                <button type="button" @click="showAssignAssetModal = false" class="text-slate-400 hover:text-slate-600">&times;</button>
-            </div>
-            <form :action="'/hrm/assets/' + selectedAssetId + '/assign'" method="POST" class="space-y-3.5 text-xs">
-                @csrf
-                <div>
-                    <span class="text-slate-500 block mb-1">Barang yang Dipinjamkan:</span>
-                    <span class="font-bold text-slate-900 font-mono text-sm block" x-text="selectedAssetName"></span>
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Pilih Karyawan Penerima *</label>
-                    <select name="employee_id" required class="w-full rounded-xl border border-slate-200 p-2.5 bg-white focus:border-sky-500 outline-none">
-                        @foreach($employees as $emp)
-                            <option value="{{ $emp->id }}">{{ $emp->full_name }} ({{ $emp->team }})</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Tanggal Serah Terima *</label>
-                    <input type="date" name="assigned_at" value="{{ date('Y-m-d') }}" required class="w-full rounded-xl border border-slate-200 p-2.5 focus:border-sky-500 outline-none">
-                </div>
-                <div class="pt-3 flex items-center justify-end space-x-2">
-                    <button type="button" @click="showAssignAssetModal = false" class="px-4 py-2 border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl">Serah Terimakan</button>
-                </div>
-            </form>
+    <!-- ============================================================== -->
+    <!-- MODAL: PREVIEW FOTO PRESENSI ZOOM                              -->
+    <!-- ============================================================== -->
+    <div x-show="showPhotoModal" x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+        <div @click.away="showPhotoModal = false" class="relative max-w-sm w-full bg-slate-900 rounded-3xl p-3 border border-slate-800">
+            <button type="button" @click="showPhotoModal = false"
+                    class="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center hover:bg-slate-700">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <img :src="activePhotoUrl" class="w-full h-80 object-cover rounded-2xl" alt="Foto Selfie Presensi" />
+            <div class="text-center text-xs font-mono text-slate-400 mt-2">Foto Verifikasi Biometrik Satelit</div>
         </div>
     </div>
 
