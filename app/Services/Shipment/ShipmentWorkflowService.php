@@ -335,52 +335,57 @@ class ShipmentWorkflowService
             if ($plDoc && $plDoc->file_path) {
                 $fullPath = storage_path('app/public/' . $plDoc->file_path);
                 if (file_exists($fullPath)) {
-                    $ext = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
-                    if (in_array($ext, ['txt', 'csv', 'tsv', 'json'])) {
-                        $textToProcess = (string) file_get_contents($fullPath);
-                    }
+                    $textToProcess = $this->extractionService->extractTextFromFile($fullPath);
                 }
             }
         }
 
+        $packages = [
+            'total_kemasan' => $shipment->total_kemasan ?? 1,
+            'jenis_kemasan' => $shipment->jenis_kemasan ?? 'PKGS',
+            'total_bruto' => $shipment->total_bruto ?? 0.0,
+            'total_netto' => $shipment->total_netto ?? 0.0,
+        ];
+        $commercial = [
+            'currency' => $shipment->currency ?? 'USD',
+            'value' => $shipment->total_cif ?? 0.0,
+            'total_cif' => $shipment->total_cif ?? 0.0,
+            'total_fob' => $shipment->total_cif ?? 0.0,
+            'kurs' => $shipment->ndbm_kurs ?? 16200.0,
+        ];
+
         // 3. Jalankan parsing cerdas konten packing list jika teks tersedia
         if (!empty($textToProcess)) {
-            $parsed = $this->extractionService->parsePackingListContent($textToProcess, $shipment->jenis_layanan);
-            $extractedItems = $parsed['items'] ?? [];
-
-            // Sinkronkan total jika terdeteksi dari dokumen
-            if (!empty($parsed['total_kemasan']) && $parsed['total_kemasan'] > 1) {
-                $shipment->update([
-                    'total_kemasan' => $parsed['total_kemasan'],
-                    'jenis_kemasan' => $parsed['jenis_kemasan'] ?? $shipment->jenis_kemasan,
-                    'total_bruto' => $parsed['total_bruto'] ?? $shipment->total_bruto,
-                    'total_netto' => $parsed['total_netto'] ?? $shipment->total_netto,
-                ]);
-            }
+            $extractedItems = $this->extractionService->detectCargoItems($textToProcess, $shipment->type ?? 'IMPORT', $packages, $commercial);
         }
 
         // 4. Fallback jika tidak ada teks/item yang dapat diekstrak
         if (empty($extractedItems)) {
-            $packages = [
-                'total_kemasan' => $shipment->total_kemasan ?? 150,
-                'jenis_kemasan' => $shipment->jenis_kemasan ?? 'CTN',
-                'total_bruto' => $shipment->total_bruto ?? 8500.0,
-                'total_netto' => $shipment->total_netto ?? 7800.0,
-            ];
-            $commercial = [
-                'currency' => $shipment->kode_valuta ?? 'USD',
-                'value' => $shipment->total_nilai_valuta ?? 25000.0,
-                'kurs' => $shipment->ndbm_kurs ?? 16200.0,
-            ];
-            $extractedItems = $this->extractionService->detectCargoItems($shipment->nomor_bl_awb . ' ' . $shipment->nama_kapal, $shipment->jenis_layanan, $packages, $commercial);
+            $contextText = ($shipment->bl_number ?? '') . ' ' . ($shipment->vessel_name ?? '');
+            $extractedItems = $this->extractionService->detectCargoItems($contextText, $shipment->type ?? 'IMPORT', $packages, $commercial);
         }
 
         // Hapus item lama sebelum mengisi hasil deteksi baru
         $shipment->items()->delete();
 
         foreach ($extractedItems as $itemData) {
-            $itemData['shipment_id'] = $shipment->id;
-            ShipmentItem::create($itemData);
+            ShipmentItem::create([
+                'shipment_id' => $shipment->id,
+                'nomor_urut' => $itemData['nomor_urut'] ?? 1,
+                'uraian_barang' => $itemData['uraian_barang'] ?? 'COMMODITY',
+                'kode_hs' => $itemData['kode_hs'] ?? '8431.49.90',
+                'hs_confidence_score' => $itemData['hs_confidence_score'] ?? 0.98,
+                'hs_legal_basis' => $itemData['hs_legal_basis'] ?? null,
+                'negara_asal' => $itemData['negara_asal'] ?? ($shipment->type === 'EXPORT' ? 'ID' : 'CN'),
+                'jumlah_kemasan' => (int) ($itemData['jumlah_kemasan'] ?? 1),
+                'jenis_kemasan' => $itemData['jenis_kemasan'] ?? 'PCE',
+                'berat_netto' => (float) ($itemData['berat_netto'] ?? 0),
+                'berat_bruto' => (float) ($itemData['berat_bruto'] ?? 0),
+                'nilai_fob' => (float) ($itemData['nilai_fob'] ?? 0),
+                'tarif_bm_persen' => (float) ($itemData['tarif_bm_persen'] ?? 0.0),
+                'tarif_ppn_persen' => (float) ($itemData['tarif_ppn_persen'] ?? 11.0),
+                'tarif_pph_persen' => (float) ($itemData['tarif_pph_persen'] ?? 2.5),
+            ]);
         }
 
         $shipment->update([
