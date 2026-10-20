@@ -77,15 +77,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/ceisa/kurs/{valuta}', [CeisaApiController::class, 'getKurs'])->name('ceisa.kurs');
     Route::get('/ceisa/tarif-hs/{hsCode}', [CeisaApiController::class, 'getTarifHs'])->name('ceisa.tarif-hs');
 
-    // 2. Core Bisnis - Tim DO & Tim Traffic
+    // 2. Core Bisnis - Tim DO & Tim Traffic (Unified Redirects to Active Workflows)
     Route::prefix('do')->name('do.')->group(function () {
-        Route::get('/', [DoController::class, 'index'])->name('index');
-        Route::get('/{id}', [DoController::class, 'show'])->name('show');
+        Route::get('/', fn() => redirect()->route('core.do.index'))->name('index');
+        Route::get('/{id}', fn($id) => redirect()->route('core.do.index'))->name('show');
     });
 
     Route::prefix('traffic')->name('traffic.')->group(function () {
-        Route::get('/', [TrafficController::class, 'index'])->name('index');
-        Route::get('/{id}', [TrafficController::class, 'show'])->name('show');
+        Route::get('/', fn() => redirect()->route('core.traffic.index'))->name('index');
+        Route::get('/{id}', fn($id) => redirect()->route('core.traffic.index'))->name('show');
     });
 
     // 2.5 Staff Personal Portal & Attendance Hub (Employee Self-Service / ESS)

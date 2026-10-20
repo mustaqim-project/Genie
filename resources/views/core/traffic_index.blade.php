@@ -209,7 +209,7 @@
             </div>
 
             <p class="text-[10px] text-slate-400 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                *Konfirmasi serah terima kargo akan otomatis mengubah status menjadi <strong>DELIVERED</strong> dan menerbitkan draf <strong>Invoice Penagihan Klien (P19)</strong> pada modul Finance.
+                *Konfirmasi serah terima kargo akan otomatis mengubah status menjadi <strong>DELIVERED</strong> dan menerbitkan draf <strong>Invoice Penagihan Klien</strong> pada modul Finance & Accounting.
             </p>
 
             <div class="pt-3 border-t border-slate-100 flex items-center justify-end space-x-2">

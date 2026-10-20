@@ -81,37 +81,36 @@
             @endif
         </div>
 
-        <!-- GRUP 2: CORE BISNIS PABEAN (3 TIM UTAMA) -->
+        <!-- GRUP 2: OPERASIONAL LOGISTIK -->
         <div>
             <div x-show="!sidebarCollapsed" class="px-3 mb-1 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 flex items-center justify-between">
                 <span>Operasional</span>
             </div>
 
-            <!-- TIM DOCUMENT -->
+            <!-- PROYEK & DOKUMEN PABEAN -->
             @if(!auth()->check() || auth()->user()->hasPermission('document.view'))
             <div class="space-y-0.5">
                 <a href="{{ route('core.document.index') }}" 
                    class="flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('core.document.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
-                   title="Tim Document (P01 - P05)">
+                   title="Proyek Pengapalan & Dokumen Pabean">
                     <div class="flex items-center space-x-2.5 min-w-0 flex-1 mr-1.5">
                         <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('core.document.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-sky-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        <span x-show="!sidebarCollapsed" class="truncate font-semibold">Tim Document (P01)</span>
+                        <span x-show="!sidebarCollapsed" class="truncate font-semibold">Proyek & Dokumen</span>
                     </div>
-                    <span x-show="!sidebarCollapsed" class="flex-shrink-0 text-[9px] font-mono px-1.5 py-0.5 rounded bg-sky-100 text-sky-800 font-bold">DOC</span>
                 </a>
 
                 <!-- Quick Sub-Links BC 2.0 & BC 3.0 -->
                 <div x-show="!sidebarCollapsed" class="grid grid-cols-2 gap-1.5 px-2 pt-1 pb-1">
                     <a href="{{ route('bc20.index') }}" 
                        class="px-2 py-1.5 rounded-lg text-[11px] font-medium transition-colors text-center truncate {{ request()->routeIs('bc20.*') ? 'bg-sky-100 text-sky-800 font-bold border border-sky-200' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200/40' }}"
-                       title="Dokumen PIB Impor">
+                       title="Dokumen PIB Impor (BC 2.0)">
                         BC 2.0 (PIB)
                     </a>
                     <a href="{{ route('bc30.index') }}" 
                        class="px-2 py-1.5 rounded-lg text-[11px] font-medium transition-colors text-center truncate {{ request()->routeIs('bc30.*') ? 'bg-sky-100 text-sky-800 font-bold border border-sky-200' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200/40' }}"
-                       title="Dokumen PEB Ekspor">
+                       title="Dokumen PEB Ekspor (BC 3.0)">
                         BC 3.0 (PEB)
                     </a>
                 </div>
@@ -122,11 +121,11 @@
             @if(!auth()->check() || auth()->user()->hasPermission('do.view'))
             <a href="{{ route('core.do.index') }}" 
                class="flex items-center space-x-2.5 px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('core.do.*', 'do.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
-               title="Tim Delivery Order & Pelayaran">
+               title="Penebusan Delivery Order Pelayaran">
                 <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('core.do.*', 'do.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-amber-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2m-4-1v8m0 0l3-3m-3 3L9 8m-5 5h2.586a1 1 0 01.707.293l2.414 2.414a1 1 0 00.707.293h3.172a1 1 0 00.707-.293l2.414-2.414a1 1 0 01.707-.293H20" />
                 </svg>
-                <span x-show="!sidebarCollapsed" class="truncate font-semibold">DO & Pelayaran</span>
+                <span x-show="!sidebarCollapsed" class="truncate font-semibold">DO Pelayaran</span>
             </a>
             @endif
 
@@ -134,11 +133,11 @@
             @if(!auth()->check() || auth()->user()->hasPermission('traffic.view'))
             <a href="{{ route('core.traffic.index') }}" 
                class="flex items-center space-x-2.5 px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('core.traffic.*', 'traffic.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
-               title="Tim Traffic, Behandle & POD">
+               title="Pengeluaran Peti Kemas & Armada Truk (Traffic)">
                 <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('core.traffic.*', 'traffic.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-emerald-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
                 </svg>
-                <span x-show="!sidebarCollapsed" class="truncate font-semibold">Traffic & Truk</span>
+                <span x-show="!sidebarCollapsed" class="truncate font-semibold">Traffic & Pelabuhan</span>
             </a>
             @endif
         </div>
@@ -149,72 +148,57 @@
                 Keuangan & Akuntansi
             </div>
 
-            <!-- FINANCE (INVOICE P19) -->
+            <!-- FINANCE (INVOICE) -->
             @if(!auth()->check() || auth()->user()->hasPermission('finance.view'))
             <a href="{{ route('finance.invoices.index') }}" 
-               class="flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('finance.invoices.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
-               title="Finance & Invoicing (P19)">
-                <div class="flex items-center space-x-2.5 min-w-0 flex-1 mr-1.5">
-                    <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('finance.invoices.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-emerald-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span x-show="!sidebarCollapsed" class="truncate font-semibold">Piutang & Invoice</span>
-                </div>
-                <span x-show="!sidebarCollapsed" class="flex-shrink-0 text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">P19</span>
+               class="flex items-center space-x-2.5 px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('finance.invoices.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
+               title="Invoice Tagihan Klien">
+                <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('finance.invoices.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-emerald-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span x-show="!sidebarCollapsed" class="truncate font-semibold">Piutang & Invoice</span>
             </a>
 
             <!-- FINANCE (HUTANG VENDOR AP) -->
             <a href="{{ route('finance.bills.index') }}" 
-               class="flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('finance.bills.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
+               class="flex items-center space-x-2.5 px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('finance.bills.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
                title="Hutang Vendor & Biaya Operasional (AP)">
-                <div class="flex items-center space-x-2.5 min-w-0 flex-1 mr-1.5">
-                    <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('finance.bills.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-rose-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z" />
-                    </svg>
-                    <span x-show="!sidebarCollapsed" class="truncate font-semibold">Hutang Vendor</span>
-                </div>
-                <span x-show="!sidebarCollapsed" class="flex-shrink-0 text-[9px] font-mono px-1.5 py-0.5 rounded bg-rose-100 text-rose-800 font-bold">AP</span>
+                <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('finance.bills.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-rose-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z" />
+                </svg>
+                <span x-show="!sidebarCollapsed" class="truncate font-semibold">Hutang Vendor</span>
             </a>
 
             <!-- FINANCE (KAS & BANK) -->
             <a href="{{ route('finance.cash-bank.index') }}" 
-               class="flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('finance.cash-bank.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
-               title="Buku Kas & Rekening Bank (Cash Flow)">
-                <div class="flex items-center space-x-2.5 min-w-0 flex-1 mr-1.5">
-                    <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('finance.cash-bank.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-blue-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                    </svg>
-                    <span x-show="!sidebarCollapsed" class="truncate font-semibold">Kas & Bank</span>
-                </div>
-                <span x-show="!sidebarCollapsed" class="flex-shrink-0 text-[9px] font-mono px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 font-bold">CB</span>
+               class="flex items-center space-x-2.5 px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('finance.cash-bank.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
+               title="Buku Kas & Rekening Bank">
+                <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('finance.cash-bank.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-blue-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+                <span x-show="!sidebarCollapsed" class="truncate font-semibold">Kas & Bank</span>
             </a>
 
             <!-- FINANCE (PAJAK & SPT) -->
             <a href="{{ route('finance.tax.index') }}" 
-               class="flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('finance.tax.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
-               title="Perpajakan Forwarding PPN 1.1% (PMK 71/2022) & PPh 23">
-                <div class="flex items-center space-x-2.5 min-w-0 flex-1 mr-1.5">
-                    <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('finance.tax.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-purple-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    <span x-show="!sidebarCollapsed" class="truncate font-semibold">Pajak & SPT</span>
-                </div>
-                <span x-show="!sidebarCollapsed" class="flex-shrink-0 text-[9px] font-mono px-1.5 py-0.5 rounded bg-purple-100 text-purple-800 font-bold">TAX</span>
+               class="flex items-center space-x-2.5 px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('finance.tax.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
+               title="Perpajakan PPN 1.1% & PPh 23">
+                <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('finance.tax.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-purple-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span x-show="!sidebarCollapsed" class="truncate font-semibold">Pajak (PPN & PPh)</span>
             </a>
             @endif
 
             <!-- ACCOUNTING -->
             @if(!auth()->check() || auth()->user()->hasPermission('accounting.view'))
             <a href="{{ route('accounting.index') }}" 
-               class="flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('accounting.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
-               title="Accounting & Buku Besar">
-                <div class="flex items-center space-x-2.5 min-w-0 flex-1 mr-1.5">
-                    <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('accounting.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-indigo-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                    <span x-show="!sidebarCollapsed" class="truncate font-semibold">Accounting & Jurnal</span>
-                </div>
-                <span x-show="!sidebarCollapsed" class="flex-shrink-0 text-[9px] font-mono px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-800 font-bold">GL</span>
+               class="flex items-center space-x-2.5 px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('accounting.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
+               title="Buku Besar & Akuntansi">
+                <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('accounting.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-indigo-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <span x-show="!sidebarCollapsed" class="truncate font-semibold">Akuntansi & Jurnal</span>
             </a>
             @endif
         </div>
@@ -308,24 +292,23 @@
             </a>
         </div>
 
-        <!-- GRUP 5: SISTEM & AI -->
+        <!-- GRUP 5: SISTEM & INTEGRASI -->
         <div>
             <div x-show="!sidebarCollapsed" class="px-3 mb-1 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
-                Sistem & AI
+                Sistem & Integrasi
             </div>
 
-            <!-- AI AGENT -->
+            <!-- ASISTEN POS TARIF HS CODE -->
             @if(!auth()->check() || auth()->user()->hasPermission('ai.view'))
             <a href="{{ route('ai.index') }}" 
                class="flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('ai.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
-               title="AI Agent & Klasifikasi HS Code BTKI">
+               title="Asisten Klasifikasi Pos Tarif HS Code BTKI">
                 <div class="flex items-center space-x-2.5 min-w-0 flex-1 mr-1.5">
-                    <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('ai.*') ? 'text-purple-400' : 'text-slate-500 group-hover:text-purple-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('ai.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-sky-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
-                    <span x-show="!sidebarCollapsed" class="truncate font-semibold">AI Agent HS Code</span>
+                    <span x-show="!sidebarCollapsed" class="truncate font-semibold">Asisten HS Code</span>
                 </div>
-                <span x-show="!sidebarCollapsed" class="w-2 h-2 rounded-full bg-purple-500 animate-pulse flex-shrink-0"></span>
             </a>
             @endif
 

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Tim Document — Project Lifecycle & Dokumen Pabean (P01-P19)')
+@section('title', 'Proyek Pengapalan & Dokumen Pabean')
 
 @section('content')
 <div class="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-12">
@@ -11,28 +11,27 @@
             <div class="flex items-center space-x-2 text-xs text-slate-500 font-medium mb-1">
                 <a href="{{ route('dashboard') }}" class="hover:text-slate-800 transition-colors">Dashboard</a>
                 <span>/</span>
-                <span class="text-slate-400">Core Bisnis Pabean</span>
+                <span class="text-slate-400">Operasional</span>
                 <span>/</span>
-                <span class="text-sky-700 font-bold">Tim Document</span>
+                <span class="text-sky-700 font-bold">Proyek & Dokumen</span>
             </div>
             <h1 class="text-2xl font-black text-slate-900 tracking-tight flex items-center space-x-2">
-                <span>Manajemen Proyek Dokumen & Pabean</span>
-                <span class="px-2 py-0.5 text-xs font-mono font-bold bg-sky-100 text-sky-800 rounded-lg">P01–P07</span>
+                <span>Proyek Pengapalan & Dokumen Pabean</span>
             </h1>
             <p class="text-xs text-slate-500 mt-1">
-                Registrasi shipment, audit 9 slot dokumen wajib berversi, deteksi HS code AI (BTKI), validasi three-way matching, hingga terbit Billing MPN G3 CEISA 4.0.
+                Registrasi pengapalan impor & ekspor, verifikasi berkas (Invoice, Packing List, B/L), pos tarif HS Code, dan integrasi CEISA 4.0 DJBC.
             </p>
         </div>
         <div class="flex items-center space-x-2.5">
             <a href="{{ route('bc20.index') }}" 
                class="inline-flex items-center space-x-1.5 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-all shadow-xs active:scale-95">
                 <svg class="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                <span>Daftar BC 2.0</span>
+                <span>Daftar BC 2.0 (PIB)</span>
             </a>
             <a href="{{ route('bc30.index') }}" 
                class="inline-flex items-center space-x-1.5 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-all shadow-xs active:scale-95">
                 <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
-                <span>Daftar BC 3.0</span>
+                <span>Daftar BC 3.0 (PEB)</span>
             </a>
             @can('document.create')
             <button onclick="document.getElementById('modal-create-project').classList.remove('hidden')" 
@@ -40,7 +39,7 @@
                 <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
-                <span>Buka Proyek Baru (P01)</span>
+                <span>+ Buka Proyek Baru</span>
             </button>
             @endcan
         </div>
@@ -371,12 +370,9 @@
         <!-- Header Modal & Tab Navigasi -->
         <div class="flex items-start justify-between pb-4 border-b border-slate-100 mb-4">
             <div>
-                <div class="flex items-center space-x-2">
-                    <span class="px-2 py-0.5 rounded-lg text-[10px] font-mono font-bold bg-sky-100 text-sky-800">P01</span>
-                    <h3 class="text-base font-extrabold text-slate-900">Buka Proyek Shipment Baru</h3>
-                </div>
+                <h3 class="text-base font-extrabold text-slate-900">Buka Proyek Pengapalan Baru</h3>
                 <p class="text-[11px] text-slate-500 mt-0.5">
-                    Cukup upload dokumen kargo (B/L, Invoice, Packing List). Sistem mengekstrak informasi dan mendeteksi HS Code secara otomatis.
+                    Unggah berkas kargo (B/L, Invoice, Packing List). Sistem mengekstrak informasi dan mencocokkan pos tarif HS Code secara otomatis.
                 </p>
             </div>
             <button onclick="document.getElementById('modal-create-project').classList.add('hidden')" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100">
@@ -392,8 +388,8 @@
                     @click="tab = 'ai'" 
                     :class="tab === 'ai' ? 'bg-white text-sky-800 shadow-sm' : 'text-slate-600 hover:text-slate-900'"
                     class="flex-1 py-2 px-3 rounded-lg transition-all flex items-center justify-center space-x-2">
-                <span>⚡ Upload Berkas & Auto-Deteksi AI</span>
-                <span class="px-1.5 py-0.2 bg-emerald-100 text-emerald-800 font-bold text-[9px] rounded-full">Rekomendasi</span>
+                <span>⚡ Unggah Berkas & Ekstraksi Otomatis</span>
+                <span class="px-1.5 py-0.2 bg-emerald-100 text-emerald-800 font-bold text-[9px] rounded-full">Praktis</span>
             </button>
             <button type="button" 
                     @click="tab = 'manual'" 
