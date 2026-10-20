@@ -106,7 +106,7 @@ class RbacAuthenticationTest extends TestCase
         $this->actingAs($doStaff);
 
         // Berhak akses DO
-        $responseDo = $this->get(route('do.index'));
+        $responseDo = $this->get(route('core.do.index'));
         $responseDo->assertStatus(200);
 
         // Ditolak 403 saat akses Setting

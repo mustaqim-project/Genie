@@ -47,9 +47,15 @@ class AdminPanelRoutesTest extends TestCase
 
         foreach ($routes as $route) {
             $response = $this->get($route);
-            $response->assertStatus(200);
-            $response->assertSee('PATS_CEISA', false);
-            $response->assertSee('PT Agung Trans Solusindo', false);
+            if ($route === route('do.index')) {
+                $response->assertRedirect(route('core.do.index'));
+            } elseif ($route === route('traffic.index')) {
+                $response->assertRedirect(route('core.traffic.index'));
+            } else {
+                $response->assertStatus(200);
+                $response->assertSee('GENIE', false);
+                $response->assertSee('PT Agung Trans Solusindo', false);
+            }
         }
     }
 }

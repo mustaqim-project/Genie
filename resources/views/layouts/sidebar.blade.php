@@ -1,6 +1,7 @@
 <!-- ============================================================== -->
 <!-- PATS_CEISA ERP - APPLE DESIGN SYSTEM SIDEBAR                   -->
 <!-- Inspired by macOS / iPadOS Navigation & Apple HIG              -->
+<!-- Hierarchical Groupings, Menus & Accordion Submenus             -->
 <!-- ============================================================== -->
 
 <!-- Mobile Backdrop Blur Sheet (Zero-Gap Edge-to-Edge) -->
@@ -44,7 +45,7 @@
         <!-- Desktop Collapse Button (macOS sidebar toggle) -->
         <button @click="sidebarCollapsed = !sidebarCollapsed" 
                 type="button"
-                class="hidden lg:flex p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors"
+                class="hidden lg:flex p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer"
                 title="Sembunyikan / Buka Bilah Samping">
             <svg class="w-4 h-4 transition-transform duration-300" :class="{ 'rotate-180': sidebarCollapsed }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
@@ -61,10 +62,12 @@
         </button>
     </div>
 
-    <!-- 2. MAIN NAVIGATION (APPLE HIG STYLE GROUPED LIST) -->
+    <!-- 2. MAIN NAVIGATION (APPLE HIG STYLE GROUPED LIST WITH SUBMENUS) -->
     <nav class="flex-1 px-2.5 py-3 space-y-4 overflow-y-auto custom-scrollbar text-[13px] pb-32 lg:pb-6">
 
-        <!-- GRUP 1: UTAMA & MONITORING -->
+        <!-- ============================================================== -->
+        <!-- GRUP 1: UTAMA                                                 -->
+        <!-- ============================================================== -->
         <div>
             <div x-show="!sidebarCollapsed" class="px-3 mb-1 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
                 Utama
@@ -72,7 +75,7 @@
             @if(!auth()->check() || auth()->user()->hasPermission('dashboard.view'))
             <a href="{{ route('dashboard') }}" 
                class="flex items-center space-x-2.5 px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('dashboard') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
-               title="Dashboard & KPI">
+               title="Dashboard & KPI Operasional">
                 <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('dashboard') ? 'text-sky-400' : 'text-slate-500 group-hover:text-slate-900' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                 </svg>
@@ -81,47 +84,64 @@
             @endif
         </div>
 
-        <!-- GRUP 2: OPERASIONAL LOGISTIK -->
+        <!-- ============================================================== -->
+        <!-- GRUP 2: OPERASIONAL & KEPABEANAN                             -->
+        <!-- ============================================================== -->
         <div>
             <div x-show="!sidebarCollapsed" class="px-3 mb-1 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 flex items-center justify-between">
-                <span>Operasional</span>
+                <span>Operasional & Pabean</span>
             </div>
 
-            <!-- PROYEK & DOKUMEN PABEAN -->
+            <!-- MENU 1: PROYEK PENGAPALAN & DOKUMEN PABEAN (ACCORDION SUBMENU) -->
             @if(!auth()->check() || auth()->user()->hasPermission('document.view'))
-            <div class="space-y-0.5">
-                <a href="{{ route('core.document.index') }}" 
-                   class="flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('core.document.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
-                   title="Proyek Pengapalan & Dokumen Pabean">
+            @php $isDocActive = request()->routeIs('core.document.*', 'bc20.*', 'bc30.*'); @endphp
+            <div x-data="{ open: {{ $isDocActive ? 'true' : 'false' }} }" class="space-y-0.5">
+                <button type="button" 
+                        @click="if (sidebarCollapsed) { window.location.href = '{{ route('core.document.index') }}'; } else { open = !open; }"
+                        class="w-full flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] cursor-pointer {{ $isDocActive ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
+                        title="Proyek Pengapalan & Pabean (PIB/PEB)">
                     <div class="flex items-center space-x-2.5 min-w-0 flex-1 mr-1.5">
-                        <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('core.document.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-sky-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 flex-shrink-0 {{ $isDocActive ? 'text-sky-400' : 'text-slate-500 group-hover:text-sky-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        <span x-show="!sidebarCollapsed" class="truncate font-semibold">Proyek & Dokumen</span>
+                        <span x-show="!sidebarCollapsed" class="truncate font-semibold">Proyek & Pabean</span>
                     </div>
-                </a>
+                    <svg x-show="!sidebarCollapsed" 
+                         class="w-3.5 h-3.5 transition-transform duration-200 text-slate-400 group-hover:text-slate-600"
+                         :class="{ 'rotate-90 text-sky-400': open }" 
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
 
-                <!-- Quick Sub-Links BC 2.0 & BC 3.0 -->
-                <div x-show="!sidebarCollapsed" class="grid grid-cols-2 gap-1.5 px-2 pt-1 pb-1">
+                <!-- SUBMENU PROYEK & PABEAN -->
+                <div x-show="open && !sidebarCollapsed" 
+                     x-collapse 
+                     class="border-l border-slate-200 ml-4 pl-2 space-y-1 mt-1">
+                    <a href="{{ route('core.document.index') }}" 
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors {{ request()->routeIs('core.document.*') ? 'bg-sky-50 text-sky-800 font-bold border border-sky-100' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100' }}">
+                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('core.document.*') ? 'bg-sky-600' : 'bg-slate-300' }}"></span>
+                        <span class="truncate">Daftar Proyek Shipment</span>
+                    </a>
                     <a href="{{ route('bc20.index') }}" 
-                       class="px-2 py-1.5 rounded-lg text-[11px] font-medium transition-colors text-center truncate {{ request()->routeIs('bc20.*') ? 'bg-sky-100 text-sky-800 font-bold border border-sky-200' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200/40' }}"
-                       title="Dokumen PIB Impor (BC 2.0)">
-                        BC 2.0 (PIB)
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors {{ request()->routeIs('bc20.*') ? 'bg-sky-50 text-sky-800 font-bold border border-sky-100' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100' }}">
+                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('bc20.*') ? 'bg-sky-600' : 'bg-slate-300' }}"></span>
+                        <span class="truncate">Pemberitahuan Impor (BC 2.0)</span>
                     </a>
                     <a href="{{ route('bc30.index') }}" 
-                       class="px-2 py-1.5 rounded-lg text-[11px] font-medium transition-colors text-center truncate {{ request()->routeIs('bc30.*') ? 'bg-sky-100 text-sky-800 font-bold border border-sky-200' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200/40' }}"
-                       title="Dokumen PEB Ekspor (BC 3.0)">
-                        BC 3.0 (PEB)
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors {{ request()->routeIs('bc30.*') ? 'bg-sky-50 text-sky-800 font-bold border border-sky-100' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100' }}">
+                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('bc30.*') ? 'bg-sky-600' : 'bg-slate-300' }}"></span>
+                        <span class="truncate">Pemberitahuan Ekspor (BC 3.0)</span>
                     </a>
                 </div>
             </div>
             @endif
 
-            <!-- TIM DO (DELIVERY ORDER) -->
+            <!-- MENU 2: TIM DO (DELIVERY ORDER) -->
             @if(!auth()->check() || auth()->user()->hasPermission('do.view'))
             <a href="{{ route('core.do.index') }}" 
                class="flex items-center space-x-2.5 px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('core.do.*', 'do.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
-               title="Penebusan Delivery Order Pelayaran">
+               title="Penebusan Delivery Order Pelayaran & Free Time">
                 <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('core.do.*', 'do.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-amber-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2m-4-1v8m0 0l3-3m-3 3L9 8m-5 5h2.586a1 1 0 01.707.293l2.414 2.414a1 1 0 00.707.293h3.172a1 1 0 00.707-.293l2.414-2.414a1 1 0 01.707-.293H20" />
                 </svg>
@@ -129,11 +149,11 @@
             </a>
             @endif
 
-            <!-- TIM TRAFFIC & LAPANGAN -->
+            <!-- MENU 3: TIM TRAFFIC & LAPANGAN -->
             @if(!auth()->check() || auth()->user()->hasPermission('traffic.view'))
             <a href="{{ route('core.traffic.index') }}" 
                class="flex items-center space-x-2.5 px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('core.traffic.*', 'traffic.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
-               title="Pengeluaran Peti Kemas & Armada Truk (Traffic)">
+               title="Penjaluran SPPB, Gate Out TPS & Bukti Serah Terima (POD)">
                 <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('core.traffic.*', 'traffic.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-emerald-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
                 </svg>
@@ -142,59 +162,69 @@
             @endif
         </div>
 
-        <!-- GRUP 3: FINANCE & ACCOUNTING -->
+        <!-- ============================================================== -->
+        <!-- GRUP 3: KEUANGAN & AKUNTANSI                                  -->
+        <!-- ============================================================== -->
         <div>
             <div x-show="!sidebarCollapsed" class="px-3 mb-1 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
                 Keuangan & Akuntansi
             </div>
 
-            <!-- FINANCE (INVOICE) -->
+            <!-- MENU 1: KEUANGAN (FINANCE) - ACCORDION SUBMENU -->
             @if(!auth()->check() || auth()->user()->hasPermission('finance.view'))
-            <a href="{{ route('finance.invoices.index') }}" 
-               class="flex items-center space-x-2.5 px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('finance.invoices.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
-               title="Invoice Tagihan Klien">
-                <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('finance.invoices.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-emerald-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span x-show="!sidebarCollapsed" class="truncate font-semibold">Piutang & Invoice</span>
-            </a>
+            @php $isFinActive = request()->routeIs('finance.*'); @endphp
+            <div x-data="{ open: {{ $isFinActive ? 'true' : 'false' }} }" class="space-y-0.5">
+                <button type="button" 
+                        @click="if (sidebarCollapsed) { window.location.href = '{{ route('finance.invoices.index') }}'; } else { open = !open; }"
+                        class="w-full flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] cursor-pointer {{ $isFinActive ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
+                        title="Modul Keuangan (Piutang, Hutang, Kas, Pajak)">
+                    <div class="flex items-center space-x-2.5 min-w-0 flex-1 mr-1.5">
+                        <svg class="w-4 h-4 flex-shrink-0 {{ $isFinActive ? 'text-sky-400' : 'text-slate-500 group-hover:text-emerald-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span x-show="!sidebarCollapsed" class="truncate font-semibold">Keuangan (Finance)</span>
+                    </div>
+                    <svg x-show="!sidebarCollapsed" 
+                         class="w-3.5 h-3.5 transition-transform duration-200 text-slate-400 group-hover:text-slate-600"
+                         :class="{ 'rotate-90 text-sky-400': open }" 
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
 
-            <!-- FINANCE (HUTANG VENDOR AP) -->
-            <a href="{{ route('finance.bills.index') }}" 
-               class="flex items-center space-x-2.5 px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('finance.bills.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
-               title="Hutang Vendor & Biaya Operasional (AP)">
-                <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('finance.bills.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-rose-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z" />
-                </svg>
-                <span x-show="!sidebarCollapsed" class="truncate font-semibold">Hutang Vendor</span>
-            </a>
-
-            <!-- FINANCE (KAS & BANK) -->
-            <a href="{{ route('finance.cash-bank.index') }}" 
-               class="flex items-center space-x-2.5 px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('finance.cash-bank.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
-               title="Buku Kas & Rekening Bank">
-                <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('finance.cash-bank.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-blue-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                </svg>
-                <span x-show="!sidebarCollapsed" class="truncate font-semibold">Kas & Bank</span>
-            </a>
-
-            <!-- FINANCE (PAJAK & SPT) -->
-            <a href="{{ route('finance.tax.index') }}" 
-               class="flex items-center space-x-2.5 px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('finance.tax.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
-               title="Perpajakan PPN 1.1% & PPh 23">
-                <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('finance.tax.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-purple-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <span x-show="!sidebarCollapsed" class="truncate font-semibold">Pajak (PPN & PPh)</span>
-            </a>
+                <!-- SUBMENU FINANCE -->
+                <div x-show="open && !sidebarCollapsed" 
+                     x-collapse 
+                     class="border-l border-slate-200 ml-4 pl-2 space-y-1 mt-1">
+                    <a href="{{ route('finance.invoices.index') }}" 
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors {{ request()->routeIs('finance.invoices.*') ? 'bg-sky-50 text-sky-800 font-bold border border-sky-100' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100' }}">
+                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('finance.invoices.*') ? 'bg-sky-600' : 'bg-slate-300' }}"></span>
+                        <span class="truncate">Piutang & Invoice Klien</span>
+                    </a>
+                    <a href="{{ route('finance.bills.index') }}" 
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors {{ request()->routeIs('finance.bills.*') ? 'bg-sky-50 text-sky-800 font-bold border border-sky-100' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100' }}">
+                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('finance.bills.*') ? 'bg-sky-600' : 'bg-slate-300' }}"></span>
+                        <span class="truncate">Hutang Vendor (AP)</span>
+                    </a>
+                    <a href="{{ route('finance.cash-bank.index') }}" 
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors {{ request()->routeIs('finance.cash-bank.*') ? 'bg-sky-50 text-sky-800 font-bold border border-sky-100' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100' }}">
+                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('finance.cash-bank.*') ? 'bg-sky-600' : 'bg-slate-300' }}"></span>
+                        <span class="truncate">Buku Kas & Bank</span>
+                    </a>
+                    <a href="{{ route('finance.tax.index') }}" 
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors {{ request()->routeIs('finance.tax.*') ? 'bg-sky-50 text-sky-800 font-bold border border-sky-100' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100' }}">
+                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('finance.tax.*') ? 'bg-sky-600' : 'bg-slate-300' }}"></span>
+                        <span class="truncate">Perpajakan (PPN & PPh)</span>
+                    </a>
+                </div>
+            </div>
             @endif
 
-            <!-- ACCOUNTING -->
+            <!-- MENU 2: AKUNTANSI & BUKU BESAR -->
             @if(!auth()->check() || auth()->user()->hasPermission('accounting.view'))
             <a href="{{ route('accounting.index') }}" 
                class="flex items-center space-x-2.5 px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('accounting.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
-               title="Buku Besar & Akuntansi">
+               title="Buku Besar, Jurnal Umum, Laba Rugi & Neraca">
                 <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('accounting.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-indigo-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
@@ -203,167 +233,216 @@
             @endif
         </div>
 
-        <!-- GRUP 4: MANAJEMEN BISNIS & SDM -->
+        <!-- ============================================================== -->
+        <!-- GRUP 4: MANAJEMEN BISNIS & SDM                                -->
+        <!-- ============================================================== -->
         <div>
             <div x-show="!sidebarCollapsed" class="px-3 mb-1 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
-                Manajemen & SDM
+                Bisnis & SDM
             </div>
 
-            <!-- CRM & KLIEN -->
+            <!-- MENU 1: CRM & KOMUNIKASI (ACCORDION SUBMENU) -->
             @if(!auth()->check() || auth()->user()->hasPermission('crm.view'))
-            <a href="{{ route('crm.index') }}" 
-               class="flex items-center space-x-2.5 px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('crm.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
-               title="CRM, Sales Pipeline & Direktori Klien Logistik">
-                <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('crm.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-teal-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                <span x-show="!sidebarCollapsed" class="truncate font-semibold">CRM & Klien</span>
-            </a>
-            @endif
-
-            <!-- KOTAK MASUK TERPADU (OMNICHANNEL INBOX) -->
-            @if(!auth()->check() || auth()->user()->hasPermission('crm.view'))
-            <a href="{{ route('inbox.index') }}" 
-               class="flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('inbox.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
-               title="Kotak Masuk Terpadu (WhatsApp WABA & Media Sosial)">
-                <div class="flex items-center space-x-2.5 min-w-0 flex-1 mr-1.5">
-                    <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('inbox.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-emerald-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+            @php $isCrmActive = request()->routeIs('crm.*', 'inbox.*', 'whatsapp.*', 'social-media.*'); @endphp
+            <div x-data="{ open: {{ $isCrmActive ? 'true' : 'false' }} }" class="space-y-0.5">
+                <button type="button" 
+                        @click="if (sidebarCollapsed) { window.location.href = '{{ route('crm.index') }}'; } else { open = !open; }"
+                        class="w-full flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] cursor-pointer {{ $isCrmActive ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
+                        title="CRM Klien, Kotak Masuk, WhatsApp WABA & Media Sosial">
+                    <div class="flex items-center space-x-2.5 min-w-0 flex-1 mr-1.5">
+                        <svg class="w-4 h-4 flex-shrink-0 {{ $isCrmActive ? 'text-sky-400' : 'text-slate-500 group-hover:text-teal-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <span x-show="!sidebarCollapsed" class="truncate font-semibold">CRM & Komunikasi</span>
+                    </div>
+                    <svg x-show="!sidebarCollapsed" 
+                         class="w-3.5 h-3.5 transition-transform duration-200 text-slate-400 group-hover:text-slate-600"
+                         :class="{ 'rotate-90 text-sky-400': open }" 
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
-                    <span x-show="!sidebarCollapsed" class="truncate font-semibold">Kotak Masuk</span>
+                </button>
+
+                <!-- SUBMENU CRM & KOMUNIKASI -->
+                <div x-show="open && !sidebarCollapsed" 
+                     x-collapse 
+                     class="border-l border-slate-200 ml-4 pl-2 space-y-1 mt-1">
+                    <a href="{{ route('crm.index') }}" 
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors {{ request()->routeIs('crm.*') ? 'bg-sky-50 text-sky-800 font-bold border border-sky-100' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100' }}">
+                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('crm.*') ? 'bg-sky-600' : 'bg-slate-300' }}"></span>
+                        <span class="truncate">Direktori Klien & Sales</span>
+                    </a>
+                    <a href="{{ route('inbox.index') }}" 
+                       class="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors {{ request()->routeIs('inbox.*') ? 'bg-sky-50 text-sky-800 font-bold border border-sky-100' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100' }}">
+                        <span class="flex items-center space-x-2 truncate">
+                            <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('inbox.*') ? 'bg-sky-600' : 'bg-slate-300' }}"></span>
+                            <span class="truncate">Kotak Masuk Terpadu</span>
+                        </span>
+                        <span class="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-800">Live</span>
+                    </a>
+                    <a href="{{ route('whatsapp.index') }}" 
+                       class="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors {{ request()->routeIs('whatsapp.*') ? 'bg-sky-50 text-sky-800 font-bold border border-sky-100' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100' }}">
+                        <span class="flex items-center space-x-2 truncate">
+                            <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('whatsapp.*') ? 'bg-sky-600' : 'bg-slate-300' }}"></span>
+                            <span class="truncate">WhatsApp WABA Cloud</span>
+                        </span>
+                        <span class="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800">WABA</span>
+                    </a>
+                    <a href="{{ route('social-media.index') }}" 
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors {{ request()->routeIs('social-media.*') ? 'bg-sky-50 text-sky-800 font-bold border border-sky-100' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100' }}">
+                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('social-media.*') ? 'bg-sky-600' : 'bg-slate-300' }}"></span>
+                        <span class="truncate">Media Sosial Multi-Channel</span>
+                    </a>
                 </div>
-                <span x-show="!sidebarCollapsed" class="flex-shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">Live</span>
-            </a>
+            </div>
             @endif
 
-            <!-- WHATSAPP WABA -->
-            @if(!auth()->check() || auth()->user()->hasPermission('crm.view'))
-            <a href="{{ route('whatsapp.index') }}" 
-               class="flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('whatsapp.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
-               title="WhatsApp WABA (Official Cloud API & Broadcast)">
-                <div class="flex items-center space-x-2.5 min-w-0 flex-1 mr-1.5">
-                    <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('whatsapp.*') ? 'text-emerald-400' : 'text-slate-500 group-hover:text-emerald-600' }}" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.97.53 1.951.815 2.796.815 3.183 0 5.767-2.586 5.768-5.766 0-3.18-2.585-5.766-5.768-5.766zm3.376 8.21c-.14.394-.71.724-1.015.768-.29.043-.664.068-2.148-.546-1.898-.786-3.119-2.73-3.214-2.857-.095-.127-.771-1.026-.771-1.955 0-.928.487-1.385.66-1.574.173-.189.378-.236.504-.236.126 0 .252.001.362.006.116.006.27-.044.423.323.158.378.539 1.314.587 1.408.047.095.079.205.016.331-.063.126-.095.205-.189.315-.094.11-.198.246-.283.33-.095.095-.194.198-.083.388.11.19.49 8.08 1.05 1.306.721.643 1.33.842 1.519.936.19.095.3.079.41-.047.11-.126.473-.551.6-.74.126-.19.252-.158.425-.095.174.063 1.103.52 1.292.615.19.095.316.142.363.22.047.079.047.457-.094.851z"/>
-                    </svg>
-                    <span x-show="!sidebarCollapsed" class="truncate font-semibold">WhatsApp WABA</span>
-                </div>
-                <span x-show="!sidebarCollapsed" class="flex-shrink-0 text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">WABA</span>
-            </a>
-            @endif
-
-            <!-- MEDIA SOSIAL -->
-            @if(!auth()->check() || auth()->user()->hasPermission('crm.view'))
-            <a href="{{ route('social-media.index') }}" 
-               class="flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('social-media.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
-               title="Media Sosial Multi-Channel & Feed Komposer">
-                <div class="flex items-center space-x-2.5 min-w-0 flex-1 mr-1.5">
-                    <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('social-media.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-blue-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                    </svg>
-                    <span x-show="!sidebarCollapsed" class="truncate font-semibold">Media Sosial</span>
-                </div>
-                <span x-show="!sidebarCollapsed" class="flex-shrink-0 text-[9px] font-mono px-1.5 py-0.5 rounded bg-sky-100 text-sky-800 font-bold">FEED</span>
-            </a>
-            @endif
-
-            <!-- HRM SDM -->
+            <!-- MENU 2: KEPEGAWAIAN (HRM) - ACCORDION SUBMENU -->
             @if(!auth()->check() || auth()->user()->hasPermission('hrm.view'))
-            <a href="{{ route('hrm.index') }}" 
-               class="flex items-center space-x-2.5 px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('hrm.index') || (request()->routeIs('hrm.*') && !request()->routeIs('hrm.portal*')) ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
-               title="HRM, Absensi & Gaji">
-                <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('hrm.index') || (request()->routeIs('hrm.*') && !request()->routeIs('hrm.portal*')) ? 'text-sky-400' : 'text-slate-500 group-hover:text-pink-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                <span x-show="!sidebarCollapsed" class="truncate font-semibold">HRM (Kepegawaian)</span>
-            </a>
-            @endif
-
-            <!-- PORTAL KARYAWAN (ESS) -->
-            <a href="{{ route('hrm.portal') }}" 
-               class="flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('hrm.portal*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
-               title="Portal Mandiri Karyawan (Absensi GPS, Selfie & Slip Gaji)">
-                <div class="flex items-center space-x-2.5 min-w-0 flex-1 mr-1.5">
-                    <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('hrm.portal*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-indigo-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            @php $isHrmActive = request()->routeIs('hrm.*'); @endphp
+            <div x-data="{ open: {{ $isHrmActive ? 'true' : 'false' }} }" class="space-y-0.5">
+                <button type="button" 
+                        @click="if (sidebarCollapsed) { window.location.href = '{{ route('hrm.index') }}'; } else { open = !open; }"
+                        class="w-full flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] cursor-pointer {{ $isHrmActive ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
+                        title="Kepegawaian, Absensi, Payroll & Portal Mandiri">
+                    <div class="flex items-center space-x-2.5 min-w-0 flex-1 mr-1.5">
+                        <svg class="w-4 h-4 flex-shrink-0 {{ $isHrmActive ? 'text-sky-400' : 'text-slate-500 group-hover:text-pink-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        <span x-show="!sidebarCollapsed" class="truncate font-semibold">Kepegawaian (HRM)</span>
+                    </div>
+                    <svg x-show="!sidebarCollapsed" 
+                         class="w-3.5 h-3.5 transition-transform duration-200 text-slate-400 group-hover:text-slate-600"
+                         :class="{ 'rotate-90 text-sky-400': open }" 
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
-                    <span x-show="!sidebarCollapsed" class="truncate font-semibold">Portal Karyawan</span>
+                </button>
+
+                <!-- SUBMENU HRM -->
+                <div x-show="open && !sidebarCollapsed" 
+                     x-collapse 
+                     class="border-l border-slate-200 ml-4 pl-2 space-y-1 mt-1">
+                    <a href="{{ route('hrm.index') }}" 
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors {{ request()->routeIs('hrm.index') || (request()->routeIs('hrm.*') && !request()->routeIs('hrm.portal*')) ? 'bg-sky-50 text-sky-800 font-bold border border-sky-100' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100' }}">
+                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('hrm.index') || (request()->routeIs('hrm.*') && !request()->routeIs('hrm.portal*')) ? 'bg-sky-600' : 'bg-slate-300' }}"></span>
+                        <span class="truncate">Karyawan & Penggajian</span>
+                    </a>
+                    <a href="{{ route('hrm.portal') }}" 
+                       class="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors {{ request()->routeIs('hrm.portal*') ? 'bg-sky-50 text-sky-800 font-bold border border-sky-100' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100' }}">
+                        <span class="flex items-center space-x-2 truncate">
+                            <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('hrm.portal*') ? 'bg-sky-600' : 'bg-slate-300' }}"></span>
+                            <span class="truncate">Portal Mandiri (ESS)</span>
+                        </span>
+                        <span class="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-indigo-100 text-indigo-800">ESS</span>
+                    </a>
                 </div>
-                <span x-show="!sidebarCollapsed" class="flex-shrink-0 text-[9px] font-mono px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-800 font-bold">ESS</span>
-            </a>
+            </div>
+            @endif
         </div>
 
-        <!-- GRUP 5: SISTEM & INTEGRASI -->
+        <!-- ============================================================== -->
+        <!-- GRUP 5: SISTEM & PENGATURAN                                   -->
+        <!-- ============================================================== -->
         <div>
             <div x-show="!sidebarCollapsed" class="px-3 mb-1 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
-                Sistem & Integrasi
+                Sistem & Pengaturan
             </div>
 
-            <!-- ASISTEN POS TARIF HS CODE -->
-            @if(!auth()->check() || auth()->user()->hasPermission('ai.view'))
-            <a href="{{ route('ai.index') }}" 
-               class="flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('ai.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
-               title="Asisten Klasifikasi Pos Tarif HS Code BTKI">
-                <div class="flex items-center space-x-2.5 min-w-0 flex-1 mr-1.5">
-                    <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('ai.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-sky-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            <!-- MENU 1: PENGATURAN SISTEM & AKSES (ACCORDION SUBMENU) -->
+            @php $isSettingActive = request()->routeIs('settings.roles*', 'setting.*', 'config.*'); @endphp
+            <div x-data="{ open: {{ $isSettingActive ? 'true' : 'false' }} }" class="space-y-0.5">
+                <button type="button" 
+                        @click="if (sidebarCollapsed) { window.location.href = '{{ route('settings.roles.index') }}'; } else { open = !open; }"
+                        class="w-full flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] cursor-pointer {{ $isSettingActive ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
+                        title="Manajemen Pengguna, Peran RBAC & Gateway Pabean">
+                    <div class="flex items-center space-x-2.5 min-w-0 flex-1 mr-1.5">
+                        <svg class="w-4 h-4 flex-shrink-0 {{ $isSettingActive ? 'text-sky-400' : 'text-slate-500 group-hover:text-slate-800' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span x-show="!sidebarCollapsed" class="truncate font-semibold">Pengaturan Sistem</span>
+                    </div>
+                    <svg x-show="!sidebarCollapsed" 
+                         class="w-3.5 h-3.5 transition-transform duration-200 text-slate-400 group-hover:text-slate-600"
+                         :class="{ 'rotate-90 text-sky-400': open }" 
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
-                    <span x-show="!sidebarCollapsed" class="truncate font-semibold">Asisten HS Code</span>
-                </div>
-            </a>
-            @endif
+                </button>
 
-            <!-- MCP SERVER & INTEGRASI AI -->
-            <a href="{{ route('settings.mcp') }}" 
-               class="flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('settings.mcp*') || request()->routeIs('mcp.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
-               title="MCP Server (Model Context Protocol) untuk Claude, Cursor & AI Agents">
-                <div class="flex items-center space-x-2.5 min-w-0 flex-1 mr-1.5">
-                    <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('settings.mcp*') || request()->routeIs('mcp.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-sky-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                <!-- SUBMENU PENGATURAN -->
+                <div x-show="open && !sidebarCollapsed" 
+                     x-collapse 
+                     class="border-l border-slate-200 ml-4 pl-2 space-y-1 mt-1">
+                    @if(!auth()->check() || auth()->user()->hasPermission('setting.manage') || auth()->user()->hasPermission('setting.view'))
+                    <a href="{{ route('settings.roles.index') }}" 
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors {{ request()->routeIs('settings.roles*') ? 'bg-sky-50 text-sky-800 font-bold border border-sky-100' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100' }}">
+                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('settings.roles*') ? 'bg-sky-600' : 'bg-slate-300' }}"></span>
+                        <span class="truncate">Peran & Akses (RBAC)</span>
+                    </a>
+                    @endif
+
+                    @if(!auth()->check() || auth()->user()->hasPermission('setting.view'))
+                    <a href="{{ route('setting.index') }}" 
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors {{ request()->routeIs('setting.*') && !request()->routeIs('settings.roles*') ? 'bg-sky-50 text-sky-800 font-bold border border-sky-100' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100' }}">
+                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('setting.*') && !request()->routeIs('settings.roles*') ? 'bg-sky-600' : 'bg-slate-300' }}"></span>
+                        <span class="truncate">User & Gateway Komunikasi</span>
+                    </a>
+                    @endif
+
+                    @if(!auth()->check() || auth()->user()->hasPermission('setting.manage'))
+                    <a href="{{ route('config.index') }}" 
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors {{ request()->routeIs('config.*') ? 'bg-sky-50 text-sky-800 font-bold border border-sky-100' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100' }}">
+                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('config.*') ? 'bg-sky-600' : 'bg-slate-300' }}"></span>
+                        <span class="truncate">Gateway CEISA 4.0 DJBC</span>
+                    </a>
+                    @endif
+                </div>
+            </div>
+
+            <!-- MENU 2: INTEGRASI & PROTOKOL (ACCORDION SUBMENU) -->
+            @php $isAiActive = request()->routeIs('ai.*', 'settings.mcp*', 'mcp.*'); @endphp
+            <div x-data="{ open: {{ $isAiActive ? 'true' : 'false' }} }" class="space-y-0.5">
+                <button type="button" 
+                        @click="if (sidebarCollapsed) { window.location.href = '{{ route('settings.mcp') }}'; } else { open = !open; }"
+                        class="w-full flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] cursor-pointer {{ $isAiActive ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
+                        title="MCP Server AI & Asisten Pos Tarif HS Code">
+                    <div class="flex items-center space-x-2.5 min-w-0 flex-1 mr-1.5">
+                        <svg class="w-4 h-4 flex-shrink-0 {{ $isAiActive ? 'text-sky-400' : 'text-slate-500 group-hover:text-sky-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span x-show="!sidebarCollapsed" class="truncate font-semibold">Integrasi & Protokol</span>
+                    </div>
+                    <svg x-show="!sidebarCollapsed" 
+                         class="w-3.5 h-3.5 transition-transform duration-200 text-slate-400 group-hover:text-slate-600"
+                         :class="{ 'rotate-90 text-sky-400': open }" 
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
-                    <span x-show="!sidebarCollapsed" class="truncate font-semibold">MCP Server AI</span>
+                </button>
+
+                <!-- SUBMENU INTEGRASI -->
+                <div x-show="open && !sidebarCollapsed" 
+                     x-collapse 
+                     class="border-l border-slate-200 ml-4 pl-2 space-y-1 mt-1">
+                    <a href="{{ route('settings.mcp') }}" 
+                       class="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors {{ request()->routeIs('settings.mcp*') || request()->routeIs('mcp.*') ? 'bg-sky-50 text-sky-800 font-bold border border-sky-100' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100' }}">
+                        <span class="flex items-center space-x-2 truncate">
+                            <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('settings.mcp*') || request()->routeIs('mcp.*') ? 'bg-sky-600' : 'bg-slate-300' }}"></span>
+                            <span class="truncate">MCP Server Protocol</span>
+                        </span>
+                        <span class="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-sky-100 text-sky-800">MCP</span>
+                    </a>
+                    @if(!auth()->check() || auth()->user()->hasPermission('ai.view'))
+                    <a href="{{ route('ai.index') }}" 
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors {{ request()->routeIs('ai.*') ? 'bg-sky-50 text-sky-800 font-bold border border-sky-100' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100' }}">
+                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('ai.*') ? 'bg-sky-600' : 'bg-slate-300' }}"></span>
+                        <span class="truncate">Asisten Pos Tarif HS Code</span>
+                    </a>
+                    @endif
                 </div>
-                <span x-show="!sidebarCollapsed" class="flex-shrink-0 text-[9px] font-mono px-1.5 py-0.5 rounded bg-sky-100 text-sky-800 font-bold">MCP</span>
-            </a>
-
-            <!-- PERAN & HAK AKSES (RBAC COCKPIT) -->
-            @if(!auth()->check() || auth()->user()->hasPermission('setting.manage') || auth()->user()->hasPermission('setting.view'))
-            <a href="{{ route('settings.roles.index') }}" 
-               class="flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('settings.roles*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
-               title="Manajemen Peran & Matriks Hak Akses (RBAC)">
-                <div class="flex items-center space-x-2.5 min-w-0 flex-1 mr-1.5">
-                    <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('settings.roles*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-slate-800' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
-                    <span x-show="!sidebarCollapsed" class="truncate font-semibold">Peran & Akses (RBAC)</span>
-                </div>
-                <span x-show="!sidebarCollapsed" class="flex-shrink-0 text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-bold">RBAC</span>
-            </a>
-            @endif
-
-            <!-- USER & PENGATURAN UMUM -->
-            @if(!auth()->check() || auth()->user()->hasPermission('setting.view'))
-            <a href="{{ route('setting.index') }}" 
-               class="flex items-center space-x-2.5 px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('setting.*') && !request()->routeIs('settings.roles*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
-               title="Pengaturan Pengguna & Gateway Komunikasi">
-                <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('setting.*') && !request()->routeIs('settings.roles*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-slate-800' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span x-show="!sidebarCollapsed" class="truncate font-semibold">User & Gateway</span>
-            </a>
-            @endif
-
-            <!-- CEISA CONFIG -->
-            @if(!auth()->check() || auth()->user()->hasPermission('setting.manage'))
-            <a href="{{ route('config.index') }}" 
-               class="flex items-center space-x-2.5 px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('config.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
-               title="Kredensial Gateway CEISA 4.0">
-                <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('config.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-rose-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                </svg>
-                <span x-show="!sidebarCollapsed" class="truncate font-semibold">Gateway CEISA 4.0</span>
-            </a>
-            @endif
+            </div>
         </div>
 
     </nav>
@@ -371,7 +450,7 @@
     <!-- 3. BOTTOM LOGOUT & QUICK ACTIONS (Apple Clean Minimalist Bar) -->
     <div class="p-3 border-t border-slate-200/70 bg-white/70">
         <a href="{{ route('portal.index') }}" target="_blank" 
-           class="w-full flex items-center space-x-2 px-3 py-2.5 rounded-xl text-sky-800 bg-sky-50/80 hover:bg-sky-100/90 text-xs font-bold transition-all mb-2 shadow-2xs border border-sky-200/60 active:scale-[0.98]"
+           class="w-full flex items-center space-x-2 px-3 py-2 rounded-xl text-sky-800 bg-sky-50/80 hover:bg-sky-100/90 text-xs font-bold transition-all mb-2 shadow-2xs border border-sky-200/60 active:scale-[0.98]"
            title="Buka Pratinjau Portal Klien">
             <svg class="w-4 h-4 flex-shrink-0 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
             <span x-show="!sidebarCollapsed" class="truncate">Portal Klien ↗</span>
@@ -380,7 +459,7 @@
         <form action="{{ route('logout') }}" method="POST">
             @csrf
             <button type="submit" 
-                    class="w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-slate-500 hover:text-rose-600 hover:bg-rose-50/80 text-xs font-semibold transition-all min-h-[44px]">
+                    class="w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-slate-500 hover:text-rose-600 hover:bg-rose-50/80 text-xs font-semibold transition-all min-h-[40px] cursor-pointer">
                 <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
