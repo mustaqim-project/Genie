@@ -41,7 +41,7 @@ class CrmController extends Controller implements HasMiddleware
 
         // 1. Pipeline & Clients Data
         $clients = Client::latest()->paginate(10, ['*'], 'clients_page');
-        $recentShipments = CeisaDocument::select('nomor_aju', 'nama_mitra_luar_negeri', 'negara_mitra_luar_negeri', 'status_terakhir', 'created_at')
+        $recentShipments = CeisaDocument::select('nomor_aju', 'nama_mitra_luar_negeri', 'negara_mitra_luar_negeri', 'status', 'status_description', 'created_at')
             ->latest()
             ->take(8)
             ->get();

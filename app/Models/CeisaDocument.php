@@ -116,4 +116,9 @@ class CeisaDocument extends Model
             default => 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
         };
     }
+
+    public function getStatusTerakhirAttribute(): ?string
+    {
+        return $this->status_description ?? $this->status;
+    }
 }

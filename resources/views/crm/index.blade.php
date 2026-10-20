@@ -257,7 +257,7 @@
 
                     <div class="flex items-center space-x-3 text-right">
                         <div>
-                            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold {{ str_contains(strtolower($shipment->status_terakhir), 'sppb') ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800' }}">
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold {{ str_contains(strtolower($shipment->status_terakhir ?? ''), 'sppb') ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800' }}">
                                 {{ $shipment->status_terakhir ?: 'Billing Terbit' }}
                             </span>
                             <div class="text-[10px] text-slate-400 font-mono mt-1">
