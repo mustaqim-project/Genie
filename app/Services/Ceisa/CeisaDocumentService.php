@@ -18,6 +18,14 @@ class CeisaDocumentService
      */
     public function checkSchema(CeisaDocument $document): array
     {
+        if (empty($document->raw_payload)) {
+            $shipment = $document->shipment ?? \App\Models\Shipment::where('ceisa_document_id', $document->id)->first();
+            if ($shipment) {
+                app(\App\Services\Ceisa\CeisaHsCodeService::class)->generatePibOrPebFromPackingList($shipment);
+                $document->refresh();
+            }
+        }
+
         $payload = $document->raw_payload;
         if (empty($payload)) {
             throw new \Exception('Payload dokumen belum disiapkan untuk validasi skema.');
@@ -34,6 +42,14 @@ class CeisaDocumentService
      */
     public function submit(CeisaDocument $document): array
     {
+        if (empty($document->raw_payload)) {
+            $shipment = $document->shipment ?? \App\Models\Shipment::where('ceisa_document_id', $document->id)->first();
+            if ($shipment) {
+                app(\App\Services\Ceisa\CeisaHsCodeService::class)->generatePibOrPebFromPackingList($shipment);
+                $document->refresh();
+            }
+        }
+
         $payload = $document->raw_payload;
         if (empty($payload)) {
             throw new \Exception('Payload dokumen belum disiapkan.');

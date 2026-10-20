@@ -552,8 +552,9 @@ class ShipmentWorkflowService
     public function submitCeisaAndAdvanceToDo(Shipment $shipment): CeisaDocument
     {
         $ceisaDoc = $shipment->ceisaDocument;
-        if (!$ceisaDoc) {
+        if (!$ceisaDoc || empty($ceisaDoc->raw_payload)) {
             $ceisaDoc = $this->generateCeisaDocFromShipment($shipment);
+            $shipment->refresh();
         }
 
         // 1. Submit ke Gateway CEISA

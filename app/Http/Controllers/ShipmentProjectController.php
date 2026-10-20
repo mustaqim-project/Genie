@@ -475,7 +475,7 @@ class ShipmentProjectController extends Controller
         }
 
         // 1. Pastikan Dokumen Pabean telah dibuat dari Shipment Items / Verified Packing List
-        if (!$shipment->ceisaDocument) {
+        if (!$shipment->ceisaDocument || empty($shipment->ceisaDocument->raw_payload)) {
             $this->workflowService->generateCeisaDocFromShipment($shipment);
             $shipment->refresh();
         }

@@ -1287,12 +1287,16 @@ class CeisaHsCodeService
     public function generatePibOrPebFromPackingList(Shipment $shipment, array $overrides = []): CeisaDocument
     {
         $verification = $this->verifyPackingList($shipment);
-        $isBC20 = ($shipment->jenis_layanan === 'IMPORT_BC20');
+        $isBC20 = in_array($shipment->jenis_layanan, ['IMPORT_BC20', 'IMPORT']) || ($shipment->type === 'IMPORT');
 
-        $kodeKantor = $overrides['kode_kantor'] ?? (config('ceisa.company.default_kode_kantor') ?? '040300');
-        $nomorAju = $isBC20 
-            ? DocumentBC20Service::generateNomorAju($kodeKantor) 
-            : DocumentBC30Service::generateNomorAju($kodeKantor);
+        $existingDoc = $shipment->ceisaDocument ?? CeisaDocument::where('id', $shipment->ceisa_document_id)->first();
+        $kodeKantor = $overrides['kode_kantor'] ?? ($existingDoc?->kode_kantor ?: (config('ceisa.company.default_kode_kantor') ?? '040300'));
+        $nomorAju = $overrides['nomor_aju'] ?? ($existingDoc?->nomor_aju ?: null);
+        if (!$nomorAju) {
+            $nomorAju = $isBC20 
+                ? DocumentBC20Service::generateNomorAju($kodeKantor) 
+                : DocumentBC30Service::generateNomorAju($kodeKantor);
+        }
 
         $kurs = (float) ($shipment->ndbm_kurs ?? 15850.00);
         $fob = $verification['total_fob'] > 0 ? $verification['total_fob'] : (float) $shipment->total_cif;
@@ -1483,14 +1487,14 @@ class CeisaHsCodeService
             $mitraNegara = $input['buyer_negara'];
         }
 
-        // Simpan dokumen pabean resmi
-        $doc = CeisaDocument::create([
+        // Simpan / Perbarui dokumen pabean resmi
+        $docData = [
             'nomor_aju' => $nomorAju,
             'jenis_dokumen' => $jenisDokumen,
             'kode_kantor' => $kodeKantor,
-            'nama_kantor' => config('ceisa.kantor_pabean.' . $kodeKantor, 'KPU Tanjung Priok'),
+            'nama_kantor' => config('ceisa.kantor_pabean.' . $kodeKantor, $existingDoc?->nama_kantor ?: 'KPU Tanjung Priok'),
             'status' => 'DRAFT',
-            'status_description' => "Draft dokumen BC {$jenisDokumen} berhasil di-generate otomatis dari verifikasi Packing List.",
+            'status_description' => "Draft dokumen BC {$jenisDokumen} berhasil disiapkan dari verifikasi Packing List.",
             'kode_valuta' => $input['kode_valuta'],
             'ndbm_kurs' => $kurs,
             'total_nilai' => $totalNilai,
@@ -1517,13 +1521,21 @@ class CeisaHsCodeService
             'bank_kode' => $input['bank_kode'] ?? null,
             'bank_nama' => $input['bank_nama'] ?? null,
             'total_billing' => $verification['total_estimated_billing'],
-            'status_billing' => 'UNPAID',
+            'status_billing' => $existingDoc?->status_billing ?? 'UNPAID',
             'raw_payload' => $payload,
-        ]);
+        ];
 
-        // Hubungkan ke Shipment
+        if ($existingDoc) {
+            $existingDoc->update($docData);
+            $doc = $existingDoc;
+        } else {
+            $doc = CeisaDocument::create($docData);
+            $shipment->update([
+                'ceisa_document_id' => $doc->id,
+            ]);
+        }
+
         $shipment->update([
-            'ceisa_document_id' => $doc->id,
             'status_tahap' => 'DRAFT_REVIEW',
         ]);
 
