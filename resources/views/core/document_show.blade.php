@@ -3,7 +3,7 @@
 @section('title', 'Detail Proyek Dokumen — ' . ($shipment->shipment_number ?? $shipment->project_no))
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-16">
+<div class="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-16">
 
     <!-- Header & Navigation Bar -->
     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">

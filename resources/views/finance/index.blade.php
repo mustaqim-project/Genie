@@ -3,7 +3,7 @@
 @section('title', 'Finance - Ikhtisar Keuangan & Tagihan')
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12">
+<div class="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-12">
     <!-- Header & Quick Navigation -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>

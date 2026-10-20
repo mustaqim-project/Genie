@@ -3,7 +3,7 @@
 @section('title', 'Konfigurasi Gateway & Audit Log CEISA 4.0')
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+<div class="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-12">
     <!-- Breadcrumb -->
     <div class="text-xs text-slate-500 font-medium mb-2">
         <a href="{{ route('dashboard') }}" class="hover:underline">Dashboard</a> / 

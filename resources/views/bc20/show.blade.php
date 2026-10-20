@@ -3,7 +3,7 @@
 @section('title', 'Detail Dokumen BC 2.0 - ' . $bc20->nomor_aju)
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+<div class="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-12">
     <!-- Breadcrumb -->
     <div class="text-xs text-slate-500 font-medium mb-3">
         <a href="{{ route('dashboard') }}" class="hover:underline">Dashboard</a> / 

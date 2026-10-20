@@ -3,7 +3,7 @@
 @section('title', 'Setting & Manajemen RBAC Pengguna')
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" x-data="{ activeTab: 'users', showAddUserModal: false, resetPasswordModal: false, selectedUserId: null, selectedUserName: '' }">
+<div class="w-full px-4 sm:px-6 lg:px-8 py-8" x-data="{ activeTab: 'users', showAddUserModal: false, resetPasswordModal: false, selectedUserId: null, selectedUserName: '' }">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>

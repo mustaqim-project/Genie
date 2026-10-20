@@ -232,7 +232,7 @@
             @include('layouts.topbar')
 
             <!-- DYNAMIC FLASH ALERTS (APPLE HIG FLOATING NOTIFICATIONS) -->
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-4">
+            <div class="w-full px-4 sm:px-6 lg:px-8 pt-4">
                 @if(session('success'))
                     <div x-data="{ show: true }" 
                          x-show="show" 

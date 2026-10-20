@@ -4,7 +4,7 @@
 <!-- ============================================================== -->
 
 <footer class="mt-auto bg-white/70 backdrop-blur-md border-t border-slate-200/70 text-xs text-slate-500 py-4 transition-all">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-3 text-[11px]">
+    <div class="w-full px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-3 text-[11px]">
         
         <!-- Left: Legal Copyright -->
         <div class="flex items-center space-x-2 text-center md:text-left">

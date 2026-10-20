@@ -3,7 +3,7 @@
 @section('title', 'AI Agent & MCP Customs Server')
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-16">
+<div class="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-16">
 
     <!-- Page Header & MCP Status -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">

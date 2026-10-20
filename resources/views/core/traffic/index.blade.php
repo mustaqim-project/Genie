@@ -3,7 +3,7 @@
 @section('title', 'Tim Traffic & Lapangan - Gate Out & Behandle')
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+<div class="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-12">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
             <div class="text-xs text-slate-500 font-medium mb-1">

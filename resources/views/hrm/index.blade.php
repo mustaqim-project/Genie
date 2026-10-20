@@ -3,7 +3,7 @@
 @section('title', 'HRM - Human Resource Management | Genie ERP')
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12"
+<div class="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-12"
      x-data="{
         activeTab: '{{ $activeTab ?? 'employees' }}',
         showCreateEmployeeModal: false,

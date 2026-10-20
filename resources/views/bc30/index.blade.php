@@ -3,7 +3,7 @@
 @section('title', 'Dokumen BC 3.0 (Ekspor / PEB)')
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+<div class="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-12">
     <!-- Breadcrumb & Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>

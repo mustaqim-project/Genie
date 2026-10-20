@@ -3,7 +3,7 @@
 @section('title', 'Accounting & Laporan Keuangan - GENIE')
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12" x-data="{ currentTab: '{{ $activeTab }}' }">
+<div class="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-12" x-data="{ currentTab: '{{ $activeTab }}' }">
 
     <!-- Header & Period Filter -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">

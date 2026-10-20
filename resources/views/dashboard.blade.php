@@ -3,7 +3,7 @@
 @section('title', 'Dashboard Kepabeanan & Logistik')
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12" x-data="{ docFilter: 'ALL' }">
+<div class="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-12" x-data="{ docFilter: 'ALL' }">
 
     <!-- 0. APPLE MINIMALIST BREADCRUMB BAR -->
     <nav class="flex items-center gap-1.5 text-[12px] text-slate-500 py-0.5 whitespace-nowrap print:hidden mb-3" aria-label="Breadcrumb">
