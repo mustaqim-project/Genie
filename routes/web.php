@@ -13,6 +13,7 @@ use App\Http\Controllers\DoController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\HrmController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\StaffPortalController;
 use App\Http\Controllers\TrafficController;
@@ -166,22 +167,33 @@ Route::middleware('auth')->group(function () {
         Route::delete('/schedules/{schedule}', [HrmController::class, 'destroySchedule'])->name('schedules.destroy');
     });
 
-    // 4. CRM (Pipeline, WhatsApp WABA Official Gateway, Broadcast & Multi-Channel Social Media)
+    // 4. CRM & Sales Pipeline
     Route::prefix('crm')->name('crm.')->group(function () {
         Route::get('/', [CrmController::class, 'index'])->name('index');
+    });
 
-        // WhatsApp WABA Gateway & Broadcasts
-        Route::post('/whatsapp/settings', [CrmController::class, 'updateWaSettings'])->name('whatsapp.settings');
-        Route::post('/whatsapp/test', [CrmController::class, 'sendWaTest'])->name('whatsapp.test');
-        Route::post('/whatsapp/broadcasts', [CrmController::class, 'storeBroadcast'])->name('whatsapp.broadcasts.store');
-        Route::post('/whatsapp/chat/send', [CrmController::class, 'sendChatMessage'])->name('whatsapp.chat.send');
-        Route::post('/whatsapp/templates', [CrmController::class, 'storeTemplate'])->name('whatsapp.templates.store');
+    // 4.1 Kotak Masuk Terpadu (Unified Omnichannel Inbox: WhatsApp + Social Media)
+    Route::prefix('inbox')->name('inbox.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\InboxController::class, 'index'])->name('index');
+        Route::post('/whatsapp/send', [\App\Http\Controllers\InboxController::class, 'sendWhatsAppMessage'])->name('whatsapp.send');
+        Route::post('/social/{id}/reply', [\App\Http\Controllers\InboxController::class, 'replySocialInteraction'])->name('social.reply');
+    });
 
-        // Social Media Omnichannel (LinkedIn, IG, FB, TikTok, YT)
-        Route::post('/social-media/posts', [CrmController::class, 'storeSocialPost'])->name('social-media.posts.store');
-        Route::post('/social-media/interactions/{id}/reply', [CrmController::class, 'replySocialInteraction'])->name('social-media.interactions.reply');
-        Route::post('/social-media/accounts/connect', [CrmController::class, 'connectSocialAccount'])->name('social-media.accounts.connect');
-        Route::post('/social-media/accounts/{id}/disconnect', [CrmController::class, 'disconnectSocialAccount'])->name('social-media.accounts.disconnect');
+    // 4.2 WhatsApp Business (Meta WABA Official Gateway)
+    Route::prefix('whatsapp')->name('whatsapp.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\WhatsAppController::class, 'index'])->name('index');
+        Route::post('/broadcasts', [\App\Http\Controllers\WhatsAppController::class, 'storeBroadcast'])->name('broadcasts.store');
+        Route::post('/templates', [\App\Http\Controllers\WhatsAppController::class, 'storeTemplate'])->name('templates.store');
+        Route::post('/test', [\App\Http\Controllers\WhatsAppController::class, 'sendTest'])->name('test');
+    });
+
+    // 4.3 Media Sosial (Multi-Channel Publishing & Composer)
+    Route::prefix('social-media')->name('social-media.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\SocialMediaController::class, 'index'])->name('index');
+        Route::post('/posts', [\App\Http\Controllers\SocialMediaController::class, 'storePost'])->name('posts.store');
+        Route::post('/posts/{post}/publish-now', [\App\Http\Controllers\SocialMediaController::class, 'publishNow'])->name('posts.publish-now');
+        Route::patch('/posts/{post}/reschedule', [\App\Http\Controllers\SocialMediaController::class, 'reschedule'])->name('posts.reschedule');
+        Route::delete('/posts/{post}', [\App\Http\Controllers\SocialMediaController::class, 'destroyPost'])->name('posts.destroy');
     });
 
     // 5. Finance
@@ -204,7 +216,19 @@ Route::middleware('auth')->group(function () {
     Route::delete('/settings/integrations/mcp/tokens/{id}', [\App\Http\Controllers\McpIntegrationController::class, 'revokeToken'])->name('settings.mcp.tokens.revoke');
     Route::get('/mcp', [\App\Http\Controllers\McpIntegrationController::class, 'index'])->name('mcp.hub');
 
-    // 8. Setting & Konfigurasi Gateway (RBAC & User Management)
+    // 8. Manajemen Peran & Hak Akses (RBAC Cockpit) - Paritas Cooca Core
+    Route::prefix('settings/roles')->name('settings.roles.')->group(function () {
+        Route::get('/', [RoleController::class, 'index'])->name('index');
+        Route::post('/', [RoleController::class, 'store'])->name('store');
+        Route::put('/{role}', [RoleController::class, 'update'])->name('update');
+        Route::delete('/{role}', [RoleController::class, 'destroy'])->name('destroy');
+        Route::post('/members', [RoleController::class, 'storeMember'])->name('members.store');
+        Route::put('/members/{user}', [RoleController::class, 'updateMemberRole'])->name('members.role');
+        Route::delete('/members/{user}', [RoleController::class, 'destroyMember'])->name('members.destroy');
+    });
+    Route::get('/settings/roles-matrix', [RoleController::class, 'index'])->name('settings.roles');
+
+    // 9. Setting & Konfigurasi Gateway (RBAC & User Management)
     Route::prefix('setting')->name('setting.')->group(function () {
         Route::get('/', [SettingController::class, 'index'])->name('index');
         Route::post('/users', [SettingController::class, 'storeUser'])->name('users.store');
@@ -214,6 +238,11 @@ Route::middleware('auth')->group(function () {
         Route::post('/users/{user}/reset-password', [SettingController::class, 'resetUserPassword'])->name('users.reset-password');
         Route::delete('/users/{user}', [SettingController::class, 'destroyUser'])->name('users.destroy');
         Route::post('/roles/{role}/permissions', [SettingController::class, 'updateRolePermissions'])->name('roles.permissions');
+
+        // Centralized Settings for WhatsApp WABA & Social Media Official Channels
+        Route::post('/whatsapp', [SettingController::class, 'updateWaSettings'])->name('whatsapp.update');
+        Route::post('/social/connect', [SettingController::class, 'connectSocialAccount'])->name('social.connect');
+        Route::post('/social/{id}/disconnect', [SettingController::class, 'disconnectSocialAccount'])->name('social.disconnect');
     });
 
     Route::prefix('config')->name('config.')->group(function () {

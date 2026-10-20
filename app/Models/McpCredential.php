@@ -101,6 +101,22 @@ class McpCredential extends Model
     }
 
     /**
+     * Cek apakah token memiliki setidaknya salah satu izin dari daftar scopes yang diminta.
+     *
+     * @param array<int, string> $requiredScopes
+     */
+    public function hasAnyScope(array $requiredScopes): bool
+    {
+        foreach ($requiredScopes as $scope) {
+            if ($this->hasScope($scope)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Generate secure MCP Access Token baru untuk AI Client.
      *
      * @param  array<int, string>  $scopes

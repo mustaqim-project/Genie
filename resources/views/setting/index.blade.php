@@ -3,7 +3,7 @@
 @section('title', 'Setting & Manajemen RBAC Pengguna')
 
 @section('content')
-<div class="w-full px-4 sm:px-6 lg:px-8 py-8" x-data="{ activeTab: 'users', showAddUserModal: false, resetPasswordModal: false, selectedUserId: null, selectedUserName: '' }">
+<div class="w-full px-4 sm:px-6 lg:px-8 py-8" x-data="{ activeTab: '{{ request('tab', 'users') }}', showAddUserModal: false, showAddSocialModal: false, resetPasswordModal: false, selectedUserId: null, selectedUserName: '' }">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
@@ -35,6 +35,20 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
             </svg>
             <span>Matriks Hak Akses (12 Peran)</span>
+        </button>
+
+        <button type="button" @click="activeTab = 'waba'" :class="activeTab === 'waba' ? 'border-emerald-600 text-emerald-700 font-bold' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-4 py-3 border-b-2 text-xs transition-colors whitespace-nowrap flex items-center space-x-2">
+            <svg class="w-4 h-4 text-emerald-600" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.97.53 1.951.815 2.796.815 3.183 0 5.767-2.586 5.768-5.766 0-3.18-2.585-5.766-5.768-5.766zm3.376 8.21c-.14.394-.71.724-1.015.768-.29.043-.664.068-2.148-.546-1.898-.786-3.119-2.73-3.214-2.857-.095-.127-.771-1.026-.771-1.955 0-.928.487-1.385.66-1.574.173-.189.378-.236.504-.236.126 0 .252.001.362.006.116.006.27-.044.423.323.158.378.539 1.314.587 1.408.047.095.079.205.016.331-.063.126-.095.205-.189.315-.094.11-.198.246-.283.33-.095.095-.194.198-.083.388.11.19.49 8.08 1.05 1.306.721.643 1.33.842 1.519.936.19.095.3.079.41-.047.11-.126.473-.551.6-.74.126-.19.252-.158.425-.095.174.063 1.103.52 1.292.615.19.095.316.142.363.22.047.079.047.457-.094.851z"/>
+            </svg>
+            <span>WhatsApp WABA (Cloud API)</span>
+        </button>
+
+        <button type="button" @click="activeTab = 'social'" :class="activeTab === 'social' ? 'border-brand-600 text-brand-700 font-bold' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-4 py-3 border-b-2 text-xs transition-colors whitespace-nowrap flex items-center space-x-2">
+            <svg class="w-4 h-4 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+            </svg>
+            <span>Media Sosial Resmi</span>
         </button>
 
         <button type="button" @click="activeTab = 'gateway'" :class="activeTab === 'gateway' ? 'border-brand-600 text-brand-700 font-bold' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-4 py-3 border-b-2 text-xs transition-colors whitespace-nowrap flex items-center space-x-2">
@@ -344,6 +358,299 @@
         </div>
     </div>
 
+    <!-- TAB 4: WHATSAPP WABA GATEWAY -->
+    <div x-show="activeTab === 'waba'" class="space-y-6" x-cloak>
+        <!-- Status Card Meta Cloud API -->
+        <div class="bg-gradient-to-r from-emerald-900 via-slate-900 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+            <div class="absolute -right-12 -bottom-12 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+                <div class="flex items-start sm:items-center space-x-4">
+                    <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-400 shadow-inner flex-shrink-0">
+                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.97.53 1.951.815 2.796.815 3.183 0 5.767-2.586 5.768-5.766 0-3.18-2.585-5.766-5.768-5.766zm3.376 8.21c-.14.394-.71.724-1.015.768-.29.043-.664.068-2.148-.546-1.898-.786-3.119-2.73-3.214-2.857-.095-.127-.771-1.026-.771-1.955 0-.928.487-1.385.66-1.574.173-.189.378-.236.504-.236.126 0 .252.001.362.006.116.006.27-.044.423.323.158.378.539 1.314.587 1.408.047.095.079.205.016.331-.063.126-.095.205-.189.315-.094.11-.198.246-.283.33-.095.095-.194.198-.083.388.11.19.49 8.08 1.05 1.306.721.643 1.33.842 1.519.936.19.095.3.079.41-.047.11-.126.473-.551.6-.74.126-.19.252-.158.425-.095.174.063 1.103.52 1.292.615.19.095.316.142.363.22.047.079.047.457-.094.851z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse mr-1.5"></span>
+                                Meta Official Cloud API v20.0
+                            </span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-400/30">
+                                Single-System Forwarder ERP
+                            </span>
+                        </div>
+                        <h2 class="text-xl font-bold mt-1.5 flex items-center space-x-2">
+                            <span>{{ $waSetting->verified_name ?? 'PT AGUNG TRANS LOGISTICS' }}</span>
+                            <svg class="w-5 h-5 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                        </h2>
+                        <p class="text-xs text-slate-300 font-mono mt-0.5">
+                            Nomor Resmi: {{ $waSetting->display_phone_number ?? '+62 812-9000-8888' }} &bull; WABA ID: {{ $waSetting->waba_id ?? '104928374829103' }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="bg-white/10 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-white/10 text-right">
+                        <div class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Tier Pengiriman</div>
+                        <div class="text-xs font-bold text-white font-mono">{{ $waSetting->messaging_limit_tier ?? 'TIER_10K' }} (10.000/hari)</div>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-white/10 text-right">
+                        <div class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Quality Rating</div>
+                        <div class="text-xs font-bold text-emerald-400 flex items-center justify-end space-x-1">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                            <span>{{ $waSetting->quality_rating ?? 'GREEN (Sangat Baik)' }}</span>
+                        </div>
+                    </div>
+                    <a href="{{ route('whatsapp.index') }}" class="px-4 py-2.5 rounded-xl bg-white text-slate-900 font-bold text-xs hover:bg-slate-100 transition-colors shadow-sm flex items-center space-x-1.5">
+                        <span>Buka WhatsApp Cockpit</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Konfigurasi Kredensial Meta & Trigger Otomasi -->
+        <form action="{{ route('setting.whatsapp.update') }}" method="POST" class="space-y-6">
+            @csrf
+            
+            <div class="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-sm">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900">Kredensial Meta Business & WhatsApp Cloud API</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Konfigurasi API token sistem permanen dari Meta Developer Console.</p>
+                    </div>
+                    <span class="text-[11px] font-mono text-slate-400 bg-slate-100 px-2.5 py-1 rounded-lg">Graph API v20.0</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Nama Bisnis Terverifikasi (Verified Name)</label>
+                        <input type="text" name="verified_name" value="{{ old('verified_name', $waSetting->verified_name) }}" required
+                            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <p class="text-[11px] text-slate-400 mt-1">Nama resmi bercentang hijau yang muncul di layar WhatsApp klien.</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Nomor Telepon Pengirim (Display Number)</label>
+                        <input type="text" name="display_phone_number" value="{{ old('display_phone_number', $waSetting->display_phone_number) }}" required
+                            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <p class="text-[11px] text-slate-400 mt-1">Format internasional dengan kode negara (contoh: +62 812-9000-8888).</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">WhatsApp Business Account ID (WABA ID)</label>
+                        <input type="text" name="waba_id" value="{{ old('waba_id', $waSetting->waba_id) }}" required
+                            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <p class="text-[11px] text-slate-400 mt-1">ID akun WABA di Meta Business Suite Manager.</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Phone Number ID (Meta Graph API)</label>
+                        <input type="text" name="phone_number_id" value="{{ old('phone_number_id', $waSetting->phone_number_id) }}" required
+                            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <p class="text-[11px] text-slate-400 mt-1">Identifier unik nomor pengirim di dashboard Developer Meta.</p>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Permanent System User Access Token</label>
+                        <input type="password" name="access_token" placeholder="EAABw..." value="{{ $waSetting->access_token ? '••••••••••••••••••••••••••••••••••••••••••••••••' : '' }}"
+                            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <p class="text-[11px] text-slate-400 mt-1">Kosongkan jika tidak ingin mengubah access token permanen Meta yang sudah tersimpan aman.</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Webhook Callback URL</label>
+                        <div class="flex items-center space-x-2">
+                            <input type="text" readonly value="{{ url('/api/v1/webhook/whatsapp') }}"
+                                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-mono text-slate-600 focus:outline-none select-all">
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-1">Salin URL ini ke konfigurasi Webhook Meta Cloud API untuk menerima status pesan masuk & centang biru.</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Webhook Verify Token</label>
+                        <input type="text" name="webhook_verify_token" value="{{ old('webhook_verify_token', $waSetting->webhook_verify_token ?? 'agungtrans_waba_secret_2026') }}" required
+                            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <p class="text-[11px] text-slate-400 mt-1">Token rahasia verifikasi webhook antara server GENIE dan Meta.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trigger Otomasi Notifikasi Kargo & Logistik -->
+            <div class="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-sm">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900">Trigger Otomasi Notifikasi Kargo & Kepabeanan</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Sistem akan secara otomatis mengirimkan pesan resmi WhatsApp WABA ke klien saat event logistik berikut tercapai.</p>
+                    </div>
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-bold">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5"></span>
+                        Event Listener Active
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <label class="flex items-start space-x-3.5 p-4 rounded-2xl border border-slate-200/80 hover:bg-slate-50/70 transition-colors cursor-pointer {{ $waSetting->auto_send_sppb ? 'bg-emerald-50/30 border-emerald-200' : '' }}">
+                        <input type="checkbox" name="auto_send_sppb" value="1" {{ $waSetting->auto_send_sppb ? 'checked' : '' }}
+                            class="mt-1 w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500">
+                        <div>
+                            <div class="font-bold text-xs text-slate-900">Kirim Otomatis SPPB (Jalur Hijau Bea Cukai)</div>
+                            <div class="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+                                Notifikasi instan ke importir saat respon CEISA 4.0 menerbitkan Surat Persetujuan Pengeluaran Barang beserta nomor pendaftaran pabean.
+                            </div>
+                        </div>
+                    </label>
+
+                    <label class="flex items-start space-x-3.5 p-4 rounded-2xl border border-slate-200/80 hover:bg-slate-50/70 transition-colors cursor-pointer {{ $waSetting->auto_send_npe ? 'bg-emerald-50/30 border-emerald-200' : '' }}">
+                        <input type="checkbox" name="auto_send_npe" value="1" {{ $waSetting->auto_send_npe ? 'checked' : '' }}
+                            class="mt-1 w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500">
+                        <div>
+                            <div class="font-bold text-xs text-slate-900">Kirim Otomatis NPE (Nota Pelayanan Ekspor)</div>
+                            <div class="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+                                Notifikasi instan ke eksportir begitu dokumen NPE terbit untuk kepastian pemuatan kontainer (stuffing) ke kapal/pesawat.
+                            </div>
+                        </div>
+                    </label>
+
+                    <label class="flex items-start space-x-3.5 p-4 rounded-2xl border border-slate-200/80 hover:bg-slate-50/70 transition-colors cursor-pointer {{ $waSetting->auto_send_do ? 'bg-emerald-50/30 border-emerald-200' : '' }}">
+                        <input type="checkbox" name="auto_send_do" value="1" {{ $waSetting->auto_send_do ? 'checked' : '' }}
+                            class="mt-1 w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500">
+                        <div>
+                            <div class="font-bold text-xs text-slate-900">Kirim Otomatis Delivery Order (DO) Release</div>
+                            <div class="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+                                Notifikasi ke pihak consignee & armada trucking bahwa Delivery Order pelayaran telah ditebus dan kontainer siap ditarik dari depo/TPS.
+                            </div>
+                        </div>
+                    </label>
+
+                    <label class="flex items-start space-x-3.5 p-4 rounded-2xl border border-slate-200/80 hover:bg-slate-50/70 transition-colors cursor-pointer {{ $waSetting->auto_send_billing ? 'bg-emerald-50/30 border-emerald-200' : '' }}">
+                        <input type="checkbox" name="auto_send_billing" value="1" {{ $waSetting->auto_send_billing ? 'checked' : '' }}
+                            class="mt-1 w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500">
+                        <div>
+                            <div class="font-bold text-xs text-slate-900">Kirim Otomatis Invoice Billing & Kwitansi</div>
+                            <div class="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+                                Kirim ringkasan invoice, link pembayaran/rekening resmi, dan dokumen tagihan saat invoice pengiriman disahkan bagian finance.
+                            </div>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="pt-6 mt-6 border-t border-slate-100 flex items-center justify-between">
+                    <p class="text-xs text-slate-400">Template pesan resmi yang dikirimkan mengacu pada template yang disetujui Meta di menu WhatsApp WABA.</p>
+                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition-colors flex items-center space-x-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <span>Simpan Konfigurasi WhatsApp WABA</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- TAB 5: KONEKSI MEDIA SOSIAL RESMI -->
+    <div x-show="activeTab === 'social'" class="space-y-6" x-cloak>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm">
+            <div>
+                <h2 class="text-base font-bold text-slate-900">Koneksi Akun Media Sosial Resmi Perusahaan</h2>
+                <p class="text-xs text-slate-500 mt-0.5">Kelola saluran media sosial resmi PT Agung Trans Logistics untuk publikasi konten kargo dan integrasi pesan masuk.</p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <a href="{{ route('social-media.index') }}" class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-bold text-xs hover:bg-slate-50 transition-colors flex items-center space-x-1.5">
+                    <span>Buka Komposer & Feed</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </a>
+                <button type="button" @click="showAddSocialModal = true" class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-600/20 flex items-center space-x-1.5 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                    <span>Hubungkan Saluran Baru</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Grid Saluran Terhubung -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            @forelse($socialAccounts as $acc)
+                @php
+                    $isLinked = $acc->status === 'active';
+                    $platformColors = [
+                        'linkedin' => ['bg' => 'bg-sky-50 text-sky-700 border-sky-200', 'badge' => 'bg-sky-600'],
+                        'instagram' => ['bg' => 'bg-pink-50 text-pink-700 border-pink-200', 'badge' => 'bg-gradient-to-r from-purple-500 to-pink-500'],
+                        'facebook' => ['bg' => 'bg-blue-50 text-blue-700 border-blue-200', 'badge' => 'bg-blue-600'],
+                        'tiktok' => ['bg' => 'bg-slate-900 text-white border-slate-800', 'badge' => 'bg-slate-800'],
+                        'youtube' => ['bg' => 'bg-red-50 text-red-700 border-red-200', 'badge' => 'bg-red-600'],
+                    ];
+                    $theme = $platformColors[$acc->platform] ?? ['bg' => 'bg-slate-50 text-slate-700 border-slate-200', 'badge' => 'bg-slate-600'];
+                @endphp
+                <div class="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-sm flex flex-col justify-between hover:border-slate-300 transition-all">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-xl text-[10px] font-bold uppercase tracking-wider {{ $acc->platform === 'tiktok' ? 'bg-slate-900 text-white' : $theme['bg'] }}">
+                                {{ $acc->platform }}
+                            </span>
+                            @if($isLinked)
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
+                                    Terhubung
+                                </span>
+                            @else
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">
+                                    Terputus
+                                </span>
+                            @endif
+                        </div>
+
+                        <div class="font-bold text-slate-900 text-sm truncate">{{ $acc->account_name }}</div>
+                        <div class="text-xs text-slate-400 font-mono mt-0.5">@<span>{{ $acc->username }}</span></div>
+
+                        <div class="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-slate-100">
+                            <div>
+                                <div class="text-[10px] text-slate-400">Pengikut / Audiens</div>
+                                <div class="text-xs font-bold text-slate-800 font-mono">{{ number_format($acc->followers_count) }}</div>
+                            </div>
+                            <div>
+                                <div class="text-[10px] text-slate-400">Sinkronisasi</div>
+                                <div class="text-[11px] font-bold text-slate-700">{{ $acc->updated_at ? $acc->updated_at->diffForHumans() : 'Hari ini' }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 mt-4 border-t border-slate-100">
+                        @if($isLinked)
+                            <form action="{{ route('setting.social.disconnect', $acc->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin memutuskan integrasi akun ini?')">
+                                @csrf
+                                <button type="submit" class="w-full py-2 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 font-bold text-xs transition-colors">
+                                    Putuskan Koneksi
+                                </button>
+                            </form>
+                        @else
+                            <button type="button" @click="showAddSocialModal = true" class="w-full py-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold text-xs transition-colors">
+                                Hubungkan Kembali
+                            </button>
+                        @endif
+                    </div>
+                </div>
+            @empty
+                <div class="col-span-4 bg-white rounded-3xl border border-slate-200/80 p-8 text-center">
+                    <p class="text-xs text-slate-400 italic">Belum ada akun media sosial yang terhubung.</p>
+                </div>
+            @endforelse
+        </div>
+
+        <!-- Panduan API Meta & LinkedIn -->
+        <div class="bg-blue-50/60 rounded-3xl border border-blue-200/70 p-6">
+            <h4 class="text-xs font-bold text-blue-900 flex items-center space-x-2">
+                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span>Panduan Integrasi Multi-Channel Media Sosial</span>
+            </h4>
+            <p class="text-xs text-blue-800 mt-1 leading-relaxed">
+                Untuk penyiaran posting otomatis ke Instagram Business & Facebook Pages, pastikan Halaman Facebook resmi telah tertaut ke Meta Business Manager yang sama dengan WhatsApp Cloud API. Konten yang diterbitkan dari menu Media Sosial akan otomatis disinkronkan ke feed resmi tanpa memotong kuota pihak ketiga.
+            </p>
+        </div>
+    </div>
+
     <!-- MODAL TAMBAH PENGGUNA BARU -->
     <div x-show="showAddUserModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200" @click.outside="showAddUserModal = false">
@@ -414,6 +721,61 @@
                     </button>
                     <button type="submit" class="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-600/20 transition-colors">
                         Simpan Pengguna
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL HUBUNGKAN AKUN MEDIA SOSIAL -->
+    <div x-show="showAddSocialModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-200" @click.outside="showAddSocialModal = false">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
+                <div>
+                    <h3 class="text-base font-bold text-slate-900">Hubungkan Saluran Media Sosial</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Tautkan akun resmi perusahaan ke sistem GENIE.</p>
+                </div>
+                <button type="button" @click="showAddSocialModal = false" class="text-slate-400 hover:text-slate-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <form action="{{ route('setting.social.connect') }}" method="POST" class="space-y-4">
+                @csrf
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Platform Media Sosial</label>
+                    <select name="platform" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none bg-white">
+                        <option value="linkedin">LinkedIn Company Page</option>
+                        <option value="instagram">Instagram Professional / Creator</option>
+                        <option value="facebook">Facebook Business Page</option>
+                        <option value="tiktok">TikTok for Business</option>
+                        <option value="youtube">YouTube Channel</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Nama Profil / Akun Resmi</label>
+                    <input type="text" name="account_name" required placeholder="Contoh: PT Agung Trans Logistics Indonesia"
+                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Username / Handle (@)</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 font-mono text-xs">@</span>
+                        <input type="text" name="username" required placeholder="agungtrans.id"
+                            class="w-full pl-8 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-mono focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="pt-4 flex items-center justify-end space-x-3 border-t border-slate-100">
+                    <button type="button" @click="showAddSocialModal = false" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-50 transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-600/20 transition-colors">
+                        Hubungkan Akun
                     </button>
                 </div>
             </form>

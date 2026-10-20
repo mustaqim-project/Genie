@@ -804,7 +804,7 @@ print('Hasil Deteksi Pos Tarif:', result['result']['structured_data'])`, 'Kode P
         </div>
     </div>
 
-    <!-- MODAL POPUP: BUAT KUNCI AKSES MCP BARU -->
+    <!-- MODAL POPUP: BUAT KUNCI AKSES MCP BARU (RBAC Granular Scopes) -->
     <div x-show="showTokenModal" 
          x-cloak
          class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4"
@@ -815,20 +815,20 @@ print('Hasil Deteksi Pos Tarif:', result['result']['structured_data'])`, 'Kode P
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0">
         
-        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-200 space-y-5"
+        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-7 shadow-2xl border border-slate-200 space-y-5"
              @click.away="showTokenModal = false">
             
             <div class="flex items-center justify-between pb-3 border-b border-slate-100">
                 <div class="flex items-center space-x-2">
-                    <div class="w-8 h-8 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center text-sm font-bold">
+                    <div class="w-9 h-9 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center text-base font-bold shadow-2xs">
                         🔑
                     </div>
                     <div>
                         <h3 class="text-base font-bold text-slate-900">Buat Token Akses MCP Baru</h3>
-                        <p class="text-[11px] text-slate-500">Generate token Bearer baru untuk Klien AI kepabeanan Anda.</p>
+                        <p class="text-[11px] text-slate-500">Konfigurasikan peran, izin CRUD, dan otoritas persetujuan (Approval) untuk AI Agent Anda.</p>
                     </div>
                 </div>
-                <button type="button" @click="showTokenModal = false" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg cursor-pointer">
+                <button type="button" @click="showTokenModal = false" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
@@ -844,7 +844,7 @@ print('Hasil Deteksi Pos Tarif:', result['result']['structured_data'])`, 'Kode P
                     <input type="text" 
                            name="name" 
                            required 
-                           placeholder="Contoh: Claude Desktop - Impor Samarinda, Cursor IDE Tim AI"
+                           placeholder="Contoh: Claude Desktop - Impor Samarinda, Cursor IDE Tim AI, Production Agent"
                            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-sky-500 focus:outline-none">
                 </div>
 
@@ -871,7 +871,7 @@ print('Hasil Deteksi Pos Tarif:', result['result']['structured_data'])`, 'Kode P
                             Masa Berlaku Token
                         </label>
                         <select name="expires_in" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:ring-2 focus:ring-sky-500 bg-white">
-                            <option value="never">Permanen (Tidak Pernah)</option>
+                            <option value="never">Permanen (Tidak Pernah Kedaluwarsa)</option>
                             <option value="30_days">30 Hari</option>
                             <option value="90_days">90 Hari</option>
                             <option value="1_year">1 Tahun</option>
@@ -879,48 +879,321 @@ print('Hasil Deteksi Pos Tarif:', result['result']['structured_data'])`, 'Kode P
                     </div>
                 </div>
 
-                <!-- Hak Akses / Scopes -->
+                <!-- Hak Akses & Matriks Izin Granular (RBAC Selector) -->
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                        Hak Akses Tool ERP & Kepabeanan (Scopes)
-                    </label>
-                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2 max-h-48 overflow-y-auto">
-                        <label class="flex items-center space-x-2 text-xs font-bold text-slate-800 pb-1 border-b border-slate-200 cursor-pointer">
-                            <input type="checkbox" name="scope_roles[]" value="*" checked class="rounded text-sky-600 focus:ring-sky-500">
-                            <span>* (Akses Penuh Seluruh 24 Tool ERP & Kepabeanan)</span>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-xs font-bold text-slate-800">
+                            Matriks Hak Akses & Otoritas MCP (Granular RBAC)
                         </label>
-                        <label class="flex items-center space-x-2 text-xs text-slate-700 cursor-pointer">
-                            <input type="checkbox" name="scope_roles[]" value="customs:*" checked class="rounded text-sky-600 focus:ring-sky-500">
-                            <span>customs:* (Kepabeanan CEISA 4.0, Pos Tarif BTKI, Kurs Pajak)</span>
-                        </label>
-                        <label class="flex items-center space-x-2 text-xs text-slate-700 cursor-pointer">
-                            <input type="checkbox" name="scope_roles[]" value="shipment:*" checked class="rounded text-sky-600 focus:ring-sky-500">
-                            <span>shipment:* (Operasional Pengapalan, B/L, Kontainer, Timeline)</span>
-                        </label>
-                        <label class="flex items-center space-x-2 text-xs text-slate-700 cursor-pointer">
-                            <input type="checkbox" name="scope_roles[]" value="do:*" checked class="rounded text-sky-600 focus:ring-sky-500">
-                            <span>do:* (Delivery Order Pelayaran, Free-Time Demurrage, SP2)</span>
-                        </label>
-                        <label class="flex items-center space-x-2 text-xs text-slate-700 cursor-pointer">
-                            <input type="checkbox" name="scope_roles[]" value="traffic:*" checked class="rounded text-sky-600 focus:ring-sky-500">
-                            <span>traffic:* (Tracking Kontainer Lapangan & Penugasan Armada Truk)</span>
-                        </label>
-                        <label class="flex items-center space-x-2 text-xs text-slate-700 cursor-pointer">
-                            <input type="checkbox" name="scope_roles[]" value="finance:*" checked class="rounded text-sky-600 focus:ring-sky-500">
-                            <span>finance:* (Piutang Klien P19, Hutang Vendor AP, Kas & Rekening Bank)</span>
-                        </label>
-                        <label class="flex items-center space-x-2 text-xs text-slate-700 cursor-pointer">
-                            <input type="checkbox" name="scope_roles[]" value="accounting:*" checked class="rounded text-sky-600 focus:ring-sky-500">
-                            <span>accounting:* (Laporan Laba Rugi P&L, Job Costing Margin, Pajak)</span>
-                        </label>
-                        <label class="flex items-center space-x-2 text-xs text-slate-700 cursor-pointer">
-                            <input type="checkbox" name="scope_roles[]" value="crm:*" checked class="rounded text-sky-600 focus:ring-sky-500">
-                            <span>crm:* (Database Klien, PIC, Notifikasi WhatsApp Otomatis)</span>
-                        </label>
-                        <label class="flex items-center space-x-2 text-xs text-slate-700 cursor-pointer">
-                            <input type="checkbox" name="scope_roles[]" value="hrm:*" checked class="rounded text-sky-600 focus:ring-sky-500">
-                            <span>hrm:* (Presensi Kehadiran GPS Tim Operasional & Rekap Payroll)</span>
-                        </label>
+                        <span class="text-[10px] text-slate-500 font-mono" x-text="selectedScopes.includes('*') ? 'Semua Hak Akses (Administrator)' : selectedScopes.length + ' Izin Dipilih'"></span>
+                    </div>
+
+                    <!-- Preset Akses Cepat -->
+                    <div class="flex flex-wrap gap-1.5 mb-2.5">
+                        <button type="button" 
+                                @click="setScopePreset('admin')"
+                                :class="selectedScopes.includes('*') ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                                class="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer">
+                            🛡️ Full Admin (*)
+                        </button>
+                        <button type="button" 
+                                @click="setScopePreset('ops')"
+                                :class="!selectedScopes.includes('*') && selectedScopes.includes('customs:create') && !selectedScopes.includes('finance:approve') ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                                class="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer">
+                            🚢 Operasional & Kepabeanan
+                        </button>
+                        <button type="button" 
+                                @click="setScopePreset('finance')"
+                                :class="!selectedScopes.includes('*') && selectedScopes.includes('finance:approve') ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                                class="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer">
+                            💰 Keuangan & Approval
+                        </button>
+                        <button type="button" 
+                                @click="setScopePreset('readonly')"
+                                :class="!selectedScopes.includes('*') && selectedScopes.includes('approval:read') && !selectedScopes.includes('customs:create') ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                                class="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer">
+                            👁️ Auditor (Read-Only)
+                        </button>
+                    </div>
+
+                    <!-- Daftar Checkbox Granular -->
+                    <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-3.5 max-h-64 overflow-y-auto">
+                        <!-- Akses Penuh Wildcard -->
+                        <div class="pb-2 border-b border-slate-200">
+                            <label class="flex items-center space-x-2.5 text-xs font-bold text-slate-900 cursor-pointer">
+                                <input type="checkbox" 
+                                       name="scope_roles[]" 
+                                       value="*" 
+                                       :checked="selectedScopes.includes('*')"
+                                       @change="toggleScope('*')"
+                                       class="rounded text-sky-600 focus:ring-sky-500 w-4 h-4">
+                                <span class="flex-1">
+                                    <span class="text-sky-700 font-black">* (Akses Penuh Seluruh 27 Tools ERP, CRUD & Approvals)</span>
+                                    <span class="block text-[10px] font-normal text-slate-500">Mencakup eksekusi instruksi apa pun yang didukung oleh server GENIE.</span>
+                                </span>
+                            </label>
+                        </div>
+
+                        <!-- 1. Persetujuan & Tata Kelola (Governance) -->
+                        <div class="space-y-1.5">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-purple-700 flex items-center gap-1">
+                                ⚖️ Persetujuan & Tata Kelola Sistem (Governance)
+                            </span>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                                <label class="flex items-start space-x-2 cursor-pointer p-1.5 rounded-lg hover:bg-white transition-colors">
+                                    <input type="checkbox" name="scope_roles[]" value="governance:approve" 
+                                           :checked="isScopeChecked('governance:approve')" @change="toggleScope('governance:approve')"
+                                           class="rounded text-purple-600 focus:ring-purple-500 mt-0.5">
+                                    <span class="text-[11px] text-slate-700">
+                                        <strong class="text-purple-800">governance:approve</strong>
+                                        <span class="block text-[10px] text-slate-500">Otoritas Menyetujui/Menolak Aksi (Customs, Bills, Advances, Proposals)</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-start space-x-2 cursor-pointer p-1.5 rounded-lg hover:bg-white transition-colors">
+                                    <input type="checkbox" name="scope_roles[]" value="governance:delete" 
+                                           :checked="isScopeChecked('governance:delete')" @change="toggleScope('governance:delete')"
+                                           class="rounded text-rose-600 focus:ring-rose-500 mt-0.5">
+                                    <span class="text-[11px] text-slate-700">
+                                        <strong class="text-rose-700">governance:delete</strong>
+                                        <span class="block text-[10px] text-slate-500">Otoritas Void / Menghapus Rekaman Data (Shipment, Invoice, Bill)</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-start space-x-2 cursor-pointer p-1.5 rounded-lg hover:bg-white transition-colors sm:col-span-2">
+                                    <input type="checkbox" name="scope_roles[]" value="approval:read" 
+                                           :checked="isScopeChecked('approval:read')" @change="toggleScope('approval:read')"
+                                           class="rounded text-sky-600 focus:ring-sky-500 mt-0.5">
+                                    <span class="text-[11px] text-slate-700">
+                                        <strong class="text-slate-800">approval:read</strong>
+                                        <span class="block text-[10px] text-slate-500">Melihat daftar antrean yang menunggu persetujuan tim</span>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- 2. Kepabeanan & CEISA 4.0 -->
+                        <div class="space-y-1.5 pt-2 border-t border-slate-200/80">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-sky-700 flex items-center gap-1">
+                                🛃 Kepabeanan & CEISA 4.0 (Customs)
+                            </span>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                                <label class="flex items-start space-x-2 cursor-pointer p-1.5 rounded-lg hover:bg-white transition-colors">
+                                    <input type="checkbox" name="scope_roles[]" value="customs:read" 
+                                           :checked="isScopeChecked('customs:read')" @change="toggleScope('customs:read')"
+                                           class="rounded text-sky-600 focus:ring-sky-500 mt-0.5">
+                                    <span class="text-[11px] text-slate-700">
+                                        <strong>customs:read</strong>
+                                        <span class="block text-[10px] text-slate-500">Cek Pos Tarif BTKI, Kurs Pajak & Status CEISA</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-start space-x-2 cursor-pointer p-1.5 rounded-lg hover:bg-white transition-colors">
+                                    <input type="checkbox" name="scope_roles[]" value="customs:create" 
+                                           :checked="isScopeChecked('customs:create')" @change="toggleScope('customs:create')"
+                                           class="rounded text-sky-600 focus:ring-sky-500 mt-0.5">
+                                    <span class="text-[11px] text-slate-700">
+                                        <strong>customs:create</strong>
+                                        <span class="block text-[10px] text-slate-500">Parse Packing List & Generate Draft Deklarasi PIB/PEB</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-start space-x-2 cursor-pointer p-1.5 rounded-lg hover:bg-white transition-colors">
+                                    <input type="checkbox" name="scope_roles[]" value="customs:approve" 
+                                           :checked="isScopeChecked('customs:approve')" @change="toggleScope('customs:approve')"
+                                           class="rounded text-purple-600 focus:ring-purple-500 mt-0.5">
+                                    <span class="text-[11px] text-slate-700">
+                                        <strong class="text-purple-700">customs:approve</strong>
+                                        <span class="block text-[10px] text-slate-500">Approval Final Deklarasi Pabean Siap Submit</span>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- 3. Operasional Pengapalan (P01) -->
+                        <div class="space-y-1.5 pt-2 border-t border-slate-200/80">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700 flex items-center gap-1">
+                                🚢 Operasional Pengapalan & Ekspedisi
+                            </span>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                                <label class="flex items-start space-x-2 cursor-pointer p-1.5 rounded-lg hover:bg-white transition-colors">
+                                    <input type="checkbox" name="scope_roles[]" value="shipment:read" 
+                                           :checked="isScopeChecked('shipment:read')" @change="toggleScope('shipment:read')"
+                                           class="rounded text-emerald-600 focus:ring-emerald-500 mt-0.5">
+                                    <span class="text-[11px] text-slate-700">
+                                        <strong>shipment:read</strong>
+                                        <span class="block text-[10px] text-slate-500">Lihat Proyek Pengapalan, B/L & Kontainer</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-start space-x-2 cursor-pointer p-1.5 rounded-lg hover:bg-white transition-colors">
+                                    <input type="checkbox" name="scope_roles[]" value="shipment:create" 
+                                           :checked="isScopeChecked('shipment:create')" @change="toggleScope('shipment:create')"
+                                           class="rounded text-emerald-600 focus:ring-emerald-500 mt-0.5">
+                                    <span class="text-[11px] text-slate-700">
+                                        <strong>shipment:create</strong>
+                                        <span class="block text-[10px] text-slate-500">Buat Proyek Shipment & Booking Kargo Baru</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-start space-x-2 cursor-pointer p-1.5 rounded-lg hover:bg-white transition-colors">
+                                    <input type="checkbox" name="scope_roles[]" value="shipment:update" 
+                                           :checked="isScopeChecked('shipment:update')" @change="toggleScope('shipment:update')"
+                                           class="rounded text-emerald-600 focus:ring-emerald-500 mt-0.5">
+                                    <span class="text-[11px] text-slate-700">
+                                        <strong>shipment:update</strong>
+                                        <span class="block text-[10px] text-slate-500">Update Status Milestone & Timeline</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-start space-x-2 cursor-pointer p-1.5 rounded-lg hover:bg-white transition-colors">
+                                    <input type="checkbox" name="scope_roles[]" value="shipment:delete" 
+                                           :checked="isScopeChecked('shipment:delete')" @change="toggleScope('shipment:delete')"
+                                           class="rounded text-rose-600 focus:ring-rose-500 mt-0.5">
+                                    <span class="text-[11px] text-slate-700">
+                                        <strong class="text-rose-700">shipment:delete</strong>
+                                        <span class="block text-[10px] text-slate-500">Hapus / Batalkan Proyek Pengapalan</span>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- 4. DO & Traffic Pelabuhan -->
+                        <div class="space-y-1.5 pt-2 border-t border-slate-200/80">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-amber-700 flex items-center gap-1">
+                                📑 Delivery Order (DO) & Armada Truk
+                            </span>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                                <label class="flex items-start space-x-2 cursor-pointer p-1.5 rounded-lg hover:bg-white transition-colors">
+                                    <input type="checkbox" name="scope_roles[]" value="do:manage" 
+                                           :checked="isScopeChecked('do:manage')" @change="toggleScope('do:manage')"
+                                           class="rounded text-amber-600 focus:ring-amber-500 mt-0.5">
+                                    <span class="text-[11px] text-slate-700">
+                                        <strong>do:manage</strong>
+                                        <span class="block text-[10px] text-slate-500">Kelola Release DO, Free-Time & SP2 Pelayaran</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-start space-x-2 cursor-pointer p-1.5 rounded-lg hover:bg-white transition-colors">
+                                    <input type="checkbox" name="scope_roles[]" value="traffic:read" 
+                                           :checked="isScopeChecked('traffic:read')" @change="toggleScope('traffic:read')"
+                                           class="rounded text-amber-600 focus:ring-amber-500 mt-0.5">
+                                    <span class="text-[11px] text-slate-700">
+                                        <strong>traffic:read</strong>
+                                        <span class="block text-[10px] text-slate-500">Monitoring Kontainer di Lapangan & Gate Out</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-start space-x-2 cursor-pointer p-1.5 rounded-lg hover:bg-white transition-colors sm:col-span-2">
+                                    <input type="checkbox" name="scope_roles[]" value="traffic:update" 
+                                           :checked="isScopeChecked('traffic:update')" @change="toggleScope('traffic:update')"
+                                           class="rounded text-amber-600 focus:ring-amber-500 mt-0.5">
+                                    <span class="text-[11px] text-slate-700">
+                                        <strong>traffic:update</strong>
+                                        <span class="block text-[10px] text-slate-500">Penugasan Armada Truk & Sopir Lapangan</span>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- 5. Keuangan, Billing & Pajak -->
+                        <div class="space-y-1.5 pt-2 border-t border-slate-200/80">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-700 flex items-center gap-1">
+                                💳 Keuangan, Billing & Perpajakan
+                            </span>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                                <label class="flex items-start space-x-2 cursor-pointer p-1.5 rounded-lg hover:bg-white transition-colors">
+                                    <input type="checkbox" name="scope_roles[]" value="finance:read" 
+                                           :checked="isScopeChecked('finance:read')" @change="toggleScope('finance:read')"
+                                           class="rounded text-indigo-600 focus:ring-indigo-500 mt-0.5">
+                                    <span class="text-[11px] text-slate-700">
+                                        <strong>finance:read</strong>
+                                        <span class="block text-[10px] text-slate-500">Lihat Rekap Keuangan & Mutasi Rekening Bank</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-start space-x-2 cursor-pointer p-1.5 rounded-lg hover:bg-white transition-colors">
+                                    <input type="checkbox" name="scope_roles[]" value="finance:create" 
+                                           :checked="isScopeChecked('finance:create')" @change="toggleScope('finance:create')"
+                                           class="rounded text-indigo-600 focus:ring-indigo-500 mt-0.5">
+                                    <span class="text-[11px] text-slate-700">
+                                        <strong>finance:create</strong>
+                                        <span class="block text-[10px] text-slate-500">Buat Invoice P19 & Tagihan Vendor AP</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-start space-x-2 cursor-pointer p-1.5 rounded-lg hover:bg-white transition-colors">
+                                    <input type="checkbox" name="scope_roles[]" value="finance:approve" 
+                                           :checked="isScopeChecked('finance:approve')" @change="toggleScope('finance:approve')"
+                                           class="rounded text-purple-600 focus:ring-purple-500 mt-0.5">
+                                    <span class="text-[11px] text-slate-700">
+                                        <strong class="text-purple-700">finance:approve</strong>
+                                        <span class="block text-[10px] text-slate-500">Persetujuan Tagihan Vendor & Biaya Operasional</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-start space-x-2 cursor-pointer p-1.5 rounded-lg hover:bg-white transition-colors">
+                                    <input type="checkbox" name="scope_roles[]" value="finance:delete" 
+                                           :checked="isScopeChecked('finance:delete')" @change="toggleScope('finance:delete')"
+                                           class="rounded text-rose-600 focus:ring-rose-500 mt-0.5">
+                                    <span class="text-[11px] text-slate-700">
+                                        <strong class="text-rose-700">finance:delete</strong>
+                                        <span class="block text-[10px] text-slate-500">Void / Hapus Invoice Klien & Tagihan Vendor</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-start space-x-2 cursor-pointer p-1.5 rounded-lg hover:bg-white transition-colors">
+                                    <input type="checkbox" name="scope_roles[]" value="accounting:read" 
+                                           :checked="isScopeChecked('accounting:read')" @change="toggleScope('accounting:read')"
+                                           class="rounded text-indigo-600 focus:ring-indigo-500 mt-0.5">
+                                    <span class="text-[11px] text-slate-700">
+                                        <strong>accounting:read</strong>
+                                        <span class="block text-[10px] text-slate-500">Laporan Laba Rugi (P&L) & Margin Pekerjaan</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-start space-x-2 cursor-pointer p-1.5 rounded-lg hover:bg-white transition-colors">
+                                    <input type="checkbox" name="scope_roles[]" value="tax:read" 
+                                           :checked="isScopeChecked('tax:read')" @change="toggleScope('tax:read')"
+                                           class="rounded text-indigo-600 focus:ring-indigo-500 mt-0.5">
+                                    <span class="text-[11px] text-slate-700">
+                                        <strong>tax:read</strong>
+                                        <span class="block text-[10px] text-slate-500">Rekap Faktur Pajak PPN 1.1% & PPh 23</span>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- 6. CRM & HRM -->
+                        <div class="space-y-1.5 pt-2 border-t border-slate-200/80">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-teal-700 flex items-center gap-1">
+                                👥 CRM, Notifikasi WhatsApp & Kepegawaian (HRM)
+                            </span>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                                <label class="flex items-start space-x-2 cursor-pointer p-1.5 rounded-lg hover:bg-white transition-colors">
+                                    <input type="checkbox" name="scope_roles[]" value="crm:read" 
+                                           :checked="isScopeChecked('crm:read')" @change="toggleScope('crm:read')"
+                                           class="rounded text-teal-600 focus:ring-teal-500 mt-0.5">
+                                    <span class="text-[11px] text-slate-700">
+                                        <strong>crm:read</strong>
+                                        <span class="block text-[10px] text-slate-500">Database Klien & Kontak PIC</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-start space-x-2 cursor-pointer p-1.5 rounded-lg hover:bg-white transition-colors">
+                                    <input type="checkbox" name="scope_roles[]" value="crm:communicate" 
+                                           :checked="isScopeChecked('crm:communicate')" @change="toggleScope('crm:communicate')"
+                                           class="rounded text-teal-600 focus:ring-teal-500 mt-0.5">
+                                    <span class="text-[11px] text-slate-700">
+                                        <strong>crm:communicate</strong>
+                                        <span class="block text-[10px] text-slate-500">Kirim Notifikasi WhatsApp Status Kargo</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-start space-x-2 cursor-pointer p-1.5 rounded-lg hover:bg-white transition-colors">
+                                    <input type="checkbox" name="scope_roles[]" value="hrm:read" 
+                                           :checked="isScopeChecked('hrm:read')" @change="toggleScope('hrm:read')"
+                                           class="rounded text-teal-600 focus:ring-teal-500 mt-0.5">
+                                    <span class="text-[11px] text-slate-700">
+                                        <strong>hrm:read</strong>
+                                        <span class="block text-[10px] text-slate-500">Presensi GPS Lapangan & Rekap Payroll</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-start space-x-2 cursor-pointer p-1.5 rounded-lg hover:bg-white transition-colors">
+                                    <input type="checkbox" name="scope_roles[]" value="hrm:approve" 
+                                           :checked="isScopeChecked('hrm:approve')" @change="toggleScope('hrm:approve')"
+                                           class="rounded text-purple-600 focus:ring-purple-500 mt-0.5">
+                                    <span class="text-[11px] text-slate-700">
+                                        <strong class="text-purple-700">hrm:approve</strong>
+                                        <span class="block text-[10px] text-slate-500">Approval Cuti & Kasbon Karyawan</span>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -964,6 +1237,46 @@ function mcpIntegrationApp() {
         
         copyToast: false,
         copyMsg: '',
+
+        selectedScopes: ['*'],
+        scopePresets: {
+            admin: ['*'],
+            ops: ['customs:read', 'customs:create', 'shipment:read', 'shipment:create', 'shipment:update', 'do:manage', 'traffic:read', 'traffic:update', 'crm:read', 'crm:communicate'],
+            finance: ['finance:read', 'finance:create', 'finance:approve', 'accounting:read', 'tax:read', 'approval:read'],
+            readonly: ['customs:read', 'shipment:read', 'traffic:read', 'finance:read', 'accounting:read', 'tax:read', 'crm:read', 'hrm:read', 'approval:read']
+        },
+
+        setScopePreset(preset) {
+            if (preset === 'admin') {
+                this.selectedScopes = ['*'];
+            } else if (this.scopePresets[preset]) {
+                this.selectedScopes = [...this.scopePresets[preset]];
+            }
+        },
+
+        toggleScope(scope) {
+            if (scope === '*') {
+                if (this.selectedScopes.includes('*')) {
+                    this.selectedScopes = [];
+                } else {
+                    this.selectedScopes = ['*'];
+                }
+                return;
+            }
+            this.selectedScopes = this.selectedScopes.filter(s => s !== '*');
+            if (this.selectedScopes.includes(scope)) {
+                this.selectedScopes = this.selectedScopes.filter(s => s !== scope);
+            } else {
+                this.selectedScopes.push(scope);
+            }
+            if (this.selectedScopes.length === 0) {
+                this.selectedScopes = ['customs:read'];
+            }
+        },
+
+        isScopeChecked(scope) {
+            return this.selectedScopes.includes('*') || this.selectedScopes.includes(scope);
+        },
 
         getToken() {
             if (this.customToken && this.customToken.trim().length > 0) {

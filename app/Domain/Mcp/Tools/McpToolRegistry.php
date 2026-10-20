@@ -66,6 +66,11 @@ class McpToolRegistry
         // 8. SDM & Kepegawaian (HRM)
         $this->register(new HrmGetAttendanceSummaryTool());
         $this->register(new HrmGetPayrollSummaryTool());
+
+        // 9. Approval, Tata Kelola & CRUD Actions
+        $this->register(new McpApproveActionTool());
+        $this->register(new McpListPendingApprovalsTool());
+        $this->register(new McpDeleteRecordTool());
     }
 
     public function register(McpToolInterface $tool): void

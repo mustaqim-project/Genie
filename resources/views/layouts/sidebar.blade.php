@@ -229,11 +229,56 @@
             @if(!auth()->check() || auth()->user()->hasPermission('crm.view'))
             <a href="{{ route('crm.index') }}" 
                class="flex items-center space-x-2.5 px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('crm.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
-               title="CRM & Data Klien">
+               title="CRM, Sales Pipeline & Direktori Klien Logistik">
                 <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('crm.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-teal-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
                 <span x-show="!sidebarCollapsed" class="truncate font-semibold">CRM & Klien</span>
+            </a>
+            @endif
+
+            <!-- KOTAK MASUK TERPADU (OMNICHANNEL INBOX) -->
+            @if(!auth()->check() || auth()->user()->hasPermission('crm.view'))
+            <a href="{{ route('inbox.index') }}" 
+               class="flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('inbox.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
+               title="Kotak Masuk Terpadu (WhatsApp WABA & Media Sosial)">
+                <div class="flex items-center space-x-2.5 min-w-0 flex-1 mr-1.5">
+                    <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('inbox.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-emerald-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                    </svg>
+                    <span x-show="!sidebarCollapsed" class="truncate font-semibold">Kotak Masuk</span>
+                </div>
+                <span x-show="!sidebarCollapsed" class="flex-shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">Live</span>
+            </a>
+            @endif
+
+            <!-- WHATSAPP WABA -->
+            @if(!auth()->check() || auth()->user()->hasPermission('crm.view'))
+            <a href="{{ route('whatsapp.index') }}" 
+               class="flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('whatsapp.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
+               title="WhatsApp WABA (Official Cloud API & Broadcast)">
+                <div class="flex items-center space-x-2.5 min-w-0 flex-1 mr-1.5">
+                    <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('whatsapp.*') ? 'text-emerald-400' : 'text-slate-500 group-hover:text-emerald-600' }}" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.97.53 1.951.815 2.796.815 3.183 0 5.767-2.586 5.768-5.766 0-3.18-2.585-5.766-5.768-5.766zm3.376 8.21c-.14.394-.71.724-1.015.768-.29.043-.664.068-2.148-.546-1.898-.786-3.119-2.73-3.214-2.857-.095-.127-.771-1.026-.771-1.955 0-.928.487-1.385.66-1.574.173-.189.378-.236.504-.236.126 0 .252.001.362.006.116.006.27-.044.423.323.158.378.539 1.314.587 1.408.047.095.079.205.016.331-.063.126-.095.205-.189.315-.094.11-.198.246-.283.33-.095.095-.194.198-.083.388.11.19.49 8.08 1.05 1.306.721.643 1.33.842 1.519.936.19.095.3.079.41-.047.11-.126.473-.551.6-.74.126-.19.252-.158.425-.095.174.063 1.103.52 1.292.615.19.095.316.142.363.22.047.079.047.457-.094.851z"/>
+                    </svg>
+                    <span x-show="!sidebarCollapsed" class="truncate font-semibold">WhatsApp WABA</span>
+                </div>
+                <span x-show="!sidebarCollapsed" class="flex-shrink-0 text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">WABA</span>
+            </a>
+            @endif
+
+            <!-- MEDIA SOSIAL -->
+            @if(!auth()->check() || auth()->user()->hasPermission('crm.view'))
+            <a href="{{ route('social-media.index') }}" 
+               class="flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('social-media.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
+               title="Media Sosial Multi-Channel & Feed Komposer">
+                <div class="flex items-center space-x-2.5 min-w-0 flex-1 mr-1.5">
+                    <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('social-media.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-blue-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                    </svg>
+                    <span x-show="!sidebarCollapsed" class="truncate font-semibold">Media Sosial</span>
+                </div>
+                <span x-show="!sidebarCollapsed" class="flex-shrink-0 text-[9px] font-mono px-1.5 py-0.5 rounded bg-sky-100 text-sky-800 font-bold">FEED</span>
             </a>
             @endif
 
@@ -297,16 +342,31 @@
                 <span x-show="!sidebarCollapsed" class="flex-shrink-0 text-[9px] font-mono px-1.5 py-0.5 rounded bg-sky-100 text-sky-800 font-bold">MCP</span>
             </a>
 
-            <!-- USER & RBAC -->
+            <!-- PERAN & HAK AKSES (RBAC COCKPIT) -->
+            @if(!auth()->check() || auth()->user()->hasPermission('setting.manage') || auth()->user()->hasPermission('setting.view'))
+            <a href="{{ route('settings.roles.index') }}" 
+               class="flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('settings.roles*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
+               title="Manajemen Peran & Matriks Hak Akses (RBAC)">
+                <div class="flex items-center space-x-2.5 min-w-0 flex-1 mr-1.5">
+                    <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('settings.roles*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-slate-800' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    <span x-show="!sidebarCollapsed" class="truncate font-semibold">Peran & Akses (RBAC)</span>
+                </div>
+                <span x-show="!sidebarCollapsed" class="flex-shrink-0 text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-bold">RBAC</span>
+            </a>
+            @endif
+
+            <!-- USER & PENGATURAN UMUM -->
             @if(!auth()->check() || auth()->user()->hasPermission('setting.view'))
             <a href="{{ route('setting.index') }}" 
-               class="flex items-center space-x-2.5 px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('setting.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
-               title="Pengaturan Pengguna & Akses RBAC">
-                <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('setting.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-slate-800' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               class="flex items-center space-x-2.5 px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('setting.*') && !request()->routeIs('settings.roles*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
+               title="Pengaturan Pengguna & Gateway Komunikasi">
+                <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('setting.*') && !request()->routeIs('settings.roles*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-slate-800' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <span x-show="!sidebarCollapsed" class="truncate font-semibold">User & Role RBAC</span>
+                <span x-show="!sidebarCollapsed" class="truncate font-semibold">User & Gateway</span>
             </a>
             @endif
 

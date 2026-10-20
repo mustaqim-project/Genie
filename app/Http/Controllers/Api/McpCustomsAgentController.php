@@ -194,6 +194,22 @@ class McpCustomsAgentController extends Controller
                 ], 404);
             }
 
+            // Otorisasi Granular berbasis Scope MCP Token (RBAC Guard)
+            if ($auth instanceof \App\Models\McpCredential) {
+                $requiredScopes = $this->getRequiredScopesForTool((string) $toolName, is_array($args) ? $args : []);
+                if (!$auth->hasAnyScope($requiredScopes)) {
+                    $joinedScopes = implode(', ', $requiredScopes);
+                    return response()->json([
+                        'jsonrpc' => '2.0',
+                        'id' => $id,
+                        'error' => [
+                            'code' => -32003,
+                            'message' => "Forbidden: Token MCP '{$auth->name}' tidak memiliki izin yang diperlukan untuk mengeksekusi '{$toolName}'. Izin yang dibutuhkan: [{$joinedScopes}]. Silakan perbarui hak akses token di Pengaturan MCP GENIE.",
+                        ],
+                    ], 403);
+                }
+            }
+
             try {
                 $tool = $this->toolRegistry->getTool($toolName);
                 $toolResult = $tool->execute(is_array($args) ? $args : []);
@@ -392,5 +408,76 @@ class McpCustomsAgentController extends Controller
             'items_count' => count($doc->payload['barang'] ?? []),
             'lartas_complete' => $shipment->is_all_lartas_documents_complete,
         ]);
+    }
+
+    /**
+     * Dapatkan daftar scopes/izin yang valid untuk mengeksekusi tool MCP tertentu.
+     *
+     * @param string $toolName
+     * @param array<string, mixed> $args
+     * @return array<int, string>
+     */
+    protected function getRequiredScopesForTool(string $toolName, array $args = []): array
+    {
+        return match ($toolName) {
+            // Customs (CEISA 4.0 & BTKI)
+            'customs_check_hs_code', 'check_hs_code' => ['customs:read', 'customs:*', '*'],
+            'customs_detect_shipment', 'detect_shipment', 'detect_shipment_customs' => ['customs:read', 'customs:*', '*'],
+            'customs_get_kurs_pajak' => ['customs:read', 'customs:*', '*'],
+            'customs_check_ceisa_status' => ['customs:read', 'customs:*', '*'],
+            'customs_parse_packing_list', 'parse_packing_list' => ['customs:create', 'customs:write', 'customs:*', '*'],
+            'customs_generate_declaration', 'generate_customs_declaration', 'generate_declaration' => ['customs:create', 'customs:write', 'customs:*', '*'],
+
+            // Shipment Operasional
+            'shipment_list_projects' => ['shipment:read', 'shipment:*', '*'],
+            'shipment_get_detail' => ['shipment:read', 'shipment:*', '*'],
+            'shipment_create_project' => ['shipment:create', 'shipment:write', 'shipment:*', '*'],
+            'shipment_update_status' => ['shipment:update', 'shipment:write', 'shipment:*', '*'],
+
+            // DO & Pelayaran
+            'do_manage_workflow' => ['do:manage', 'do:write', 'do:*', '*'],
+
+            // Traffic & Armada
+            'traffic_track_containers' => ['traffic:read', 'traffic:*', '*'],
+            'traffic_assign_fleet' => ['traffic:update', 'traffic:write', 'traffic:*', '*'],
+
+            // Keuangan & Billing
+            'finance_get_summary' => ['finance:read', 'finance:*', '*'],
+            'finance_get_cash_bank_balances' => ['finance:read', 'finance:*', '*'],
+            'finance_manage_invoice' => ['finance:create', 'finance:write', 'finance:*', '*'],
+            'finance_manage_vendor_bill' => ['finance:create', 'finance:write', 'finance:*', '*'],
+            'finance_record_cash_mutation' => ['finance:create', 'finance:write', 'finance:*', '*'],
+
+            // Akuntansi & Pajak
+            'accounting_get_profit_loss' => ['accounting:read', 'accounting:*', 'finance:read', 'finance:*', '*'],
+            'tax_get_summary' => ['tax:read', 'tax:*', 'finance:read', 'finance:*', '*'],
+
+            // CRM & Notifikasi
+            'crm_search_clients' => ['crm:read', 'crm:*', '*'],
+            'crm_send_whatsapp' => ['crm:communicate', 'crm:write', 'crm:*', '*'],
+
+            // HRM & Kepegawaian
+            'hrm_get_attendance_summary' => ['hrm:read', 'hrm:*', '*'],
+            'hrm_get_payroll_summary' => ['hrm:read', 'hrm:*', '*'],
+
+            // Persetujuan / Governance Actions
+            'mcp_list_pending_approvals' => ['approval:read', 'governance:approve', 'customs:approve', 'finance:approve', 'hrm:approve', '*'],
+            'mcp_approve_action' => match (strtoupper((string) ($args['action_type'] ?? ''))) {
+                'CUSTOMS_DECLARATION' => ['customs:approve', 'governance:approve', '*'],
+                'VENDOR_BILL', 'CLIENT_INVOICE', 'CASH_ADVANCE' => ['finance:approve', 'governance:approve', '*'],
+                'LEAVE_REQUEST' => ['hrm:approve', 'governance:approve', '*'],
+                default => ['governance:approve', '*'],
+            },
+
+            // Penghapusan Data / Void Record
+            'mcp_delete_record' => match (strtoupper((string) ($args['entity_type'] ?? ''))) {
+                'SHIPMENT' => ['shipment:delete', 'governance:delete', '*'],
+                'INVOICE', 'VENDOR_BILL' => ['finance:delete', 'governance:delete', '*'],
+                'CLIENT' => ['crm:delete', 'governance:delete', '*'],
+                default => ['governance:delete', '*'],
+            },
+
+            default => ['*'],
+        };
     }
 }
