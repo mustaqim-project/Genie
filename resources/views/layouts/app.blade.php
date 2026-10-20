@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="id" class="h-full bg-slate-50">
+<html lang="id" class="h-full bg-slate-50 antialiased">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="PATS_CEISA">
+    <meta name="apple-mobile-web-app-title" content="GENIE ERP">
     <meta name="theme-color" content="#ffffff">
-    <title>@yield('title', 'Admin Panel') — PATS_CEISA ERP | PT Agung Trans Solusindo</title>
+    <title>@yield('title', 'Admin Panel') — GENIE ERP | Freight Forwarding & PPJK Indonesia</title>
 
     <!-- Design Token Architecture (Apple HIG & 3-Layer Design System) -->
     <link rel="stylesheet" href="{{ asset('css/design-tokens.css') }}">
@@ -43,6 +43,10 @@
                         'squircle-lg': 'var(--radius-lg)',
                         'squircle-xl': 'var(--radius-xl)',
                         'squircle-2xl': 'var(--radius-2xl)',
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', '"SF Pro Display"', 'Inter', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', '"SF Mono"', 'Menlo', 'Monaco', 'monospace'],
                     }
                 }
             }
@@ -52,29 +56,41 @@
     <!-- Alpine.js CDN for interactive dropdowns, modals & sidebar -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
 
-    <!-- Google Fonts: Inter & JetBrains Mono (Apple SF Pro Equivalent) -->
+    <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono (Linear / Apple Tier) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", sans-serif; 
-            letter-spacing: -0.011em;
+            font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", sans-serif; 
+            letter-spacing: -0.015em;
             -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
-        code, pre, .font-mono { font-family: "SF Mono", "JetBrains Mono", Menlo, monospace; }
+        code, pre, .font-mono { 
+            font-family: "JetBrains Mono", "SF Mono", Menlo, monospace; 
+            letter-spacing: -0.02em;
+        }
         [x-cloak] { display: none !important; }
-        .safe-bottom { padding-bottom: max(0.5rem, env(safe-area-inset-bottom)); }
         
+        /* Mobile Safe Areas (iPhone Dynamic Island & Home Indicator) */
+        .safe-top { padding-top: max(0.75rem, env(safe-area-inset-top)); }
+        .safe-bottom { padding-bottom: max(0.75rem, env(safe-area-inset-bottom)); }
+
         /* Apple Minimalist Scrollbar */
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.35); border-radius: 9999px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(100, 116, 139, 0.6); }
+        ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(100, 116, 139, 0.55); }
+
+        /* Double-Bezel Card Highlight */
+        .double-bezel {
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.02), 0 4px 16px 0 rgba(0, 0, 0, 0.03);
+        }
     </style>
 </head>
-<body class="min-h-screen text-slate-800 antialiased selection:bg-brand-500 selection:text-white bg-slate-50 flex flex-col"
+<body class="min-h-[100dvh] text-slate-800 antialiased selection:bg-sky-500 selection:text-white bg-[#F8FAFC] flex flex-col"
       x-data="{ 
           sidebarOpen: false, 
           sidebarCollapsed: false,
@@ -85,32 +101,42 @@
       @keydown.window.prevent.cmd.k="quickSearchOpen = true"
       @keydown.escape.window="quickSearchOpen = false">
 
-    <div class="flex-1 flex flex-col lg:flex-row w-full min-h-screen">
+    <div class="flex-1 flex flex-col lg:flex-row w-full min-h-[100dvh]">
 
         <!-- ============================================================== -->
-        <!-- 1. SIDEBAR NAVIGATION                                         -->
+        <!-- 1. SIDEBAR NAVIGATION (DESKTOP + MOBILE DRAWER)               -->
         <!-- ============================================================== -->
         @include('layouts.sidebar')
 
         <!-- ============================================================== -->
         <!-- 2. MAIN CONTENT WRAPPER (TOPBAR + BODY + FOOTER)              -->
         <!-- ============================================================== -->
-        <div class="flex-1 flex flex-col min-w-0 w-full bg-slate-50">
+        <div class="flex-1 flex flex-col min-w-0 w-full bg-[#F8FAFC]">
 
             <!-- TOPBAR HEADER -->
             @include('layouts.topbar')
 
-            <!-- DYNAMIC FLASH ALERTS -->
+            <!-- DYNAMIC FLASH ALERTS (APPLE HIG FLOATING NOTIFICATIONS) -->
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-4">
                 @if(session('success'))
-                    <div class="mb-4 flex items-center justify-between p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs shadow-sm">
+                    <div x-data="{ show: true }" 
+                         x-show="show" 
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 -translate-y-2"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 -translate-y-2"
+                         class="mb-4 flex items-center justify-between p-3.5 rounded-2xl bg-emerald-50/90 border border-emerald-200/80 text-emerald-900 text-xs shadow-xs backdrop-blur-xs">
                         <div class="flex items-center space-x-2.5">
-                            <svg class="w-5 h-5 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span class="font-medium">{{ session('success') }}</span>
+                            <span class="w-7 h-7 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </span>
+                            <span class="font-semibold leading-relaxed">{{ session('success') }}</span>
                         </div>
-                        <button onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700">
+                        <button @click="show = false" class="p-1 rounded-lg text-emerald-500 hover:text-emerald-700 hover:bg-emerald-100/50 transition-colors" aria-label="Tutup notifikasi">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                             </svg>
@@ -119,14 +145,24 @@
                 @endif
 
                 @if(session('error'))
-                    <div class="mb-4 flex items-center justify-between p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs shadow-sm">
+                    <div x-data="{ show: true }" 
+                         x-show="show" 
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 -translate-y-2"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 -translate-y-2"
+                         class="mb-4 flex items-center justify-between p-3.5 rounded-2xl bg-rose-50/90 border border-rose-200/80 text-rose-900 text-xs shadow-xs backdrop-blur-xs">
                         <div class="flex items-center space-x-2.5">
-                            <svg class="w-5 h-5 text-rose-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span class="font-medium">{{ session('error') }}</span>
+                            <span class="w-7 h-7 rounded-xl bg-rose-100 flex items-center justify-center text-rose-600 flex-shrink-0">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </span>
+                            <span class="font-semibold leading-relaxed">{{ session('error') }}</span>
                         </div>
-                        <button onclick="this.parentElement.remove()" class="text-rose-500 hover:text-rose-700">
+                        <button @click="show = false" class="p-1 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-100/50 transition-colors" aria-label="Tutup notifikasi">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                             </svg>
@@ -135,14 +171,21 @@
                 @endif
 
                 @if($errors->any())
-                    <div class="mb-4 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs shadow-sm">
-                        <div class="font-bold flex items-center space-x-1.5 mb-1">
-                            <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
-                            <span>Mohon periksa kesalahan input berikut:</span>
+                    <div x-data="{ show: true }" 
+                         x-show="show" 
+                         class="mb-4 p-4 rounded-2xl bg-rose-50/90 border border-rose-200/80 text-rose-900 text-xs shadow-xs">
+                        <div class="flex items-center justify-between font-bold mb-1.5">
+                            <div class="flex items-center space-x-2">
+                                <svg class="w-4 h-4 text-rose-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span>Terdapat beberapa kesalahan validasi input:</span>
+                            </div>
+                            <button @click="show = false" class="text-rose-500 hover:text-rose-700">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
                         </div>
-                        <ul class="list-disc list-inside space-y-0.5 text-rose-700 pl-2">
+                        <ul class="list-disc list-inside space-y-0.5 text-rose-800 pl-2">
                             @foreach($errors->all() as $err)
                                 <li>{{ $err }}</li>
                             @endforeach
@@ -151,7 +194,7 @@
                 @endif
             </div>
 
-            <!-- MAIN VIEW BODY (APPLE EXPANDED CANVAS) -->
+            <!-- MAIN VIEW BODY (EXPANDED CANVAS) -->
             <main class="flex-1 pb-24 lg:pb-12 w-full">
                 @yield('content')
             </main>
@@ -164,15 +207,16 @@
     </div>
 
     <!-- ============================================================== -->
-    <!-- GLOBAL QUICK SEARCH / COMMAND PALETTE MODAL (CTRL + K)         -->
+    <!-- GLOBAL SPOTLIGHT COMMAND PALETTE MODAL (CTRL + K / ⌘K)        -->
+    <!-- ZERO-GAP EDGE-TO-EDGE BACKDROP ARCHITECTURE                    -->
     <!-- ============================================================== -->
     <div x-show="quickSearchOpen" 
          x-cloak
-         class="fixed inset-0 z-50 overflow-y-auto p-4 sm:p-6 md:p-20" 
+         class="fixed inset-0 z-[200] overflow-y-auto p-4 sm:p-6 md:p-20 flex items-start justify-center" 
          role="dialog" 
          aria-modal="true">
         
-        <!-- Backdrop -->
+        <!-- Standalone Zero-Gap Backdrop -->
         <div x-show="quickSearchOpen"
              x-transition:enter="ease-out duration-200"
              x-transition:enter-start="opacity-0"
@@ -180,10 +224,10 @@
              x-transition:leave="ease-in duration-150"
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
-             class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm transition-opacity" 
+             class="fixed inset-0 bg-slate-950/70 backdrop-blur-md" 
              @click="quickSearchOpen = false"></div>
 
-        <!-- Modal Box -->
+        <!-- Dialog Card (Double-Bezel Architecture) -->
         <div x-show="quickSearchOpen"
              x-transition:enter="ease-out duration-200"
              x-transition:enter-start="opacity-0 scale-95"
@@ -191,82 +235,86 @@
              x-transition:leave="ease-in duration-150"
              x-transition:leave-start="opacity-100 scale-100"
              x-transition:leave-end="opacity-0 scale-95"
-             class="mx-auto max-w-2xl transform divide-y divide-slate-100 overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/5 transition-all relative z-10">
+             class="mx-auto max-w-2xl w-full transform divide-y divide-slate-100 overflow-hidden rounded-3xl bg-white/95 backdrop-blur-2xl shadow-2xl ring-1 ring-black/5 transition-all relative z-10 text-xs">
             
             <!-- Search Bar Input -->
-            <div class="relative flex items-center px-4 py-3">
+            <div class="relative flex items-center px-4 py-3.5 bg-slate-50/50">
                 <svg class="h-5 w-5 text-slate-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 <input type="text" 
                        x-model="searchQuery"
-                       class="h-9 w-full bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none" 
-                       placeholder="Ketik untuk mencari No Aju, BL, Kontainer, Klien, atau menu navigasi..."
+                       class="h-10 w-full bg-transparent text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none" 
+                       placeholder="Cari Dokumen Pabean, No B/L, Kontainer, Invoice, atau Menu..."
                        autofocus>
-                <button @click="quickSearchOpen = false" class="text-xs px-2 py-1 rounded bg-slate-100 text-slate-500 hover:bg-slate-200">
+                <button @click="quickSearchOpen = false" class="text-[11px] font-mono px-2 py-1 rounded-lg bg-slate-200/80 text-slate-600 hover:bg-slate-300 font-semibold transition-colors">
                     ESC
                 </button>
             </div>
 
             <!-- Quick Action Shortcuts -->
-            <div class="p-3 text-xs">
-                <div class="font-bold text-[11px] text-slate-400 uppercase tracking-wider px-2 py-1">Pintasan Cepat Operasional</div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 mt-1">
-                    <a href="{{ route('core.document.index') }}" class="p-2 rounded-xl hover:bg-slate-50 flex items-center space-x-3 text-slate-700 font-medium transition-colors">
-                        <span class="w-7 h-7 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center font-bold">P</span>
-                        <div>
-                            <div class="text-xs font-bold text-slate-900">Project Lifecycle (P01)</div>
-                            <div class="text-[10px] text-slate-500">Buat & kelola 9 berkas shipment</div>
+            <div class="p-4 text-xs max-h-96 overflow-y-auto">
+                <div class="font-bold text-[10px] text-slate-400 uppercase tracking-wider px-2 py-1">Pintasan Cepat Operasional (Spotlight)</div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1.5">
+                    <a href="{{ route('core.document.index') }}" class="p-2.5 rounded-2xl hover:bg-slate-100/70 border border-transparent hover:border-slate-200 flex items-center space-x-3 text-slate-700 font-medium transition-all group">
+                        <span class="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold text-xs flex-shrink-0 group-hover:scale-105 transition-transform">P01</span>
+                        <div class="truncate">
+                            <div class="text-xs font-bold text-slate-900 truncate">Project Lifecycle (P01)</div>
+                            <div class="text-[10px] text-slate-500 truncate">Buat & kelola berkas pengiriman</div>
                         </div>
                     </a>
-                    <a href="{{ route('bc20.create') }}" class="p-2 rounded-xl hover:bg-slate-50 flex items-center space-x-3 text-slate-700 font-medium transition-colors">
-                        <span class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold">20</span>
-                        <div>
-                            <div class="text-xs font-bold text-slate-900">Ajukan BC 2.0 (PIB Impor)</div>
-                            <div class="text-[10px] text-slate-500">Draft & submit ke CEISA 4.0</div>
+                    <a href="{{ route('bc20.create') }}" class="p-2.5 rounded-2xl hover:bg-slate-100/70 border border-transparent hover:border-slate-200 flex items-center space-x-3 text-slate-700 font-medium transition-all group">
+                        <span class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs flex-shrink-0 group-hover:scale-105 transition-transform">BC20</span>
+                        <div class="truncate">
+                            <div class="text-xs font-bold text-slate-900 truncate">Draft PIB (BC 2.0 Impor)</div>
+                            <div class="text-[10px] text-slate-500 truncate">Integrasi CEISA 4.0 DJBC</div>
                         </div>
                     </a>
-                    <a href="{{ route('bc30.create') }}" class="p-2 rounded-xl hover:bg-slate-50 flex items-center space-x-3 text-slate-700 font-medium transition-colors">
-                        <span class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">30</span>
-                        <div>
-                            <div class="text-xs font-bold text-slate-900">Ajukan BC 3.0 (PEB Ekspor)</div>
-                            <div class="text-[10px] text-slate-500">Pemberitahuan Ekspor Barang</div>
+                    <a href="{{ route('finance.invoices.index') }}" class="p-2.5 rounded-2xl hover:bg-slate-100/70 border border-transparent hover:border-slate-200 flex items-center space-x-3 text-slate-700 font-medium transition-all group">
+                        <span class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xs flex-shrink-0 group-hover:scale-105 transition-transform">INV</span>
+                        <div class="truncate">
+                            <div class="text-xs font-bold text-slate-900 truncate">Piutang & Invoice (P19)</div>
+                            <div class="text-[10px] text-slate-500 truncate">Penagihan jasa & reimburse outlay</div>
                         </div>
                     </a>
-                    <a href="{{ route('core.do.index') }}" class="p-2 rounded-xl hover:bg-slate-50 flex items-center space-x-3 text-slate-700 font-medium transition-colors">
-                        <span class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold">DO</span>
-                        <div>
-                            <div class="text-xs font-bold text-slate-900">Penebusan DO & Free Time</div>
-                            <div class="text-[10px] text-slate-500">Otomasi email pelayaran</div>
+                    <a href="{{ route('finance.bills.index') }}" class="p-2.5 rounded-2xl hover:bg-slate-100/70 border border-transparent hover:border-slate-200 flex items-center space-x-3 text-slate-700 font-medium transition-all group">
+                        <span class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-xs flex-shrink-0 group-hover:scale-105 transition-transform">AP</span>
+                        <div class="truncate">
+                            <div class="text-xs font-bold text-slate-900 truncate">Hutang Vendor (AP)</div>
+                            <div class="text-[10px] text-slate-500 truncate">Pelayaran, Trucking, & Depo TPS</div>
                         </div>
                     </a>
-                    <a href="{{ route('core.traffic.index') }}" class="p-2 rounded-xl hover:bg-slate-50 flex items-center space-x-3 text-slate-700 font-medium transition-colors">
-                        <span class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">TR</span>
-                        <div>
-                            <div class="text-xs font-bold text-slate-900">Traffic, Behandle & Gate Out</div>
-                            <div class="text-[10px] text-slate-500">Armada truk & bukti kirim (POD)</div>
+                    <a href="{{ route('finance.cash-bank.index') }}" class="p-2.5 rounded-2xl hover:bg-slate-100/70 border border-transparent hover:border-slate-200 flex items-center space-x-3 text-slate-700 font-medium transition-all group">
+                        <span class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs flex-shrink-0 group-hover:scale-105 transition-transform">CB</span>
+                        <div class="truncate">
+                            <div class="text-xs font-bold text-slate-900 truncate">Buku Kas & Rekening Bank</div>
+                            <div class="text-[10px] text-slate-500 truncate">Mutasi, transfer & rekonsiliasi</div>
                         </div>
                     </a>
-                    <a href="{{ route('finance.invoices.index') }}" class="p-2 rounded-xl hover:bg-slate-50 flex items-center space-x-3 text-slate-700 font-medium transition-colors">
-                        <span class="w-7 h-7 rounded-lg bg-green-50 text-green-600 flex items-center justify-center font-bold">INV</span>
-                        <div>
-                            <div class="text-xs font-bold text-slate-900">Tagihan Klien (Invoice P19)</div>
-                            <div class="text-[10px] text-slate-500">Reimbursement talangan & jasa PPJK</div>
+                    <a href="{{ route('accounting.index') }}" class="p-2.5 rounded-2xl hover:bg-slate-100/70 border border-transparent hover:border-slate-200 flex items-center space-x-3 text-slate-700 font-medium transition-all group">
+                        <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs flex-shrink-0 group-hover:scale-105 transition-transform">GL</span>
+                        <div class="truncate">
+                            <div class="text-xs font-bold text-slate-900 truncate">Buku Besar, P&L & Neraca</div>
+                            <div class="text-[10px] text-slate-500 truncate">Laporan keuangan & job costing</div>
                         </div>
                     </a>
                 </div>
             </div>
 
             <!-- Footer Keyboard Instructions -->
-            <div class="bg-slate-50 px-4 py-2 text-[10px] text-slate-500 flex items-center justify-between">
-                <span>Gunakan panah untuk bernavigasi, Enter untuk memilih</span>
-                <span>Tekan <kbd class="px-1 py-0.5 bg-white border border-slate-200 rounded font-mono">ESC</kbd> untuk keluar</span>
+            <div class="bg-slate-50/80 px-4 py-2.5 text-[11px] text-slate-500 flex items-center justify-between border-t border-slate-100">
+                <span class="flex items-center gap-1">
+                    Gunakan <kbd class="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-[10px] font-mono">↑</kbd> <kbd class="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-[10px] font-mono">↓</kbd> untuk memilih
+                </span>
+                <span>Tekan <kbd class="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-[10px] font-mono">ESC</kbd> untuk keluar</span>
             </div>
 
         </div>
     </div>
 
-    <!-- APPLE iOS MOBILE BOTTOM TAB BAR -->
+    <!-- ============================================================== -->
+    <!-- 4. APPLE iOS MOBILE BOTTOM TAB BAR (PWA Mobile)               -->
+    <!-- ============================================================== -->
     @include('layouts.bottom-tab-bar')
 
 </body>
