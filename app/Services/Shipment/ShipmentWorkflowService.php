@@ -628,11 +628,19 @@ class ShipmentWorkflowService
     /**
      * 8. TIM DO: Update Rilis DO Pelayaran & Batas Waktu Expired DO
      */
-    public function releaseDo(Shipment $shipment, string $nomorDo, string $doExpiredAt): void
+    public function releaseDo(Shipment $shipment, string|array $nomorDo, ?string $doExpiredAt = null): void
     {
+        $doFilePath = null;
+        if (is_array($nomorDo)) {
+            $data = $nomorDo;
+            $nomorDo = $data['do_number'] ?? ($data['nomor_do'] ?? 'DO-' . date('Ymd'));
+            $doExpiredAt = $data['do_expired_at'] ?? now()->addDays(7)->toDateString();
+            $doFilePath = $data['do_file_path'] ?? null;
+        }
+
         $shipment->update([
             'nomor_do' => $nomorDo,
-            'do_expired_at' => Carbon::parse($doExpiredAt),
+            'do_expired_at' => Carbon::parse($doExpiredAt ?? now()->addDays(7)),
             'status_do' => 'DO_RELEASED',
             'status_tahap' => 'DO_RELEASED', // Diteruskan ke Tim Traffic
         ]);
@@ -643,6 +651,7 @@ class ShipmentWorkflowService
             $doc->update([
                 'status' => 'VERIFIED',
                 'nama_file' => 'DO_' . $nomorDo . '.pdf',
+                'file_path' => $doFilePath ?? $doc->file_path,
                 'verified_at' => now(),
             ]);
         }

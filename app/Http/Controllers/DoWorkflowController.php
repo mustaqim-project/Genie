@@ -26,7 +26,16 @@ class DoWorkflowController extends Controller
         Gate::authorize('do.view');
 
         $query = Shipment::with(['client', 'shippingVendor', 'ceisaDocument'])
-            ->whereIn('status', ['DOC_COMPLETED', 'DO_REQUESTED', 'DO_ISSUED', 'ARRIVED', 'INSPECTION_CUSTOMS']);
+            ->whereIn('status_tahap', [
+                'BILLING_ISSUED', 
+                'DO_PROCESSING', 
+                'DO_REQUESTED', 
+                'DO_RELEASED', 
+                'TRAFFIC_SPPB', 
+                'TRAFFIC_HOLD', 
+                'TRAFFIC_GATE_OUT', 
+                'DELIVERED_POD'
+            ]);
 
         if ($request->filled('vendor_id')) {
             $query->where('shipping_vendor_id', $request->vendor_id);

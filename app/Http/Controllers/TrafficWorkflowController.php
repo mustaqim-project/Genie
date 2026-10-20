@@ -25,7 +25,17 @@ class TrafficWorkflowController extends Controller
         Gate::authorize('traffic.view');
 
         $query = Shipment::with(['client', 'ceisaDocument', 'shippingVendor'])
-            ->whereIn('status', ['DO_ISSUED', 'ARRIVED', 'INSPECTION_CUSTOMS', 'SPPB_RELEASED', 'GATE_OUT', 'DELIVERED']);
+            ->whereIn('status_tahap', [
+                'DO_RELEASED', 
+                'TRAFFIC_SPPB', 
+                'SPPB_RELEASED', 
+                'TRAFFIC_HOLD', 
+                'INSPECTION_CUSTOMS', 
+                'TRAFFIC_GATE_OUT', 
+                'GATE_OUT', 
+                'DELIVERED_POD', 
+                'DELIVERED'
+            ]);
 
         if ($request->filled('channel')) {
             $query->where('customs_channel', $request->channel);

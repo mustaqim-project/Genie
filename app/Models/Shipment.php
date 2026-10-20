@@ -232,6 +232,24 @@ class Shipment extends Model
         return $verifiedCount >= count($mandatoryTypes);
     }
 
+    public function getDoIsReleasedAttribute(): bool
+    {
+        return !empty($this->nomor_do) || ($this->status_do ?? '') === 'DO_RELEASED' || ($this->status_tahap ?? '') === 'DO_RELEASED';
+    }
+
+    public function getDoNumberAttribute(): ?string
+    {
+        return $this->nomor_do;
+    }
+
+    public function getDaysUntilFreeTimeExpiresAttribute(): int
+    {
+        if ($this->free_time_expired_at) {
+            return max(0, (int) now()->diffInDays($this->free_time_expired_at, false));
+        }
+        return (int) ($this->free_time_days ?? 7);
+    }
+
     public function getTypeAttribute(): string
     {
         return ($this->attributes['jenis_layanan'] ?? 'IMPORT_BC20') === 'EKSPORT_BC30' ? 'EXPORT' : 'IMPORT';

@@ -474,17 +474,22 @@ class ShipmentProjectController extends Controller
             return back()->with('error', 'Dokumen wajib (Invoice, Packing List, B/L) belum 100% diverifikasi. Lengkapi dan setujui berkas terlebih dahulu.');
         }
 
-        // 1. Pastikan Dokumen Pabean telah dibuat dari Shipment Items / Verified Packing List
-        if (!$shipment->ceisaDocument || empty($shipment->ceisaDocument->raw_payload)) {
-            $this->workflowService->generateCeisaDocFromShipment($shipment);
-            $shipment->refresh();
+        try {
+            // 1. Pastikan Dokumen Pabean telah dibuat dari Shipment Items / Verified Packing List
+            if (!$shipment->ceisaDocument || empty($shipment->ceisaDocument->raw_payload)) {
+                $this->workflowService->generateCeisaDocFromShipment($shipment);
+                $shipment->refresh();
+            }
+
+            // 2. Submit ke CEISA 4.0 & Dapatkan Kode Billing MPN G3
+            $ceisaDoc = $this->workflowService->submitCeisaAndAdvanceToDo($shipment);
+            $billingCode = $ceisaDoc->kode_billing ?? '028192847192841';
+
+            return back()->with('success', "Dokumen Pabean {$ceisaDoc->nomor_aju} berhasil disubmit ke CEISA 4.0! Kode Billing MPN G3: {$billingCode}. Tahap Tim Dokumen selesai & otomatis dialihkan ke antrian Tim DO.");
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('CEISA Submission Error: ' . $e->getMessage(), ['exception' => $e]);
+            return back()->with('error', 'Gagal memproses pengajuan CEISA 4.0: ' . $e->getMessage());
         }
-
-        // 2. Submit ke CEISA 4.0 & Dapatkan Kode Billing MPN G3
-        $ceisaDoc = $this->workflowService->submitCeisaAndAdvanceToDo($shipment);
-        $billingCode = $ceisaDoc->kode_billing ?? '028192847192841';
-
-        return back()->with('success', "Dokumen Pabean {$ceisaDoc->nomor_aju} berhasil disubmit ke CEISA 4.0! Kode Billing MPN G3: {$billingCode}. Tahap Tim Dokumen selesai & otomatis dialihkan ke antrian Tim DO.");
     }
 
     /**
