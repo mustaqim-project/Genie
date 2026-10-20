@@ -50,7 +50,14 @@ class BC30Controller extends Controller implements HasMiddleware
 
         $documents = $query->latest()->paginate(10)->withQueryString();
 
-        return view('bc30.index', compact('documents'));
+        $stats = [
+            'total' => CeisaDocument::where('jenis_dokumen', '30')->count(),
+            'draft' => CeisaDocument::where('jenis_dokumen', '30')->where('status', 'DRAFT')->count(),
+            'proses' => CeisaDocument::where('jenis_dokumen', '30')->whereIn('status', ['SUBMITTED', 'PROSES'])->count(),
+            'npe' => CeisaDocument::where('jenis_dokumen', '30')->where('status', 'NPE')->count(),
+        ];
+
+        return view('bc30.index', compact('documents', 'stats'));
     }
 
     public function create(Request $request)

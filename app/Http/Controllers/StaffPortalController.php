@@ -445,6 +445,55 @@ class StaffPortalController extends Controller
     }
 
     /**
+     * Pengajuan Permohonan Cuti Mandiri via Portal Staf.
+     */
+    public function storeLeave(Request $request)
+    {
+        $employee = $this->getActiveEmployee();
+
+        $validated = $request->validate([
+            'kind' => 'required|string|in:TAHUNAN,SAKIT,MELAHIRKAN,IZIN_KELUARGA',
+            'from_date' => 'required|date|after_or_equal:today',
+            'to_date' => 'required|date|after_or_equal:from_date',
+        ]);
+
+        LeaveRequest::create([
+            'employee_id' => $employee->id,
+            'kind' => $validated['kind'],
+            'from_date' => $validated['from_date'],
+            'to_date' => $validated['to_date'],
+            'status' => 'PENDING',
+        ]);
+
+        return redirect()->route('hrm.portal', ['tab' => 'history'])
+            ->with('success', 'Permohonan cuti mandiri berhasil diajukan dan menunggu persetujuan HR.');
+    }
+
+    /**
+     * Pengajuan Permohonan Kasbon Mandiri via Portal Staf.
+     */
+    public function storeCashAdvance(Request $request)
+    {
+        $employee = $this->getActiveEmployee();
+
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:100000',
+            'installments' => 'required|integer|min:1|max:12',
+        ]);
+
+        CashAdvance::create([
+            'employee_id' => $employee->id,
+            'amount' => $validated['amount'],
+            'installments' => $validated['installments'],
+            'balance' => $validated['amount'],
+            'status' => 'ACTIVE',
+        ]);
+
+        return redirect()->route('hrm.portal', ['tab' => 'history'])
+            ->with('success', 'Permohonan kasbon mandiri berhasil diajukan.');
+    }
+
+    /**
      * Registrasi Biometrik Wajah Mandiri via Portal.
      */
     public function registerFace(Request $request)

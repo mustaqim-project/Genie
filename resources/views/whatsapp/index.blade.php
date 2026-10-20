@@ -19,19 +19,6 @@
     }
 }">
 
-    <!-- Alerts -->
-    @if(session('success'))
-        <div class="mb-5 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 text-xs sm:text-sm font-semibold flex items-center justify-between shadow-xs">
-            <div class="flex items-center space-x-2.5">
-                <svg class="w-5 h-5 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <span>{{ session('success') }}</span>
-            </div>
-            <button @click="$el.parentElement.remove()" class="text-emerald-700 hover:text-emerald-900 font-bold text-xs">✕</button>
-        </div>
-    @endif
-
     <!-- 1. BENTO HEADER -->
     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
         <div class="flex items-center space-x-3.5">

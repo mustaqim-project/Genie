@@ -103,23 +103,28 @@
                                     {{ $shp->status }}
                                 </span>
                             </td>
-                            <td class="py-3 px-4 text-right space-x-1.5">
-                                @if($shp->status !== 'DELIVERED')
+                            <td class="py-3 px-4 text-right space-x-1.5 whitespace-nowrap">
+                                @if($shp->status === 'GATE_OUT')
+                                    <!-- Tombol Konfirmasi POD Modal Trigger -->
+                                    <button onclick="openPodModal('{{ $shp->id }}', '{{ $shp->shipment_number ?? $shp->project_no }}')"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] shadow-xs transition-all active:scale-95 cursor-pointer">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                        <span>Konfirmasi POD</span>
+                                    </button>
+                                @elseif($shp->status !== 'DELIVERED')
                                     <!-- Tombol Gate Out Modal Trigger -->
                                     <button onclick="openGateOutModal('{{ $shp->id }}', '{{ $shp->shipment_number ?? $shp->project_no }}')"
                                             {{ !$shp->do_is_released ? 'disabled title="Wajib rilis DO terlebih dahulu"' : '' }}
-                                            class="px-2.5 py-1.5 rounded-lg text-white font-bold text-[11px]
-                                                {{ $shp->do_is_released ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-300 cursor-not-allowed' }}">
-                                        Gate Out
-                                    </button>
-
-                                    <!-- Tombol Konfirmasi POD Modal Trigger -->
-                                    <button onclick="openPodModal('{{ $shp->id }}', '{{ $shp->shipment_number ?? $shp->project_no }}')"
-                                            class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px]">
-                                        Konfirmasi POD
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-[11px] transition-all shadow-xs active:scale-95
+                                                {{ $shp->do_is_released ? 'bg-slate-900 hover:bg-slate-800 text-white cursor-pointer' : 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed' }}">
+                                        <svg class="w-3.5 h-3.5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+                                        <span>Gate Out TPS</span>
                                     </button>
                                 @else
-                                    <span class="text-emerald-700 font-bold text-[11px]">&check; Kargo Diterima</span>
+                                    <span class="inline-flex items-center gap-1 text-emerald-700 font-bold text-[11px] bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                                        <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                        <span>Kargo Selesai (POD)</span>
+                                    </span>
                                 @endif
                             </td>
                         </tr>

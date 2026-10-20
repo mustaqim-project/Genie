@@ -10,31 +10,6 @@
         <span class="text-slate-800 font-semibold">Master HS Code & Konfigurasi Gateway CEISA 4.0</span>
     </div>
 
-    <!-- Feedback Alerts -->
-    @if(session('success'))
-        <div class="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-xs flex items-start space-x-3 shadow-sm animate-fade-in">
-            <svg class="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <div>
-                <span class="font-bold block text-sm">Operasi Berhasil</span>
-                <p class="mt-0.5 text-emerald-700 leading-relaxed">{{ session('success') }}</p>
-            </div>
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200/80 text-rose-800 text-xs flex items-start space-x-3 shadow-sm animate-fade-in">
-            <svg class="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <div>
-                <span class="font-bold block text-sm">Terjadi Kesalahan</span>
-                <p class="mt-0.5 text-rose-700 leading-relaxed">{{ session('error') }}</p>
-            </div>
-        </div>
-    @endif
-
     @if(session('hs_result'))
         @php $res = session('hs_result'); @endphp
         <div class="mb-6 p-5 rounded-2xl bg-sky-50 border border-sky-200 text-sky-900 text-xs shadow-sm animate-fade-in">
@@ -88,23 +63,23 @@
             <h1 class="text-2xl font-black text-slate-900 tracking-tight">Master Pos Tarif HS Code & Gateway CEISA 4.0</h1>
             <p class="text-xs text-slate-500 mt-1">Sinkronisasi database Pos Tarif BTKI 2022 (PMK 26/PMK.010/2022), tarif pungutan kepabeanan, regulasi Lartas, dan konfigurasi API DJBC</p>
         </div>
-        <div class="flex flex-wrap items-center gap-3">
+        <div class="flex flex-wrap items-center gap-2.5">
             <!-- Sinkronisasi BTKI 2022 -->
             <form action="{{ route('config.sync-hs-codes') }}" method="POST">
                 @csrf
-                <button type="submit" class="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition-all hover:-translate-y-0.5">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button type="submit" class="inline-flex items-center space-x-2 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs transition-all shadow-xs active:scale-95">
+                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
-                    <span>Sinkronkan Master BTKI 2022 Bea Cukai</span>
+                    <span>Sinkronkan Master BTKI 2022</span>
                 </button>
             </form>
 
             <!-- Uji Koneksi Token OAuth -->
             <form action="{{ route('config.test-auth') }}" method="POST">
                 @csrf
-                <button type="submit" class="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-md shadow-sky-600/20 transition-all hover:-translate-y-0.5">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button type="submit" class="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs shadow-xs transition-all active:scale-95">
+                    <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                     <span>Uji Token OAuth DJBC</span>

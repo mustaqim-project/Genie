@@ -322,9 +322,9 @@
             </div>
             <button type="button" 
                     @click="showTokenModal = true" 
-                    class="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center space-x-2 shrink-0 cursor-pointer">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                <span>+ Buat Token MCP Baru</span>
+                    class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition-all active:scale-95 flex items-center justify-center space-x-2 shrink-0 cursor-pointer">
+                <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                <span>Buat Token MCP Baru</span>
             </button>
         </div>
 
@@ -413,7 +413,7 @@
                         @empty
                         <tr>
                             <td colspan="7" class="p-8 text-center text-slate-400">
-                                Belum ada token MCP yang dibuat. Klik tombol <strong>"+ Buat Token MCP Baru"</strong> di atas untuk membuat kunci pertama Anda.
+                                Belum ada token MCP yang dibuat. Klik tombol <strong>"Buat Token MCP Baru"</strong> di atas untuk membuat kunci pertama Anda.
                             </td>
                         </tr>
                         @endforelse
@@ -505,8 +505,9 @@
             <div class="shrink-0 flex items-end">
                 <button type="button" 
                         @click="activeTab = 'tokens'; showTokenModal = true" 
-                        class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer">
-                    + Buat Kunci Baru
+                        class="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer active:scale-95">
+                    <svg class="w-3.5 h-3.5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    <span>Buat Kunci Baru</span>
                 </button>
             </div>
         </div>

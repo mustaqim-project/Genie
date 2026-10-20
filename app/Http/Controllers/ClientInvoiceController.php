@@ -33,7 +33,14 @@ class ClientInvoiceController extends Controller
 
         $invoices = $query->latest()->paginate(10);
 
-        return view('finance.invoices_index', compact('invoices'));
+        $stats = [
+            'total' => ClientInvoice::count(),
+            'paid' => ClientInvoice::where('status', 'PAID')->count(),
+            'unpaid' => ClientInvoice::where('status', 'UNPAID')->count(),
+            'total_amount' => ClientInvoice::sum('total_amount'),
+        ];
+
+        return view('finance.invoices_index', compact('invoices', 'stats'));
     }
 
     /**

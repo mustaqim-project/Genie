@@ -28,26 +28,12 @@
         <div class="flex items-center gap-2.5 w-full sm:w-auto">
             <button type="button" 
                     @click="openCreateModal()"
-                    class="h-10 px-4 rounded-xl text-xs font-semibold text-white bg-sky-600 hover:bg-sky-700 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer w-full sm:w-auto">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                <span>+ Buat Role Custom</span>
+                    class="h-10 px-4 rounded-xl text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer w-full sm:w-auto">
+                <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                <span>Buat Role Custom</span>
             </button>
         </div>
     </header>
-
-    <!-- Flash Notifications (Apple Banner Style) -->
-    @if (session('success'))
-        <div class="rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-3 text-xs text-emerald-800 font-semibold flex items-center gap-3">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
-            <div class="flex-1">{{ session('success') }}</div>
-        </div>
-    @endif
-    @if (session('error'))
-        <div class="rounded-xl bg-rose-50 border border-rose-200 px-4 py-3 text-xs text-rose-800 font-semibold flex items-center gap-3">
-            <span class="w-2 h-2 rounded-full bg-rose-500 shrink-0"></span>
-            <div class="flex-1">{{ session('error') }}</div>
-        </div>
-    @endif
 
     <!-- ===================================================== -->
     <!-- 2. KPI SUMMARY (4 Flat Apple Standard Cards)          -->
@@ -259,8 +245,9 @@
             </div>
             <button type="button" 
                     @click="showAddMemberModal = true"
-                    class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer">
-                <span>+ Daftarkan Anggota Baru</span>
+                    class="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition-all active:scale-95 cursor-pointer">
+                <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                <span>Daftarkan Anggota Baru</span>
             </button>
         </div>
 

@@ -89,26 +89,30 @@
                                 <div class="font-semibold text-slate-800">{{ $shp->days_until_free_time_expires ?? 7 }} Hari Tersisa</div>
                                 <div class="text-[10px] text-slate-400">s/d {{ now()->addDays(7)->format('d/m/Y') }}</div>
                             </td>
-                            <td class="py-3 px-4 text-right space-x-1.5">
-                                <!-- Otomasi Kirim Email -->
-                                <form action="{{ route('core.do.send-email', $shp->id) }}" method="POST" class="inline-block">
-                                    @csrf
-                                    <button type="submit" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100 font-semibold text-[11px] transition-colors" title="Kirim Email Invoice ke Pelayaran">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                                        <span>Email Pelayaran</span>
-                                    </button>
-                                </form>
+                            <td class="py-3 px-4 text-right space-x-1.5 whitespace-nowrap">
+                                @if(!$shp->do_is_released)
+                                    <!-- Otomasi Kirim Email -->
+                                    <form action="{{ route('core.do.send-email', $shp->id) }}" method="POST" class="inline-block">
+                                        @csrf
+                                        <button type="submit" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-sky-50 text-sky-700 hover:bg-sky-100 font-bold text-[11px] transition-colors border border-sky-200/80 cursor-pointer" title="Kirim Email Permintaan Invoice ke Pelayaran">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                            <span>Email Pelayaran</span>
+                                        </button>
+                                    </form>
 
-                                <!-- Tombol Rilis DO Modal Trigger -->
-                                <button onclick="openReleaseModal('{{ $shp->id }}', '{{ $shp->shipment_number ?? $shp->project_no }}')"
-                                        class="px-2.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-semibold text-[11px] transition-all shadow-xs active:scale-95">
-                                    Rilis DO
-                                </button>
+                                    <!-- Tombol Rilis DO Modal Trigger -->
+                                    <button onclick="openReleaseModal('{{ $shp->id }}', '{{ $shp->shipment_number ?? $shp->project_no }}')"
+                                            class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-[11px] transition-all shadow-xs active:scale-95 cursor-pointer">
+                                        <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        <span>Rilis DO</span>
+                                    </button>
+                                @endif
 
                                 <!-- Cetak Surat Permohonan DO -->
                                 <a href="{{ route('pdf.do-request', $shp->id) }}" target="_blank"
-                                   class="px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 font-semibold text-[11px] transition-colors">
-                                    PDF Surat
+                                   class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold text-[11px] transition-colors" title="Lihat / Cetak Surat Permohonan DO">
+                                    <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                    <span>PDF Surat</span>
                                 </a>
                             </td>
                         </tr>

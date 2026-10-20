@@ -94,6 +94,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/hrm/portal/clock-in', [StaffPortalController::class, 'clockIn'])->name('hrm.portal.clock-in');
     Route::post('/hrm/portal/clock-out', [StaffPortalController::class, 'clockOut'])->name('hrm.portal.clock-out');
     Route::post('/hrm/portal/corrections', [StaffPortalController::class, 'storeCorrection'])->name('hrm.portal.corrections.store');
+    Route::post('/hrm/portal/leaves', [StaffPortalController::class, 'storeLeave'])->name('hrm.portal.leaves.store');
+    Route::post('/hrm/portal/cash-advances', [StaffPortalController::class, 'storeCashAdvance'])->name('hrm.portal.cash-advances.store');
     Route::post('/hrm/portal/face-register', [StaffPortalController::class, 'registerFace'])->name('hrm.portal.face-register');
     Route::post('/hrm/portal/face-verify', [StaffPortalController::class, 'verifyFace'])->name('hrm.portal.face-verify');
     Route::get('/hrm/portal/payslips/{payslip}', [StaffPortalController::class, 'showPayslip'])->name('hrm.portal.payslips.show');
