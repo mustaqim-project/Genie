@@ -138,6 +138,7 @@ Route::middleware('auth')->group(function () {
     // 6. Accounting
     Route::prefix('accounting')->name('accounting.')->group(function () {
         Route::get('/', [AccountingController::class, 'index'])->name('index');
+        Route::get('/export-ledger', [AccountingController::class, 'exportLedger'])->name('export-ledger');
     });
 
     // 7. AI Agent

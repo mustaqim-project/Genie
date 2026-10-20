@@ -127,6 +127,11 @@ class Shipment extends Model
         return $this->hasOne(ClientInvoice::class);
     }
 
+    public function invoices()
+    {
+        return $this->hasMany(ClientInvoice::class);
+    }
+
     public function costItems()
     {
         return $this->hasMany(CostItem::class);

@@ -347,10 +347,48 @@ class AccountingService
     }
 
     /**
+     * 6. AUTO-JOURNAL: Saldo Awal Modal Disetor & Rekening Kas/Bank
+     * DR: Kas Kecil (1-1110)
+     * DR: Bank Mandiri MPN G3 (1-1120)
+     * DR: Bank BCA (1-1130)
+     * CR: Modal Disetor Saham (3-1100)
+     */
+    public function recordOpeningBalance(): ?JournalEntry
+    {
+        $existing = JournalEntry::where('source_type', 'OPENING_BALANCE')->first();
+        if ($existing) {
+            return $existing;
+        }
+
+        $bcaInit = 450000000.00;
+        $mandiriInit = 380000000.00;
+        $kasInit = 20000000.00;
+        $totalCapital = $bcaInit + $mandiriInit + $kasInit; // Rp 850.000.000
+
+        $lines = [
+            ['account_id' => self::getCoaId('1-1110'), 'debit' => $kasInit, 'credit' => 0],
+            ['account_id' => self::getCoaId('1-1120'), 'debit' => $mandiriInit, 'credit' => 0],
+            ['account_id' => self::getCoaId('1-1130'), 'debit' => $bcaInit, 'credit' => 0],
+            ['account_id' => self::getCoaId('3-1100'), 'debit' => 0, 'credit' => $totalCapital],
+        ];
+
+        return self::createBalancedEntry(
+            'OPENING_BALANCE',
+            'CAPITAL-850M',
+            '2026-01-01',
+            'Saldo Awal Modal Disetor Pemilik & Likuiditas Rekening Kas/Bank',
+            $lines
+        );
+    }
+
+    /**
      * Sinkronisasi Seluruh Transaksi Lampau yang Belum Terjurnal (Idempotent Backfill)
      */
     public function syncHistoricalTransactions(): array
     {
+        // 1. Pastikan saldo awal modal disetor tercatat
+        $this->recordOpeningBalance();
+
         $invoices = ClientInvoice::all();
         $bills = VendorBill::all();
 
