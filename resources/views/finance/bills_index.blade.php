@@ -34,11 +34,13 @@
         <div class="flex items-center gap-2">
             @can('finance.bill')
             <button type="button" @click="showCreateModal = true"
-                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-xs transition-all">
-                <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
+                    class="min-h-[44px] inline-flex items-center pl-4 pr-2 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-xs transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900">
                 <span>Catat Tagihan Vendor Baru</span>
+                <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-800 text-emerald-400 ml-2.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                </span>
             </button>
             @endcan
         </div>
@@ -360,29 +362,62 @@
         </div>
     </div>
 
-    <!-- MODAL 1: FORM INPUT TAGIHAN VENDOR BARU -->
+    <!-- MODAL 1: FORM INPUT TAGIHAN VENDOR BARU (Mandat Mutlak: Standalone Backdrop z-[200] & Mobile Bottom-Sheet) -->
     <div x-show="showCreateModal" 
-         class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs"
+         class="fixed inset-0 z-[200] overflow-y-auto flex items-end sm:items-center justify-center p-0 sm:p-4 md:p-6"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="create-bill-title"
          x-cloak>
-        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 text-xs"
-             @click.outside="showCreateModal = false">
+        <!-- Independent Standalone Zero-Gap Backdrop -->
+        <div x-show="showCreateModal"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 bg-slate-950/70 backdrop-blur-md"
+             @click="showCreateModal = false"
+             aria-hidden="true"></div>
+
+        <!-- Dialog Shell: Mobile Bottom-Sheet -> Desktop Centered -->
+        <div x-show="showCreateModal"
+             x-transition:enter="transition ease-out duration-250"
+             x-transition:enter-start="opacity-0 translate-y-8 sm:translate-y-0 sm:scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave-end="opacity-0 translate-y-8 sm:translate-y-0 sm:scale-95"
+             class="relative z-10 bg-white w-full rounded-t-[28px] sm:rounded-3xl max-w-lg max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200/80 text-xs">
             
-            <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+            <!-- Mobile Grab Handle -->
+            <div class="sm:hidden w-12 h-1.5 bg-slate-200 rounded-full mx-auto mt-3 mb-1"></div>
+
+            <!-- Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
                 <div>
-                    <h3 class="font-bold text-slate-900 text-sm">Pendaftaran Tagihan Vendor Baru (AP)</h3>
-                    <p class="text-[11px] text-slate-500">Tagihan pelayaran, depo, trucking inland, atau terminal</p>
+                    <h3 id="create-bill-title" class="font-bold text-slate-900 text-sm sm:text-base">Pendaftaran Tagihan Vendor Baru (AP)</h3>
+                    <p class="text-[11px] text-slate-500 mt-0.5">Tagihan pelayaran, depo, trucking inland, atau bea cukai</p>
                 </div>
-                <button type="button" @click="showCreateModal = false" class="text-slate-400 hover:text-slate-600 text-lg font-bold">&times;</button>
+                <button type="button" 
+                        @click="showCreateModal = false" 
+                        class="w-10 h-10 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900"
+                        aria-label="Tutup modal">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
 
-            <form action="{{ route('finance.bills.store') }}" method="POST">
+            <form action="{{ route('finance.bills.store') }}" method="POST" class="flex flex-col flex-1 overflow-hidden">
                 @csrf
 
-                <div class="space-y-4">
+                <div class="p-6 space-y-4 overflow-y-auto flex-1">
                     <div>
                         <label for="vendor_type" class="block font-semibold text-slate-700 mb-1">Kategori Tipe Vendor *</label>
                         <select name="vendor_type" id="vendor_type" required
-                                class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                                class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:border-slate-900 transition-all bg-white font-medium">
                             <option value="SHIPPING_LINE">Pelayaran (THC, DO Fee, Demurrage)</option>
                             <option value="TRUCKING">Subkon Trucking Inland Transport</option>
                             <option value="TPS">Terminal Petikemas TPS (Lift On/Off)</option>
@@ -393,7 +428,7 @@
                     <div>
                         <label for="shipment_id" class="block font-semibold text-slate-700 mb-1">Tautkan ke Shipment / Job Order (Opsional)</label>
                         <select name="shipment_id" id="shipment_id"
-                                class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                                class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:border-slate-900 transition-all bg-white">
                             <option value="">-- Biaya Umum / Tanpa Kaitan Job --</option>
                             @foreach($activeShipments as $s)
                                 <option value="{{ $s->id }}">
@@ -406,71 +441,114 @@
                     <div>
                         <label for="ref_no" class="block font-semibold text-slate-700 mb-1">Nomor Referensi Tagihan / Invoice Vendor *</label>
                         <input type="text" name="ref_no" id="ref_no" required placeholder="Contoh: INV-WANHAI-81923"
-                               class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none font-mono">
+                               class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:border-slate-900 transition-all font-mono">
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label for="amount" class="block font-semibold text-slate-700 mb-1">Nominal Tagihan (IDR) *</label>
                             <input type="number" name="amount" id="amount" required min="1" step="0.01" placeholder="Contoh: 4500000"
-                                   class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none font-mono font-bold">
+                                   class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:border-slate-900 transition-all font-mono font-bold">
                             <span class="text-[10px] text-slate-400 mt-1 block">&gt; Rp 10 Jt perlu approval Pimpinan</span>
                         </div>
 
                         <div>
                             <label for="due_date" class="block font-semibold text-slate-700 mb-1">Jatuh Tempo *</label>
                             <input type="date" name="due_date" id="due_date" required value="{{ date('Y-m-d', strtotime('+14 days')) }}"
-                                   class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                                   class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:border-slate-900 transition-all">
                         </div>
                     </div>
                 </div>
 
-                <div class="mt-6 flex items-center justify-end gap-2">
+                <!-- Sticky Footer -->
+                <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
                     <button type="button" @click="showCreateModal = false"
-                            class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-colors">
+                            class="min-h-[44px] px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900">
                         Batal
                     </button>
+                    <!-- Single Primary Action with button-in-button design-taste-frontend pattern -->
                     <button type="submit"
-                            class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold transition-colors shadow-xs">
-                        Simpan Tagihan Vendor
+                            class="min-h-[44px] inline-flex items-center pl-4 pr-2 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-all shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900">
+                        <span>Simpan Tagihan Vendor</span>
+                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-800 text-emerald-400 ml-2.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </span>
                     </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- MODAL 2: FORM PENCAIRAN PEMBAYARAN TAGIHAN VENDOR -->
+    <!-- MODAL 2: FORM PENCAIRAN PEMBAYARAN TAGIHAN VENDOR (Mandat Mutlak: Standalone Backdrop z-[200] & Mobile Bottom-Sheet) -->
     <div x-show="showPayModal" 
-         class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs"
+         class="fixed inset-0 z-[200] overflow-y-auto flex items-end sm:items-center justify-center p-0 sm:p-4 md:p-6"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="pay-bill-title"
          x-cloak>
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 text-xs"
-             @click.outside="showPayModal = false">
+        <!-- Independent Standalone Zero-Gap Backdrop -->
+        <div x-show="showPayModal"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 bg-slate-950/70 backdrop-blur-md"
+             @click="showPayModal = false"
+             aria-hidden="true"></div>
+
+        <!-- Dialog Shell: Mobile Bottom-Sheet -> Desktop Centered -->
+        <div x-show="showPayModal"
+             x-transition:enter="transition ease-out duration-250"
+             x-transition:enter-start="opacity-0 translate-y-8 sm:translate-y-0 sm:scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave-end="opacity-0 translate-y-8 sm:translate-y-0 sm:scale-95"
+             class="relative z-10 bg-white w-full rounded-t-[28px] sm:rounded-3xl max-w-md max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200/80 text-xs">
             
-            <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
-                <h3 class="font-bold text-slate-900 text-sm">Pencairan Pembayaran Vendor</h3>
-                <button type="button" @click="showPayModal = false" class="text-slate-400 hover:text-slate-600 text-lg font-bold">&times;</button>
+            <!-- Mobile Grab Handle -->
+            <div class="sm:hidden w-12 h-1.5 bg-slate-200 rounded-full mx-auto mt-3 mb-1"></div>
+
+            <!-- Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+                <div>
+                    <h3 id="pay-bill-title" class="font-bold text-slate-900 text-sm sm:text-base">Pencairan Pembayaran Vendor</h3>
+                    <p class="text-[11px] text-slate-500 mt-0.5">Pengeluaran kas/bank untuk pelunasan hutang</p>
+                </div>
+                <button type="button" 
+                        @click="showPayModal = false" 
+                        class="w-10 h-10 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900"
+                        aria-label="Tutup modal">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
 
-            <form :action="'{{ url('finance/bills') }}/' + payBillId + '/pay'" method="POST">
+            <form :action="'{{ url('finance/bills') }}/' + payBillId + '/pay'" method="POST" class="flex flex-col flex-1 overflow-hidden">
                 @csrf
 
-                <div class="space-y-4">
+                <div class="p-6 space-y-4 overflow-y-auto flex-1">
                     <div>
                         <label class="block font-semibold text-slate-700 mb-1">Nomor Referensi Tagihan</label>
                         <input type="text" :value="payRefNo" disabled
-                               class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-slate-600 font-mono">
+                               class="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-600 font-mono text-xs cursor-not-allowed">
                     </div>
 
                     <div>
                         <label class="block font-semibold text-slate-700 mb-1">Nominal yang Dicairkan (IDR)</label>
                         <input type="text" :value="'Rp ' + Number(payAmount).toLocaleString('id-ID')" disabled
-                               class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-slate-900 font-mono font-bold">
+                               class="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-900 font-mono font-bold text-xs cursor-not-allowed">
                     </div>
 
                     <div>
                         <label for="account_id" class="block font-semibold text-slate-700 mb-1">Rekening Kas / Bank Pengirim *</label>
                         <select name="account_id" id="account_id" required
-                                class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none font-medium">
+                                class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:border-slate-900 transition-all bg-white font-medium">
                             @foreach($bankAccounts as $acc)
                                 <option value="{{ $acc->id }}">
                                     {{ $acc->name }} (Saldo: Rp {{ number_format($acc->current_balance, 0, ',', '.') }})
@@ -483,24 +561,31 @@
                     <div>
                         <label for="paid_at" class="block font-semibold text-slate-700 mb-1">Tanggal Pencairan / Bayar *</label>
                         <input type="date" name="paid_at" id="paid_at" value="{{ date('Y-m-d') }}" required
-                               class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                               class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:border-slate-900 transition-all">
                     </div>
 
                     <div>
                         <label for="payment_ref" class="block font-semibold text-slate-700 mb-1">Nomor Referensi Transfer / Bukti</label>
                         <input type="text" name="payment_ref" id="payment_ref" placeholder="Contoh: TRF-BCA-81923"
-                               class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none font-mono">
+                               class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:border-slate-900 transition-all font-mono">
                     </div>
                 </div>
 
-                <div class="mt-6 flex items-center justify-end gap-2">
+                <!-- Sticky Footer -->
+                <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
                     <button type="button" @click="showPayModal = false"
-                            class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-colors">
+                            class="min-h-[44px] px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900">
                         Batal
                     </button>
+                    <!-- Single Primary Action with button-in-button design-taste-frontend pattern -->
                     <button type="submit"
-                            class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold transition-colors shadow-xs">
-                        Konfirmasi Cairkan Pembayaran
+                            class="min-h-[44px] inline-flex items-center pl-4 pr-2 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs transition-all shadow-xs shadow-sky-600/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-700">
+                        <span>Konfirmasi Pencairan</span>
+                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-sky-700/60 text-white ml-2.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </span>
                     </button>
                 </div>
             </form>

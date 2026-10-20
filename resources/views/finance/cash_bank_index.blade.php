@@ -23,23 +23,28 @@
             <p class="text-xs text-slate-500 mt-0.5">Saldo multi-rekening, mutasi kas real-time, pindah buku antar-bank, dan rekonsiliasi pembukuan</p>
         </div>
 
-        <div class="flex items-center gap-2 flex-wrap">
+        <div class="flex items-center gap-2.5 flex-wrap">
             @can('finance.manage')
             <button type="button" @click="showTransferModal = true"
-                    class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200 text-xs font-bold transition-all shadow-2xs">
+                    class="min-h-[44px] inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 text-xs font-bold transition-all shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900">
                 <svg class="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
-                <span>Pindah Buku (Transfer)</span>
+                <span>Pindah Buku</span>
             </button>
 
             <button type="button" @click="showTrxModal = true"
-                    class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-xs">
-                <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    class="min-h-[44px] inline-flex items-center pl-4 pr-2 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900">
                 <span>Catat Mutasi Kas</span>
+                <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-800 text-emerald-400 ml-2.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                </span>
             </button>
 
             <button type="button" @click="showAccountModal = true"
-                    class="p-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 transition-colors shadow-2xs"
-                    title="Buka Rekening Baru">
+                    class="w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl bg-white hover:bg-slate-50 text-slate-600 border border-slate-200/90 flex items-center justify-center transition-colors shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900"
+                    title="Buka Rekening Baru"
+                    aria-label="Buka Rekening Baru">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
             </button>
             @endcan
@@ -325,26 +330,62 @@
         </div>
     </div>
 
-    <!-- MODAL 1: CATAT MUTASI KAS MANUAL -->
+    <!-- MODAL 1: CATAT MUTASI KAS MANUAL (Mandat Mutlak: Standalone Backdrop z-[200] & Mobile Bottom-Sheet) -->
     <div x-show="showTrxModal" 
-         class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs"
+         class="fixed inset-0 z-[200] overflow-y-auto flex items-end sm:items-center justify-center p-0 sm:p-4 md:p-6"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="trx-modal-title"
          x-cloak>
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 text-xs"
-             @click.outside="showTrxModal = false">
+        <!-- Independent Standalone Zero-Gap Backdrop -->
+        <div x-show="showTrxModal"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 bg-slate-950/70 backdrop-blur-md"
+             @click="showTrxModal = false"
+             aria-hidden="true"></div>
+
+        <!-- Dialog Shell: Mobile Bottom-Sheet -> Desktop Centered -->
+        <div x-show="showTrxModal"
+             x-transition:enter="transition ease-out duration-250"
+             x-transition:enter-start="opacity-0 translate-y-8 sm:translate-y-0 sm:scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave-end="opacity-0 translate-y-8 sm:translate-y-0 sm:scale-95"
+             class="relative z-10 bg-white w-full rounded-t-[28px] sm:rounded-3xl max-w-lg max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200/80 text-xs">
             
-            <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
-                <h3 class="font-bold text-slate-900 text-sm">Pencatatan Mutasi Kas Operasional</h3>
-                <button type="button" @click="showTrxModal = false" class="text-slate-400 hover:text-slate-600 text-lg font-bold">&times;</button>
+            <!-- Mobile Grab Handle -->
+            <div class="sm:hidden w-12 h-1.5 bg-slate-200 rounded-full mx-auto mt-3 mb-1"></div>
+
+            <!-- Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+                <div>
+                    <h3 id="trx-modal-title" class="font-bold text-slate-900 text-sm sm:text-base">Pencatatan Mutasi Kas Operasional</h3>
+                    <p class="text-[11px] text-slate-500 mt-0.5">Catat penerimaan atau pengeluaran kas kecil & operasional</p>
+                </div>
+                <button type="button" 
+                        @click="showTrxModal = false" 
+                        class="w-10 h-10 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900"
+                        aria-label="Tutup modal">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
 
-            <form action="{{ route('finance.cash-bank.transactions.store') }}" method="POST">
+            <form action="{{ route('finance.cash-bank.transactions.store') }}" method="POST" class="flex flex-col flex-1 overflow-hidden">
                 @csrf
 
-                <div class="space-y-4">
+                <div class="p-6 space-y-4 overflow-y-auto flex-1">
                     <div>
                         <label for="account_id" class="block font-semibold text-slate-700 mb-1">Rekening Kas / Bank *</label>
                         <select name="account_id" id="account_id" required
-                                class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                                class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:border-slate-900 transition-all bg-white font-medium">
                             @foreach($accounts as $acc)
                                 <option value="{{ $acc->id }}">
                                     {{ $acc->name }} (Saldo: Rp {{ number_format($acc->current_balance, 0, ',', '.') }})
@@ -355,12 +396,12 @@
 
                     <div>
                         <label class="block font-semibold text-slate-700 mb-1">Arus Kas Masuk / Keluar *</label>
-                        <div class="grid grid-cols-2 gap-2">
-                            <label class="p-2.5 rounded-xl border border-slate-200 flex items-center gap-2 cursor-pointer hover:bg-slate-50">
+                        <div class="grid grid-cols-2 gap-3">
+                            <label class="p-3 rounded-xl border border-slate-200 flex items-center gap-2.5 cursor-pointer hover:bg-slate-50 transition-colors">
                                 <input type="radio" name="type" value="IN" checked class="text-emerald-600 focus:ring-emerald-500">
                                 <span class="font-bold text-emerald-700">Kas Masuk (+)</span>
                             </label>
-                            <label class="p-2.5 rounded-xl border border-slate-200 flex items-center gap-2 cursor-pointer hover:bg-slate-50">
+                            <label class="p-3 rounded-xl border border-slate-200 flex items-center gap-2.5 cursor-pointer hover:bg-slate-50 transition-colors">
                                 <input type="radio" name="type" value="OUT" class="text-rose-600 focus:ring-rose-500">
                                 <span class="font-bold text-rose-700">Kas Keluar (-)</span>
                             </label>
@@ -370,56 +411,99 @@
                     <div>
                         <label for="amount" class="block font-semibold text-slate-700 mb-1">Nominal (IDR) *</label>
                         <input type="number" name="amount" id="amount" required min="1" step="0.01" placeholder="Contoh: 1500000"
-                               class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none font-mono font-bold">
+                               class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:border-slate-900 transition-all font-mono font-bold">
                     </div>
 
                     <div>
                         <label for="trx_date" class="block font-semibold text-slate-700 mb-1">Tanggal Transaksi *</label>
                         <input type="date" name="trx_date" id="trx_date" value="{{ date('Y-m-d') }}" required
-                               class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                               class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:border-slate-900 transition-all">
                     </div>
 
                     <div>
                         <label for="description" class="block font-semibold text-slate-700 mb-1">Uraian / Keterangan Mutasi *</label>
                         <input type="text" name="description" id="description" required placeholder="Contoh: Pengisian kembali kas kecil operasional"
-                               class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                               class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:border-slate-900 transition-all">
                     </div>
                 </div>
 
-                <div class="mt-6 flex items-center justify-end gap-2">
+                <!-- Sticky Footer -->
+                <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
                     <button type="button" @click="showTrxModal = false"
-                            class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-colors">
+                            class="min-h-[44px] px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900">
                         Batal
                     </button>
+                    <!-- Single Primary Action with button-in-button design-taste-frontend pattern -->
                     <button type="submit"
-                            class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold transition-colors shadow-xs">
-                        Simpan Mutasi Kas
+                            class="min-h-[44px] inline-flex items-center pl-4 pr-2 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-all shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900">
+                        <span>Simpan Mutasi Kas</span>
+                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-800 text-emerald-400 ml-2.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </span>
                     </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- MODAL 2: PINDAH BUKU / TRANSFER ANTAR-REKENING -->
+    <!-- MODAL 2: PINDAH BUKU / TRANSFER ANTAR-REKENING (Mandat Mutlak: Standalone Backdrop z-[200] & Mobile Bottom-Sheet) -->
     <div x-show="showTransferModal" 
-         class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs"
+         class="fixed inset-0 z-[200] overflow-y-auto flex items-end sm:items-center justify-center p-0 sm:p-4 md:p-6"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="transfer-modal-title"
          x-cloak>
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 text-xs"
-             @click.outside="showTransferModal = false">
+        <!-- Independent Standalone Zero-Gap Backdrop -->
+        <div x-show="showTransferModal"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 bg-slate-950/70 backdrop-blur-md"
+             @click="showTransferModal = false"
+             aria-hidden="true"></div>
+
+        <!-- Dialog Shell: Mobile Bottom-Sheet -> Desktop Centered -->
+        <div x-show="showTransferModal"
+             x-transition:enter="transition ease-out duration-250"
+             x-transition:enter-start="opacity-0 translate-y-8 sm:translate-y-0 sm:scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave-end="opacity-0 translate-y-8 sm:translate-y-0 sm:scale-95"
+             class="relative z-10 bg-white w-full rounded-t-[28px] sm:rounded-3xl max-w-lg max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200/80 text-xs">
             
-            <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
-                <h3 class="font-bold text-slate-900 text-sm">Pindah Buku Antar-Rekening Bank</h3>
-                <button type="button" @click="showTransferModal = false" class="text-slate-400 hover:text-slate-600 text-lg font-bold">&times;</button>
+            <!-- Mobile Grab Handle -->
+            <div class="sm:hidden w-12 h-1.5 bg-slate-200 rounded-full mx-auto mt-3 mb-1"></div>
+
+            <!-- Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+                <div>
+                    <h3 id="transfer-modal-title" class="font-bold text-slate-900 text-sm sm:text-base">Pindah Buku Antar-Rekening Bank</h3>
+                    <p class="text-[11px] text-slate-500 mt-0.5">Transfer likuiditas kas operasional internal perusahaan</p>
+                </div>
+                <button type="button" 
+                        @click="showTransferModal = false" 
+                        class="w-10 h-10 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900"
+                        aria-label="Tutup modal">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
 
-            <form action="{{ route('finance.cash-bank.transfer') }}" method="POST">
+            <form action="{{ route('finance.cash-bank.transfer') }}" method="POST" class="flex flex-col flex-1 overflow-hidden">
                 @csrf
 
-                <div class="space-y-4">
+                <div class="p-6 space-y-4 overflow-y-auto flex-1">
                     <div>
                         <label for="from_account_id" class="block font-semibold text-slate-700 mb-1">Dari Rekening Asal *</label>
                         <select name="from_account_id" id="from_account_id" required
-                                class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                                class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:border-slate-900 transition-all bg-white font-medium">
                             @foreach($accounts as $acc)
                                 <option value="{{ $acc->id }}">
                                     {{ $acc->name }} (Saldo: Rp {{ number_format($acc->current_balance, 0, ',', '.') }})
@@ -431,7 +515,7 @@
                     <div>
                         <label for="to_account_id" class="block font-semibold text-slate-700 mb-1">Ke Rekening Tujuan *</label>
                         <select name="to_account_id" id="to_account_id" required
-                                class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                                class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:border-slate-900 transition-all bg-white font-medium">
                             @foreach($accounts as $acc)
                                 <option value="{{ $acc->id }}">
                                     {{ $acc->name }} (Saldo: Rp {{ number_format($acc->current_balance, 0, ',', '.') }})
@@ -443,85 +527,135 @@
                     <div>
                         <label for="amount" class="block font-semibold text-slate-700 mb-1">Nominal Pindah Buku (IDR) *</label>
                         <input type="number" name="amount" id="amount" required min="1" step="0.01" placeholder="Contoh: 50000000"
-                               class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none font-mono font-bold">
+                               class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:border-slate-900 transition-all font-mono font-bold">
                     </div>
 
                     <div>
                         <label for="transfer_date" class="block font-semibold text-slate-700 mb-1">Tanggal Transfer *</label>
                         <input type="date" name="transfer_date" id="transfer_date" value="{{ date('Y-m-d') }}" required
-                               class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                               class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:border-slate-900 transition-all">
                     </div>
 
                     <div>
                         <label for="notes" class="block font-semibold text-slate-700 mb-1">Catatan Pindah Buku</label>
                         <input type="text" name="notes" id="notes" placeholder="Contoh: Top-up saldo deposit MPN G3 Mandiri"
-                               class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                               class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:border-slate-900 transition-all">
                     </div>
                 </div>
 
-                <div class="mt-6 flex items-center justify-end gap-2">
+                <!-- Sticky Footer -->
+                <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
                     <button type="button" @click="showTransferModal = false"
-                            class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-colors">
+                            class="min-h-[44px] px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900">
                         Batal
                     </button>
+                    <!-- Single Primary Action with button-in-button design-taste-frontend pattern -->
                     <button type="submit"
-                            class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold transition-colors shadow-xs">
-                        Eksekusi Pindah Buku
+                            class="min-h-[44px] inline-flex items-center pl-4 pr-2 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs transition-all shadow-xs shadow-sky-600/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-700">
+                        <span>Eksekusi Pindah Buku</span>
+                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-sky-700/60 text-white ml-2.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            </svg>
+                        </span>
                     </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- MODAL 3: TAMBAH REKENING BARU -->
+    <!-- MODAL 3: TAMBAH REKENING BARU (Mandat Mutlak: Standalone Backdrop z-[200] & Mobile Bottom-Sheet) -->
     <div x-show="showAccountModal" 
-         class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs"
+         class="fixed inset-0 z-[200] overflow-y-auto flex items-end sm:items-center justify-center p-0 sm:p-4 md:p-6"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="account-modal-title"
          x-cloak>
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 text-xs"
-             @click.outside="showAccountModal = false">
+        <!-- Independent Standalone Zero-Gap Backdrop -->
+        <div x-show="showAccountModal"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 bg-slate-950/70 backdrop-blur-md"
+             @click="showAccountModal = false"
+             aria-hidden="true"></div>
+
+        <!-- Dialog Shell: Mobile Bottom-Sheet -> Desktop Centered -->
+        <div x-show="showAccountModal"
+             x-transition:enter="transition ease-out duration-250"
+             x-transition:enter-start="opacity-0 translate-y-8 sm:translate-y-0 sm:scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave-end="opacity-0 translate-y-8 sm:translate-y-0 sm:scale-95"
+             class="relative z-10 bg-white w-full rounded-t-[28px] sm:rounded-3xl max-w-lg max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200/80 text-xs">
             
-            <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
-                <h3 class="font-bold text-slate-900 text-sm">Buka Rekening Kas / Bank Baru</h3>
-                <button type="button" @click="showAccountModal = false" class="text-slate-400 hover:text-slate-600 text-lg font-bold">&times;</button>
+            <!-- Mobile Grab Handle -->
+            <div class="sm:hidden w-12 h-1.5 bg-slate-200 rounded-full mx-auto mt-3 mb-1"></div>
+
+            <!-- Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+                <div>
+                    <h3 id="account-modal-title" class="font-bold text-slate-900 text-sm sm:text-base">Buka Rekening Kas / Bank Baru</h3>
+                    <p class="text-[11px] text-slate-500 mt-0.5">Daftarkan rekening bank atau kas operasional baru ke sistem</p>
+                </div>
+                <button type="button" 
+                        @click="showAccountModal = false" 
+                        class="w-10 h-10 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900"
+                        aria-label="Tutup modal">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
 
-            <form action="{{ route('finance.cash-bank.accounts.store') }}" method="POST">
+            <form action="{{ route('finance.cash-bank.accounts.store') }}" method="POST" class="flex flex-col flex-1 overflow-hidden">
                 @csrf
 
-                <div class="space-y-4">
+                <div class="p-6 space-y-4 overflow-y-auto flex-1">
                     <div>
                         <label for="name" class="block font-semibold text-slate-700 mb-1">Nama Rekening / Deskripsi *</label>
                         <input type="text" name="name" id="name" required placeholder="Contoh: Bank BNI Escrow Logistik"
-                               class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                               class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:border-slate-900 transition-all">
                     </div>
 
                     <div>
                         <label for="bank" class="block font-semibold text-slate-700 mb-1">Nama Bank / Institusi *</label>
                         <input type="text" name="bank" id="bank" required placeholder="Contoh: Bank Negara Indonesia (BNI)"
-                               class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                               class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:border-slate-900 transition-all">
                     </div>
 
                     <div>
                         <label for="account_no" class="block font-semibold text-slate-700 mb-1">Nomor Rekening *</label>
                         <input type="text" name="account_no" id="account_no" required placeholder="Contoh: 0918-2831-928"
-                               class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none font-mono">
+                               class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:border-slate-900 transition-all font-mono">
                     </div>
 
                     <div>
                         <label for="initial_balance" class="block font-semibold text-slate-700 mb-1">Saldo Awal Pembukaan (IDR)</label>
                         <input type="number" name="initial_balance" id="initial_balance" min="0" step="0.01" placeholder="0"
-                               class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none font-mono">
+                               class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:border-slate-900 transition-all font-mono">
                     </div>
                 </div>
 
-                <div class="mt-6 flex items-center justify-end gap-2">
+                <!-- Sticky Footer -->
+                <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
                     <button type="button" @click="showAccountModal = false"
-                            class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-colors">
+                            class="min-h-[44px] px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900">
                         Batal
                     </button>
+                    <!-- Single Primary Action with button-in-button design-taste-frontend pattern -->
                     <button type="submit"
-                            class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold transition-colors shadow-xs">
-                        Buka Rekening
+                            class="min-h-[44px] inline-flex items-center pl-4 pr-2 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-all shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900">
+                        <span>Buka Rekening</span>
+                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-800 text-emerald-400 ml-2.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                        </span>
                     </button>
                 </div>
             </form>

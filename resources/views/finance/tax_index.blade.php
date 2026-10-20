@@ -39,11 +39,13 @@
 
             <!-- Export e-Faktur CSV -->
             <a href="{{ route('finance.tax.export', ['year' => $year, 'month' => $month]) }}" 
-               class="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition-all">
-                <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+               class="min-h-[44px] inline-flex items-center pl-4 pr-2 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-xs transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900">
                 <span>Export e-Faktur (CSV)</span>
+                <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-800 text-emerald-400 ml-2.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </span>
             </a>
         </div>
     </div>
@@ -167,15 +169,17 @@
         </div>
     </div>
 
-    <!-- Navigation Tabs -->
-    <div class="flex items-center space-x-2 border-b border-slate-200 mb-4 text-xs font-semibold">
+    <!-- Navigation Tabs (Segmented Control Anti-Slop) -->
+    <div class="inline-flex p-1 rounded-2xl bg-slate-200/60 border border-slate-200/80 mb-6 text-xs font-semibold gap-1">
         <button type="button" @click="activeTab = 'ppn_keluaran'"
-                :class="activeTab === 'ppn_keluaran' ? 'border-sky-600 text-sky-700 border-b-2 font-bold pb-2' : 'text-slate-500 hover:text-slate-800 pb-2'">
-            Faktur Pajak Keluaran (PPN 1.1% Jasa Forwarding) - ({{ $invoices->count() }})
+                :class="activeTab === 'ppn_keluaran' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'"
+                class="min-h-[40px] sm:min-h-[44px] px-4 py-2 rounded-xl transition-all font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900">
+            Faktur Keluaran (PPN 1.1%) ({{ $invoices->count() }})
         </button>
         <button type="button" @click="activeTab = 'ppn_masukan'"
-                :class="activeTab === 'ppn_masukan' ? 'border-sky-600 text-sky-700 border-b-2 font-bold pb-2' : 'text-slate-500 hover:text-slate-800 pb-2'">
-            Faktur Pajak Masukan (Vendor Pelayaran & Depo AP) - ({{ $vendorBills->count() }})
+                :class="activeTab === 'ppn_masukan' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'"
+                class="min-h-[40px] sm:min-h-[44px] px-4 py-2 rounded-xl transition-all font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900">
+            Faktur Masukan (Vendor AP) ({{ $vendorBills->count() }})
         </button>
     </div>
 
