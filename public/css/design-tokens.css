@@ -211,3 +211,151 @@
   --tabbar-bg: rgba(15, 23, 42, 0.9);
   --card-bg: var(--primitive-slate-900);
 }
+
+/* ============================================================
+ * APPLE HIG v2.0 STYLING ENGINE (Adapted from COOCA Core)
+ * ============================================================ */
+
+/* Standardized Apple Buttons */
+.btn-apple-filled {
+  min-height: 44px;
+  padding: 0.625rem 1rem;
+  border-radius: 12px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: #007AFF;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 1px 2px rgba(0, 122, 255, 0.25);
+  transition: all 0.15s ease-out;
+  cursor: pointer;
+  border: none;
+}
+.btn-apple-filled:hover {
+  background-color: #0071E3;
+}
+.btn-apple-filled:active {
+  transform: scale(0.97);
+  opacity: 0.9;
+}
+
+.btn-apple-tinted {
+  min-height: 44px;
+  padding: 0.625rem 1rem;
+  border-radius: 12px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #1e293b;
+  background-color: rgba(0, 0, 0, 0.05);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.15s ease-out;
+  cursor: pointer;
+  border: none;
+}
+.btn-apple-tinted:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+.btn-apple-tinted:active {
+  transform: scale(0.97);
+  opacity: 0.9;
+}
+
+/* Apple Segmented Control for Period & Tab Switchers */
+.period-seg {
+  padding: 0.45rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+.period-seg:hover {
+  color: #0f172a;
+}
+.period-seg-active {
+  background: #ffffff;
+  color: #0f172a;
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+/* Apple KPI Bento Tiles (from Cooca Core) */
+.kpi-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #ffffff;
+  border: 1px solid rgba(60, 60, 67, 0.08);
+  border-radius: 16px;
+  padding: 1.15rem 1.25rem;
+  min-height: 100px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+}
+.kpi-icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+.kpi-icon-blue    { color: #007AFF; background: rgba(0, 122, 255, 0.12); }
+.kpi-icon-green   { color: #34C759; background: rgba(52, 199, 89, 0.12); }
+.kpi-icon-teal    { color: #30B0C7; background: rgba(48, 176, 199, 0.12); }
+.kpi-icon-violet  { color: #5856D6; background: rgba(88, 86, 214, 0.12); }
+.kpi-icon-rose    { color: #FF3B30; background: rgba(255, 59, 48, 0.12); }
+.kpi-icon-amber   { color: #FF9500; background: rgba(255, 149, 0, 0.12); }
+
+.kpi-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1 1 auto;
+  gap: 0.15rem;
+}
+.kpi-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.kpi-value {
+  font-size: 1.45rem;
+  line-height: 1.2;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+}
+.kpi-foot {
+  font-size: 0.72rem;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 0.2rem;
+}
+.kpi-foot b {
+  color: #0f172a;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
