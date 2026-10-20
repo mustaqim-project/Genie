@@ -21,12 +21,12 @@
            'translate-x-0': sidebarOpen,
            '-translate-x-full lg:translate-x-0': !sidebarOpen,
            'lg:w-64': !sidebarCollapsed,
-           'lg:w-[72px]': sidebarCollapsed
+           'lg:w-[72px] is-collapsed': sidebarCollapsed
        }"
-       class="fixed inset-y-0 left-0 z-50 flex flex-col bg-white/90 dark:bg-[#1C1C1E]/90 backdrop-blur-2xl border-r border-black/[0.08] dark:border-white/[0.08] text-black/80 dark:text-white/80 transition-all duration-250 ease-in-out lg:sticky lg:top-0 lg:h-screen w-64 max-w-[85vw] flex-shrink-0 shadow-xl lg:shadow-none select-none">
+       class="app-sidebar fixed inset-y-0 left-0 z-40 flex flex-col bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-2xl border-r border-black/[0.08] dark:border-white/[0.08] text-black/80 dark:text-white/80 transition-all duration-250 ease-out h-screen max-h-screen w-64 max-w-[85vw] flex-shrink-0 shadow-xl lg:shadow-none select-none">
 
     <!-- 1. APPLE macOS STYLE HEADER & BRAND LOGO -->
-    <div class="h-14 flex items-center justify-between px-3.5 border-b border-black/[0.06] dark:border-white/[0.08] bg-white/40 dark:bg-white/[0.02]">
+    <div class="h-14 flex items-center justify-between px-3.5 border-b border-black/[0.06] dark:border-white/[0.08] bg-white/40 dark:bg-white/[0.02] shrink-0">
         <a href="{{ route('dashboard') }}" class="flex items-center space-x-2.5 overflow-hidden group min-w-0">
             <div class="w-8 h-8 rounded-[9px] bg-gradient-to-tr from-[#007AFF] to-[#5856D6] flex items-center justify-center text-white font-bold shadow-xs flex-shrink-0">
                 <i data-lucide="ship" class="w-4 h-4 text-white"></i>
@@ -397,7 +397,7 @@
     </nav>
 
     <!-- 3. MINIMALIST FOOTER STATUS (Version & System Identity) -->
-    <div class="px-3.5 py-2.5 border-t border-black/[0.06] dark:border-white/[0.08] text-[11px] text-black/40 dark:text-white/40 flex items-center justify-between">
+    <div class="px-3.5 py-2.5 border-t border-black/[0.06] dark:border-white/[0.08] text-[11px] text-black/40 dark:text-white/40 flex items-center justify-between shrink-0">
         <span x-show="!sidebarCollapsed" class="truncate font-medium">GENIE ERP v2.4.0</span>
         <span x-show="!sidebarCollapsed" class="font-mono text-[10px] text-[#34C759] font-semibold">● Ready</span>
         <span x-show="sidebarCollapsed" class="font-mono text-[10px] text-center w-full">v2.4</span>

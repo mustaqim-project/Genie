@@ -703,7 +703,7 @@
       @keydown.window.prevent.cmd.k="quickSearchOpen = true"
       @keydown.escape.window="quickSearchOpen = false">
 
-    <div class="flex-1 flex flex-col lg:flex-row w-full min-h-[100dvh]">
+    <div class="min-h-full flex flex-col w-full">
 
         <!-- ============================================================== -->
         <!-- 1. SIDEBAR NAVIGATION (DESKTOP + MOBILE DRAWER)               -->
@@ -713,7 +713,8 @@
         <!-- ============================================================== -->
         <!-- 2. MAIN CONTENT WRAPPER (TOPBAR + BODY + FOOTER)              -->
         <!-- ============================================================== -->
-        <div class="flex-1 flex flex-col min-w-0 w-full bg-[#F2F2F7] dark:bg-[#1E1E1E]">
+        <div :class="sidebarCollapsed ? 'lg:pl-[72px]' : 'lg:pl-64'"
+             class="flex-1 flex flex-col min-w-0 w-full min-h-screen transition-[padding] duration-250 ease-out bg-[#F2F2F7] dark:bg-[#1E1E1E]">
 
             <!-- TOPBAR HEADER -->
             @include('layouts.topbar')
