@@ -45,9 +45,22 @@ class CeisaHsCodeService
                 ],
             ],
         ],
+        '84122100' => [
+            'code' => '8412.21.00',
+            'desc' => 'Hydraulic Breaker Mesin Pemecah Batu Hidraulik & Motor Hidraulik Linear (DYB800, THB140)',
+            'bm' => 0.0,
+            'ppn' => 11.0,
+            'pph' => 2.5,
+            'bk' => 0.0,
+            'satuan' => 'SET',
+            'has_lartas' => false,
+            'lartas' => 'Bebas Lartas (Non-Lartas)',
+            'legal' => 'BTKI 2022 Pos 8412.21 - Motor tenaga hidraulik aksi linear / silinder (BM 0% ACFTA, PPN 11%, PPh 2.5%)',
+            'required_documents' => [],
+        ],
         '84306900' => [
             'code' => '8430.69.00',
-            'desc' => 'Hydraulic Breaker / Mesin Pemecah Batu Hidraulik untuk Ekskavator',
+            'desc' => 'Mesin pemadat atau perata tanah atau mineral lainnya',
             'bm' => 0.0,
             'ppn' => 11.0,
             'pph' => 2.5,
@@ -60,7 +73,7 @@ class CeisaHsCodeService
         ],
         '84314990' => [
             'code' => '8431.49.90',
-            'desc' => 'Suku Cadang Hydraulic Breaker (Chisel, Pin Rod, Side Bolt, Bushing, Piping Kit, Piston)',
+            'desc' => 'Suku Cadang Hydraulic Breaker (Chisel, Pin Rod, Pin Lock, Side Bolt, Through Bolt, Bushing, Fitting, Sleeve Valve, Hose Clamp, Piping Kit)',
             'bm' => 0.0,
             'ppn' => 11.0,
             'pph' => 2.5,
@@ -68,38 +81,38 @@ class CeisaHsCodeService
             'satuan' => 'PCE',
             'has_lartas' => false,
             'lartas' => 'Bebas Lartas (Non-Lartas)',
-            'legal' => 'BTKI 2022 Pos 8431.49 - Bagian dari mesin pos 84.30 (BM 0%, PPN 11%, PPh 2.5%)',
+            'legal' => 'BTKI 2022 Pos 8431.49 - Bagian dari mesin pos 84.30 / Breaker (BM 0% ACFTA / 5%, PPN 11%, PPh 2.5%)',
             'required_documents' => [],
         ],
         '68071000' => [
             'code' => '6807.10.00',
             'desc' => 'SBS / Granule Waterproofing Membrane Gulungan Aspal Bitumen Kedap Air',
-            'bm' => 5.0,
+            'bm' => 0.0,
             'ppn' => 11.0,
             'pph' => 2.5,
             'bk' => 0.0,
             'satuan' => 'ROL',
             'has_lartas' => false,
             'lartas' => 'Bebas Lartas (Non-Lartas)',
-            'legal' => 'BTKI 2022 Pos 6807.10 - Barang dari aspal dalam bentuk gulungan (BM 5%, PPN 11%, PPh 2.5%)',
+            'legal' => 'BTKI 2022 Pos 6807.10 - Barang dari aspal dalam bentuk gulungan (BM 0% ACFTA / 5%, PPN 11%, PPh 2.5%)',
             'required_documents' => [],
         ],
-        '84671100' => [
-            'code' => '8467.11.00',
-            'desc' => 'Pneumatic Pick / Alat Genggam Pneumatik Bobok Beton (G10, G15, G20, TCA-7, TPB60)',
-            'bm' => 5.0,
+        '84671900' => [
+            'code' => '8467.19.00',
+            'desc' => 'Pneumatic Pick / Perkakas Pneumatik Genggam Bobok Beton (G10, G15, G20, TCA-7, TPB60)',
+            'bm' => 0.0,
             'ppn' => 11.0,
             'pph' => 2.5,
             'bk' => 0.0,
             'satuan' => 'UNT',
             'has_lartas' => false,
             'lartas' => 'Bebas Lartas (Non-Lartas)',
-            'legal' => 'BTKI 2022 Pos 8467.11 - Perkakas pneumatik genggam (BM 5%, PPN 11%, PPh 2.5%)',
+            'legal' => 'BTKI 2022 Pos 8467.19 - Perkakas pneumatik lainnya (BM 0% ACFTA / 5%, PPN 11%, PPh 2.5%)',
             'required_documents' => [],
         ],
-        '84679200' => [
-            'code' => '8467.92.00',
-            'desc' => 'Bagian dan Suku Cadang Perkakas Pneumatik (Chisel, Spring Head, Bushing)',
+        '84679990' => [
+            'code' => '8467.99.90',
+            'desc' => 'Suku Cadang Perkakas Pneumatik (Chisel Type Plus/Minus, Spring Head, Bushing TPB60)',
             'bm' => 0.0,
             'ppn' => 11.0,
             'pph' => 2.5,
@@ -107,7 +120,189 @@ class CeisaHsCodeService
             'satuan' => 'PCE',
             'has_lartas' => false,
             'lartas' => 'Bebas Lartas (Non-Lartas)',
-            'legal' => 'BTKI 2022 Pos 8467.92 - Bagian perkakas pneumatik (BM 0%, PPN 11%, PPh 2.5%)',
+            'legal' => 'BTKI 2022 Pos 8467.99 - Bagian perkakas genggam pos 84.67 (BM 0% ACFTA, PPN 11%, PPh 2.5%)',
+            'required_documents' => [],
+        ],
+        '84279000' => [
+            'code' => '8427.90.00',
+            'desc' => 'Hand Pallet Truck & Hand Stacker (Manual & Elektrik) Truk Angkat Kerja',
+            'bm' => 0.0,
+            'ppn' => 11.0,
+            'pph' => 2.5,
+            'bk' => 0.0,
+            'satuan' => 'UNT',
+            'has_lartas' => false,
+            'lartas' => 'Bebas Lartas (Non-Lartas)',
+            'legal' => 'BTKI 2022 Pos 8427.90 - Truk kerja lainnya (BM 0% ACFTA / 5%, PPN 11%, PPh 2.5%)',
+            'required_documents' => [],
+        ],
+        '84312090' => [
+            'code' => '8431.20.90',
+            'desc' => 'Suku Cadang Hand Pallet & Hand Stacker (Oil Cylinder, PU/Nylon Caster, Wheel Bracket, Rubber Seal 2T/3T)',
+            'bm' => 0.0,
+            'ppn' => 11.0,
+            'pph' => 2.5,
+            'bk' => 0.0,
+            'satuan' => 'PCE',
+            'has_lartas' => false,
+            'lartas' => 'Bebas Lartas (Non-Lartas)',
+            'legal' => 'BTKI 2022 Pos 8431.20 - Bagian dari mesin pos 84.27 (BM 0% ACFTA / 5%, PPN 11%, PPh 2.5%)',
+            'required_documents' => [],
+        ],
+        '84622600' => [
+            'code' => '8462.26.00',
+            'desc' => 'Bending Machine GW-50 Mesin Pembengkok / Penekuk Profil Besi Beton',
+            'bm' => 0.0,
+            'ppn' => 11.0,
+            'pph' => 2.5,
+            'bk' => 0.0,
+            'satuan' => 'UNT',
+            'has_lartas' => false,
+            'lartas' => 'Bebas Lartas (Non-Lartas)',
+            'legal' => 'BTKI 2022 Pos 8462.26 - Mesin pembengkok profil logam (BM 0% ACFTA, PPN 11%, PPh 2.5%)',
+            'required_documents' => [],
+        ],
+        '84615000' => [
+            'code' => '8461.50.00',
+            'desc' => 'Steel Bar Cutting Machine GQ50 Mesin Pemotong Besi Tulangan / Beton',
+            'bm' => 0.0,
+            'ppn' => 11.0,
+            'pph' => 2.5,
+            'bk' => 0.0,
+            'satuan' => 'UNT',
+            'has_lartas' => false,
+            'lartas' => 'Bebas Lartas (Non-Lartas)',
+            'legal' => 'BTKI 2022 Pos 8461.50 - Mesin pemotong atau penggergaji logam (BM 0% ACFTA, PPN 11%, PPh 2.5%)',
+            'required_documents' => [],
+        ],
+        '84602910' => [
+            'code' => '8460.29.10',
+            'desc' => 'Angle Grinder SH-05 Mesin Gerinda Tangan Listrik',
+            'bm' => 0.0,
+            'ppn' => 11.0,
+            'pph' => 2.5,
+            'bk' => 0.0,
+            'satuan' => 'UNT',
+            'has_lartas' => false,
+            'lartas' => 'Bebas Lartas (Non-Lartas)',
+            'legal' => 'BTKI 2022 Pos 8460.29 - Mesin penggerinda logam dioperasikan dengan tangan (BM 0% ACFTA, PPN 11%, PPh 2.5%)',
+            'required_documents' => [],
+        ],
+        '84743110' => [
+            'code' => '8474.31.10',
+            'desc' => 'Electric Concrete Mixer 180, 240, 300 Mesin Molen Pengaduk Semen / Beton Listrik',
+            'bm' => 0.0,
+            'ppn' => 11.0,
+            'pph' => 2.5,
+            'bk' => 0.0,
+            'satuan' => 'UNT',
+            'has_lartas' => false,
+            'lartas' => 'Bebas Lartas (Non-Lartas)',
+            'legal' => 'BTKI 2022 Pos 8474.31 - Mesin pengaduk beton atau semen (BM 0% ACFTA, PPN 11%, PPh 2.5%)',
+            'required_documents' => [],
+        ],
+        '70199090' => [
+            'code' => '7019.90.90',
+            'desc' => 'Fiberglass Mesh Waterproofing 120gr 1*50m Jaring Serat Kaca Kedap Air',
+            'bm' => 0.0,
+            'ppn' => 11.0,
+            'pph' => 2.5,
+            'bk' => 0.0,
+            'satuan' => 'ROL',
+            'has_lartas' => false,
+            'lartas' => 'Bebas Lartas (Non-Lartas)',
+            'legal' => 'BTKI 2022 Pos 7019.90 - Serat kaca dan barang daripadanya (BM 0% ACFTA, PPN 11%, PPh 2.5%)',
+            'required_documents' => [],
+        ],
+        '84679910' => [
+            'code' => '8467.99.10',
+            'desc' => 'Hammer Drill Bit 10*160, 14*160 Mata Bor Palu Beton untuk Perkakas',
+            'bm' => 0.0,
+            'ppn' => 11.0,
+            'pph' => 2.5,
+            'bk' => 0.0,
+            'satuan' => 'PCE',
+            'has_lartas' => false,
+            'lartas' => 'Bebas Lartas (Non-Lartas)',
+            'legal' => 'BTKI 2022 Pos 8467.99 - Bagian dari perkakas pneumatik / listrik (BM 0% ACFTA, PPN 11%, PPh 2.5%)',
+            'required_documents' => [],
+        ],
+        '84269900' => [
+            'code' => '8426.99.00',
+            'desc' => 'Hydraulic Engine Crane Folding Type 2T, 3T Derek Derek Derek Mesin Hidraulik',
+            'bm' => 0.0,
+            'ppn' => 11.0,
+            'pph' => 2.5,
+            'bk' => 0.0,
+            'satuan' => 'UNT',
+            'has_lartas' => false,
+            'lartas' => 'Bebas Lartas (Non-Lartas)',
+            'legal' => 'BTKI 2022 Pos 8426.99 - Derek dan alat pengangkat lainnya (BM 0% ACFTA, PPN 11%, PPh 2.5%)',
+            'required_documents' => [],
+        ],
+        '84269100' => [
+            'code' => '8426.91.00',
+            'desc' => 'Mini Truck Crane 1T 12V, 24V Derek Pengangkat Dipasang pada Kendaraan',
+            'bm' => 0.0,
+            'ppn' => 11.0,
+            'pph' => 2.5,
+            'bk' => 0.0,
+            'satuan' => 'SET',
+            'has_lartas' => false,
+            'lartas' => 'Bebas Lartas (Non-Lartas)',
+            'legal' => 'BTKI 2022 Pos 8426.91 - Derek dirancang untuk dipasang pada kendaraan (BM 0% ACFTA, PPN 11%, PPh 2.5%)',
+            'required_documents' => [],
+        ],
+        '84251900' => [
+            'code' => '8425.19.00',
+            'desc' => 'Lever Block & Chain Block (0.75T, 1T, 1.5T, 2T, 3T, 10T) Katrol Takel Manual',
+            'bm' => 0.0,
+            'ppn' => 11.0,
+            'pph' => 2.5,
+            'bk' => 0.0,
+            'satuan' => 'UNT',
+            'has_lartas' => false,
+            'lartas' => 'Bebas Lartas (Non-Lartas)',
+            'legal' => 'BTKI 2022 Pos 8425.19 - Derek katrol puli dan kerekan manual (BM 0% ACFTA, PPN 11%, PPh 2.5%)',
+            'required_documents' => [],
+        ],
+        '56074900' => [
+            'code' => '5607.49.00',
+            'desc' => 'Paranet 75% & 65% Black 100M*3M Jaring Peneduh Polietilena',
+            'bm' => 0.0,
+            'ppn' => 11.0,
+            'pph' => 2.5,
+            'bk' => 0.0,
+            'satuan' => 'KGM',
+            'has_lartas' => false,
+            'lartas' => 'Bebas Lartas (Non-Lartas)',
+            'legal' => 'BTKI 2022 Pos 5607.49 - Tali, benang dan jala dari polietilena atau polipropilena (BM 0% ACFTA, PPN 11%, PPh 2.5%)',
+            'required_documents' => [],
+        ],
+        '84306100' => [
+            'code' => '8430.61.00',
+            'desc' => 'Tamping Rammer Gasoline Type 125 Stamper Kuda Mesin Pemadat Tanah Bensin',
+            'bm' => 0.0,
+            'ppn' => 11.0,
+            'pph' => 2.5,
+            'bk' => 0.0,
+            'satuan' => 'UNT',
+            'has_lartas' => false,
+            'lartas' => 'Bebas Lartas (Non-Lartas)',
+            'legal' => 'BTKI 2022 Pos 8430.61 - Mesin pemadat atau perata tanah (BM 0% ACFTA, PPN 11%, PPh 2.5%)',
+            'required_documents' => [],
+        ],
+        '56090000' => [
+            'code' => '5609.00.00',
+            'desc' => 'Webbing Sling Belt Yellow 3T, Grey 4T, Red 5T/10T Sabuk Tali Angkat Poliester',
+            'bm' => 0.0,
+            'ppn' => 11.0,
+            'pph' => 2.5,
+            'bk' => 0.0,
+            'satuan' => 'KGM',
+            'has_lartas' => false,
+            'lartas' => 'Bebas Lartas (Non-Lartas)',
+            'legal' => 'BTKI 2022 Pos 5609.00 - Barang dari benang, strip atau tali (BM 0% ACFTA, PPN 11%, PPh 2.5%)',
             'required_documents' => [],
         ],
         '84279000' => [
@@ -672,218 +867,202 @@ class CeisaHsCodeService
             return $tariff;
         }
 
-        // 2. Evaluasi Suku Cadang & Komponen Spesifik (Hierarki Prioritas Tinggi)
-        // Harus dievaluasi SEBELUM nama mesin induk agar tidak salah kaprah tertimpa
-
-        // 2a. Fasteners (Side Bolt, Through Bolt, Baut, Sekrup, Mur) -> 7318.15.90
-        if (preg_match('/\b(SIDE\s*BOLT|THROUGH\s*BOLT|HEX\s*BOLT|BOLT|SCREW|NUT)\b/', $upper)) {
-            $tariff = $this->getTariffAndLartas('73181590');
-            $tariff['confidence_score'] = 0.98;
-            $tariff['classification_source'] = 'AI_SPECIFIC_COMPONENT_MATCH';
-            return $tariff;
-        }
-
-        // 2b. Klem Pipa / Selang (Hose Clamp, Pipe Clamp) -> 7326.90.99
-        if (preg_match('/\b(HOSE\s*CLAMP|PIPE\s*CLAMP|CLAMP)\b/', $upper)) {
-            $tariff = $this->getTariffAndLartas('73269099');
-            $tariff['confidence_score'] = 0.98;
-            $tariff['classification_source'] = 'AI_SPECIFIC_COMPONENT_MATCH';
-            return $tariff;
-        }
-
-        // 2c. Sambungan Pipa / Fitting Selang Hidrolik -> 7307.99.10
-        if (preg_match('/\b(FITTING|PIPE\s*CONNECTOR|HOSE\s*JOINT)\b/', $upper)) {
-            $tariff = $this->getTariffAndLartas('73079910');
-            $tariff['confidence_score'] = 0.98;
-            $tariff['classification_source'] = 'AI_SPECIFIC_COMPONENT_MATCH';
-            return $tariff;
-        }
-
-        // 2d. Seal Karet / Gasket / O-Ring -> 4016.93.20
-        if (preg_match('/\b(RUBBER\s*SEAL|SEAL\s*KIT|OIL\s*SEAL|O-RING|GASKET)\b/', $upper)) {
-            $tariff = $this->getTariffAndLartas('40169320');
-            $tariff['confidence_score'] = 0.98;
-            $tariff['classification_source'] = 'AI_SPECIFIC_COMPONENT_MATCH';
-            return $tariff;
-        }
-
-        // 2e. Silinder Hidraulik (Oil Cylinder) -> 8412.21.00
-        if (preg_match('/\b(OIL\s*CYLINDER|HYDRAULIC\s*CYLINDER)\b/', $upper)) {
-            $tariff = $this->getTariffAndLartas('84122100');
-            $tariff['confidence_score'] = 0.98;
-            $tariff['classification_source'] = 'AI_SPECIFIC_COMPONENT_MATCH';
-            return $tariff;
-        }
-
-        // 2f. Unit Truk Palet Utuh (Hand Pallet Truck) -> 8427.90.00
-        if (preg_match('/\bHAND\s*PALLET\b/i', $upper) && !str_contains($upper, 'SPAREPART') && !str_contains($upper, 'SPARE PART')) {
-            $tariff = $this->getTariffAndLartas('84279000');
-            $tariff['confidence_score'] = 0.98;
-            $tariff['classification_source'] = 'AI_EQUIPMENT_MATCH';
-            return $tariff;
-        }
-
-        // 2g. Roda Kastor / Bracket Alat Angkat (PU / Nylon Caster) -> 8431.20.00
-        if (preg_match('/\b(CASTER|CASTERS|WHEEL\s*BRACKET)\b/', $upper)) {
-            $tariff = $this->getTariffAndLartas('84312000');
-            $tariff['confidence_score'] = 0.97;
-            $tariff['classification_source'] = 'AI_SPECIFIC_COMPONENT_MATCH';
-            return $tariff;
-        }
-
-        // 2h. Suku Cadang Khusus Hydraulic Breaker (Chisel, Pin Rod, Pin Lock, Bushing, Sleeve Valve, Piping Kit) -> 8431.49.90
-        if (str_contains($upper, 'BREAKER') && (str_contains($upper, 'SPAREPART') || str_contains($upper, 'SPARE PART') || preg_match('/\b(CHISEL|PIN\s*ROD|PIN\s*LOCK|BUSHING|BUSH|SLEEVE\s*VALVE|PIPING\s*KIT|STOP\s*PIN|PISTON)\b/', $upper))) {
-            $tariff = $this->getTariffAndLartas('84314990');
-            $tariff['confidence_score'] = 0.98;
-            $tariff['classification_source'] = 'AI_SPECIFIC_COMPONENT_MATCH';
-            return $tariff;
-        }
-
-        // 2i. Suku Cadang Perkakas Pneumatik (Pneumatic Pick Chisel, Spring Head, Bushing)
-        if (str_contains($upper, 'PNEUMATIC PICK') && (str_contains($upper, 'SPAREPART') || str_contains($upper, 'SPARE PART') || preg_match('/\b(CHISEL|SPRING\s*HEAD|BUSHING)\b/', $upper))) {
-            if (str_contains($upper, 'CHISEL')) {
-                $tariff = $this->getTariffAndLartas('82079000');
-            } else {
-                $tariff = $this->getTariffAndLartas('84679200');
+        // 2. Evaluasi Suku Cadang & Komponen Mesin Industri (Hierarki Prioritas Utama)
+        // 2a. Mesin Hydraulic Breaker & Seluruh Suku Cadangnya (Chisel, Pin, Bolt, Bushing, Valve, Clamp, Fitting, Piping Kit)
+        if (str_contains($upper, 'BREAKER')) {
+            // Suku cadang khusus breaker (chisel, pin rod, pin lock, side bolt, through bolt, bushing, clamp, valve, fitting, piping kit) -> 8431.49.90
+            if (str_contains($upper, 'SPAREPART') || str_contains($upper, 'SPARE PART') || preg_match('/\b(CHISEL|PIN\s*ROD|PIN\s*LOCK|PIN\s*BUSHING|SIDE\s*BOLT|THROUGH\s*BOLT|INNER\s*BUSHING|OUTER\s*BUSHING|T\s*BUSH|RING\s*PIN|BUSHING|BUSH|SLEEVE\s*VALVE|HOSE\s*CLAMP|PIPING\s*KIT|STOP\s*PIN|PISTON|SEAL\s*KIT|FITTING)\b/', $upper)) {
+                $tariff = $this->getTariffAndLartas('84314990');
+                $tariff['confidence_score'] = 0.99;
+                $tariff['classification_source'] = 'AI_BREAKER_PARTS_MATCH';
+                return $tariff;
             }
-            $tariff['confidence_score'] = 0.97;
-            $tariff['classification_source'] = 'AI_SPECIFIC_COMPONENT_MATCH';
+            // Unit Mesin Hydraulic Breaker Utuh (DYB800, THB140) -> 8412.21.00
+            $tariff = $this->getTariffAndLartas('84122100');
+            $tariff['confidence_score'] = 0.99;
+            $tariff['classification_source'] = 'AI_BREAKER_UNIT_MATCH';
             return $tariff;
         }
 
-        // 2j. Mata Bor Beton / Logam (Hammer Drill Bit) -> 8207.50.00
-        if (preg_match('/\b(DRILL\s*BIT|MATA\s*BOR)\b/', $upper)) {
-            $tariff = $this->getTariffAndLartas('82075000');
-            $tariff['confidence_score'] = 0.98;
-            $tariff['classification_source'] = 'AI_SPECIFIC_COMPONENT_MATCH';
+        // 2b. Hand Pallet Truck & Hand Stacker serta Suku Cadangnya (Oil cylinder, Caster, Wheel bracket, Rubber seal)
+        if (str_contains($upper, 'PALLET') || str_contains($upper, 'STACKER')) {
+            // Suku cadang khusus hand pallet / stacker (hanya jika ada kata SPAREPART atau komponen lepasan)
+            if (str_contains($upper, 'SPAREPART') || str_contains($upper, 'SPARE PART')) {
+                $tariff = $this->getTariffAndLartas('84312090');
+                $tariff['confidence_score'] = 0.99;
+                $tariff['classification_source'] = 'AI_PALLET_PARTS_MATCH';
+                return $tariff;
+            }
+            if (preg_match('/\b(OIL\s*CYLINDER|WHEEL\s*BRACKET|RUBBER\s*SEAL)\b/', $upper)) {
+                $tariff = $this->getTariffAndLartas('84312090');
+                $tariff['confidence_score'] = 0.99;
+                $tariff['classification_source'] = 'AI_PALLET_PARTS_MATCH';
+                return $tariff;
+            }
+            // Unit Hand Pallet / Stacker -> 8427.90.00
+            $tariff = $this->getTariffAndLartas('84279000');
+            $tariff['confidence_score'] = 0.99;
+            $tariff['classification_source'] = 'AI_PALLET_UNIT_MATCH';
             return $tariff;
         }
 
-        // 2k. Kain Jaring Serat Kaca (Fiberglass Mesh) -> 7019.61.00
-        if (preg_match('/\b(FIBERGLASS|FIBREGLASS|FIBER\s*GLASS)\b/', $upper)) {
-            $tariff = $this->getTariffAndLartas('70196100');
-            $tariff['confidence_score'] = 0.98;
-            $tariff['classification_source'] = 'AI_SPECIFIC_COMPONENT_MATCH';
+        // 2c. Perkakas Pneumatik (Pneumatic Pick) & Suku Cadangnya
+        if (str_contains($upper, 'PNEUMATIC PICK') || str_contains($upper, 'AIR PICK') || preg_match('/\b(G10|G15|G20|TCA-7|TPB60)\b/', $upper)) {
+            // Suku cadang perkakas pneumatik (Chisel, Spring Head, Bushing) -> 8467.99.90
+            if (str_contains($upper, 'SPAREPART') || str_contains($upper, 'SPARE PART') || preg_match('/\b(CHISEL|SPRING\s*HEAD|BUSHING|SPRING)\b/', $upper)) {
+                $tariff = $this->getTariffAndLartas('84679990');
+                $tariff['confidence_score'] = 0.99;
+                $tariff['classification_source'] = 'AI_PNEUMATIC_PARTS_MATCH';
+                return $tariff;
+            }
+            // Unit Perkakas Pneumatik Genggam (G10, G15, G20, TCA-7, TPB60) -> 8467.19.00
+            $tariff = $this->getTariffAndLartas('84671900');
+            $tariff['confidence_score'] = 0.99;
+            $tariff['classification_source'] = 'AI_PNEUMATIC_UNIT_MATCH';
             return $tariff;
         }
 
-        // 2l. Membran Kedap Air Aspal / Bitumen (SBS / Granule Membrane) -> 6807.10.00
-        if (preg_match('/\b(WATERPROOFING|MEMBRANE|SBS|BITUMEN|ASPHALT)\b/', $upper)) {
+        // 2d. Membran Kedap Air Aspal / Bitumen (SBS & Granule Waterproofing Membrane) -> 6807.10.00
+        if (preg_match('/\b(WATERPROOFING\s*MEMBRANE|SBS|GRANULE\s*WATERPROOFING|MEMBRANE\s*GREEN|MEMBRANE\s*PE)\b/', $upper)) {
             $tariff = $this->getTariffAndLartas('68071000');
-            $tariff['confidence_score'] = 0.98;
-            $tariff['classification_source'] = 'AI_SPECIFIC_COMPONENT_MATCH';
+            $tariff['confidence_score'] = 0.99;
+            $tariff['classification_source'] = 'AI_WATERPROOFING_MATCH';
             return $tariff;
         }
 
-        // 2m. Tali Sabuk Pengangkat Kargo Poliester (Webbing Sling Belt) -> 6307.90.90
-        if (preg_match('/\b(WEBBING\s*SLING|SLING\s*BELT|CARGO\s*SLING)\b/', $upper)) {
-            $tariff = $this->getTariffAndLartas('63079090');
-            $tariff['confidence_score'] = 0.98;
-            $tariff['classification_source'] = 'AI_SPECIFIC_COMPONENT_MATCH';
-            return $tariff;
-        }
-
-        // 2n. Jaring Peneduh Sintetis (Paranet) -> 5608.19.20
-        if (preg_match('/\b(PARANET|SHADE\s*NET|JARING\s*PENEDUH)\b/', $upper)) {
-            $tariff = $this->getTariffAndLartas('56081920');
-            $tariff['confidence_score'] = 0.98;
-            $tariff['classification_source'] = 'AI_SPECIFIC_COMPONENT_MATCH';
-            return $tariff;
-        }
-
-        // 2o. Katrol Derek Manual (Lever Block & Chain Block) -> 8425.19.00
-        if (preg_match('/\b(LEVER\s*BLOCK|CHAIN\s*BLOCK|HOIST|TAKEL)\b/', $upper)) {
-            $tariff = $this->getTariffAndLartas('84251900');
-            $tariff['confidence_score'] = 0.98;
+        // 2e. Mesin Tekuk Besi Beton (Bending Machine GW-50) -> 8462.26.00
+        if (preg_match('/\b(BENDING\s*MACHINE|GW-50|GW50|TEKUK\s*BESI)\b/', $upper)) {
+            $tariff = $this->getTariffAndLartas('84622600');
+            $tariff['confidence_score'] = 0.99;
             $tariff['classification_source'] = 'AI_EQUIPMENT_MATCH';
             return $tariff;
         }
 
-        // 2p. Derek Gantung Hidraulik & Mini Truk (Hydraulic Engine Crane & Mini Truck Crane) -> 8426.19.00
-        if (preg_match('/\b(ENGINE\s*CRANE|TRUCK\s*CRANE)\b/', $upper)) {
-            $tariff = $this->getTariffAndLartas('84261900');
-            $tariff['confidence_score'] = 0.98;
+        // 2f. Mesin Pemotong Besi Beton / Tulangan (Steel Bar Cutting Machine GQ50) -> 8461.50.00
+        if (preg_match('/\b(CUTTING\s*MACHINE|GQ-50|GQ50|BAR\s*CUTTING|POTONG\s*BESI)\b/', $upper)) {
+            $tariff = $this->getTariffAndLartas('84615000');
+            $tariff['confidence_score'] = 0.99;
             $tariff['classification_source'] = 'AI_EQUIPMENT_MATCH';
             return $tariff;
         }
 
-        // 2q. Mesin Pemadat Tanah (Tamping Rammer Stamper Kuda) -> 8430.61.00
-        if (preg_match('/\b(TAMPING\s*RAMMER|RAMMER|STAMPER)\b/', $upper)) {
-            $tariff = $this->getTariffAndLartas('84306100');
-            $tariff['confidence_score'] = 0.98;
+        // 2g. Mesin Gerinda Tangan Listrik (Angle Grinder SH-05) -> 8460.29.10
+        if (preg_match('/\b(ANGLE\s*GRINDER|SH-05|SH05|GERINDA)\b/', $upper)) {
+            $tariff = $this->getTariffAndLartas('84602910');
+            $tariff['confidence_score'] = 0.99;
             $tariff['classification_source'] = 'AI_EQUIPMENT_MATCH';
             return $tariff;
         }
 
-        // 2r. Mesin Tekuk Besi Beton (Bending Machine GW-50) -> 8462.24.00
-        if (preg_match('/\b(BENDING\s*MACHINE|TEKUK\s*BESI)\b/', $upper)) {
-            $tariff = $this->getTariffAndLartas('84622400');
-            $tariff['confidence_score'] = 0.98;
+        // 2h. Molen Pengaduk Semen / Beton Elektrik (Electric Concrete Mixer 180, 240, 300) -> 8474.31.10
+        if (preg_match('/\b(CONCRETE\s*MIXER|MOLEN)\b/', $upper)) {
+            $tariff = $this->getTariffAndLartas('84743110');
+            $tariff['confidence_score'] = 0.99;
             $tariff['classification_source'] = 'AI_EQUIPMENT_MATCH';
             return $tariff;
         }
 
-        // 2s. Mesin Potong Besi Beton (Steel Bar Cutting Machine GQ50) -> 8462.33.00
-        if (preg_match('/\b(CUTTING\s*MACHINE|POTONG\s*BESI)\b/', $upper)) {
-            $tariff = $this->getTariffAndLartas('84623300');
-            $tariff['confidence_score'] = 0.98;
+        // 2i. Jaring Kaca Kedap Air (Fiberglass Mesh Waterproofing) -> 7019.90.90
+        if (preg_match('/\b(FIBERGLASS|FIBREGLASS|FIBER\s*GLASS)\b/', $upper)) {
+            $tariff = $this->getTariffAndLartas('70199090');
+            $tariff['confidence_score'] = 0.99;
             $tariff['classification_source'] = 'AI_EQUIPMENT_MATCH';
             return $tariff;
         }
 
-        // 2t. Mesin Gerinda Tangan Listrik (Angle Grinder SH-05) -> 8467.29.10
-        if (preg_match('/\b(ANGLE\s*GRINDER|GRINDER|GERINDA)\b/', $upper)) {
-            $tariff = $this->getTariffAndLartas('84672910');
-            $tariff['confidence_score'] = 0.98;
+        // 2j. Mata Bor Palu Beton untuk Perkakas (Hammer Drill Bit 10*160, 14*160) -> 8467.99.10
+        if (preg_match('/\b(HAMMER\s*DRILL\s*BIT|DRILL\s*BIT|MATA\s*BOR)\b/', $upper)) {
+            $tariff = $this->getTariffAndLartas('84679910');
+            $tariff['confidence_score'] = 0.99;
             $tariff['classification_source'] = 'AI_EQUIPMENT_MATCH';
             return $tariff;
         }
 
-        // 2u. Mesin Bor Listrik Tangan (Impact Drill) -> 8467.21.00
+        // 2k. Derek Gantung Mesin Hidraulik (Hydraulic Engine Crane 2T, 3T) -> 8426.99.00
+        if (preg_match('/\b(ENGINE\s*CRANE)\b/', $upper)) {
+            $tariff = $this->getTariffAndLartas('84269900');
+            $tariff['confidence_score'] = 0.99;
+            $tariff['classification_source'] = 'AI_EQUIPMENT_MATCH';
+            return $tariff;
+        }
+
+        // 2l. Derek Truk Mini (Mini Truck Crane 1T 12V/24V) -> 8426.91.00
+        if (preg_match('/\b(TRUCK\s*CRANE)\b/', $upper)) {
+            $tariff = $this->getTariffAndLartas('84269100');
+            $tariff['confidence_score'] = 0.99;
+            $tariff['classification_source'] = 'AI_EQUIPMENT_MATCH';
+            return $tariff;
+        }
+
+        // 2m. Mesin Bor Listrik Tangan (Impact Drill 10mm, 13mm) -> 8467.21.00
         if (preg_match('/\b(IMPACT\s*DRILL|BOR\s*LISTRIK)\b/', $upper)) {
             $tariff = $this->getTariffAndLartas('84672100');
-            $tariff['confidence_score'] = 0.98;
+            $tariff['confidence_score'] = 0.99;
             $tariff['classification_source'] = 'AI_EQUIPMENT_MATCH';
             return $tariff;
         }
 
-        // 2v. Mesin Pengaduk Beton Molen Listrik (Electric Concrete Mixer) -> 8474.31.00
-        if (preg_match('/\b(CONCRETE\s*MIXER|MOLEN)\b/', $upper)) {
-            $tariff = $this->getTariffAndLartas('84743100');
-            $tariff['confidence_score'] = 0.98;
+        // 2n. Takel Derek Manual (Lever Block & Chain Block 0.75T s.d. 10T) -> 8425.19.00
+        if (preg_match('/\b(LEVER\s*BLOCK|CHAIN\s*BLOCK|HOIST|TAKEL)\b/', $upper)) {
+            $tariff = $this->getTariffAndLartas('84251900');
+            $tariff['confidence_score'] = 0.99;
             $tariff['classification_source'] = 'AI_EQUIPMENT_MATCH';
             return $tariff;
         }
 
-        // 2w. Perkakas Pneumatik Genggam Bobok (Pneumatic Pick G10, G15, G20, TCA-7, TPB60) -> 8467.11.00
-        if (preg_match('/\b(PNEUMATIC\s*PICK|JACK\s*HAMMER|AIR\s*PICK)\b/', $upper)) {
-            $tariff = $this->getTariffAndLartas('84671100');
-            $tariff['confidence_score'] = 0.98;
+        // 2o. Jaring Peneduh Sintetis (Paranet 75%, 65% Black) -> 5607.49.00
+        if (preg_match('/\b(PARANET|SHADE\s*NET|JARING\s*PENEDUH)\b/', $upper)) {
+            $tariff = $this->getTariffAndLartas('56074900');
+            $tariff['confidence_score'] = 0.99;
             $tariff['classification_source'] = 'AI_EQUIPMENT_MATCH';
             return $tariff;
         }
 
-        // 2x. Truk Stacker Bertenaga Listrik -> 8427.10.00
-        if (preg_match('/\b(ELECTRIC\s*HAND\s*STACKER|ELECTRIC\s*STACKER)\b/', $upper)) {
-            $tariff = $this->getTariffAndLartas('84271000');
-            $tariff['confidence_score'] = 0.98;
+        // 2p. Stamper Pemadat Tanah Bensin (Tamping Rammer Gasoline Type 125) -> 8430.61.00
+        if (preg_match('/\b(TAMPING\s*RAMMER|RAMMER|STAMPER)\b/', $upper)) {
+            $tariff = $this->getTariffAndLartas('84306100');
+            $tariff['confidence_score'] = 0.99;
             $tariff['classification_source'] = 'AI_EQUIPMENT_MATCH';
             return $tariff;
         }
 
-        // 2y. Truk Stacker Manual -> 8427.90.00
-        if (preg_match('/\b(HAND\s*STACKER|STACKER)\b/', $upper)) {
-            $tariff = $this->getTariffAndLartas('84279000');
-            $tariff['confidence_score'] = 0.98;
+        // 2q. Sabuk Tali Pengangkat Poliester (Webbing Sling Belt 3T, 4T, 5T, 10T) -> 5609.00.00
+        if (preg_match('/\b(WEBBING\s*SLING|SLING\s*BELT|CARGO\s*SLING)\b/', $upper)) {
+            $tariff = $this->getTariffAndLartas('56090000');
+            $tariff['confidence_score'] = 0.99;
             $tariff['classification_source'] = 'AI_EQUIPMENT_MATCH';
             return $tariff;
         }
 
-        // 2z. Unit Mesin Hydraulic Breaker Utuh Attachment Ekskavator (DYB800, THB140) -> 8431.49.90
-        if (preg_match('/\b(HYDRAULIC\s*BREAKER|BREAKER)\b/', $upper)) {
-            $tariff = $this->getTariffAndLartas('84314990');
-            $tariff['confidence_score'] = 0.98;
-            $tariff['classification_source'] = 'AI_EQUIPMENT_MATCH';
+        // 2r. Fallback: Fasteners Umum (Hanya jika bukan bagian dari mesin khusus di atas) -> 7318.15.90
+        if (preg_match('/\b(BOLT|SCREW|NUT|BAUT|SEKRUP|MUR)\b/', $upper)) {
+            $tariff = $this->getTariffAndLartas('73181590');
+            $tariff['confidence_score'] = 0.95;
+            $tariff['classification_source'] = 'AI_GENERIC_HARDWARE_MATCH';
+            return $tariff;
+        }
+
+        // 2s. Fallback: Klem Selang Umum -> 7326.90.99
+        if (preg_match('/\b(HOSE\s*CLAMP|PIPE\s*CLAMP|CLAMP)\b/', $upper)) {
+            $tariff = $this->getTariffAndLartas('73269099');
+            $tariff['confidence_score'] = 0.95;
+            $tariff['classification_source'] = 'AI_GENERIC_HARDWARE_MATCH';
+            return $tariff;
+        }
+
+        // 2t. Fallback: Sambungan Pipa / Fitting Umum -> 7307.99.10
+        if (preg_match('/\b(FITTING|PIPE\s*CONNECTOR|HOSE\s*JOINT)\b/', $upper)) {
+            $tariff = $this->getTariffAndLartas('73079910');
+            $tariff['confidence_score'] = 0.95;
+            $tariff['classification_source'] = 'AI_GENERIC_HARDWARE_MATCH';
+            return $tariff;
+        }
+
+        // 2u. Fallback: Seal Karet Umum -> 4016.93.20
+        if (preg_match('/\b(RUBBER\s*SEAL|SEAL\s*KIT|OIL\s*SEAL|O-RING|GASKET)\b/', $upper)) {
+            $tariff = $this->getTariffAndLartas('40169320');
+            $tariff['confidence_score'] = 0.95;
+            $tariff['classification_source'] = 'AI_GENERIC_HARDWARE_MATCH';
             return $tariff;
         }
 

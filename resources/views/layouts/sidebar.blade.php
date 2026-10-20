@@ -284,6 +284,19 @@
             </a>
             @endif
 
+            <!-- MCP SERVER & INTEGRASI AI -->
+            <a href="{{ route('settings.mcp') }}" 
+               class="flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all group min-h-[42px] {{ request()->routeIs('settings.mcp*') || request()->routeIs('mcp.*') ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50' }}"
+               title="MCP Server (Model Context Protocol) untuk Claude, Cursor & AI Agents">
+                <div class="flex items-center space-x-2.5 min-w-0 flex-1 mr-1.5">
+                    <svg class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('settings.mcp*') || request()->routeIs('mcp.*') ? 'text-sky-400' : 'text-slate-500 group-hover:text-sky-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span x-show="!sidebarCollapsed" class="truncate font-semibold">MCP Server AI</span>
+                </div>
+                <span x-show="!sidebarCollapsed" class="flex-shrink-0 text-[9px] font-mono px-1.5 py-0.5 rounded bg-sky-100 text-sky-800 font-bold">MCP</span>
+            </a>
+
             <!-- USER & RBAC -->
             @if(!auth()->check() || auth()->user()->hasPermission('setting.view'))
             <a href="{{ route('setting.index') }}" 

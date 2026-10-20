@@ -123,29 +123,93 @@ class McpCustomsAgentController extends Controller
     }
 
     /**
+     * MCP Server-Sent Events (SSE) Transport Endpoint
+     * Standar resmi Anthropic MCP HTTP SSE Transport untuk Cursor, Claude Desktop Remote, dan Antigravity.
+     */
+    public function sse(Request $request)
+    {
+        $sessionId = (string) \Illuminate\Support\Str::uuid();
+        $postEndpoint = url("/api/mcp/execute?sessionId={$sessionId}");
+
+        $response = new \Symfony\Component\HttpFoundation\StreamedResponse(function () use ($postEndpoint) {
+            echo "event: endpoint\n";
+            echo "data: " . $postEndpoint . "\n\n";
+            if (ob_get_level() > 0) ob_flush();
+            flush();
+        });
+
+        $response->headers->set('Content-Type', 'text/event-stream');
+        $response->headers->set('Cache-Control', 'no-cache, no-transform');
+        $response->headers->set('Connection', 'keep-alive');
+        $response->headers->set('X-Accel-Buffering', 'no');
+
+        return $response;
+    }
+
+    /**
      * Generic MCP JSON-RPC Protocol Router
      */
     public function execute(Request $request): JsonResponse
     {
-        $method = $request->input('method');
+        $id = $request->input('id');
+        $method = $request->input('method') ?? ($request->has('tool') ? 'tools/call' : null);
         $params = $request->input('params', []);
 
+        // Handshake Inisialisasi MCP Standard
+        if ($method === 'initialize') {
+            return response()->json([
+                'jsonrpc' => '2.0',
+                'id' => $id,
+                'result' => [
+                    'protocolVersion' => '2024-11-05',
+                    'serverInfo' => [
+                        'name' => 'genie-customs-mcp',
+                        'version' => '2.5.0',
+                    ],
+                    'capabilities' => [
+                        'tools' => [
+                            'listChanged' => false,
+                        ],
+                    ],
+                    'instructions' => 'GENIE Customs AI Agent & BTKI MCP Server. Gunakan tool parse_packing_list untuk mencocokkan HS code otomatis dari dokumen, check_hs_code untuk validasi pos tarif & lartas, dan generate_customs_declaration untuk membuat draf PIB/PEB resmi CEISA 4.0.',
+                ],
+            ]);
+        }
+
+        if ($method === 'ping') {
+            return response()->json([
+                'jsonrpc' => '2.0',
+                'id' => $id,
+                'result' => new \stdClass(),
+            ]);
+        }
+
         if ($method === 'tools/list') {
-            return $this->tools();
+            $toolsData = $this->tools()->getData(true);
+            return response()->json([
+                'jsonrpc' => '2.0',
+                'id' => $id,
+                'result' => [
+                    'tools' => $toolsData['tools'] ?? [],
+                ],
+            ]);
         }
 
         if ($method === 'tools/call') {
-            $toolName = $params['name'] ?? null;
-            $args = $params['arguments'] ?? [];
+            $toolName = $params['name'] ?? $request->input('tool') ?? null;
+            $args = $params['arguments'] ?? $request->input('arguments') ?? $request->input('params', []);
 
+            $toolResult = null;
             switch ($toolName) {
                 case 'parse_packing_list':
                     $req = new Request($args);
-                    return $this->parsePackingList($req);
+                    $toolResult = $this->parsePackingList($req)->getData(true);
+                    break;
 
                 case 'check_hs_code':
                     $req = new Request($args);
-                    return $this->checkHs($req);
+                    $toolResult = $this->checkHs($req)->getData(true);
+                    break;
 
                 case 'detect_shipment_customs':
                     $shipmentId = $args['shipment_id'] ?? null;
@@ -153,7 +217,8 @@ class McpCustomsAgentController extends Controller
                         return response()->json(['error' => 'Argument shipment_id is required'], 422);
                     }
                     $req = new Request($args);
-                    return $this->detectShipmentCustoms($shipmentId, $req);
+                    $toolResult = $this->detectShipmentCustoms($shipmentId, $req)->getData(true);
+                    break;
 
                 case 'generate_customs_declaration':
                     $shipmentId = $args['shipment_id'] ?? null;
@@ -161,17 +226,44 @@ class McpCustomsAgentController extends Controller
                         return response()->json(['error' => 'Argument shipment_id is required'], 422);
                     }
                     $req = new Request($args);
-                    return $this->generateDeclaration($shipmentId, $req);
+                    $toolResult = $this->generateDeclaration($shipmentId, $req)->getData(true);
+                    break;
 
                 default:
                     return response()->json([
-                        'error' => "Unknown tool name '{$toolName}'",
+                        'jsonrpc' => '2.0',
+                        'id' => $id,
+                        'error' => [
+                            'code' => -32601,
+                            'message' => "Tool MCP '{$toolName}' tidak ditemukan.",
+                        ],
                     ], 404);
             }
+
+            // Standar format respon MCP tool call
+            return response()->json([
+                'jsonrpc' => '2.0',
+                'id' => $id,
+                'result' => [
+                    'content' => [
+                        [
+                            'type' => 'text',
+                            'text' => json_encode($toolResult, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+                        ],
+                    ],
+                    'structured_data' => $toolResult,
+                    'isError' => false,
+                ],
+            ]);
         }
 
         return response()->json([
-            'error' => "Unsupported MCP method '{$method}'. Expected 'tools/list' or 'tools/call'.",
+            'jsonrpc' => '2.0',
+            'id' => $id,
+            'error' => [
+                'code' => -32600,
+                'message' => "Metode '{$method}' tidak didukung. Harap gunakan 'initialize', 'tools/list', atau 'tools/call'.",
+            ],
         ], 400);
     }
 

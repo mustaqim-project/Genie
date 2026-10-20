@@ -15,6 +15,7 @@ Route::prefix('v1/ceisa')->group(function () {
 
 // MCP (Model Context Protocol) Server & Customs AI Agent Endpoints
 Route::prefix('mcp')->group(function () {
+    Route::get('/sse', [\App\Http\Controllers\Api\McpCustomsAgentController::class, 'sse'])->name('api.mcp.sse');
     Route::get('/tools', [\App\Http\Controllers\Api\McpCustomsAgentController::class, 'tools'])->name('api.mcp.tools');
     Route::get('/manifest', [\App\Http\Controllers\Api\McpCustomsAgentController::class, 'tools']);
     Route::post('/execute', [\App\Http\Controllers\Api\McpCustomsAgentController::class, 'execute'])->name('api.mcp.execute');

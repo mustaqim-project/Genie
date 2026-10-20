@@ -166,9 +166,22 @@ Route::middleware('auth')->group(function () {
         Route::delete('/schedules/{schedule}', [HrmController::class, 'destroySchedule'])->name('schedules.destroy');
     });
 
-    // 4. CRM
+    // 4. CRM (Pipeline, WhatsApp WABA Official Gateway, Broadcast & Multi-Channel Social Media)
     Route::prefix('crm')->name('crm.')->group(function () {
         Route::get('/', [CrmController::class, 'index'])->name('index');
+
+        // WhatsApp WABA Gateway & Broadcasts
+        Route::post('/whatsapp/settings', [CrmController::class, 'updateWaSettings'])->name('whatsapp.settings');
+        Route::post('/whatsapp/test', [CrmController::class, 'sendWaTest'])->name('whatsapp.test');
+        Route::post('/whatsapp/broadcasts', [CrmController::class, 'storeBroadcast'])->name('whatsapp.broadcasts.store');
+        Route::post('/whatsapp/chat/send', [CrmController::class, 'sendChatMessage'])->name('whatsapp.chat.send');
+        Route::post('/whatsapp/templates', [CrmController::class, 'storeTemplate'])->name('whatsapp.templates.store');
+
+        // Social Media Omnichannel (LinkedIn, IG, FB, TikTok, YT)
+        Route::post('/social-media/posts', [CrmController::class, 'storeSocialPost'])->name('social-media.posts.store');
+        Route::post('/social-media/interactions/{id}/reply', [CrmController::class, 'replySocialInteraction'])->name('social-media.interactions.reply');
+        Route::post('/social-media/accounts/connect', [CrmController::class, 'connectSocialAccount'])->name('social-media.accounts.connect');
+        Route::post('/social-media/accounts/{id}/disconnect', [CrmController::class, 'disconnectSocialAccount'])->name('social-media.accounts.disconnect');
     });
 
     // 5. Finance
@@ -182,10 +195,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/export-ledger', [AccountingController::class, 'exportLedger'])->name('export-ledger');
     });
 
-    // 7. AI Agent
+    // 7. AI Agent & MCP Integration Hub
     Route::prefix('ai')->name('ai.')->group(function () {
         Route::get('/', [AiAgentController::class, 'index'])->name('index');
     });
+    Route::get('/settings/integrations/mcp', [\App\Http\Controllers\McpIntegrationController::class, 'index'])->name('settings.mcp');
+    Route::get('/mcp', [\App\Http\Controllers\McpIntegrationController::class, 'index'])->name('mcp.hub');
 
     // 8. Setting & Konfigurasi Gateway (RBAC & User Management)
     Route::prefix('setting')->name('setting.')->group(function () {
