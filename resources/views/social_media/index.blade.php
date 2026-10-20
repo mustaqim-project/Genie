@@ -3,7 +3,7 @@
 @section('title', 'Media Sosial Multi-Channel - PT Agung Trans Logistics')
 
 @section('content')
-<div class="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-16" x-data="socialComposerManager()">
+<div class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12" x-data="socialComposerManager()">
 
     <!-- 1. BENTO HEADER -->
     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">

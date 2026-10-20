@@ -3,7 +3,7 @@
 @section('title', 'Buat Draf Penggajian (Payroll Wizard) — GENIE ERP')
 
 @section('content')
-<div class="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 pb-24"
+<div class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12"
      x-data="{
         includeThr: false,
         totalNetEstimate: 0,

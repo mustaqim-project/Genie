@@ -3,7 +3,7 @@
 @section('title', 'WhatsApp Business (Meta WABA) - PT Agung Trans Logistics')
 
 @section('content')
-<div class="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-16" x-data="{
+<div class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12" x-data="{
     activeTab: '{{ $currentTab }}',
     openBroadcastModal: false,
     openTemplateModal: false,

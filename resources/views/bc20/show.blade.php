@@ -3,7 +3,7 @@
 @section('title', 'Detail Dokumen BC 2.0 - ' . $bc20->nomor_aju)
 
 @section('content')
-<div class="w-full space-y-6">
+<div class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12">
     <!-- Breadcrumb & Header Toolbar -->
     <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-5 sm:p-6 border border-black/[0.06] dark:border-white/[0.08] shadow-xs">
         <nav class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium mb-2" aria-label="Breadcrumb">

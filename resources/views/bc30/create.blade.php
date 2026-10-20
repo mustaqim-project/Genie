@@ -3,7 +3,7 @@
 @section('title', 'Form Pengajuan BC 3.0 (PEB)')
 
 @section('content')
-<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-16" x-data="bc30FormManager()">
+<div class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12" x-data="bc30FormManager()">
     <!-- Breadcrumb -->
     <x-breadcrumb :items="[
         ['label' => 'Dashboard', 'url' => route('dashboard')],

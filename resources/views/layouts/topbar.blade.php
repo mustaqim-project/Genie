@@ -5,7 +5,7 @@
 <!-- ============================================================== -->
 
 <header class="sticky top-0 z-30 bg-white/80 dark:bg-[#1C1C1E]/80 backdrop-blur-xl border-b border-black/[0.08] dark:border-white/[0.08] transition-all">
-    <div class="px-4 sm:px-6 lg:px-8">
+    <div class="max-w-[1360px] mx-auto px-4 sm:px-6">
         <div class="flex items-center justify-between h-14 gap-3">
             
             <!-- LEFT: HAMBURGER & APPLE-STYLE CLEAN BREADCRUMBS -->

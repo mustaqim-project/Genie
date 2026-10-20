@@ -3,7 +3,7 @@
 @section('title', 'Detail Invoice ' . ($invoice->invoice_number ?? $invoice->invoice_no))
 
 @section('content')
-<div class="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-12" x-data="{ showPayModal: false }">
+<div class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12" x-data="{ showPayModal: false }">
 
     <!-- Breadcrumb -->
     <x-breadcrumb :items="[

@@ -3,7 +3,7 @@
 @section('title', 'Setting & Manajemen RBAC Pengguna')
 
 @section('content')
-<div class="w-full px-4 sm:px-6 lg:px-8 py-8" x-data="{ activeTab: '{{ request('tab', 'users') }}', showAddUserModal: false, showAddSocialModal: false, resetPasswordModal: false, selectedUserId: null, selectedUserName: '' }">
+<div class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12" x-data="{ activeTab: '{{ request('tab', 'users') }}', showAddUserModal: false, showAddSocialModal: false, resetPasswordModal: false, selectedUserId: null, selectedUserName: '' }">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>

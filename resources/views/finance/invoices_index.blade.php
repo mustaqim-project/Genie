@@ -3,7 +3,7 @@
 @section('title', 'Finance — Invoicing Klien (P19) & Talangan Pabean')
 
 @section('content')
-<div class="w-full space-y-6" x-data="coocaTableSort(0, false)">
+<div class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12" x-data="coocaTableSort(0, false)">
 
     <!-- 1. ZONE 1: BREADCRUMB, HEADER & EXECUTIVE KPI SUMMARY -->
     <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-5 sm:p-6 border border-black/[0.06] dark:border-white/[0.08] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">

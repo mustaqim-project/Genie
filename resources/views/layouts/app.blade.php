@@ -720,7 +720,7 @@
             @include('layouts.topbar')
 
             <!-- DYNAMIC FLASH ALERTS (APPLE HIG NOTIFICATIONS) -->
-            <div class="w-full px-4 sm:px-6 lg:px-8 pt-4">
+            <div class="max-w-[1360px] mx-auto px-4 sm:px-6 pt-4">
                 @if(session('success'))
                     <div x-data="{ show: true }" 
                          x-show="show" 

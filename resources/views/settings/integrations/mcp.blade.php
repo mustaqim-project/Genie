@@ -3,7 +3,7 @@
 @section('title', 'MCP Server & Integrasi AI Kepabeanan')
 
 @section('content')
-<div x-data="mcpIntegrationApp()" class="space-y-6">
+<div class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12" x-data="mcpIntegrationApp()">
 
     <!-- Toast Notifikasi Copy -->
     <div x-show="copyToast" 
