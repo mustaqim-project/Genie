@@ -186,11 +186,6 @@
 
             <!-- Value Proposition & Cargo Illustration -->
             <div class="my-auto py-6 w-full max-w-2xl">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-950/80 border border-sky-500/30 text-sky-400 text-xs font-semibold mb-5">
-                    <span class="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
-                    Sistem Terintegrasi CEISA 4.0
-                </div>
-
                 <h1 class="text-3xl lg:text-4xl font-extrabold tracking-tight leading-tight text-white mb-3">
                     Satu sistem untuk seluruh proses import-export.
                 </h1>
