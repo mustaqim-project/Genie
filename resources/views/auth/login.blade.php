@@ -185,23 +185,23 @@
             </div>
 
             <!-- Value Proposition & Cargo Illustration -->
-            <div class="my-auto py-12 max-w-md">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-950/80 border border-sky-500/30 text-sky-400 text-xs font-semibold mb-6">
+            <div class="my-auto py-6 w-full max-w-2xl">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-950/80 border border-sky-500/30 text-sky-400 text-xs font-semibold mb-5">
                     <span class="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
                     Sistem Terintegrasi CEISA 4.0
                 </div>
 
-                <h1 class="text-3xl lg:text-4xl font-extrabold tracking-tight leading-tight text-white mb-4">
+                <h1 class="text-3xl lg:text-4xl font-extrabold tracking-tight leading-tight text-white mb-3">
                     Satu sistem untuk seluruh proses import-export.
                 </h1>
 
-                <p class="text-slate-400 text-sm leading-relaxed mb-8">
-                    Dari dokumen, CEISA 4.0, DO pelayaran, sampai penanganan lapangan, POD, dan penagihan invoice. Semua tim berkolaborasi di satu tempat.
+                <p class="text-slate-400 text-sm leading-relaxed mb-6">
+                    Platform terpadu untuk pengurusan dokumen pabean CEISA 4.0, DO pelayaran, traffic lapangan, dan penagihan klien.
                 </p>
 
                 <!-- SVG Cargo Ship & Containers Illustration With Dynamic Port Animation -->
-                <div class="bg-slate-950/90 rounded-2xl p-5 border border-slate-800/80 shadow-2xl backdrop-blur-md overflow-hidden relative group">
-                    <svg viewBox="0 0 460 210" width="100%" class="h-auto select-none" role="img" aria-label="Animasi Kapal Kontainer dan Crane Pelabuhan Logistik">
+                <div class="bg-slate-950/90 rounded-2xl p-4 sm:p-5 border border-slate-800/80 shadow-2xl backdrop-blur-md overflow-hidden relative group">
+                    <svg viewBox="0 0 460 210" width="100%" class="h-auto select-none" role="img" aria-label="Animasi Kapal Kontainer WAN HAI 315 dan STS CRANE ACTIVE Pelabuhan Logistik">
                         <defs>
                             <!-- Sky Gradient -->
                             <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
@@ -270,9 +270,8 @@
                             <ellipse cx="250" cy="154" rx="145" ry="5" fill="#38BDF8" opacity="0.25"/>
 
                             <!-- Ship Hull (Lambung Kapal) -->
-                            <!-- Main Hull Profile: Buritan (Kiri x:115) ke Haluan (Kanan x:395) -->
                             <path d="M120 114 L360 114 L395 130 L380 152 L132 152 L120 135 Z" fill="url(#hullGrad)"/>
-                            <!-- Waterline Stripe (Garis Putih Waterline) -->
+                            <!-- Waterline Stripe -->
                             <line x1="130" y1="140" x2="384" y2="140" stroke="#FFFFFF" stroke-width="1.2" opacity="0.85"/>
                             
                             <!-- Vessel Name On Bow -->
@@ -282,96 +281,76 @@
                             <circle cx="378" cy="126" r="2" fill="#0B132B"/>
                             <path d="M378 127 L377 132 M375 131 Q 377 134, 379 131" stroke="#475569" stroke-width="0.8" fill="none"/>
 
-                            <!-- Navigation Lights (Haluan Kapal) -->
+                            <!-- Navigation Lights -->
                             <circle cx="394" cy="128" r="2" fill="#10B981" class="anim-nav-green"/>
                             <circle cx="394" cy="132" r="2" fill="#EF4444" class="anim-nav-red"/>
 
-                            <!-- DECK CONTAINERS (Tumpukan Kontainer di Kapal) -->
-                            <!-- Baris 1 (Bawah dek y:92 h:22) -->
-                            <!-- Ctn 1: Hapag Orange -->
+                            <!-- DECK CONTAINERS -->
+                            <!-- Baris 1 -->
                             <rect x="130" y="92" width="28" height="22" rx="1.5" fill="#EA580C"/>
                             <rect x="130" y="92" width="28" height="22" fill="url(#ctnRibs)"/>
-                            <!-- Ctn 2: Maersk Blue -->
                             <rect x="160" y="92" width="28" height="22" rx="1.5" fill="#0284C7"/>
                             <rect x="160" y="92" width="28" height="22" fill="url(#ctnRibs)"/>
-                            <!-- Ctn 3: Evergreen Green -->
                             <rect x="190" y="92" width="28" height="22" rx="1.5" fill="#059669"/>
                             <rect x="190" y="92" width="28" height="22" fill="url(#ctnRibs)"/>
-                            <!-- Ctn 4: ONE Magenta -->
                             <rect x="220" y="92" width="28" height="22" rx="1.5" fill="#DB2777"/>
                             <rect x="220" y="92" width="28" height="22" fill="url(#ctnRibs)"/>
-                            <!-- Ctn 5: Cosco Dark Blue -->
                             <rect x="250" y="92" width="28" height="22" rx="1.5" fill="#1E40AF"/>
                             <rect x="250" y="92" width="28" height="22" fill="url(#ctnRibs)"/>
 
-                            <!-- Baris 2 (Tengah y:70 h:22) -->
-                            <!-- Ctn 6: Cyan -->
+                            <!-- Baris 2 -->
                             <rect x="145" y="70" width="28" height="22" rx="1.5" fill="#06B6D4"/>
                             <rect x="145" y="70" width="28" height="22" fill="url(#ctnRibs)"/>
-                            <!-- Ctn 7: Maersk Light Blue -->
                             <rect x="175" y="70" width="28" height="22" rx="1.5" fill="#38BDF8"/>
                             <rect x="175" y="70" width="28" height="22" fill="url(#ctnRibs)"/>
-                            <!-- Ctn 8: Industrial Yellow -->
                             <rect x="205" y="70" width="28" height="22" rx="1.5" fill="#D97706"/>
                             <rect x="205" y="70" width="28" height="22" fill="url(#ctnRibs)"/>
-                            <!-- Ctn 9: Emerald Green -->
                             <rect x="235" y="70" width="28" height="22" rx="1.5" fill="#10B981"/>
                             <rect x="235" y="70" width="28" height="22" fill="url(#ctnRibs)"/>
 
-                            <!-- Baris 3 (Atas y:48 h:22) -->
-                            <!-- Ctn 10: ONE Magenta -->
+                            <!-- Baris 3 -->
                             <rect x="160" y="48" width="28" height="22" rx="1.5" fill="#BE185D"/>
                             <rect x="160" y="48" width="28" height="22" fill="url(#ctnRibs)"/>
-                            <!-- Ctn 11: Pure White Ctn (Reefer) -->
                             <rect x="190" y="48" width="28" height="22" rx="1.5" fill="#E2E8F0"/>
                             <rect x="190" y="48" width="28" height="22" fill="url(#ctnRibs)"/>
-                            <circle cx="196" cy="54" r="1.5" fill="#0284C7"/> <!-- Reefer motor icon -->
-                            <!-- Ctn 12: Orange -->
+                            <circle cx="196" cy="54" r="1.5" fill="#0284C7"/>
                             <rect x="220" y="48" width="28" height="22" rx="1.5" fill="#F97316"/>
                             <rect x="220" y="48" width="28" height="22" fill="url(#ctnRibs)"/>
 
-                            <!-- NAVIGATION BRIDGE / ANJUNGAN KAPAL (x: 290 s/d 342) -->
-                            <!-- Lower Tower Deck -->
+                            <!-- NAVIGATION BRIDGE -->
                             <rect x="290" y="80" width="48" height="34" rx="2" fill="#E2E8F0"/>
-                            <rect x="294" y="86" width="40" height="4" rx="1" fill="#0F172A"/> <!-- Portholes -->
-                            <!-- Upper Bridge Deck -->
+                            <rect x="294" y="86" width="40" height="4" rx="1" fill="#0F172A"/>
                             <rect x="294" y="58" width="40" height="22" rx="2" fill="#F8FAFC"/>
-                            <!-- Bridge Command Windows (Menyala Keemasan Hangat) -->
                             <rect x="298" y="62" width="32" height="7" rx="1" fill="#FDE047" opacity="0.9"/>
                             <line x1="306" y1="62" x2="306" y2="69" stroke="#0F172A" stroke-width="0.8"/>
                             <line x1="314" y1="62" x2="314" y2="69" stroke="#0F172A" stroke-width="0.8"/>
                             <line x1="322" y1="62" x2="322" y2="69" stroke="#0F172A" stroke-width="0.8"/>
 
-                            <!-- Bridge Wings (Sayap Anjungan) -->
                             <rect x="286" y="62" width="8" height="4" rx="1" fill="#CBD5E1"/>
                             <rect x="334" y="62" width="8" height="4" rx="1" fill="#CBD5E1"/>
 
-                            <!-- Ship Funnel / Cerobong Asap (x: 322 y: 44) -->
+                            <!-- Ship Funnel -->
                             <rect x="320" y="44" width="14" height="15" rx="1" fill="#DC2626"/>
-                            <rect x="320" y="44" width="14" height="4" fill="#0F172A"/> <!-- Black top cap -->
-                            <circle cx="327" cy="52" r="3" fill="#FFFFFF"/> <!-- Funnel crest -->
+                            <rect x="320" y="44" width="14" height="4" fill="#0F172A"/>
+                            <circle cx="327" cy="52" r="3" fill="#FFFFFF"/>
 
-                            <!-- Chimney Smoke Animation (Uap Asap Bergerak Halus) -->
+                            <!-- Chimney Smoke -->
                             <circle cx="327" cy="40" r="3.5" fill="#E2E8F0" class="anim-smoke-1"/>
                             <circle cx="327" cy="40" r="3" fill="#E2E8F0" class="anim-smoke-2"/>
 
-                            <!-- Main Mast & Radar & Beacon Lamp -->
+                            <!-- Main Mast & Radar -->
                             <line x1="310" y1="58" x2="310" y2="38" stroke="#64748B" stroke-width="1.8"/>
                             <line x1="304" y1="46" x2="316" y2="46" stroke="#64748B" stroke-width="1.2"/>
-                            <!-- Rotating Radar Scanner -->
                             <g class="anim-radar">
                                 <line x1="305" y1="38" x2="315" y2="38" stroke="#38BDF8" stroke-width="2" stroke-linecap="round"/>
                             </g>
-                            <!-- Top Mast Beacon Light -->
                             <circle cx="310" cy="36" r="2" fill="#38BDF8" class="anim-beacon"/>
                         </g>
 
-                        <!-- 4. QUAYSIDE DERMAGA PELABUHAN (KIRI x: 0 s/d 115) -->
+                        <!-- 4. QUAYSIDE DERMAGA -->
                         <g>
-                            <!-- Dermaga Beton Pier Profile -->
                             <rect x="0" y="132" width="112" height="78" fill="#1E293B"/>
                             <rect x="0" y="132" width="112" height="7" fill="#334155"/>
-                            <!-- Safety Hazard Stripes (Kuning & Hitam) -->
                             <g opacity="0.85">
                                 <polygon points="0,132 8,132 3,139 0,139" fill="#F59E0B"/>
                                 <polygon points="12,132 20,132 15,139 7,139" fill="#F59E0B"/>
@@ -385,11 +364,11 @@
                                 <polygon points="108,132 112,132 111,139 103,139" fill="#F59E0B"/>
                             </g>
 
-                            <!-- Bollard Tambatan Kapal & Mooring Line -->
+                            <!-- Bollard & Line -->
                             <rect x="98" y="128" width="6" height="5" rx="1.5" fill="#0F172A"/>
                             <path d="M101 130 Q 112 136, 126 138" stroke="#78716C" stroke-width="1" fill="none" stroke-dasharray="2,1"/>
 
-                            <!-- Kontainer Antrean di Dermaga -->
+                            <!-- Kontainer Dermaga -->
                             <rect x="25" y="112" width="28" height="20" rx="1.5" fill="#059669"/>
                             <rect x="25" y="112" width="28" height="20" fill="url(#ctnRibs)"/>
                             <rect x="55" y="112" width="28" height="20" rx="1.5" fill="#D97706"/>
@@ -398,35 +377,27 @@
                             <rect x="40" y="92" width="28" height="20" fill="url(#ctnRibs)"/>
                         </g>
 
-                        <!-- 5. SHIP-TO-SHORE (STS) CONTAINER GANTRY CRANE LENGKAP -->
+                        <!-- 5. STS GANTRY CRANE -->
                         <g>
-                            <!-- Crane Floodlight Glow Beam (Cahaya Sorot ke Arah Dek) -->
                             <polygon points="84,36 120,135 240,135 150,36" fill="url(#craneLightGrad)" class="anim-crane-floodlight"/>
 
-                            <!-- Crane Legs (A-Frame Portal Baja Kuning/Oranye) -->
-                            <!-- Kaki Kiri -->
                             <line x1="28" y1="132" x2="48" y2="34" stroke="#F59E0B" stroke-width="4.5" stroke-linecap="round"/>
                             <line x1="28" y1="132" x2="48" y2="34" stroke="#D97706" stroke-width="2"/>
-                            <!-- Kaki Kanan -->
                             <line x1="88" y1="132" x2="72" y2="34" stroke="#F59E0B" stroke-width="4.5" stroke-linecap="round"/>
                             <line x1="88" y1="132" x2="72" y2="34" stroke="#D97706" stroke-width="2"/>
 
-                            <!-- Crane Cross Bracing (Rangka Silang Penguat Baja) -->
                             <line x1="34" y1="105" x2="82" y2="105" stroke="#F59E0B" stroke-width="2"/>
                             <line x1="38" y1="80" x2="78" y2="80" stroke="#F59E0B" stroke-width="2"/>
                             <line x1="34" y1="105" x2="78" y2="80" stroke="#B45309" stroke-width="1.2"/>
                             <line x1="82" y1="105" x2="38" y2="80" stroke="#B45309" stroke-width="1.2"/>
                             <line x1="42" y1="58" x2="74" y2="58" stroke="#F59E0B" stroke-width="2.5"/>
 
-                            <!-- Operator Cabin & Machinery Deck -->
                             <rect x="44" y="32" width="32" height="12" rx="2" fill="#0F172A"/>
-                            <rect x="54" y="34" width="12" height="7" rx="1" fill="#FDE047" opacity="0.95"/> <!-- Cabin window -->
+                            <rect x="54" y="34" width="12" height="7" rx="1" fill="#FDE047" opacity="0.95"/>
 
-                            <!-- Gantry Boom (Lengan Horizontal Memanjang di Atas Kapal) -->
-                            <!-- Upper Boom Truss -->
                             <line x1="12" y1="24" x2="275" y2="24" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
                             <line x1="12" y1="34" x2="275" y2="34" stroke="#F59E0B" stroke-width="3.5" stroke-linecap="round"/>
-                            <!-- Diagonal Truss Struts -->
+
                             <line x1="25" y1="24" x2="35" y2="34" stroke="#D97706" stroke-width="1.4"/>
                             <line x1="45" y1="24" x2="55" y2="34" stroke="#D97706" stroke-width="1.4"/>
                             <line x1="75" y1="24" x2="85" y2="34" stroke="#D97706" stroke-width="1.4"/>
@@ -437,23 +408,20 @@
                             <line x1="225" y1="24" x2="235" y2="34" stroke="#D97706" stroke-width="1.4"/>
                             <line x1="255" y1="24" x2="265" y2="34" stroke="#D97706" stroke-width="1.4"/>
 
-                            <!-- Crane Apex Tower & Stay Cables (Tali Baja Penahan Boom) -->
                             <line x1="58" y1="34" x2="60" y2="8" stroke="#F59E0B" stroke-width="3.5"/>
                             <line x1="60" y1="8" x2="15" y2="24" stroke="#78716C" stroke-width="1.2"/>
                             <line x1="60" y1="8" x2="200" y2="24" stroke="#78716C" stroke-width="1.2"/>
                             <circle cx="60" cy="7" r="1.8" fill="#EF4444" class="anim-beacon"/>
 
-                            <!-- DYNAMIC TROLLEY & SPREADER CONTAINER (Beranimasi Bergerak di Rel Crane) -->
+                            <!-- DYNAMIC TROLLEY -->
                             <g class="anim-crane-trolley">
-                                <!-- Trolley Base -->
                                 <rect x="74" y="31" width="20" height="6" rx="1.5" fill="#1E293B"/>
                                 <circle cx="78" cy="31" r="2" fill="#D97706"/>
                                 <circle cx="90" cy="31" r="2" fill="#D97706"/>
-                                <!-- Trolley Floodlight Lamp -->
                                 <circle cx="84" cy="37" r="1.8" fill="#FDE047"/>
                             </g>
 
-                            <!-- Hoist Cables (Kabel Baja Katrol Beranimasi Memanjang/Memendek) -->
+                            <!-- Hoist Cables -->
                             <g class="anim-crane-trolley">
                                 <g class="anim-crane-cable">
                                     <line x1="79" y1="36" x2="79" y2="62" stroke="#E2E8F0" stroke-width="1" stroke-dasharray="2,1"/>
@@ -461,47 +429,42 @@
                                 </g>
                             </g>
 
-                            <!-- Spreader Bar & Container Yang Sedang Diangkat (Beranimasi Angkat/Pindah) -->
+                            <!-- Spreader Bar & Lifted Container -->
                             <g class="anim-container-lift">
-                                <!-- Spreader Bar Kuning Baja -->
                                 <rect x="70" y="60" width="28" height="4" rx="1" fill="#F59E0B"/>
-                                <rect x="69" y="62" width="2" height="4" fill="#0F172A"/> <!-- Spreader flipper guide -->
+                                <rect x="69" y="62" width="2" height="4" fill="#0F172A"/>
                                 <rect x="97" y="62" width="2" height="4" fill="#0F172A"/>
                                 
-                                <!-- Lifted Container: Maersk Sky Blue 20ft -->
                                 <rect x="70" y="64" width="28" height="20" rx="1.5" fill="#0284C7"/>
                                 <rect x="70" y="64" width="28" height="20" fill="url(#ctnRibs)"/>
                                 <text x="74" y="76" font-family="'JetBrains Mono', monospace" font-size="5" font-weight="700" fill="#FFFFFF" opacity="0.9">MAERSK</text>
                             </g>
                         </g>
 
-                        <!-- 6. FOREGROUND OCEAN WAVES (Lapisan Ombak Depan Bergerak Halus) -->
+                        <!-- 6. FOREGROUND WAVES -->
                         <g class="anim-wave-front">
                             <path d="M-20 148 Q 40 143, 100 148 T 220 148 T 340 148 T 460 148 T 580 148 L 580 210 L -20 210 Z" fill="url(#seaGrad1)"/>
-                            <!-- Sea Foam Crest Line (Buih Ombak Putih Cyan) -->
                             <path d="M-20 148 Q 40 143, 100 148 T 220 148 T 340 148 T 460 148 T 580 148" stroke="#BAE6FD" stroke-width="1.2" fill="none" opacity="0.75"/>
                         </g>
                     </svg>
 
-                    <!-- Real-Time Telemetry Port Header Under Animated Illustration -->
-                    <div class="mt-3.5 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400 border-t border-slate-800/80 pt-2.5 font-mono">
+                    <!-- Clean Single-Line Telemetry Status (Informasi Ringkas & Bersih) -->
+                    <div class="mt-3.5 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-800/70 pt-2.5 font-mono">
                         <div class="flex items-center gap-2">
-                            <span class="text-white font-bold tracking-tight">WAN HAI 315</span>
+                            <span class="text-slate-200 font-semibold tracking-wide">WAN HAI 315</span>
                             <span class="text-slate-600">&bull;</span>
-                            <span class="text-slate-400">BERTH 03 PRIOK</span>
-                            <span class="text-slate-600">&bull;</span>
-                            <span class="text-sky-400">STS CRANE ACTIVE</span>
+                            <span class="text-slate-400 text-[10px]">STS CRANE ACTIVE</span>
                         </div>
-                        <div class="flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                            <span class="text-emerald-400 font-semibold tracking-wide">CEISA 4.0 CONNECTED</span>
+                        <div class="flex items-center gap-1.5 text-emerald-400 font-medium">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span>CEISA 4.0 READY</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Footer Identitas Perusahaan -->
-            <div class="text-xs text-slate-400 flex items-center justify-between">
+            <div class="text-xs text-slate-500 flex items-center justify-between pt-4 border-t border-slate-900/60 font-mono">
                 <span>PT Agung Trans Solusindo</span>
                 <span>v2.0 &bull; CEISA 4.0 Open API</span>
             </div>
@@ -592,57 +555,56 @@
 
                 <!-- Demo Persona Picker (HANYA DITAMPILKAN DI LINGKUNGAN TESTING / DEV, TIDAK UNTUK PRODUCTION) -->
                 @if(!app()->isProduction())
-                <details class="mt-8 pt-6 border-t border-slate-800 group" open>
+                <details class="mt-6 pt-5 border-t border-slate-800/80 group" open>
                     <summary class="cursor-pointer text-xs font-semibold text-slate-400 hover:text-slate-200 transition-colors list-none flex items-center justify-between">
                         <span class="flex items-center gap-2">
-                            <span>⚡ Persona Akun Demo (Uji Coba Cepat RBAC)</span>
-                            <span class="px-2 py-0.5 rounded-full bg-sky-950 text-sky-400 border border-sky-800 text-[10px]">Testing / Dev</span>
+                            <span>⚡ Persona Akun Demo (Uji Cepat)</span>
+                            <span class="px-2 py-0.5 rounded-full bg-sky-950 text-sky-400 border border-sky-800 text-[10px] font-mono">Dev / Testing</span>
                         </span>
-                        <span class="text-slate-500 group-open:rotate-180 transition-transform">&darr;</span>
+                        <span class="text-slate-500 group-open:rotate-180 transition-transform text-xs">&darr;</span>
                     </summary>
 
-                    <div class="mt-3.5 space-y-2">
-                        <p class="text-[11px] text-slate-400 leading-relaxed">
-                            Password default: <code class="text-sky-400 bg-slate-800 px-1.5 py-0.5 rounded font-mono">password</code>.
-                            <br>
-                            <span class="text-amber-400/90 font-medium">&#9888; Khusus <b>Pimpinan (R-OWN)</b> dan <b>Finance (R-FIN)</b> mewajibkan verifikasi 2FA OTP (Kode Demo: <code class="text-amber-300 font-mono">123456</code>).</span>
-                        </p>
+                    <div class="mt-3 space-y-2.5">
+                        <div class="flex items-center justify-between text-[11px] text-slate-400 font-mono px-0.5">
+                            <span>Password default: <code class="text-sky-400 bg-slate-800/90 px-1 py-0.5 rounded">password</code></span>
+                            <span>OTP 2FA: <code class="text-amber-400 bg-slate-800/90 px-1 py-0.5 rounded">123456</code></span>
+                        </div>
 
-                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-2">
-                            <a href="{{ route('quick-login', 'R-OWN') }}" class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/80 text-left transition-all hover:scale-[1.02]">
-                                <div class="font-bold text-xs text-amber-400">R-OWN (Pimpinan)</div>
-                                <div class="text-[11px] text-slate-300">Soehartono</div>
-                                <div class="text-[9px] text-amber-500 font-mono mt-0.5">Wajib 2FA (123456)</div>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            <a href="{{ route('quick-login', 'R-OWN') }}" class="p-2.5 rounded-xl bg-slate-800/70 hover:bg-slate-700/80 border border-slate-700/60 text-left transition-all hover:scale-[1.02]">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-xs text-amber-400">Pimpinan</span>
+                                    <span class="text-[9px] px-1 py-0.2 rounded bg-amber-950 text-amber-300 border border-amber-600/40 font-mono">2FA</span>
+                                </div>
+                                <div class="text-[11px] text-slate-300 mt-0.5 truncate">Soehartono</div>
                             </a>
 
-                            <a href="{{ route('quick-login', 'R-DOC-SPV') }}" class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/80 text-left transition-all hover:scale-[1.02]">
-                                <div class="font-bold text-xs text-emerald-400">R-DOC-SPV</div>
-                                <div class="text-[11px] text-slate-300">Rian Hidayat</div>
-                                <div class="text-[9px] text-slate-400 mt-0.5">Approve PIB/PEB</div>
+                            <a href="{{ route('quick-login', 'R-DOC-SPV') }}" class="p-2.5 rounded-xl bg-slate-800/70 hover:bg-slate-700/80 border border-slate-700/60 text-left transition-all hover:scale-[1.02]">
+                                <div class="font-bold text-xs text-emerald-400">SPV Dokumen</div>
+                                <div class="text-[11px] text-slate-300 mt-0.5 truncate">Rian Hidayat</div>
                             </a>
 
-                            <a href="{{ route('quick-login', 'R-DOC') }}" class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/80 text-left transition-all hover:scale-[1.02]">
-                                <div class="font-bold text-xs text-sky-400">R-DOC (Dokumen)</div>
-                                <div class="text-[11px] text-slate-300">Dewi Anggraini</div>
-                                <div class="text-[9px] text-slate-400 mt-0.5">HS Code & Berkas</div>
+                            <a href="{{ route('quick-login', 'R-DOC') }}" class="p-2.5 rounded-xl bg-slate-800/70 hover:bg-slate-700/80 border border-slate-700/60 text-left transition-all hover:scale-[1.02]">
+                                <div class="font-bold text-xs text-sky-400">Staf Dokumen</div>
+                                <div class="text-[11px] text-slate-300 mt-0.5 truncate">Dewi Anggraini</div>
                             </a>
 
-                            <a href="{{ route('quick-login', 'R-DO') }}" class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/80 text-left transition-all hover:scale-[1.02]">
-                                <div class="font-bold text-xs text-indigo-400">R-DO (Pelayaran)</div>
-                                <div class="text-[11px] text-slate-300">Dimas Pratama</div>
-                                <div class="text-[9px] text-slate-400 mt-0.5">Rilis DO & Free Time</div>
+                            <a href="{{ route('quick-login', 'R-DO') }}" class="p-2.5 rounded-xl bg-slate-800/70 hover:bg-slate-700/80 border border-slate-700/60 text-left transition-all hover:scale-[1.02]">
+                                <div class="font-bold text-xs text-indigo-400">Pelayaran (DO)</div>
+                                <div class="text-[11px] text-slate-300 mt-0.5 truncate">Dimas Pratama</div>
                             </a>
 
-                            <a href="{{ route('quick-login', 'R-TRF') }}" class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/80 text-left transition-all hover:scale-[1.02]">
-                                <div class="font-bold text-xs text-rose-400">R-TRF (Traffic)</div>
-                                <div class="text-[11px] text-slate-300">Budi Hartanto</div>
-                                <div class="text-[9px] text-slate-400 mt-0.5">Jalur, Gate & Truk</div>
+                            <a href="{{ route('quick-login', 'R-TRF') }}" class="p-2.5 rounded-xl bg-slate-800/70 hover:bg-slate-700/80 border border-slate-700/60 text-left transition-all hover:scale-[1.02]">
+                                <div class="font-bold text-xs text-rose-400">Traffic Lapangan</div>
+                                <div class="text-[11px] text-slate-300 mt-0.5 truncate">Budi Hartanto</div>
                             </a>
 
-                            <a href="{{ route('quick-login', 'R-FIN') }}" class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/80 text-left transition-all hover:scale-[1.02]">
-                                <div class="font-bold text-xs text-yellow-400">R-FIN (Keuangan)</div>
-                                <div class="text-[11px] text-slate-300">Sinta Wulandari</div>
-                                <div class="text-[9px] text-amber-500 font-mono mt-0.5">Wajib 2FA (123456)</div>
+                            <a href="{{ route('quick-login', 'R-FIN') }}" class="p-2.5 rounded-xl bg-slate-800/70 hover:bg-slate-700/80 border border-slate-700/60 text-left transition-all hover:scale-[1.02]">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-xs text-yellow-400">Keuangan</span>
+                                    <span class="text-[9px] px-1 py-0.2 rounded bg-amber-950 text-amber-300 border border-amber-600/40 font-mono">2FA</span>
+                                </div>
+                                <div class="text-[11px] text-slate-300 mt-0.5 truncate">Sinta Wulandari</div>
                             </a>
                         </div>
                     </div>

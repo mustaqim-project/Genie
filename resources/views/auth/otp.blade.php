@@ -106,9 +106,8 @@
                     </div>
                 @else
                     <!-- Mode Testing / Development: Simulasi & Demo Code -->
-                    <div class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-slate-400 space-y-1 text-center font-mono">
-                        <p>Kode simulasi resmi: <strong class="text-sky-300">{{ $twoFaData['code'] ?? '123456' }}</strong></p>
-                        <p class="text-[11px] text-slate-500">Bypass prototipe testing: <code class="text-amber-400">123456</code> (Maks 3x)</p>
+                    <div class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-slate-400 text-center font-mono">
+                        <span>Kode OTP simulasi: <strong class="text-sky-300 bg-slate-800/80 px-2 py-0.5 rounded">{{ $twoFaData['code'] ?? '123456' }}</strong></span>
                     </div>
                 @endif
 
