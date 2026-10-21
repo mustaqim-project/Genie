@@ -251,6 +251,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/whatsapp', [SettingController::class, 'updateWaSettings'])->name('whatsapp.update');
         Route::post('/social/connect', [SettingController::class, 'connectSocialAccount'])->name('social.connect');
         Route::post('/social/{id}/disconnect', [SettingController::class, 'disconnectSocialAccount'])->name('social.disconnect');
+
+        // Kebijakan Keamanan Sesi 7 Hari (Reset Senin)
+        Route::post('/session', [SettingController::class, 'updateSessionSettings'])->name('session.update');
+        Route::post('/session/force-reset', [SettingController::class, 'forceResetSessions'])->name('session.force-reset');
     });
 
     Route::prefix('config')->name('config.')->group(function () {

@@ -32,7 +32,7 @@ return [
     |
     */
 
-    'lifetime' => (int) env('SESSION_LIFETIME', 120),
+    'lifetime' => (int) env('SESSION_LIFETIME', 10080), // 7 hari (10.080 menit), di-reset otomatis setiap hari Senin
 
     'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', false),
 

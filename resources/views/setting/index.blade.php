@@ -58,6 +58,13 @@
             </svg>
             <span>Gateway CEISA 4.0 & Audit Log</span>
         </button>
+
+        <button type="button" @click="activeTab = 'security'" :class="activeTab === 'security' ? 'border-amber-600 text-amber-700 font-bold' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-4 py-3 border-b-2 text-xs transition-colors whitespace-nowrap flex items-center space-x-2">
+            <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Kebijakan Sesi (Reset Senin)</span>
+        </button>
     </div>
 
     <!-- TAB 1: MANAJEMEN PENGGUNA -->
@@ -823,6 +830,108 @@
             <p class="text-xs text-blue-800 mt-1 leading-relaxed">
                 Untuk penyiaran posting otomatis ke Instagram Business & Facebook Pages, pastikan Halaman Facebook resmi telah tertaut ke Meta Business Manager yang sama dengan WhatsApp Cloud API. Konten yang diterbitkan dari menu Media Sosial akan otomatis disinkronkan ke feed resmi tanpa memotong kuota pihak ketiga.
             </p>
+        </div>
+    </div>
+
+    <!-- TAB 6: KEBIJAKAN SESI & KEAMANAN SISTEM (RESET SENIN) -->
+    <div x-show="activeTab === 'security'" class="space-y-6" x-cloak>
+        <!-- Policy Banner Card -->
+        <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+            <div class="relative z-10">
+                <div class="flex items-center space-x-2 text-xs font-mono text-amber-400 font-bold mb-2 uppercase tracking-wider">
+                    <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                    <span>Kebijakan Keamanan Sesi 7 Hari</span>
+                </div>
+                <h3 class="text-xl sm:text-2xl font-extrabold tracking-tight">
+                    Reset Sesi Otomatis 1x Seminggu (Setiap Hari Senin)
+                </h3>
+                <p class="text-xs sm:text-sm text-slate-300 mt-2 max-w-3xl leading-relaxed">
+                    Sesi pengguna diatur bertahan selama <strong>7 hari penuh</strong> agar aktivitas operasional forwarder tidak terputus di tengah hari. Setiap hari Senin pukul 00:00:00 WIB, sistem secara otomatis me-reset seluruh sesi aktif untuk mewajibkan re-autentikasi berkala demi standar audit kepabeanan.
+                </p>
+
+                <div class="mt-6 flex flex-wrap items-center gap-3 text-xs font-mono">
+                    <div class="px-3.5 py-1.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/10">
+                        <span class="text-slate-400">Siklus Aktif:</span>
+                        <strong class="text-white ml-1">Senin, {{ now()->startOfWeek(\Carbon\Carbon::MONDAY)->translatedFormat('d F Y') }}</strong>
+                    </div>
+                    <div class="px-3.5 py-1.5 rounded-xl bg-amber-500/20 backdrop-blur-md border border-amber-500/30 text-amber-300">
+                        <span class="text-amber-200">Reset Berikutnya:</span>
+                        <strong class="text-white ml-1">Senin, {{ now()->endOfWeek(\Carbon\Carbon::SUNDAY)->addDay()->translatedFormat('d F Y') }} (00:00 WIB)</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Session Policy Form (Saved to Database, Independent from .env) -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
+                <div>
+                    <h3 class="text-base font-bold text-slate-900">Parameter Masa Berlaku & Reset Sesi</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Konfigurasi runtime disimpan langsung ke basis data tanpa mengubah berkas .env.</p>
+                </div>
+            </div>
+
+            <form action="{{ route('setting.session.update') }}" method="POST" class="space-y-6">
+                @csrf
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Opsi Reset Hari Senin -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-2">Reset Rutin Mingguan Hari Senin</label>
+                        <select name="session_weekly_monday_reset" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                            <option value="1" {{ ($settings['session_weekly_monday_reset'] ?? true) ? 'selected' : '' }}>
+                                Aktif (Reset otomatis setiap 1x dalam 7 hari pada hari Senin)
+                            </option>
+                            <option value="0" {{ !($settings['session_weekly_monday_reset'] ?? true) ? 'selected' : '' }}>
+                                Nonaktif (Sesi tidak di-reset mingguan)
+                            </option>
+                        </select>
+                        <p class="text-[11px] text-slate-400 mt-1.5 leading-relaxed">
+                            Jika aktif, sesi login pengguna akan di-invalidate saat melewati hari Senin, mewajibkan login ulang 1x per minggu.
+                        </p>
+                    </div>
+
+                    <!-- Masa Berlaku Sesi (Hari) -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-2">Masa Berlaku Idle Sesi Maksimal</label>
+                        <div class="relative">
+                            <input type="number" name="session_lifetime_days" min="1" max="30" 
+                                value="{{ $settings['session_lifetime_days'] ?? 7 }}" required
+                                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-mono focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                            <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-xs text-slate-400 pointer-events-none">Hari</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-1.5 leading-relaxed">
+                            Default: <strong>7 hari (10.080 menit)</strong>. Sesi tetap terjaga aktif selama hari kerja tanpa terputus mendadak.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex items-center justify-end border-t border-slate-100">
+                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition-all active:scale-95 cursor-pointer">
+                        Simpan Kebijakan Sesi ke Database
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Emergency Force Reset Sessions -->
+        <div class="bg-rose-50/60 rounded-3xl p-6 sm:p-8 border border-rose-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+            <div>
+                <h4 class="text-sm font-bold text-rose-900 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    <span>Tindakan Darurat: Reset Sesi Semua Pengguna</span>
+                </h4>
+                <p class="text-xs text-rose-800 mt-1.5 leading-relaxed max-w-2xl">
+                    Paksa keluar (logout) seluruh pengguna aktif di seluruh cabang dan perangkat saat ini juga. Gunakan fitur ini jika terjadi investigasi keamanan atau perubahan izin akses masif.
+                </p>
+            </div>
+
+            <form action="{{ route('setting.session.force-reset') }}" method="POST" onsubmit="return confirm('PERINGATAN: Seluruh pengguna yang sedang login akan dipaksa logout seketika. Lanjutkan?')">
+                @csrf
+                <button type="submit" class="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-xs transition-all active:scale-95 whitespace-nowrap cursor-pointer">
+                    Force Reset Semua Sesi
+                </button>
+            </form>
         </div>
     </div>
 

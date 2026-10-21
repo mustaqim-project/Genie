@@ -100,6 +100,11 @@ class SystemSetting extends Model
             if (isset($settings['ceisa_api_key'])) config(['ceisa.api.api_key' => $settings['ceisa_api_key']]);
             if (isset($settings['ceisa_application_id'])) config(['ceisa.api.application_id' => $settings['ceisa_application_id']]);
             if (isset($settings['ceisa_whatsapp_no'])) config(['ceisa.api.whatsapp_no' => $settings['ceisa_whatsapp_no']]);
+
+            // 3. Kebijakan Sesi Keamanan Mingguan
+            if (isset($settings['session_lifetime_minutes'])) {
+                config(['session.lifetime' => (int) $settings['session_lifetime_minutes']]);
+            }
         } catch (\Throwable $e) {
             // Fail silently during initial migration or schema checks
         }

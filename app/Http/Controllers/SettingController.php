@@ -305,4 +305,37 @@ class SettingController extends Controller implements HasMiddleware
         return redirect()->route('setting.index', ['tab' => 'gateway'])
             ->with('success', "Pengaturan Gateway CEISA 4.0 dan Profil Entitas berhasil disimpan ke basis data! Mode aktif: {$modeLabel}.");
     }
+
+    /**
+     * Simpan Pengaturan Kebijakan Sesi Mingguan (Tanpa .env)
+     */
+    public function updateSessionSettings(Request $request)
+    {
+        $validated = $request->validate([
+            'session_weekly_monday_reset' => 'required|in:1,0',
+            'session_lifetime_days' => 'required|integer|min:1|max:30',
+        ]);
+
+        $lifetimeMinutes = (int) $validated['session_lifetime_days'] * 24 * 60;
+
+        \App\Models\SystemSetting::set('session_weekly_monday_reset', $validated['session_weekly_monday_reset'] === '1', 'security', 'Reset Sesi Mingguan Setiap Senin');
+        \App\Models\SystemSetting::set('session_lifetime_days', (int) $validated['session_lifetime_days'], 'security', 'Masa Berlaku Sesi (Hari)');
+        \App\Models\SystemSetting::set('session_lifetime_minutes', $lifetimeMinutes, 'security', 'Masa Berlaku Sesi (Menit)');
+
+        \App\Models\SystemSetting::loadIntoConfig();
+
+        return redirect()->route('setting.index', ['tab' => 'security'])
+            ->with('success', 'Pengaturan kebijakan sesi 1x dalam 7 hari (reset tiap hari Senin) berhasil disimpan ke basis data.');
+    }
+
+    /**
+     * Force Reset Sesi Semua Pengguna (Admin Emergency Action)
+     */
+    public function forceResetSessions()
+    {
+        \Illuminate\Support\Facades\Artisan::call('session:reset-weekly-monday', ['--force' => true]);
+
+        return redirect()->route('setting.index', ['tab' => 'security'])
+            ->with('success', 'Seluruh sesi pengguna aktif berhasil di-reset secara paksa.');
+    }
 }

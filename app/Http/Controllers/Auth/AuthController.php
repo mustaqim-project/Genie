@@ -137,6 +137,7 @@ class AuthController extends Controller
         // 5. Login normal jika bukan role berisiko tinggi
         Auth::login($user, $request->boolean('remember'));
         $request->session()->regenerate();
+        session(['auth_monday_cycle' => now()->startOfWeek(\Carbon\Carbon::MONDAY)->toDateString()]);
 
         return redirect()->intended(route('dashboard'))
             ->with('success', 'Selamat datang kembali di Genie, ' . $user->name);
@@ -213,6 +214,7 @@ class AuthController extends Controller
         Auth::login($user, $twoFaData['remember'] ?? false);
         Session::forget('2fa');
         $request->session()->regenerate();
+        session(['auth_monday_cycle' => now()->startOfWeek(\Carbon\Carbon::MONDAY)->toDateString()]);
 
         return redirect()->intended(route('dashboard'))
             ->with('success', 'Verifikasi 2-Langkah berhasil. Selamat datang, ' . $user->name);
@@ -399,6 +401,7 @@ class AuthController extends Controller
 
         Auth::login($user);
         request()->session()->regenerate();
+        session(['auth_monday_cycle' => now()->startOfWeek(\Carbon\Carbon::MONDAY)->toDateString()]);
 
         return redirect()->route('dashboard')
             ->with('success', "Beralih peran aktif sebagai: [{$role->code}] {$role->name} ({$user->name})");
