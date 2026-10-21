@@ -153,9 +153,20 @@ class Shipment extends Model
         return $this->belongsTo(User::class, 'created_by_user_id');
     }
 
+    /**
+     * Relasi ke penugasan tim PIC per pos/tahap shipment.
+     */
     public function pics()
     {
         return $this->hasMany(ShipmentPic::class, 'shipment_id');
+    }
+
+    /**
+     * Relasi ke jejak audit / riwayat aktivitas pengerjaan shipment.
+     */
+    public function events()
+    {
+        return $this->hasMany(ShipmentEvent::class, 'shipment_id')->orderBy('created_at', 'desc');
     }
 
     public function getShipmentNumberAttribute()
@@ -445,18 +456,93 @@ class Shipment extends Model
         }
 
         return match ($this->status_tahap) {
-            'DOC_COLLECTING' => 0,
+            'DOC_COLLECTING', 'DRAFT', 'DOCUMENT_RECEIVED' => 0,
             'DOC_READY' => 1,
             'HS_DETECTED', 'DRAFT_REVIEW' => 2,
             'CEISA_SUBMITTED', 'BILLING_ISSUED' => 3,
-            'DO_PROCESSING' => 4,
+            'BILLING_PAID', 'DO_PROCESSING' => 4,
             'DO_RELEASED', 'ARRIVED' => 5,
             'TRAFFIC_HOLD', 'INSPECTION_CUSTOMS' => 6,
             'TRAFFIC_SPPB', 'SPPB_RELEASED' => 7,
             'TRAFFIC_GATE_OUT', 'GATE_OUT' => 8,
+            'DELIVERY' => 9,
             'DELIVERED_POD' => 10,
             default => 0,
         };
+    }
+
+    /**
+     * Cek Status Pos Spesifik (0 s.d. 10): 'done', 'cur', 'skip', 'waiting'
+     */
+    public function getStageStatus(int $index): string
+    {
+        $currentIdx = $this->stage_index;
+
+        // Pos 6 (Hold & notul) dilewati otomatis saat Jalur Hijau
+        if ($index === 6 && $this->is_hold_skipped) {
+            return 'skip';
+        }
+
+        if ($currentIdx > $index) {
+            return 'done';
+        }
+
+        if ($currentIdx === $index && $currentIdx < 11) {
+            return 'cur';
+        }
+
+        return 'waiting';
+    }
+
+    /**
+     * Status SLA Operasional: 'ok' (Aman), 'warn' (SLA 80%), 'late' (Terlewat)
+     */
+    public function getSlaStatusAttribute(): string
+    {
+        if ($this->stage_index >= 11) {
+            return 'ok';
+        }
+
+        $stageMeta = self::STAGES_PIPELINE[$this->stage_index] ?? null;
+        $targetHours = $stageMeta['sla_hours'] ?? 8;
+
+        $elapsedHours = $this->updated_at ? now()->diffInHours($this->updated_at) : 0;
+
+        if ($elapsedHours > $targetHours) {
+            return 'late';
+        }
+
+        if ($elapsedHours >= ($targetHours * 0.8)) {
+            return 'warn';
+        }
+
+        return 'ok';
+    }
+
+    public function getSlaLabelAttribute(): string
+    {
+        return match ($this->sla_status) {
+            'late' => 'SLA Terlewat',
+            'warn' => 'SLA 80%',
+            default => 'SLA Aman',
+        };
+    }
+
+    /**
+     * Peta Relasi PIC per Pos/Tahap (eager-load friendly)
+     */
+    public function getStagePicsMapAttribute(): array
+    {
+        $map = [];
+        $pics = $this->relationLoaded('pics')
+            ? $this->pics
+            : $this->pics()->with(['user.employee', 'backup.employee'])->get();
+
+        foreach ($pics as $pic) {
+            $map[$pic->process_code] = $pic;
+        }
+
+        return $map;
     }
 
     /**

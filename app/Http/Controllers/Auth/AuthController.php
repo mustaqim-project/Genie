@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\LoginOtpMail;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
@@ -86,8 +89,29 @@ class AuthController extends Controller
         $needs2Fa = count(array_intersect(self::ROLES_REQUIRING_2FA, $userRoleCodes)) > 0;
 
         if ($needs2Fa) {
-            // Generate OTP 6 digit
-            $otpCode = (string) rand(100000, 999999);
+            // Generate OTP 6 digit acak yang aman
+            $otpCode = (string) random_int(100000, 999999);
+            $isProduction = app()->isProduction();
+
+            // Pada lingkungan produksi, kirim kode OTP ke email pengguna
+            if ($isProduction) {
+                try {
+                    Mail::to($user->email)->send(
+                        new LoginOtpMail($user, $otpCode, $request->ip(), (string) $request->userAgent())
+                    );
+                } catch (\Throwable $e) {
+                    Log::error('Gagal mengirimkan email OTP 2FA: ' . $e->getMessage(), [
+                        'user_id' => $user->id,
+                        'email' => $user->email,
+                    ]);
+
+                    return back()->withErrors([
+                        'email' => 'Gagal mengirimkan kode OTP ke alamat email Anda. Pastikan sistem mail server telah terkonfigurasi atau hubungi Administrator.',
+                    ])->onlyInput('email');
+                }
+            } else {
+                Log::info("2FA OTP simulasi untuk {$user->email}: {$otpCode} (Kode Demo: 123456)");
+            }
 
             Session::put('2fa', [
                 'user_id' => $user->id,
@@ -95,14 +119,19 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'role' => $userRoleCodes[0] ?? 'PENGGUNA',
                 'code' => $otpCode,
-                'demo_code' => '123456', // Demo bypass sesuai prototipe
+                'demo_code' => $isProduction ? null : '123456', // Demo bypass HANYA untuk non-production
+                'is_production' => $isProduction,
                 'attempts' => 0,
+                'last_sent_at' => now(),
                 'expires_at' => now()->addMinutes(10),
                 'remember' => $request->boolean('remember'),
             ]);
 
-            return redirect()->route('login.otp')
-                ->with('info', 'Kode verifikasi 2-Langkah telah disiapkan untuk akun ' . $user->email);
+            $infoMessage = $isProduction
+                ? 'Kode verifikasi 2-Langkah telah dikirimkan ke alamat email ' . $user->email . '. Silakan periksa inbox atau spam.'
+                : 'Kode verifikasi 2-Langkah telah disiapkan untuk akun ' . $user->email;
+
+            return redirect()->route('login.otp')->with('info', $infoMessage);
         }
 
         // 5. Login normal jika bukan role berisiko tinggi
@@ -149,9 +178,15 @@ class AuthController extends Controller
         }
 
         $inputOtp = trim($request->input('otp'));
-        $validCodes = [$twoFaData['code'], $twoFaData['demo_code']];
+        $isProduction = $twoFaData['is_production'] ?? app()->isProduction();
 
-        if (!in_array($inputOtp, $validCodes)) {
+        // Pada produksi, HANYA kode asli yang dikirim ke email yang valid (demo_code dilarang)
+        $validCodes = array_filter([
+            $twoFaData['code'],
+            $isProduction ? null : ($twoFaData['demo_code'] ?? null),
+        ]);
+
+        if (!in_array($inputOtp, $validCodes, true)) {
             $twoFaData['attempts'] = ($twoFaData['attempts'] ?? 0) + 1;
             Session::put('2fa', $twoFaData);
 
@@ -159,7 +194,7 @@ class AuthController extends Controller
             if ($sisa <= 0) {
                 Session::forget('2fa');
                 return redirect()->route('login')->withErrors([
-                    'email' => 'Kode salah 3 kali. Silakan masuk kembali.',
+                    'email' => 'Kode verifikasi 2FA salah 3 kali. Sesi ditutup demi keamanan.',
                 ]);
             }
 
@@ -181,6 +216,54 @@ class AuthController extends Controller
 
         return redirect()->intended(route('dashboard'))
             ->with('success', 'Verifikasi 2-Langkah berhasil. Selamat datang, ' . $user->name);
+    }
+
+    /**
+     * Kirim ulang kode OTP 2FA (Resend OTP)
+     */
+    public function resendOtp(Request $request)
+    {
+        $twoFaData = Session::get('2fa');
+        if (!$twoFaData) {
+            return redirect()->route('login')->withErrors(['email' => 'Sesi 2FA tidak ditemukan. Silakan masuk kembali.']);
+        }
+
+        $user = User::find($twoFaData['user_id']);
+        if (!$user || !$user->is_active) {
+            Session::forget('2fa');
+            return redirect()->route('login')->withErrors(['email' => 'Akun tidak ditemukan atau dinonaktifkan.']);
+        }
+
+        // Pembatasan Cooldown 60 detik antar pengiriman
+        $lastSent = isset($twoFaData['last_sent_at']) ? \Carbon\Carbon::parse($twoFaData['last_sent_at']) : null;
+        if ($lastSent && $lastSent->diffInSeconds(now()) < 60) {
+            $secondsLeft = 60 - $lastSent->diffInSeconds(now());
+            return back()->withErrors(['otp' => "Mohon tunggu {$secondsLeft} detik sebelum meminta pengiriman ulang kode OTP."]);
+        }
+
+        // Generate kode baru
+        $otpCode = (string) random_int(100000, 999999);
+        $isProduction = app()->isProduction();
+
+        if ($isProduction) {
+            try {
+                Mail::to($user->email)->send(
+                    new LoginOtpMail($user, $otpCode, $request->ip(), (string) $request->userAgent())
+                );
+            } catch (\Throwable $e) {
+                Log::error('Gagal mengirimkan ulang email OTP 2FA: ' . $e->getMessage());
+                return back()->withErrors(['otp' => 'Gagal mengirimkan ulang kode OTP. Periksa konfigurasi email atau hubungi IT Support.']);
+            }
+        } else {
+            Log::info("Resend 2FA OTP untuk {$user->email}: {$otpCode}");
+        }
+
+        $twoFaData['code'] = $otpCode;
+        $twoFaData['last_sent_at'] = now();
+        $twoFaData['expires_at'] = now()->addMinutes(10);
+        Session::put('2fa', $twoFaData);
+
+        return back()->with('info', 'Kode verifikasi 2FA baru telah dikirimkan ke alamat email ' . $user->email);
     }
 
     /**
@@ -295,6 +378,11 @@ class AuthController extends Controller
      */
     public function quickLogin(string $roleCode)
     {
+        // Blokir akses akun demo di lingkungan produksi
+        if (app()->isProduction()) {
+            abort(403, 'Akses cepat akun demo dinonaktifkan pada lingkungan produksi demi keamanan.');
+        }
+
         $role = Role::where('code', $roleCode)->first();
         if (!$role) {
             return back()->with('error', 'Peran tidak ditemukan.');

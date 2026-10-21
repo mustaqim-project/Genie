@@ -713,6 +713,13 @@ class DatabaseSeeder extends Seeder
 
         // 11. MASTER HS CODE & BTKI 2022 BEA CUKAI (F2 & CEISA 4.0)
         $this->call(Btki2022DatabaseSeeder::class);
+
+        // 12. AUTO-ASSIGN PIC WORKFLOW 11 POS UNTUK SEMUA SHIPMENT AKTIF
+        $workflowService = app(\App\Services\Shipment\ShipmentWorkflowService::class);
+        $activeShipments = \App\Models\Shipment::whereNull('closed_at')->get();
+        foreach ($activeShipments as $s) {
+            $workflowService->autoAssignPics($s);
+        }
     }
 }
 

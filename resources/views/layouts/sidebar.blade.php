@@ -125,6 +125,16 @@
             </div>
             @endif
 
+            <!-- MENU TRACKING PROJECT (11 POS WORKFLOW) -->
+            @if(!auth()->check() || auth()->user()->hasPermission('document.view') || auth()->user()->hasPermission('traffic.view') || auth()->user()->hasPermission('do.view'))
+            <a href="{{ route('core.tracking.index') }}" 
+               class="flex items-center space-x-2.5 px-2.5 py-1.5 rounded-[9px] font-medium transition-all group min-h-[36px] active:scale-[0.98] {{ request()->routeIs('core.tracking.*') ? 'bg-[#007AFF] text-white font-semibold shadow-[0_2px_8px_rgba(0,122,255,0.30)]' : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.06]' }}"
+               title="Tracking Project & Workflow 11 Pos">
+                <i data-lucide="milestone" class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('core.tracking.*') ? 'text-white' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white' }}"></i>
+                <span x-show="!sidebarCollapsed" class="truncate">Tracking 11 Pos</span>
+            </a>
+            @endif
+
             <!-- MENU 2: TIM DO (DELIVERY ORDER) -->
             @if(!auth()->check() || auth()->user()->hasPermission('do.view'))
             <a href="{{ route('core.do.index') }}" 

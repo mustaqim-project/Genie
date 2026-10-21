@@ -25,6 +25,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login.post');
     Route::get('/login/otp', [AuthController::class, 'showOtpForm'])->name('login.otp');
     Route::post('/login/otp', [AuthController::class, 'verifyOtp'])->name('login.otp.post');
+    Route::post('/login/otp/resend', [AuthController::class, 'resendOtp'])->name('login.otp.resend');
 
     Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->name('password.request');
     Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
@@ -175,6 +176,7 @@ Route::middleware('auth')->group(function () {
     // 4. CRM & Sales Pipeline
     Route::prefix('crm')->name('crm.')->group(function () {
         Route::get('/', [CrmController::class, 'index'])->name('index');
+        Route::post('/clients', [CrmController::class, 'storeClient'])->name('clients.store');
     });
 
     // 4.1 Kotak Masuk Terpadu (Unified Omnichannel Inbox: WhatsApp + Social Media)
@@ -286,7 +288,17 @@ Route::middleware('auth')->group(function () {
         Route::post('/{id}/generate-pib-peb', [\App\Http\Controllers\ShipmentProjectController::class, 'generatePibPeb'])->name('generate-pib-peb.post');
         Route::post('/{id}/submit-ceisa', [\App\Http\Controllers\ShipmentProjectController::class, 'generateAndSubmitCeisa'])->name('submit-ceisa');
         Route::post('/{id}/generate-portal', [\App\Http\Controllers\ClientPortalController::class, 'generateToken'])->name('generate-portal');
+        
+        // Penugasan & Workflow PIC Per Pos (11 Tahap)
+        Route::post('/{id}/assign-auto-pic', [\App\Http\Controllers\ProjectTrackingController::class, 'assignAutoPic'])->name('assign-auto-pic');
+        Route::post('/{id}/set-pic', [\App\Http\Controllers\ProjectTrackingController::class, 'setPic'])->name('set-pic');
+        Route::post('/{id}/remove-pic', [\App\Http\Controllers\ProjectTrackingController::class, 'removePic'])->name('remove-pic');
+        Route::post('/{id}/take-over-pic', [\App\Http\Controllers\ProjectTrackingController::class, 'takeOverPic'])->name('take-over-pic');
     });
+
+    // Integrated Project Tracking Cockpit (11 Tahap Workflow & Workload Matriks)
+    Route::get('/core/tracking', [\App\Http\Controllers\ProjectTrackingController::class, 'index'])->name('core.tracking.index');
+    Route::post('/core/tracking/auto-assign-all', [\App\Http\Controllers\ProjectTrackingController::class, 'autoAssignAll'])->name('core.tracking.auto-assign-all');
 
     // Tim DO Lifecycle & Shipping Line Automation
     Route::prefix('core/do')->name('core.do.')->group(function () {

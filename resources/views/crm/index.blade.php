@@ -4,7 +4,8 @@
 
 @section('content')
 <div class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12" x-data="{
-    activeTab: '{{ $currentTab }}'
+    activeTab: '{{ $currentTab }}',
+    showCreateClientModal: false
 }">
 
     <!-- 1. BENTO HEADER & ACTIONS -->
@@ -18,6 +19,14 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-2.5">
+            @canany(['crm.manage', 'document.create'])
+            <button type="button" @click="showCreateClientModal = true"
+                class="btn-apple-filled !py-2 !px-3.5 text-xs flex items-center gap-1.5 shadow-xs cursor-pointer">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                <span>Tambah Klien Baru</span>
+            </button>
+            @endcanany
+
             <a href="{{ route('crm.quotations.index') }}"
                 class="px-4 py-2 rounded-xl text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 shadow-xs flex items-center space-x-2 transition-all">
                 <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -161,7 +170,13 @@
                 <p class="text-xs text-slate-500 mt-0.5">Daftar klien logistik aktif yang memiliki penugasan shipment, dokumen kepabeanan, dan kontak resmi WhatsApp.</p>
             </div>
             <div class="flex items-center space-x-2">
-                <span class="text-xs text-slate-500 font-mono">Total: {{ $clients->total() }} Perusahaan</span>
+                <span class="text-xs text-slate-500 font-mono mr-2">Total: {{ $clients->total() }} Perusahaan</span>
+                @canany(['crm.manage', 'document.create'])
+                <button type="button" @click="showCreateClientModal = true" class="btn-apple-filled !py-1.5 !px-3 text-xs inline-flex items-center gap-1.5 cursor-pointer">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                    <span>Tambah Klien</span>
+                </button>
+                @endcanany
             </div>
         </div>
 
@@ -273,6 +288,103 @@
             @endforelse
         </div>
     </div>
+
+    <!-- 6. MODAL: FORM TAMBAH KLIEN / PEMILIK BARANG BARU -->
+    @canany(['crm.manage', 'document.create'])
+    <div x-show="showCreateClientModal" 
+         class="fixed inset-0 z-[200] overflow-y-auto flex items-end sm:items-center justify-center p-0 sm:p-4 md:p-6"
+         role="dialog"
+         aria-modal="true"
+         x-cloak>
+        <div x-show="showCreateClientModal"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-md"
+             @click="showCreateClientModal = false"
+             aria-hidden="true"></div>
+
+        <div x-show="showCreateClientModal"
+             x-transition:enter="transition ease-out duration-250"
+             x-transition:enter-start="opacity-0 translate-y-8 sm:translate-y-0 sm:scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave-end="opacity-0 translate-y-8 sm:translate-y-0 sm:scale-95"
+             class="relative z-10 bg-white dark:bg-[#1C1C1E] rounded-t-[28px] sm:rounded-3xl border border-slate-200/90 dark:border-white/10 shadow-2xl max-w-lg w-full p-6 text-xs max-h-[90vh] overflow-y-auto">
+            
+            <div class="sm:hidden w-12 h-1.5 bg-slate-200 dark:bg-white/20 rounded-full mx-auto -mt-2 mb-4"></div>
+
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/10 mb-4">
+                <div>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white">Tambah Data Klien / Pemilik Barang</h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Pendaftaran importir/eksportir ke direktori kontak & opsi pilihan dokumen kargo</p>
+                </div>
+                <button type="button" @click="showCreateClientModal = false" class="btn-apple-gray !p-2 rounded-full cursor-pointer">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <form action="{{ route('crm.clients.store') }}" method="POST" class="space-y-4">
+                @csrf
+                
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Perusahaan / Importir <span class="text-rose-500">*</span></label>
+                    <input type="text" name="name" required placeholder="Contoh: PT. JINDI MATERIAL INDONESIA" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">NPWP Perusahaan (16 Digit)</label>
+                        <input type="text" name="npwp" placeholder="Contoh: 75.296.714.1-041.000" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF] focus:outline-none font-mono">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">NIB (Nomor Induk Berusaha)</label>
+                        <input type="text" name="nib" placeholder="Contoh: 1234567890123" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF] focus:outline-none font-mono">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama PIC (Contact Person)</label>
+                        <input type="text" name="pic_name" placeholder="Contoh: Bpk. Hendra / Ibu Maya" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor WhatsApp / HP</label>
+                        <input type="text" name="phone" placeholder="Contoh: 081290008888" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Email Resmi Klien</label>
+                        <input type="email" name="email" placeholder="import@perusahaan.co.id" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Masa Berlaku Surat Kuasa PPJK</label>
+                        <input type="date" name="surat_kuasa_expired_at" value="{{ now()->addYear()->format('Y-m-d') }}" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Alamat Domisili Perusahaan</label>
+                    <textarea name="address" rows="2" placeholder="Jalan, Kawasan Industri, Gedung, Kota, Kode Pos" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF] focus:outline-none"></textarea>
+                </div>
+
+                <div class="pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-end space-x-2">
+                    <button type="button" @click="showCreateClientModal = false" class="btn-apple-gray cursor-pointer">Batal</button>
+                    <button type="submit" class="btn-apple-filled cursor-pointer">
+                        <i data-lucide="check" class="w-4 h-4"></i>
+                        <span>Simpan Data Klien</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    @endcanany
 
 </div>
 @endsection

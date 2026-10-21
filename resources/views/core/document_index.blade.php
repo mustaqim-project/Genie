@@ -407,6 +407,62 @@
             } finally {
                 this.scanning = false;
             }
+        },
+        showQuickClientModal: false,
+        quickClient: { name: '', npwp: '', pic_name: '', phone: '' },
+        quickClientLoading: false,
+        quickClientError: '',
+        openQuickClient() {
+            this.quickClient = { name: '', npwp: '', pic_name: '', phone: '' };
+            this.quickClientError = '';
+            this.showQuickClientModal = true;
+        },
+        async submitQuickClient() {
+            if (!this.quickClient.name) {
+                this.quickClientError = 'Nama perusahaan / importir wajib diisi.';
+                return;
+            }
+            this.quickClientLoading = true;
+            this.quickClientError = '';
+            try {
+                const response = await fetch('{{ route('crm.clients.store') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify(this.quickClient)
+                });
+                const res = await response.json();
+                if (res.status === 'success' && res.data) {
+                    const c = res.data;
+                    const smartSelect = document.getElementById('smart-client-select');
+                    if (smartSelect) {
+                        const opt = document.createElement('option');
+                        opt.value = c.id;
+                        opt.textContent = `${c.name} (NPWP: ${c.npwp || '-'})`;
+                        smartSelect.appendChild(opt);
+                        smartSelect.value = c.id;
+                    }
+                    const manualSelect = document.getElementById('manual-client-select');
+                    if (manualSelect) {
+                        const opt = document.createElement('option');
+                        opt.value = c.id;
+                        opt.textContent = `${c.name} (NPWP: ${c.npwp || '-'})`;
+                        manualSelect.appendChild(opt);
+                        manualSelect.value = c.id;
+                    }
+                    this.detected.client_id = c.id;
+                    this.showQuickClientModal = false;
+                } else {
+                    this.quickClientError = res.message || 'Gagal menyimpan klien.';
+                }
+            } catch (err) {
+                this.quickClientError = 'Terjadi kesalahan sistem saat menyimpan data klien.';
+            } finally {
+                this.quickClientLoading = false;
+            }
         }
      }">
     <div class="app-modal-dialog app-modal-dialog-xl rounded-[20px] bg-white dark:bg-[#1C1C1E] border border-black/10 dark:border-white/10 shadow-2xl p-6 text-[13px]">
@@ -454,7 +510,13 @@
                 <!-- Pilih Klien & Jenis Layanan -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#007AFF]/5 dark:bg-[#007AFF]/10 p-3.5 rounded-[14px] border border-[#007AFF]/20">
                     <div>
-                        <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Klien / Pemilik Barang (Importir/Eksportir)</label>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block font-semibold text-black dark:text-white text-[12px]">Klien / Pemilik Barang (Importir/Eksportir)</label>
+                            <button type="button" @click="openQuickClient()" class="text-[11px] font-semibold text-[#007AFF] hover:underline flex items-center gap-0.5 cursor-pointer">
+                                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+                                <span>+ Klien Baru</span>
+                            </button>
+                        </div>
                         <select name="client_id" id="smart-client-select" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
                             <option value="">-- Auto-Deteksi dari Dokumen atau Pilih --</option>
                             @foreach($clients as $c)
@@ -791,8 +853,14 @@
                 <!-- Section 1: Klien & Jenis Layanan -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-black/[0.02] dark:bg-white/[0.02] p-3 rounded-[14px] border border-black/5 dark:border-white/5">
                     <div>
-                        <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Pilih Klien / Pemilik Barang</label>
-                        <select name="client_id_manual" @change="detected.client_id = $event.target.value" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block font-semibold text-black dark:text-white text-[12px]">Pilih Klien / Pemilik Barang</label>
+                            <button type="button" @click="openQuickClient()" class="text-[11px] font-semibold text-[#007AFF] hover:underline flex items-center gap-0.5 cursor-pointer">
+                                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+                                <span>+ Klien Baru</span>
+                            </button>
+                        </div>
+                        <select name="client_id_manual" id="manual-client-select" @change="detected.client_id = $event.target.value" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
                             <option value="">-- Pilih Importir / Eksportir --</option>
                             @foreach($clients as $c)
                                 <option value="{{ $c->id }}">{{ $c->name }} (NPWP: {{ $c->npwp ?? '-' }})</option>
@@ -914,6 +982,63 @@
                 </button>
             </div>
         </form>
+
+        <!-- SUB-MODAL: QUICK ADD CLIENT / PEMILIK BARANG -->
+        <div x-show="showQuickClientModal" 
+             class="fixed inset-0 z-[250] overflow-y-auto flex items-center justify-center p-4 bg-black/70 backdrop-blur-md"
+             role="dialog"
+             aria-modal="true"
+             x-cloak>
+            <div class="relative bg-white dark:bg-[#1C1C1E] rounded-2xl border border-black/10 dark:border-white/10 shadow-2xl max-w-md w-full p-5 text-xs animate-in fade-in zoom-in-95 duration-150">
+                <div class="flex items-center justify-between pb-3 border-b border-black/5 dark:border-white/5 mb-3">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 rounded-lg bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center">
+                            <i data-lucide="user-plus" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-black dark:text-white">Tambah Klien Baru Cepat</h4>
+                            <p class="text-[11px] text-black/50 dark:text-white/50">Daftarkan pemilik barang baru ke database</p>
+                        </div>
+                    </div>
+                    <button type="button" @click="showQuickClientModal = false" class="p-1 rounded text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white cursor-pointer">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+
+                <div x-show="quickClientError" class="mb-3 p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 text-[11px] border border-rose-200 dark:border-rose-800" x-text="quickClientError"></div>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="block font-semibold text-black dark:text-white mb-1 text-[11px]">Nama Perusahaan / Importir <span class="text-rose-500">*</span></label>
+                        <input type="text" x-model="quickClient.name" placeholder="PT. JINDI MATERIAL INDONESIA" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white focus:outline-none focus:border-[#007AFF]">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block font-semibold text-black dark:text-white mb-1 text-[11px]">NPWP (16 Digit)</label>
+                            <input type="text" x-model="quickClient.npwp" placeholder="75.296.714.1-041.000" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white font-mono focus:outline-none focus:border-[#007AFF]">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-black dark:text-white mb-1 text-[11px]">Nama PIC</label>
+                            <input type="text" x-model="quickClient.pic_name" placeholder="Bpk. Hendra" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white focus:outline-none focus:border-[#007AFF]">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-black dark:text-white mb-1 text-[11px]">No. WhatsApp / HP</label>
+                        <input type="text" x-model="quickClient.phone" placeholder="081290008888" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white focus:outline-none focus:border-[#007AFF]">
+                    </div>
+
+                    <div class="pt-2 border-t border-black/5 dark:border-white/5 flex items-center justify-end space-x-2">
+                        <button type="button" @click="showQuickClientModal = false" class="btn-apple-gray !h-8 text-[11px] cursor-pointer">Batal</button>
+                        <button type="button" @click="submitQuickClient()" :disabled="quickClientLoading" class="btn-apple-filled !h-8 text-[11px] flex items-center space-x-1 cursor-pointer">
+                            <span x-show="quickClientLoading">Menyimpan...</span>
+                            <span x-show="!quickClientLoading">Simpan & Pilih Klien</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 

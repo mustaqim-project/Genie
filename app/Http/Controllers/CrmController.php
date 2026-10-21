@@ -27,7 +27,8 @@ class CrmController extends Controller implements HasMiddleware
     {
         return [
             new Middleware('permission:crm.view', only: ['index']),
-            new Middleware('permission:crm.manage', except: ['index']),
+            new Middleware('permission:crm.manage|document.create', only: ['storeClient']),
+            new Middleware('permission:crm.manage', except: ['index', 'storeClient']),
         ];
     }
 
@@ -379,5 +380,53 @@ class CrmController extends Controller implements HasMiddleware
 
         return redirect()->route('crm.index', ['tab' => 'social_media'])
             ->with('success', "Akun {$account->account_name} ({$account->platform}) telah dinonaktifkan.");
+    }
+
+    /**
+     * Daftarkan Klien / Pemilik Barang Baru (CRM Master Directory & Dokumen Proyek)
+     */
+    public function storeClient(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'npwp' => 'nullable|string|max:35',
+            'nib' => 'nullable|string|max:35',
+            'pic_name' => 'nullable|string|max:100',
+            'phone' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:100',
+            'address' => 'nullable|string',
+            'surat_kuasa_expired_at' => 'nullable|date',
+        ]);
+
+        $nextNum = Client::count() + 1;
+        $code = 'CLI-' . date('Ym') . '-' . str_pad((string) $nextNum, 4, '0', STR_PAD_LEFT);
+
+        $client = Client::create([
+            'code' => $code,
+            'name' => trim($validated['name']),
+            'npwp' => $validated['npwp'] ?? null,
+            'nib' => $validated['nib'] ?? null,
+            'pic_name' => $validated['pic_name'] ?? null,
+            'phone' => $validated['phone'] ?? null,
+            'email' => $validated['email'] ?? null,
+            'address' => $validated['address'] ?? null,
+            'surat_kuasa_expired_at' => $validated['surat_kuasa_expired_at'] ?? null,
+            'is_active' => true,
+        ]);
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'status' => 'success',
+                'message' => "Klien {$client->name} berhasil didaftarkan.",
+                'data' => [
+                    'id' => $client->id,
+                    'name' => $client->name,
+                    'npwp' => $client->npwp ?? '-',
+                    'code' => $client->code,
+                ],
+            ]);
+        }
+
+        return back()->with('success', "Klien {$client->name} ({$client->code}) berhasil ditambahkan ke direktori.");
     }
 }

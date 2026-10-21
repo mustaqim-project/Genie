@@ -5,111 +5,12 @@
 @section('content')
 <div class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12" x-data="{ activeTab: 'docs' }">
 
-    <!-- 0. Header & Breadcrumb Toolbar -->
-    <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-5 sm:p-6 border border-black/[0.06] dark:border-white/[0.08] shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-5">
-        <div>
-            <!-- Breadcrumbs -->
-            <nav class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium mb-2" aria-label="Breadcrumb">
-                <a href="{{ route('dashboard') }}" class="hover:text-[#007AFF] transition-colors flex items-center gap-1">
-                    <i data-lucide="home" class="w-3.5 h-3.5"></i>
-                    <span>Dashboard</span>
-                </a>
-                <i data-lucide="chevron-right" class="w-3 h-3 text-slate-300 dark:text-slate-600"></i>
-                <a href="{{ route('core.document.index') }}" class="hover:text-[#007AFF] transition-colors">
-                    Proyek Pengapalan
-                </a>
-                <i data-lucide="chevron-right" class="w-3 h-3 text-slate-300 dark:text-slate-600"></i>
-                <span class="text-slate-800 dark:text-white font-mono font-semibold">{{ $shipment->shipment_number ?? $shipment->project_no }}</span>
-            </nav>
-
-            <div class="flex flex-wrap items-center gap-3">
-                <h1 class="text-2xl font-bold font-mono text-slate-900 dark:text-white tracking-tight">
-                    {{ $shipment->shipment_number ?? $shipment->project_no }}
-                </h1>
-                
-                <!-- Status Pill -->
-                <span class="px-3 py-1 rounded-full text-xs font-semibold font-mono tracking-tight
-                    @if(in_array($shipment->status, ['BILLING_ISSUED', 'DO_RELEASED', 'DELIVERED_POD', 'COMPLETED'])) bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-800/40
-                    @elseif(in_array($shipment->status, ['DOC_READY', 'HS_DETECTED', 'DRAFT_REVIEW'])) bg-[#007AFF]/10 text-[#007AFF] border border-[#007AFF]/20
-                    @elseif($shipment->status === 'DO_PROCESSING') bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200/80 dark:border-amber-800/40
-                    @else bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10 @endif">
-                    {{ $shipment->status }}
-                </span>
-
-                <!-- Type Badge -->
-                <span class="px-2.5 py-1 rounded-lg text-xs font-semibold {{ $shipment->type === 'EXPORT' ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20' : 'bg-[#007AFF]/10 text-[#007AFF] border border-[#007AFF]/20' }}">
-                    {{ $shipment->type === 'EXPORT' ? 'BC 3.0 EKSPOR' : 'BC 2.0 IMPOR' }}
-                </span>
-            </div>
-
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
-                <span>Klien: <strong class="text-slate-800 dark:text-white font-medium">{{ $shipment->client->name ?? '-' }}</strong></span>
-                <span class="text-slate-300 dark:text-slate-700">&bull;</span>
-                <span>No. B/L: <strong class="text-slate-800 dark:text-white font-mono font-medium">{{ $shipment->bl_number ?? '-' }}</strong></span>
-                <span class="text-slate-300 dark:text-slate-700">&bull;</span>
-                <span>Sarana Pengangkut: <span class="text-slate-700 dark:text-slate-300">{{ $shipment->vessel_name ?? '-' }} (Voy: {{ $shipment->voyage_number ?? '-' }})</span></span>
-            </p>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="flex flex-wrap items-center gap-2">
-            @if($shipment->type === 'EXPORT')
-                <a href="{{ route('pdf.peb', $shipment->id) }}" target="_blank"
-                   class="btn-apple-gray text-xs inline-flex items-center gap-1.5 px-3.5 py-2">
-                    <i data-lucide="printer" class="w-3.5 h-3.5 text-slate-500"></i>
-                    <span>Cetak PEB BC 3.0</span>
-                </a>
-            @else
-                <a href="{{ route('pdf.pib', $shipment->id) }}" target="_blank"
-                   class="btn-apple-gray text-xs inline-flex items-center gap-1.5 px-3.5 py-2">
-                    <i data-lucide="printer" class="w-3.5 h-3.5 text-slate-500"></i>
-                    <span>Cetak PIB BC 2.0</span>
-                </a>
-            @endif
-
-            @if($shipment->ceisaDocument?->kode_billing || $shipment->billing_code)
-                <a href="{{ route('pdf.billing', $shipment->id) }}" target="_blank"
-                   class="btn-apple-tinted text-xs inline-flex items-center gap-1.5 px-3.5 py-2">
-                    <i data-lucide="receipt" class="w-3.5 h-3.5"></i>
-                    <span>Billing MPN G3</span>
-                </a>
-            @endif
-
-            <form action="{{ route('core.document.sync-from-docs', $shipment->id) }}" method="POST" class="inline">
-                @csrf
-                <button type="submit" 
-                        onclick="return confirm('Pindai ulang seluruh berkas terlampir dan perbarui data proyek secara otomatis?')"
-                        class="btn-apple-gray text-xs inline-flex items-center gap-1.5 px-3.5 py-2" 
-                        title="Pindai ulang dan sinkronkan metadata proyek & kargo dari dokumen">
-                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-[#007AFF]"></i>
-                    <span>Sinkronkan Data</span>
-                </button>
-            </form>
-
-            <a href="{{ route('pdf.do-request', $shipment->id) }}" target="_blank"
-               class="btn-apple-gray text-xs inline-flex items-center gap-1.5 px-3.5 py-2" 
-               title="Surat Permohonan Rilis DO ke Pelayaran">
-                <i data-lucide="ship" class="w-3.5 h-3.5 text-amber-600"></i>
-                <span>Surat Permohonan DO</span>
-            </a>
-
-            <!-- Portal Pelacakan Klien & Timer Button -->
-            <button type="button" 
-                    onclick="openPortalModalShow()"
-                    class="btn-apple-gray text-xs inline-flex items-center gap-1.5 px-3.5 py-2 {{ $shipment->isPortalActive() ? '!text-[#007AFF] !border-[#007AFF]/30' : '' }}"
-                    title="Bagikan Tautan Pelacakan Portal Klien & Atur Timer">
-                <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
-                <span>Portal Klien</span>
-                @if($shipment->isPortalActive())
-                    <span class="w-1.5 h-1.5 rounded-full bg-[#34C759]"></span>
-                @endif
-            </button>
-        </div>
-    </div>
+    <!-- 0. Header Proyek & 11 Pos Workflow Stepper (Persis Gambar Acuan) -->
+    @include('core.components.workflow_pos_stepper')
 
     <!-- Alert Demurrage & Free Time Warning -->
     @if($shipment->is_demurrage_warning)
-    <div class="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-900/50 text-rose-800 dark:text-rose-300 text-xs flex items-center justify-between gap-4">
+    <div class="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-900/50 text-rose-800 dark:text-rose-300 text-xs flex items-center justify-between gap-4 mb-6">
         <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
                 <i data-lucide="alert-triangle" class="w-4 h-4"></i>
@@ -125,8 +26,10 @@
     </div>
     @endif
 
-    <!-- 1. Tahapan Alur Kerja Proyek (4 Milestones Stepper) -->
-    @include('core.components.pipeline_stepper')
+    <!-- 1. Tim & PIC Project (Pembagian Tugas 11 Pos & Delegasi SLA) -->
+    <div id="pos-assignment">
+        @include('core.components.project_pic_assignment_card')
+    </div>
 
     <!-- 2. Ringkasan Proyek 3 Kolom Bento -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 text-xs">
