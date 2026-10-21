@@ -58,7 +58,7 @@
         }
 
         /* ============================================================== */
-        /* REALISTIC PORT LOGISTICS & CRANE CYCLE 60FPS CSS ANIMATIONS   */
+        /* REALISTIC PORT LOGISTICS & 60FPS SHIP BUOYANCY ANIMATIONS     */
         /* ============================================================== */
         @keyframes vessel-heavy-sway {
             0%, 100% { transform: translateY(0px) rotate(0deg); }
@@ -72,39 +72,6 @@
         @keyframes ocean-swell-back {
             0%, 100% { transform: translateX(0); }
             50% { transform: translateX(18px); }
-        }
-        /* REALISTIC 14-SECOND STS CRANE OPERATIONAL CYCLE */
-        @keyframes crane-trolley-traverse {
-            0%, 16% { transform: translateX(0px); }
-            24% { transform: translateX(14px); }
-            46% { transform: translateX(122px); }
-            48%, 70% { transform: translateX(122px); }
-            76% { transform: translateX(106px); }
-            94%, 100% { transform: translateX(0px); }
-        }
-        @keyframes crane-cable-hoist {
-            0% { transform: scaleY(0.92); }
-            14%, 20% { transform: scaleY(0.36); }
-            46% { transform: scaleY(0.36); }
-            56%, 66% { transform: scaleY(0.86); }
-            74%, 94% { transform: scaleY(0.36); }
-            100% { transform: scaleY(0.92); }
-        }
-        @keyframes container-spreader-cycle {
-            0% { transform: translate(0px, 48px); opacity: 1; }
-            14%, 20% { transform: translate(0px, 6px); opacity: 1; }
-            46% { transform: translate(122px, 6px); opacity: 1; }
-            56%, 65% { transform: translate(122px, 44px); opacity: 1; }
-            65.1%, 95% { transform: translate(122px, 44px); opacity: 0; }
-            95.1%, 100% { transform: translate(0px, 48px); opacity: 1; }
-        }
-        @keyframes spreader-headblock-cycle {
-            0% { transform: translate(0px, 48px); }
-            14%, 20% { transform: translate(0px, 6px); }
-            46% { transform: translate(122px, 6px); }
-            56%, 66% { transform: translate(122px, 44px); }
-            74%, 94% { transform: translate(0px, 6px); }
-            100% { transform: translate(0px, 48px); }
         }
         @keyframes maritime-radar-sweep {
             0% { transform: rotate(0deg); }
@@ -142,17 +109,7 @@
             animation: ocean-swell-back 8s ease-in-out infinite;
         }
         .anim-crane-trolley {
-            animation: crane-trolley-traverse 14s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-        }
-        .anim-crane-cable {
-            animation: crane-cable-hoist 14s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-            transform-origin: 82px 42px;
-        }
-        .anim-container-lift {
-            animation: container-spreader-cycle 14s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-        }
-        .anim-spreader-headblock {
-            animation: spreader-headblock-cycle 14s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+            will-change: transform;
         }
         .anim-smoke-1 {
             animation: funnel-vapor-rise 3.2s ease-out infinite;
@@ -357,103 +314,131 @@
                             <rect x="319" y="118" width="6" height="2" fill="#64748B"/>
 
                             <!-- ============================================== -->
-                            <!-- REALISTIC DECK CONTAINER STACKS (3 BAYS, 4 TIERS) -->
+                            <!-- DYNAMIC 10-CONTAINER SHIP CARGO HOLD SLOTS    -->
+                            <!-- (Kontainer menumpuk nyata dari 1 hingga 10)  -->
                             <!-- ============================================== -->
 
-                            <!-- BAY 1 (Stern Bay: x=148 to 226) -->
-                            <!-- Tier 1 -->
-                            <rect x="150" y="122" width="36" height="20" rx="1" fill="#EA580C"/>
-                            <rect x="150" y="122" width="36" height="20" fill="url(#ctnRibs2)"/>
-                            <rect x="188" y="122" width="36" height="20" rx="1" fill="#0284C7"/>
-                            <rect x="188" y="122" width="36" height="20" fill="url(#ctnRibs2)"/>
-
-                            <!-- Tier 2 -->
-                            <rect x="150" y="101" width="36" height="20" rx="1" fill="#065F46"/>
-                            <rect x="150" y="101" width="36" height="20" fill="url(#ctnRibs2)"/>
-                            <rect x="188" y="101" width="36" height="20" rx="1" fill="#BE185D"/>
-                            <rect x="188" y="101" width="36" height="20" fill="url(#ctnRibs2)"/>
-
-                            <!-- Tier 3 -->
-                            <rect x="150" y="80" width="36" height="20" rx="1" fill="#1E3A8A"/>
-                            <rect x="150" y="80" width="36" height="20" fill="url(#ctnRibs2)"/>
-                            <rect x="188" y="80" width="36" height="20" rx="1" fill="#F1F5F9"/>
-                            <rect x="188" y="80" width="36" height="20" fill="url(#ctnRibs2)"/>
-                            <!-- Reefer cooling unit grille -->
-                            <rect x="216" y="83" width="7" height="14" rx="0.5" fill="#0284C7"/>
-                            <line x1="217" y1="86" x2="222" y2="86" stroke="#FFFFFF" stroke-width="0.8"/>
-                            <line x1="217" y1="90" x2="222" y2="90" stroke="#FFFFFF" stroke-width="0.8"/>
-                            <line x1="217" y1="94" x2="222" y2="94" stroke="#FFFFFF" stroke-width="0.8"/>
-
-                            <!-- BAY 2 (Midship Bay: x=232 to 320) -->
-                            <!-- Tier 1 -->
-                            <rect x="232" y="122" width="42" height="20" rx="1" fill="#0284C7"/>
-                            <rect x="232" y="122" width="42" height="20" fill="url(#ctnRibs2)"/>
-                            <!-- Maersk White Star Emblem -->
-                            <circle cx="253" cy="132" r="3" fill="#FFFFFF" opacity="0.9"/>
-                            <polygon points="253,130 254,132 256,132 254.5,133.5 255,135.5 253,134 251,135.5 251.5,133.5 250,132 252,132" fill="#0284C7"/>
-
-                            <rect x="276" y="122" width="42" height="20" rx="1" fill="#065F46"/>
-                            <rect x="276" y="122" width="42" height="20" fill="url(#ctnRibs2)"/>
-
-                            <!-- Tier 2 -->
-                            <rect x="232" y="101" width="42" height="20" rx="1" fill="#EA580C"/>
-                            <rect x="232" y="101" width="42" height="20" fill="url(#ctnRibs2)"/>
-                            <rect x="276" y="101" width="42" height="20" rx="1" fill="#1E3A8A"/>
-                            <rect x="276" y="101" width="42" height="20" fill="url(#ctnRibs2)"/>
-
-                            <!-- Tier 3 -->
-                            <rect x="232" y="80" width="42" height="20" rx="1" fill="#BE185D"/>
-                            <rect x="232" y="80" width="42" height="20" fill="url(#ctnRibs2)"/>
-                            <rect x="276" y="80" width="42" height="20" rx="1" fill="#F1F5F9"/>
-                            <rect x="276" y="80" width="42" height="20" fill="url(#ctnRibs2)"/>
-
-                            <!-- Tier 4 (Top Stack on Midship) -->
-                            <rect x="245" y="59" width="42" height="20" rx="1" fill="#0284C7"/>
-                            <rect x="245" y="59" width="42" height="20" fill="url(#ctnRibs2)"/>
-
-                            <!-- BAY 3 (Forward Bay: x=326 to 414) -->
-                            <!-- Tier 1 -->
-                            <rect x="326" y="122" width="42" height="20" rx="1" fill="#1E3A8A"/>
-                            <rect x="326" y="122" width="42" height="20" fill="url(#ctnRibs2)"/>
-                            <rect x="370" y="122" width="42" height="20" rx="1" fill="#EA580C"/>
-                            <rect x="370" y="122" width="42" height="20" fill="url(#ctnRibs2)"/>
-
-                            <!-- Tier 2 -->
-                            <rect x="326" y="101" width="42" height="20" rx="1" fill="#065F46"/>
-                            <rect x="326" y="101" width="42" height="20" fill="url(#ctnRibs2)"/>
-                            <rect x="370" y="101" width="42" height="20" rx="1" fill="#0284C7"/>
-                            <rect x="370" y="101" width="42" height="20" fill="url(#ctnRibs2)"/>
-
-                            <!-- Tier 3 -->
-                            <rect x="338" y="80" width="42" height="20" rx="1" fill="#BE185D"/>
-                            <rect x="338" y="80" width="42" height="20" fill="url(#ctnRibs2)"/>
-
-                            <!-- Diagonal Steel Lashing Rods (Silang Pengikat Kontainer Kapal Samudra) -->
-                            <g stroke="#E2E8F0" stroke-width="0.7" opacity="0.45" stroke-dasharray="1.5,1">
-                                <line x1="150" y1="142" x2="186" y2="101"/>
-                                <line x1="186" y1="142" x2="150" y2="101"/>
-                                <line x1="188" y1="142" x2="224" y2="101"/>
-                                <line x1="224" y1="142" x2="188" y2="101"/>
-                                <line x1="232" y1="142" x2="274" y2="101"/>
-                                <line x1="274" y1="142" x2="232" y2="101"/>
-                                <line x1="276" y1="142" x2="318" y2="101"/>
-                                <line x1="318" y1="142" x2="276" y2="101"/>
-                                <line x1="326" y1="142" x2="368" y2="101"/>
-                                <line x1="368" y1="142" x2="326" y2="101"/>
-                                <line x1="370" y1="142" x2="412" y2="101"/>
-                                <line x1="412" y1="142" x2="370" y2="101"/>
+                            <!-- Cell Guide Vertical Structural Rails -->
+                            <g stroke="#334155" stroke-width="1.8">
+                                <line x1="184" y1="84" x2="184" y2="142"/>
+                                <line x1="222" y1="84" x2="222" y2="142"/>
+                                <line x1="260" y1="84" x2="260" y2="142"/>
+                                <line x1="298" y1="84" x2="298" y2="142"/>
+                                <line x1="336" y1="84" x2="336" y2="142"/>
                             </g>
 
-                            <!-- Modern Twistlock Corner Castings (Ujung Sudut Kontainer Standar ISO) -->
-                            <g fill="#94A3B8" opacity="0.8">
-                                <rect x="149" y="122" width="2" height="2.5"/>
-                                <rect x="185" y="122" width="2" height="2.5"/>
-                                <rect x="149" y="139" width="2" height="2.5"/>
-                                <rect x="185" y="139" width="2" height="2.5"/>
-                                <rect x="231" y="122" width="2" height="2.5"/>
-                                <rect x="273" y="122" width="2" height="2.5"/>
-                                <rect x="275" y="122" width="2" height="2.5"/>
-                                <rect x="317" y="122" width="2" height="2.5"/>
+                            <!-- Lashing Platforms -->
+                            <rect x="220" y="118" width="4" height="2" fill="#64748B"/>
+                            <rect x="258" y="118" width="4" height="2" fill="#64748B"/>
+                            <rect x="296" y="118" width="4" height="2" fill="#64748B"/>
+
+                            <!-- TIER 1 (Dasar Geladak Kapal) -->
+                            <!-- Slot 1: Col 1, Tier 1 -->
+                            <g id="shipCtn1" style="display:none">
+                                <rect x="187" y="125" width="34" height="17" rx="1" fill="#EA580C"/>
+                                <rect x="187" y="125" width="34" height="17" fill="url(#ctnRibs2)"/>
+                                <rect x="187" y="125" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="219" y="125" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="187" y="139.5" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="219" y="139.5" width="2" height="2.5" fill="#94A3B8"/>
+                                <line x1="187" y1="126" x2="221" y2="126" stroke="#FFFFFF" stroke-width="0.8" opacity="0.6"/>
+                            </g>
+                            <!-- Slot 2: Col 2, Tier 1 -->
+                            <g id="shipCtn2" style="display:none">
+                                <rect x="225" y="125" width="34" height="17" rx="1" fill="#0284C7"/>
+                                <rect x="225" y="125" width="34" height="17" fill="url(#ctnRibs2)"/>
+                                <rect x="225" y="125" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="257" y="125" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="225" y="139.5" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="257" y="139.5" width="2" height="2.5" fill="#94A3B8"/>
+                                <circle cx="242" cy="133.5" r="2.5" fill="#FFFFFF" opacity="0.85"/>
+                                <line x1="225" y1="126" x2="259" y2="126" stroke="#FFFFFF" stroke-width="0.8" opacity="0.6"/>
+                            </g>
+                            <!-- Slot 3: Col 3, Tier 1 -->
+                            <g id="shipCtn3" style="display:none">
+                                <rect x="263" y="125" width="34" height="17" rx="1" fill="#065F46"/>
+                                <rect x="263" y="125" width="34" height="17" fill="url(#ctnRibs2)"/>
+                                <rect x="263" y="125" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="295" y="125" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="263" y="139.5" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="295" y="139.5" width="2" height="2.5" fill="#94A3B8"/>
+                                <line x1="263" y1="126" x2="297" y2="126" stroke="#FFFFFF" stroke-width="0.8" opacity="0.6"/>
+                            </g>
+                            <!-- Slot 4: Col 4, Tier 1 -->
+                            <g id="shipCtn4" style="display:none">
+                                <rect x="301" y="125" width="34" height="17" rx="1" fill="#1E3A8A"/>
+                                <rect x="301" y="125" width="34" height="17" fill="url(#ctnRibs2)"/>
+                                <rect x="301" y="125" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="333" y="125" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="301" y="139.5" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="333" y="139.5" width="2" height="2.5" fill="#94A3B8"/>
+                                <line x1="301" y1="126" x2="335" y2="126" stroke="#FFFFFF" stroke-width="0.8" opacity="0.6"/>
+                            </g>
+
+                            <!-- TIER 2 (Tingkat Kedua) -->
+                            <!-- Slot 5: Col 1, Tier 2 -->
+                            <g id="shipCtn5" style="display:none">
+                                <rect x="187" y="108" width="34" height="17" rx="1" fill="#BE185D"/>
+                                <rect x="187" y="108" width="34" height="17" fill="url(#ctnRibs2)"/>
+                                <rect x="187" y="108" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="219" y="108" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="187" y="122.5" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="219" y="122.5" width="2" height="2.5" fill="#94A3B8"/>
+                                <line x1="187" y1="109" x2="221" y2="109" stroke="#FFFFFF" stroke-width="0.8" opacity="0.6"/>
+                            </g>
+                            <!-- Slot 6: Col 2, Tier 2 (White Reefer) -->
+                            <g id="shipCtn6" style="display:none">
+                                <rect x="225" y="108" width="34" height="17" rx="1" fill="#F8FAFC"/>
+                                <rect x="225" y="108" width="34" height="17" fill="url(#ctnRibs2)"/>
+                                <rect x="225" y="108" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="257" y="108" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="225" y="122.5" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="257" y="122.5" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="250" y="110" width="5.5" height="12" rx="0.5" fill="#0284C7"/>
+                                <line x1="225" y1="109" x2="259" y2="109" stroke="#FFFFFF" stroke-width="0.8" opacity="0.6"/>
+                            </g>
+                            <!-- Slot 7: Col 3, Tier 2 -->
+                            <g id="shipCtn7" style="display:none">
+                                <rect x="263" y="108" width="34" height="17" rx="1" fill="#D97706"/>
+                                <rect x="263" y="108" width="34" height="17" fill="url(#ctnRibs2)"/>
+                                <rect x="263" y="108" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="295" y="108" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="263" y="122.5" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="295" y="122.5" width="2" height="2.5" fill="#94A3B8"/>
+                                <line x1="263" y1="109" x2="297" y2="109" stroke="#FFFFFF" stroke-width="0.8" opacity="0.6"/>
+                            </g>
+                            <!-- Slot 8: Col 4, Tier 2 -->
+                            <g id="shipCtn8" style="display:none">
+                                <rect x="301" y="108" width="34" height="17" rx="1" fill="#0369A1"/>
+                                <rect x="301" y="108" width="34" height="17" fill="url(#ctnRibs2)"/>
+                                <rect x="301" y="108" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="333" y="108" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="301" y="122.5" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="333" y="122.5" width="2" height="2.5" fill="#94A3B8"/>
+                                <line x1="301" y1="109" x2="335" y2="109" stroke="#FFFFFF" stroke-width="0.8" opacity="0.6"/>
+                            </g>
+
+                            <!-- TIER 3 (Tingkat Ketiga / Puncak Tumpukan) -->
+                            <!-- Slot 9: Col 2, Tier 3 -->
+                            <g id="shipCtn9" style="display:none">
+                                <rect x="225" y="91" width="34" height="17" rx="1" fill="#B45309"/>
+                                <rect x="225" y="91" width="34" height="17" fill="url(#ctnRibs2)"/>
+                                <rect x="225" y="91" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="257" y="91" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="225" y="105.5" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="257" y="105.5" width="2" height="2.5" fill="#94A3B8"/>
+                                <line x1="225" y1="92" x2="259" y2="92" stroke="#FFFFFF" stroke-width="0.8" opacity="0.6"/>
+                            </g>
+                            <!-- Slot 10: Col 3, Tier 3 -->
+                            <g id="shipCtn10" style="display:none">
+                                <rect x="263" y="91" width="34" height="17" rx="1" fill="#0284C7"/>
+                                <rect x="263" y="91" width="34" height="17" fill="url(#ctnRibs2)"/>
+                                <rect x="263" y="91" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="295" y="91" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="263" y="105.5" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="295" y="105.5" width="2" height="2.5" fill="#94A3B8"/>
+                                <circle cx="280" cy="99.5" r="2.5" fill="#FFFFFF" opacity="0.85"/>
+                                <line x1="263" y1="92" x2="297" y2="92" stroke="#FFFFFF" stroke-width="0.8" opacity="0.6"/>
                             </g>
 
                             <!-- ACCOMMODATION SUPERSTRUCTURE & NAVIGATION BRIDGE (Anjungan Kapal) -->
@@ -544,19 +529,16 @@
                             <rect x="118" y="150" width="7" height="7" rx="1.5" fill="#0F172A"/>
                             <circle cx="121.5" cy="150" r="4" fill="#334155"/>
 
-                            <!-- TERMINAL PRIME MOVER (Truk Petikemas Kalmar/Terberg di Dermaga) -->
-                            <g>
+                            <!-- DYNAMIC TERMINAL PRIME MOVER & TRUCK (Truk Petikemas Masuk Membawa Kontainer) -->
+                            <g id="terminalTruckGroup" transform="translate(0, 0)">
                                 <!-- Headlights Beam on Pavement -->
                                 <polygon points="34,149 0,147 0,157 34,153" fill="url(#craneFloodGrad)" opacity="0.65"/>
                                 
                                 <!-- Prime Mover Cabin -->
                                 <rect x="34" y="142" width="16" height="13" rx="1.5" fill="#F8FAFC"/>
                                 <rect x="34" y="143" width="7" height="6" rx="0.8" fill="#0284C7"/>
-                                <!-- Windshield tinted glass -->
                                 <rect x="35" y="144" width="5" height="4" rx="0.5" fill="#38BDF8" opacity="0.85"/>
-                                <!-- Headlamp -->
                                 <circle cx="34.5" cy="150.5" r="1.2" fill="#FDE047"/>
-                                <!-- Roof amber warning light -->
                                 <circle cx="42" cy="141.5" r="1" fill="#F59E0B"/>
 
                                 <!-- Skeletal Chassis Trailer Frame -->
@@ -571,6 +553,17 @@
                                 <circle cx="78" cy="154.5" r="1.2" fill="#94A3B8"/>
                                 <circle cx="86" cy="154.5" r="2.8" fill="#020617"/>
                                 <circle cx="86" cy="154.5" r="1.2" fill="#94A3B8"/>
+
+                                <!-- CONTAINER ON TRUCK (Diangkut oleh truk baru di dermaga) -->
+                                <g id="truckCtnGroup">
+                                    <rect id="truckCtnRect" x="51" y="132" width="34" height="17" rx="1" fill="#EA580C"/>
+                                    <rect x="51" y="132" width="34" height="17" fill="url(#ctnRibs2)"/>
+                                    <rect x="51" y="132" width="2" height="2.5" fill="#94A3B8"/>
+                                    <rect x="83" y="132" width="2" height="2.5" fill="#94A3B8"/>
+                                    <rect x="51" y="146.5" width="2" height="2.5" fill="#94A3B8"/>
+                                    <rect x="83" y="146.5" width="2" height="2.5" fill="#94A3B8"/>
+                                    <line x1="51" y1="133" x2="85" y2="133" stroke="#FFFFFF" stroke-width="0.8" opacity="0.6"/>
+                                </g>
                             </g>
                         </g>
 
@@ -658,45 +651,39 @@
                             <rect x="59" y="44" width="14" height="9" rx="1" fill="#38BDF8" opacity="0.8"/>
                             <circle cx="65" cy="49" r="2" fill="#FDE047"/>
 
-                            <!-- DYNAMIC WORKING TROLLEY ASSEMBLY (Kereta Troli Crane Bergerak 60FPS) -->
-                            <g class="anim-crane-trolley">
+                            <!-- DYNAMIC WORKING TROLLEY & SPREADER ASSEMBLY (Dioperasikan Otomatis 60FPS) -->
+                            <g id="craneTrolleyGroup" class="anim-crane-trolley" transform="translate(68, 0)">
                                 <!-- Heavy Trolley Carriage Body -->
-                                <rect x="70" y="36" width="24" height="8" rx="2" fill="#0F172A"/>
-                                <circle cx="75" cy="36" r="2.5" fill="#F59E0B"/>
-                                <circle cx="89" cy="36" r="2.5" fill="#F59E0B"/>
+                                <rect x="-14" y="36" width="28" height="8" rx="2" fill="#0F172A"/>
+                                <circle cx="-8" cy="36" r="2.5" fill="#F59E0B"/>
+                                <circle cx="8" cy="36" r="2.5" fill="#F59E0B"/>
                                 <!-- Trolley Warning Strobe & LED spotlight -->
-                                <circle cx="82" cy="43.5" r="2" fill="#FDE047"/>
-                            </g>
+                                <circle cx="0" cy="43.5" r="2" fill="#FDE047"/>
 
-                            <!-- DYNAMIC HIGH-TENSILE STEEL HOIST WIRE ROPES (Kabel Baja Pengangkat) -->
-                            <g class="anim-crane-trolley">
-                                <g class="anim-crane-cable">
-                                    <line x1="75" y1="42" x2="75" y2="100" stroke="#F1F5F9" stroke-width="1" stroke-dasharray="3,1.5"/>
-                                    <line x1="89" y1="42" x2="89" y2="100" stroke="#F1F5F9" stroke-width="1" stroke-dasharray="3,1.5"/>
+                                <!-- High-Tensile Hoist Wire Ropes -->
+                                <line id="cableL" x1="-8" y1="42" x2="-8" y2="56" stroke="#F1F5F9" stroke-width="1" stroke-dasharray="3,1.5"/>
+                                <line id="cableR" x1="8" y1="42" x2="8" y2="56" stroke="#F1F5F9" stroke-width="1" stroke-dasharray="3,1.5"/>
+
+                                <!-- Spreader Assembly (Bergerak Turun/Naik saat Angkat & Tarok) -->
+                                <g id="spreaderGroup" transform="translate(0, 56)">
+                                    <rect x="-18" y="0" width="36" height="5" rx="1.2" fill="#F59E0B"/>
+                                    <rect x="-19" y="2" width="3" height="6" fill="#0F172A"/>
+                                    <rect x="16" y="2" width="3" height="6" fill="#0F172A"/>
+                                    <!-- Twistlock indicator lights -->
+                                    <circle id="twistlockL" cx="-14" cy="2.5" r="1" fill="#10B981"/>
+                                    <circle id="twistlockR" cx="14" cy="2.5" r="1" fill="#10B981"/>
+
+                                    <!-- Lifted Container Under Spreader (Aktif saat diangkat dari truck ke kapal) -->
+                                    <g id="spreaderCtn" style="display:none">
+                                        <rect id="spreaderCtnRect" x="-17" y="5" width="34" height="17" rx="1" fill="#EA580C"/>
+                                        <rect x="-17" y="5" width="34" height="17" fill="url(#ctnRibs2)"/>
+                                        <rect x="-17" y="5" width="2" height="2.5" fill="#94A3B8"/>
+                                        <rect x="15" y="5" width="2" height="2.5" fill="#94A3B8"/>
+                                        <rect x="-17" y="19.5" width="2" height="2.5" fill="#94A3B8"/>
+                                        <rect x="15" y="19.5" width="2" height="2.5" fill="#94A3B8"/>
+                                        <line x1="-17" y1="6" x2="17" y2="6" stroke="#FFFFFF" stroke-width="0.8" opacity="0.6"/>
+                                    </g>
                                 </g>
-                            </g>
-
-                            <!-- TELESCOPIC SPREADER HEADBLOCK (Kepala Spreader Twistlock) -->
-                            <g class="anim-spreader-headblock">
-                                <rect x="68" y="94" width="28" height="5" rx="1.2" fill="#F59E0B"/>
-                                <rect x="67" y="96" width="3" height="6" fill="#0F172A"/>
-                                <rect x="94" y="96" width="3" height="6" fill="#0F172A"/>
-                                <!-- Twistlock indicator lights -->
-                                <circle cx="71" cy="96" r="1" fill="#10B981"/>
-                                <circle cx="93" cy="96" r="1" fill="#10B981"/>
-                            </g>
-
-                            <!-- LIFTED 40FT CONTAINER (Kontainer Diangkat Crane dari Dermaga ke Kapal) -->
-                            <g class="anim-container-lift">
-                                <rect x="68" y="99" width="28" height="20" rx="1.5" fill="#0284C7"/>
-                                <rect x="68" y="99" width="28" height="20" fill="url(#ctnRibs2)"/>
-                                <!-- Corner Castings & ISO Twistlock Holes -->
-                                <rect x="68" y="99" width="2" height="2.5" fill="#94A3B8"/>
-                                <rect x="94" y="99" width="2" height="2.5" fill="#94A3B8"/>
-                                <rect x="68" y="116.5" width="2" height="2.5" fill="#94A3B8"/>
-                                <rect x="94" y="116.5" width="2" height="2.5" fill="#94A3B8"/>
-                                <!-- Shipping Line White Star Mark -->
-                                <circle cx="82" cy="109" r="2.2" fill="#FFFFFF" opacity="0.9"/>
                             </g>
                         </g>
 
@@ -860,7 +847,7 @@
         </div>
     </div>
 
-    <!-- Toggle Password Visibility JS -->
+    <!-- Toggle Password Visibility & Realistic Port Loading Simulation JS -->
     <script>
         const pwdInput = document.getElementById('password');
         const toggleBtn = document.getElementById('togglePasswordBtn');
@@ -872,6 +859,224 @@
                 toggleBtn.textContent = isPassword ? 'Sembunyikan' : 'Tampilkan';
             });
         }
+
+        // ==============================================================
+        // REALISTIC CONTAINER PORT LOADING SIMULATION (TRUCK -> CRANE -> SHIP)
+        // Akumulasi nyata 1 hingga 10 kontainer bertumpuk di kapal, lalu reset
+        // ==============================================================
+        (function() {
+            const ctnData = [
+                { colX: 204, tierY: 125, color: '#EA580C' }, // 1: Kolom 1, Tier 1 (Hapag Orange)
+                { colX: 242, tierY: 125, color: '#0284C7' }, // 2: Kolom 2, Tier 1 (Maersk Blue)
+                { colX: 280, tierY: 125, color: '#065F46' }, // 3: Kolom 3, Tier 1 (Evergreen Green)
+                { colX: 318, tierY: 125, color: '#1E3A8A' }, // 4: Kolom 4, Tier 1 (CMA CGM Navy)
+                { colX: 204, tierY: 108, color: '#BE185D' }, // 5: Kolom 1, Tier 2 (ONE Magenta)
+                { colX: 242, tierY: 108, color: '#F8FAFC' }, // 6: Kolom 2, Tier 2 (White Reefer)
+                { colX: 280, tierY: 108, color: '#D97706' }, // 7: Kolom 3, Tier 2 (Yang Ming Gold)
+                { colX: 318, tierY: 108, color: '#0369A1' }, // 8: Kolom 4, Tier 2 (COSCO Cyan)
+                { colX: 242, tierY: 91,  color: '#B45309' }, // 9: Kolom 2, Tier 3 (MSC Mustard)
+                { colX: 280, tierY: 91,  color: '#0284C7' }, // 10: Kolom 3, Tier 3 (Maersk Top Stack)
+            ];
+
+            const dockTrolleyX = 68;
+            const highSpreaderY = 56;
+            const truckSpreaderY = 127;
+
+            let currentCtn = 0; // 0 to 9
+            let cycleStart = null;
+            let lastTimestamp = null;
+            let isResetting = false;
+            let resetStartTime = 0;
+
+            const cycleDuration = 6000; // 6.0 detik per siklus kontainer
+            const resetPause = 3200;    // 3.2 detik jeda menikmati 10 kontainer penuh sebelum reset
+
+            // DOM Elements
+            const trolleyGroup = document.getElementById('craneTrolleyGroup');
+            const spreaderGroup = document.getElementById('spreaderGroup');
+            const cableL = document.getElementById('cableL');
+            const cableR = document.getElementById('cableR');
+            const spreaderCtn = document.getElementById('spreaderCtn');
+            const spreaderCtnRect = document.getElementById('spreaderCtnRect');
+            const twistlockL = document.getElementById('twistlockL');
+            const twistlockR = document.getElementById('twistlockR');
+            const truckGroup = document.getElementById('terminalTruckGroup');
+            const truckCtnGroup = document.getElementById('truckCtnGroup');
+            const truckCtnRect = document.getElementById('truckCtnRect');
+
+            if (!trolleyGroup || !spreaderGroup || !truckGroup) return;
+
+            function easeInOutQuad(t) {
+                return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+            }
+            function easeOutQuad(t) {
+                return t * (2 - t);
+            }
+            function easeInQuad(t) {
+                return t * t;
+            }
+
+            function setSpreaderY(y) {
+                spreaderGroup.setAttribute('transform', 'translate(0, ' + y + ')');
+                cableL.setAttribute('y2', y);
+                cableR.setAttribute('y2', y);
+            }
+
+            function setTrolleyX(x) {
+                trolleyGroup.setAttribute('transform', 'translate(' + x + ', 0)');
+            }
+
+            function setTruckOffset(dx) {
+                truckGroup.setAttribute('transform', 'translate(' + dx + ', 0)');
+            }
+
+            function clearShipContainers() {
+                for (let i = 1; i <= 10; i++) {
+                    const el = document.getElementById('shipCtn' + i);
+                    if (el) el.style.display = 'none';
+                }
+            }
+
+            function step(timestamp) {
+                if (!cycleStart) {
+                    cycleStart = timestamp;
+                    lastTimestamp = timestamp;
+                }
+
+                // Antisipasi jeda tab background
+                if (timestamp - lastTimestamp > 500) {
+                    cycleStart = timestamp;
+                }
+                lastTimestamp = timestamp;
+
+                // Jeda saat 10 kontainer penuh sebelum reset
+                if (isResetting) {
+                    const resetElapsed = timestamp - resetStartTime;
+                    if (resetElapsed > resetPause) {
+                        isResetting = false;
+                        currentCtn = 0;
+                        clearShipContainers();
+                        cycleStart = timestamp;
+                    }
+                    requestAnimationFrame(step);
+                    return;
+                }
+
+                const elapsed = timestamp - cycleStart;
+                const data = ctnData[currentCtn];
+                const targetShipX = data.colX;
+                const targetShipSpreaderY = data.tierY - 5; // Spreader bertengger tepat di atas kontainer
+
+                // -------------------------------------------------------------
+                // TAHAPAN SIKLUS REALISTIS (0 - 6000ms):
+                // -------------------------------------------------------------
+
+                // 1. Truk baru masuk membawa kontainer k (0 - 1100ms)
+                if (elapsed < 1100) {
+                    const t = easeOutQuad(elapsed / 1100);
+                    setTruckOffset(-85 * (1 - t));
+                    truckGroup.style.opacity = '1';
+                    truckCtnGroup.style.display = 'block';
+                    truckCtnRect.setAttribute('fill', data.color);
+
+                    // Trolley menunggu di dermaga, spreader posisi tinggi
+                    setTrolleyX(dockTrolleyX);
+                    setSpreaderY(highSpreaderY);
+                    spreaderCtn.style.display = 'none';
+                    if (twistlockL) { twistlockL.setAttribute('fill', '#10B981'); twistlockR.setAttribute('fill', '#10B981'); }
+                }
+                // 2. Spreader turun menjemput kontainer di sasis truk (1100 - 1800ms)
+                else if (elapsed < 1800) {
+                    const t = easeInOutQuad((elapsed - 1100) / 700);
+                    setTruckOffset(0);
+                    setTrolleyX(dockTrolleyX);
+                    const y = highSpreaderY + (truckSpreaderY - highSpreaderY) * t;
+                    setSpreaderY(y);
+                    spreaderCtn.style.display = 'none';
+                    truckCtnGroup.style.display = 'block';
+                }
+                // 3. Twistlock mengunci kontainer (1800 - 2000ms)
+                else if (elapsed < 2000) {
+                    setTruckOffset(0);
+                    setTrolleyX(dockTrolleyX);
+                    setSpreaderY(truckSpreaderY);
+                    truckCtnGroup.style.display = 'none'; // Kontainer berpindah ke spreader
+                    spreaderCtn.style.display = 'block';
+                    spreaderCtnRect.setAttribute('fill', data.color);
+                    if (twistlockL) { twistlockL.setAttribute('fill', '#F59E0B'); twistlockR.setAttribute('fill', '#F59E0B'); }
+                }
+                // 4. Spreader mengangkat kontainer ke atas geladak (2000 - 2800ms)
+                else if (elapsed < 2800) {
+                    const t = easeInOutQuad((elapsed - 2000) / 800);
+                    setTruckOffset(0);
+                    setTrolleyX(dockTrolleyX);
+                    const y = truckSpreaderY - (truckSpreaderY - highSpreaderY) * t;
+                    setSpreaderY(y);
+                    truckCtnGroup.style.display = 'none';
+                    spreaderCtn.style.display = 'block';
+                    if (twistlockL) { twistlockL.setAttribute('fill', '#10B981'); twistlockR.setAttribute('fill', '#10B981'); }
+                }
+                // 5. Troli meluncur ke atas kapal membawa kontainer; Truk kosong jalan keluar (2800 - 4400ms)
+                else if (elapsed < 4400) {
+                    const t = easeInOutQuad((elapsed - 2800) / 1600);
+                    const x = dockTrolleyX + (targetShipX - dockTrolleyX) * t;
+                    setTrolleyX(x);
+                    setSpreaderY(highSpreaderY);
+                    spreaderCtn.style.display = 'block';
+
+                    // Truk kosong melaju keluar ke kanan dermaga
+                    const truckT = easeInQuad((elapsed - 2800) / 1600);
+                    setTruckOffset(truckT * 140);
+                    truckGroup.style.opacity = String(Math.max(0, 1 - truckT * 1.5));
+                }
+                // 6. Spreader menurunkan kontainer ke dalam kompartemen kapal (4400 - 5200ms)
+                else if (elapsed < 5200) {
+                    const t = easeInOutQuad((elapsed - 4400) / 800);
+                    setTrolleyX(targetShipX);
+                    const y = highSpreaderY + (targetShipSpreaderY - highSpreaderY) * t;
+                    setSpreaderY(y);
+                    spreaderCtn.style.display = 'block';
+                }
+                // 7. Twistlock dilepas; Kontainer resmi mendarat dan menumpuk di kapal (5200 - 5500ms)
+                else if (elapsed < 5500) {
+                    setTrolleyX(targetShipX);
+                    setSpreaderY(targetShipSpreaderY);
+                    spreaderCtn.style.display = 'none';
+
+                    // Kontainer muncul permanen di lambung kapal dan ikut berayun bersama kapal
+                    const placedCtn = document.getElementById('shipCtn' + (currentCtn + 1));
+                    if (placedCtn) placedCtn.style.display = 'block';
+                }
+                // 8. Spreader kosong ditarik naik kembali ke atas (5500 - 6000ms)
+                else if (elapsed < 6000) {
+                    const t = easeInOutQuad((elapsed - 5500) / 500);
+                    setTrolleyX(targetShipX);
+                    const y = targetShipSpreaderY - (targetShipSpreaderY - highSpreaderY) * t;
+                    setSpreaderY(y);
+                    spreaderCtn.style.display = 'none';
+                }
+                // Siklus selesai -> Lanjut ke kontainer berikutnya
+                else {
+                    currentCtn++;
+
+                    if (currentCtn >= 10) {
+                        // Telah mencapai 10 kontainer penuh!
+                        isResetting = true;
+                        resetStartTime = timestamp;
+                        setTrolleyX(dockTrolleyX);
+                        setSpreaderY(highSpreaderY);
+                    } else {
+                        // Persiapan siklus kontainer berikutnya
+                        cycleStart = timestamp;
+                    }
+                }
+
+                requestAnimationFrame(step);
+            }
+
+            // Jalankan animasi
+            requestAnimationFrame(step);
+        })();
     </script>
 </body>
 </html>
