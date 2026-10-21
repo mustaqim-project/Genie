@@ -58,115 +58,125 @@
         }
 
         /* ============================================================== */
-        /* PORT CRANE & CONTAINER SHIP 60FPS CSS KEYFRAME ANIMATIONS     */
+        /* REALISTIC PORT LOGISTICS & CRANE CYCLE 60FPS CSS ANIMATIONS   */
         /* ============================================================== */
-        @keyframes vessel-sway {
+        @keyframes vessel-heavy-sway {
             0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-4px) rotate(0.8deg); }
+            35% { transform: translateY(-2px) rotate(0.35deg); }
+            70% { transform: translateY(1.5px) rotate(-0.25deg); }
         }
-        @keyframes ocean-wave-front {
-            0% { transform: translateX(0); }
+        @keyframes ocean-swell-front {
+            0%, 100% { transform: translateX(0); }
             50% { transform: translateX(-16px); }
-            100% { transform: translateX(0); }
         }
-        @keyframes ocean-wave-back {
-            0% { transform: translateX(0); }
-            50% { transform: translateX(16px); }
-            100% { transform: translateX(0); }
+        @keyframes ocean-swell-back {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(18px); }
         }
-        @keyframes crane-trolley-cycle {
-            0%, 12% { transform: translateX(0px); }
-            42%, 62% { transform: translateX(96px); }
-            88%, 100% { transform: translateX(0px); }
+        /* REALISTIC 14-SECOND STS CRANE OPERATIONAL CYCLE */
+        @keyframes crane-trolley-traverse {
+            0%, 16% { transform: translateX(0px); }
+            24% { transform: translateX(14px); }
+            46% { transform: translateX(122px); }
+            48%, 70% { transform: translateX(122px); }
+            76% { transform: translateX(106px); }
+            94%, 100% { transform: translateX(0px); }
         }
-        @keyframes crane-cable-cycle {
-            0%, 12% { transform: scaleY(0.48); }
-            24% { transform: scaleY(1.05); }
-            42%, 62% { transform: scaleY(0.62); }
-            78% { transform: scaleY(1.02); }
-            88%, 100% { transform: scaleY(0.48); }
+        @keyframes crane-cable-hoist {
+            0% { transform: scaleY(0.92); }
+            14%, 20% { transform: scaleY(0.36); }
+            46% { transform: scaleY(0.36); }
+            56%, 66% { transform: scaleY(0.86); }
+            74%, 94% { transform: scaleY(0.36); }
+            100% { transform: scaleY(0.92); }
         }
-        @keyframes container-lift-cycle {
-            0%, 12% { transform: translate(0px, 0px); opacity: 1; }
-            24% { transform: translate(0px, 24px); }
-            42%, 62% { transform: translate(96px, 8px); }
-            78% { transform: translate(96px, 22px); }
-            88%, 100% { transform: translate(0px, 0px); }
+        @keyframes container-spreader-cycle {
+            0% { transform: translate(0px, 48px); opacity: 1; }
+            14%, 20% { transform: translate(0px, 6px); opacity: 1; }
+            46% { transform: translate(122px, 6px); opacity: 1; }
+            56%, 65% { transform: translate(122px, 44px); opacity: 1; }
+            65.1%, 95% { transform: translate(122px, 44px); opacity: 0; }
+            95.1%, 100% { transform: translate(0px, 48px); opacity: 1; }
         }
-        @keyframes smoke-float-1 {
-            0% { opacity: 0.8; transform: translate(0, 0) scale(0.6); }
-            60% { opacity: 0.4; }
-            100% { opacity: 0; transform: translate(-18px, -28px) scale(1.9); }
+        @keyframes spreader-headblock-cycle {
+            0% { transform: translate(0px, 48px); }
+            14%, 20% { transform: translate(0px, 6px); }
+            46% { transform: translate(122px, 6px); }
+            56%, 66% { transform: translate(122px, 44px); }
+            74%, 94% { transform: translate(0px, 6px); }
+            100% { transform: translate(0px, 48px); }
         }
-        @keyframes smoke-float-2 {
-            0% { opacity: 0.7; transform: translate(0, 0) scale(0.5); }
-            60% { opacity: 0.35; }
-            100% { opacity: 0; transform: translate(-14px, -22px) scale(1.7); }
-        }
-        @keyframes radar-spin-2d {
+        @keyframes maritime-radar-sweep {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        @keyframes beacon-glow {
-            0%, 100% { opacity: 0.3; filter: drop-shadow(0 0 1px #38BDF8); }
-            50% { opacity: 1; filter: drop-shadow(0 0 8px #38BDF8); }
+        @keyframes aviation-strobe-flash {
+            0%, 86%, 92%, 100% { opacity: 0.2; filter: none; }
+            88%, 90% { opacity: 1; filter: drop-shadow(0 0 6px #EF4444); }
         }
-        @keyframes nav-light-starboard {
-            0%, 49% { opacity: 1; filter: drop-shadow(0 0 5px #10B981); }
-            50%, 100% { opacity: 0.2; filter: none; }
+        @keyframes masthead-strobe-flash {
+            0%, 82%, 88%, 94%, 100% { opacity: 0.25; filter: none; }
+            84%, 86% { opacity: 1; filter: drop-shadow(0 0 5px #F8FAFC); }
         }
-        @keyframes nav-light-port {
-            0%, 49% { opacity: 0.2; filter: none; }
-            50%, 100% { opacity: 1; filter: drop-shadow(0 0 5px #EF4444); }
+        @keyframes floodlight-volumetric {
+            0%, 100% { opacity: 0.42; }
+            50% { opacity: 0.58; }
         }
-        @keyframes port-crane-light {
-            0%, 100% { opacity: 0.65; }
-            50% { opacity: 0.95; }
+        @keyframes water-reflection-shimmer {
+            0%, 100% { transform: scaleX(1) translateX(0); opacity: 0.4; }
+            50% { transform: scaleX(1.1) translateX(-3px); opacity: 0.6; }
+        }
+        @keyframes funnel-vapor-rise {
+            0% { transform: translate(0, 0) scale(0.6); opacity: 0.6; }
+            100% { transform: translate(-14px, -22px) scale(1.7); opacity: 0; }
         }
 
         .anim-vessel {
-            animation: vessel-sway 5.2s ease-in-out infinite;
-            transform-origin: 260px 145px;
+            animation: vessel-heavy-sway 8.5s ease-in-out infinite;
+            transform-origin: 320px 170px;
         }
         .anim-wave-front {
-            animation: ocean-wave-front 6s ease-in-out infinite;
+            animation: ocean-swell-front 6.5s ease-in-out infinite;
         }
         .anim-wave-back {
-            animation: ocean-wave-back 7.5s ease-in-out infinite;
+            animation: ocean-swell-back 8s ease-in-out infinite;
         }
         .anim-crane-trolley {
-            animation: crane-trolley-cycle 12s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+            animation: crane-trolley-traverse 14s cubic-bezier(0.45, 0, 0.55, 1) infinite;
         }
         .anim-crane-cable {
-            animation: crane-cable-cycle 12s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-            transform-origin: 84px 34px;
+            animation: crane-cable-hoist 14s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+            transform-origin: 82px 42px;
         }
         .anim-container-lift {
-            animation: container-lift-cycle 12s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+            animation: container-spreader-cycle 14s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+        }
+        .anim-spreader-headblock {
+            animation: spreader-headblock-cycle 14s cubic-bezier(0.45, 0, 0.55, 1) infinite;
         }
         .anim-smoke-1 {
-            animation: smoke-float-1 3.2s ease-out infinite;
-            transform-origin: 326px 66px;
+            animation: funnel-vapor-rise 3.2s ease-out infinite;
+            transform-origin: 432px 72px;
         }
         .anim-smoke-2 {
-            animation: smoke-float-2 3.2s ease-out infinite 1.6s;
-            transform-origin: 326px 66px;
+            animation: funnel-vapor-rise 3.2s ease-out infinite 1.6s;
+            transform-origin: 432px 72px;
         }
         .anim-radar {
-            animation: radar-spin-2d 4s linear infinite;
-            transform-origin: 310px 62px;
+            animation: maritime-radar-sweep 3.6s linear infinite;
+            transform-origin: 436px 66px;
         }
         .anim-beacon {
-            animation: beacon-glow 2.5s ease-in-out infinite;
+            animation: aviation-strobe-flash 2.2s ease-in-out infinite;
         }
-        .anim-nav-green {
-            animation: nav-light-starboard 1.8s steps(1) infinite;
-        }
-        .anim-nav-red {
-            animation: nav-light-port 1.8s steps(1) infinite;
+        .anim-nav-white {
+            animation: masthead-strobe-flash 2.2s steps(1) infinite;
         }
         .anim-crane-floodlight {
-            animation: port-crane-light 4s ease-in-out infinite;
+            animation: floodlight-volumetric 5s ease-in-out infinite;
+        }
+        .anim-reflection {
+            animation: water-reflection-shimmer 4.2s ease-in-out infinite;
         }
     </style>
 </head>
@@ -196,247 +206,504 @@
 
                 <!-- SVG Cargo Ship & Containers Illustration With Dynamic Port Animation -->
                 <div class="bg-slate-950/90 rounded-2xl p-4 sm:p-5 border border-slate-800/80 shadow-2xl backdrop-blur-md overflow-hidden relative group">
-                    <svg viewBox="0 0 460 210" width="100%" class="h-auto select-none" role="img" aria-label="Animasi Kapal Kontainer dan Crane Pelabuhan Logistik">
+                    <svg viewBox="0 0 540 240" width="100%" class="h-auto select-none" role="img" aria-label="Animasi Kapal Kontainer dan Crane Pelabuhan Logistik">
                         <defs>
                             <!-- Sky Gradient -->
                             <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#050C1B"/>
-                                <stop offset="55%" stop-color="#0A1832"/>
-                                <stop offset="100%" stop-color="#0E244D"/>
+                                <stop offset="0%" stop-color="#030712"/>
+                                <stop offset="55%" stop-color="#07152B"/>
+                                <stop offset="100%" stop-color="#0E274D"/>
                             </linearGradient>
 
-                            <!-- Ocean Gradient -->
+                            <!-- Deep Ocean Gradients -->
                             <linearGradient id="seaGrad1" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#1D4ED8" stop-opacity="0.9"/>
-                                <stop offset="100%" stop-color="#0A1938" stop-opacity="0.95"/>
+                                <stop offset="0%" stop-color="#1D4ED8" stop-opacity="0.95"/>
+                                <stop offset="100%" stop-color="#030A18" stop-opacity="0.98"/>
                             </linearGradient>
                             <linearGradient id="seaGrad2" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="0%" stop-color="#2563EB" stop-opacity="0.75"/>
-                                <stop offset="100%" stop-color="#0E234B" stop-opacity="0.9"/>
+                                <stop offset="100%" stop-color="#081A38" stop-opacity="0.92"/>
                             </linearGradient>
 
-                            <!-- Crane Light Beam Cone Gradient -->
-                            <linearGradient id="craneLightGrad" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#FDE047" stop-opacity="0.45"/>
+                            <!-- Volumetric Floodlight Beam -->
+                            <linearGradient id="craneFloodGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#FDE047" stop-opacity="0.55"/>
+                                <stop offset="45%" stop-color="#FDE047" stop-opacity="0.22"/>
                                 <stop offset="100%" stop-color="#FDE047" stop-opacity="0.0"/>
                             </linearGradient>
 
-                            <!-- Ship Hull Gradient -->
-                            <linearGradient id="hullGrad" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#1E293B"/>
-                                <stop offset="70%" stop-color="#0F172A"/>
-                                <stop offset="71%" stop-color="#DC2626"/>
-                                <stop offset="100%" stop-color="#991B1B"/>
+                            <!-- Ship Hull Realistic Metallic Finish -->
+                            <linearGradient id="hullTopsidesGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#334155"/>
+                                <stop offset="12%" stop-color="#1E293B"/>
+                                <stop offset="100%" stop-color="#0F172A"/>
+                            </linearGradient>
+                            <linearGradient id="hullBottomGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#991B1B"/>
+                                <stop offset="60%" stop-color="#7F1D1D"/>
+                                <stop offset="100%" stop-color="#450A0A"/>
                             </linearGradient>
 
-                            <!-- Container Pattern -->
-                            <pattern id="ctnRibs" width="4" height="20" patternUnits="userSpaceOnUse">
-                                <line x1="2" y1="0" x2="2" y2="20" stroke="rgba(0,0,0,0.22)" stroke-width="1"/>
+                            <!-- Crane Steel Gradient -->
+                            <linearGradient id="craneSteelGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#475569"/>
+                                <stop offset="50%" stop-color="#1E293B"/>
+                                <stop offset="100%" stop-color="#0F172A"/>
+                            </linearGradient>
+
+                            <!-- Crane Safety Amber Gradient -->
+                            <linearGradient id="craneAmberGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#FBBF24"/>
+                                <stop offset="50%" stop-color="#F59E0B"/>
+                                <stop offset="100%" stop-color="#B45309"/>
+                            </linearGradient>
+
+                            <!-- Container Vertical Corrugation Rib Pattern -->
+                            <pattern id="ctnRibs2" width="3.5" height="18" patternUnits="userSpaceOnUse">
+                                <line x1="1" y1="0" x2="1" y2="18" stroke="rgba(255,255,255,0.18)" stroke-width="0.8"/>
+                                <line x1="2.5" y1="0" x2="2.5" y2="18" stroke="rgba(0,0,0,0.35)" stroke-width="0.8"/>
+                            </pattern>
+
+                            <!-- Quayside Safety Curb Pattern -->
+                            <pattern id="quayHazardPattern" width="10" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                                <rect width="5" height="7" fill="#F59E0B"/>
+                                <rect x="5" width="5" height="7" fill="#0F172A"/>
                             </pattern>
                         </defs>
 
-                        <!-- 1. Background Sky & Stars -->
-                        <rect x="0" y="0" width="460" height="210" rx="14" fill="url(#skyGrad)"/>
+                        <!-- 1. Background Sky & Starfield -->
+                        <rect x="0" y="0" width="540" height="240" rx="14" fill="url(#skyGrad)"/>
                         
-                        <!-- Stars in Sky -->
-                        <circle cx="45" cy="22" r="1" fill="#FFFFFF" opacity="0.6"/>
-                        <circle cx="95" cy="15" r="1.2" fill="#BAE6FD" opacity="0.8"/>
-                        <circle cx="160" cy="28" r="0.8" fill="#FFFFFF" opacity="0.5"/>
-                        <circle cx="215" cy="18" r="1" fill="#FFFFFF" opacity="0.7"/>
-                        <circle cx="270" cy="24" r="1.3" fill="#BAE6FD" opacity="0.8"/>
-                        <circle cx="340" cy="14" r="0.9" fill="#FFFFFF" opacity="0.6"/>
-                        <circle cx="395" cy="26" r="1.2" fill="#FFFFFF" opacity="0.7"/>
-                        <circle cx="430" cy="18" r="1" fill="#BAE6FD" opacity="0.8"/>
+                        <!-- Realistic Subtle Stars -->
+                        <circle cx="35" cy="18" r="0.8" fill="#FFFFFF" opacity="0.6"/>
+                        <circle cx="85" cy="12" r="1.1" fill="#BAE6FD" opacity="0.8"/>
+                        <circle cx="150" cy="22" r="0.7" fill="#FFFFFF" opacity="0.5"/>
+                        <circle cx="210" cy="14" r="0.9" fill="#FFFFFF" opacity="0.7"/>
+                        <circle cx="280" cy="20" r="1.2" fill="#BAE6FD" opacity="0.8"/>
+                        <circle cx="360" cy="12" r="0.8" fill="#FFFFFF" opacity="0.6"/>
+                        <circle cx="430" cy="24" r="1.1" fill="#FFFFFF" opacity="0.7"/>
+                        <circle cx="495" cy="15" r="0.9" fill="#BAE6FD" opacity="0.8"/>
 
-                        <!-- Crescent Moon -->
-                        <path d="M418 20 A 10 10 0 1 0 428 35 A 12 12 0 1 1 418 20 Z" fill="#F8FAFC" opacity="0.85"/>
+                        <!-- Crescent Moon with Atmospheric Glow -->
+                        <circle cx="490" cy="28" r="16" fill="#F8FAFC" opacity="0.04"/>
+                        <path d="M486 20 A 9 9 0 1 0 496 34 A 11 11 0 1 1 486 20 Z" fill="#F1F5F9" opacity="0.9"/>
 
-                        <!-- Distant Harbor Horizon Silhouette -->
-                        <path d="M0 135 L60 135 L75 130 L110 130 L130 135 L460 135 L460 145 L0 145 Z" fill="#061226"/>
+                        <!-- Distant Harbor Horizon Silhouette & Port Terminals -->
+                        <path d="M0 152 L70 152 L85 147 L120 147 L135 152 L260 152 L275 148 L320 148 L335 152 L540 152 L540 162 L0 162 Z" fill="#050E1F"/>
+                        <!-- Distant Horizon Crane Silhouettes -->
+                        <line x1="285" y1="148" x2="285" y2="132" stroke="#081730" stroke-width="1.2"/>
+                        <line x1="275" y1="134" x2="310" y2="134" stroke="#081730" stroke-width="1"/>
+                        <circle cx="285" cy="132" r="0.8" fill="#EF4444" opacity="0.7"/>
+                        <!-- Distant Terminal Amber Lights -->
+                        <circle cx="100" cy="149" r="1" fill="#F59E0B" opacity="0.7"/>
+                        <circle cx="112" cy="149" r="0.8" fill="#FDE047" opacity="0.8"/>
+                        <circle cx="295" cy="150" r="1" fill="#F59E0B" opacity="0.7"/>
 
-                        <!-- 2. Back Sea Wave Layer (Beranimasi) -->
+                        <!-- 2. Back Sea Wave Layer (Beranimasi Ombak Alami) -->
                         <g class="anim-wave-back">
-                            <path d="M-40 142 Q 20 138, 80 142 T 200 142 T 320 142 T 440 142 T 560 142 L 560 210 L -40 210 Z" fill="url(#seaGrad2)"/>
+                            <path d="M-40 158 Q 30 153, 100 158 T 240 158 T 380 158 T 520 158 T 660 158 L 660 240 L -40 240 Z" fill="url(#seaGrad2)"/>
                         </g>
 
-                        <!-- 3. CARGO VESSEL (Beranimasi Mengapung & Berayun) -->
+                        <!-- Water Light Reflections (Pantulan Cahaya Lampu di Permukaan Air) -->
+                        <g class="anim-reflection">
+                            <!-- Pantulan Lampu Crane -->
+                            <ellipse cx="190" cy="180" rx="42" ry="3.5" fill="#FDE047" opacity="0.32" filter="blur(2px)"/>
+                            <!-- Pantulan Lampu Anjungan Kapal -->
+                            <ellipse cx="445" cy="180" rx="26" ry="2.5" fill="#38BDF8" opacity="0.3" filter="blur(2px)"/>
+                        </g>
+
+                        <!-- 3. REALISTIC CONTAINER VESSEL (Beranimasi Buoyancy Hidrostatik Nyata) -->
                         <g class="anim-vessel">
-                            <!-- Waterline wake & reflection -->
-                            <ellipse cx="250" cy="154" rx="145" ry="5" fill="#38BDF8" opacity="0.25"/>
+                            <!-- Hull Waterline Shadow & Hydrodynamic Wake -->
+                            <ellipse cx="310" cy="174" rx="175" ry="5.5" fill="#020617" opacity="0.55"/>
 
-                            <!-- Ship Hull (Lambung Kapal) -->
-                            <path d="M120 114 L360 114 L395 130 L380 152 L132 152 L120 135 Z" fill="url(#hullGrad)"/>
-                            <!-- Waterline Stripe -->
-                            <line x1="130" y1="140" x2="384" y2="140" stroke="#FFFFFF" stroke-width="1.2" opacity="0.85"/>
-                            
-                            <!-- Hawsehole & Anchor -->
-                            <circle cx="378" cy="126" r="2" fill="#0B132B"/>
-                            <path d="M378 127 L377 132 M375 131 Q 377 134, 379 131" stroke="#475569" stroke-width="0.8" fill="none"/>
+                            <!-- SHIP HULL (Lambung Kapal) -->
+                            <!-- Underwater Red Anti-Fouling Bottom -->
+                            <path d="M148 174 L472 174 Q 486 177, 482 186 L476 186 Q 464 179, 160 179 L148 174 Z" fill="url(#hullBottomGrad)"/>
+                            <!-- Bulbous Bow Underwater -->
+                            <ellipse cx="482" cy="185" rx="5" ry="3.5" fill="#7F1D1D"/>
+                            <!-- Crisp White Waterline Stripe (Boot-Topping) -->
+                            <path d="M144 173 L476 173 L477 175 L144 175 Z" fill="#FFFFFF" opacity="0.95"/>
 
-                            <!-- Navigation Lights -->
-                            <circle cx="394" cy="128" r="2" fill="#10B981" class="anim-nav-green"/>
-                            <circle cx="394" cy="132" r="2" fill="#EF4444" class="anim-nav-red"/>
+                            <!-- Main Hull Freeboard Topsides (Charcoal Navy Steel) -->
+                            <path d="M136 142 L420 142 L454 142 Q 476 156, 477 173 L144 173 L136 156 Z" fill="url(#hullTopsidesGrad)"/>
+                            <!-- Sheer Strake Highlight (Pancaran Cahaya Tepi Geladak) -->
+                            <line x1="136" y1="143" x2="456" y2="143" stroke="#64748B" stroke-width="1.2" opacity="0.85"/>
 
-                            <!-- DECK CONTAINERS -->
-                            <!-- Baris 1 -->
-                            <rect x="130" y="92" width="28" height="22" rx="1.5" fill="#EA580C"/>
-                            <rect x="130" y="92" width="28" height="22" fill="url(#ctnRibs)"/>
-                            <rect x="160" y="92" width="28" height="22" rx="1.5" fill="#0284C7"/>
-                            <rect x="160" y="92" width="28" height="22" fill="url(#ctnRibs)"/>
-                            <rect x="190" y="92" width="28" height="22" rx="1.5" fill="#059669"/>
-                            <rect x="190" y="92" width="28" height="22" fill="url(#ctnRibs)"/>
-                            <rect x="220" y="92" width="28" height="22" rx="1.5" fill="#DB2777"/>
-                            <rect x="220" y="92" width="28" height="22" fill="url(#ctnRibs)"/>
-                            <rect x="250" y="92" width="28" height="22" rx="1.5" fill="#1E40AF"/>
-                            <rect x="250" y="92" width="28" height="22" fill="url(#ctnRibs)"/>
+                            <!-- Anchor Hawse Pipe & Bower Anchor -->
+                            <ellipse cx="462" cy="154" rx="2.2" ry="3" fill="#020617"/>
+                            <path d="M462 155 L461 161 M458 159 Q 461 163, 464 159" stroke="#94A3B8" stroke-width="1" fill="none"/>
+                            <!-- Bow Fairlead & Mooring Line tied to dock -->
+                            <circle cx="452" cy="146" r="1.4" fill="#0B132B"/>
+                            <path d="M452 147 Q 280 156, 122 158" stroke="#D1D5DB" stroke-width="1" fill="none" opacity="0.7" stroke-dasharray="3,1.5"/>
+                            <path d="M142 147 Q 132 154, 118 158" stroke="#D1D5DB" stroke-width="1" fill="none" opacity="0.7"/>
 
-                            <!-- Baris 2 -->
-                            <rect x="145" y="70" width="28" height="22" rx="1.5" fill="#06B6D4"/>
-                            <rect x="145" y="70" width="28" height="22" fill="url(#ctnRibs)"/>
-                            <rect x="175" y="70" width="28" height="22" rx="1.5" fill="#38BDF8"/>
-                            <rect x="175" y="70" width="28" height="22" fill="url(#ctnRibs)"/>
-                            <rect x="205" y="70" width="28" height="22" rx="1.5" fill="#D97706"/>
-                            <rect x="205" y="70" width="28" height="22" fill="url(#ctnRibs)"/>
-                            <rect x="235" y="70" width="28" height="22" rx="1.5" fill="#10B981"/>
-                            <rect x="235" y="70" width="28" height="22" fill="url(#ctnRibs)"/>
+                            <!-- Bow Draft Marks (Indikator Kedalaman Sarang Air) -->
+                            <line x1="472" y1="166" x2="474" y2="166" stroke="#FFFFFF" stroke-width="0.8" opacity="0.8"/>
+                            <line x1="473" y1="169" x2="475" y2="169" stroke="#FFFFFF" stroke-width="0.8" opacity="0.8"/>
+                            <line x1="474" y1="172" x2="476" y2="172" stroke="#FFFFFF" stroke-width="0.8" opacity="0.8"/>
 
-                            <!-- Baris 3 -->
-                            <rect x="160" y="48" width="28" height="22" rx="1.5" fill="#BE185D"/>
-                            <rect x="160" y="48" width="28" height="22" fill="url(#ctnRibs)"/>
-                            <rect x="190" y="48" width="28" height="22" rx="1.5" fill="#E2E8F0"/>
-                            <rect x="190" y="48" width="28" height="22" fill="url(#ctnRibs)"/>
-                            <circle cx="196" cy="54" r="1.5" fill="#0284C7"/>
-                            <rect x="220" y="48" width="28" height="22" rx="1.5" fill="#F97316"/>
-                            <rect x="220" y="48" width="28" height="22" fill="url(#ctnRibs)"/>
+                            <!-- Bow Navigation Lights -->
+                            <circle cx="476" cy="156" r="1.8" fill="#10B981"/>
+                            <circle cx="476" cy="159" r="1.8" fill="#EF4444"/>
 
-                            <!-- NAVIGATION BRIDGE -->
-                            <rect x="290" y="80" width="48" height="34" rx="2" fill="#E2E8F0"/>
-                            <rect x="294" y="86" width="40" height="4" rx="1" fill="#0F172A"/>
-                            <rect x="294" y="58" width="40" height="22" rx="2" fill="#F8FAFC"/>
-                            <rect x="298" y="62" width="32" height="7" rx="1" fill="#FDE047" opacity="0.9"/>
-                            <line x1="306" y1="62" x2="306" y2="69" stroke="#0F172A" stroke-width="0.8"/>
-                            <line x1="314" y1="62" x2="314" y2="69" stroke="#0F172A" stroke-width="0.8"/>
-                            <line x1="322" y1="62" x2="322" y2="69" stroke="#0F172A" stroke-width="0.8"/>
+                            <!-- CELL GUIDES & LASHING BRIDGES (Struktur Baja Penahan Kontainer) -->
+                            <line x1="228" y1="78" x2="228" y2="142" stroke="#334155" stroke-width="1.8"/>
+                            <line x1="322" y1="78" x2="322" y2="142" stroke="#334155" stroke-width="1.8"/>
+                            <line x1="416" y1="78" x2="416" y2="142" stroke="#334155" stroke-width="1.8"/>
 
-                            <rect x="286" y="62" width="8" height="4" rx="1" fill="#CBD5E1"/>
-                            <rect x="334" y="62" width="8" height="4" rx="1" fill="#CBD5E1"/>
+                            <!-- Lashing Bridge Platforms -->
+                            <rect x="225" y="118" width="6" height="2" fill="#64748B"/>
+                            <rect x="319" y="118" width="6" height="2" fill="#64748B"/>
 
-                            <!-- Ship Funnel -->
-                            <rect x="320" y="44" width="14" height="15" rx="1" fill="#DC2626"/>
-                            <rect x="320" y="44" width="14" height="4" fill="#0F172A"/>
-                            <circle cx="327" cy="52" r="3" fill="#FFFFFF"/>
+                            <!-- ============================================== -->
+                            <!-- REALISTIC DECK CONTAINER STACKS (3 BAYS, 4 TIERS) -->
+                            <!-- ============================================== -->
 
-                            <!-- Chimney Smoke -->
-                            <circle cx="327" cy="40" r="3.5" fill="#E2E8F0" class="anim-smoke-1"/>
-                            <circle cx="327" cy="40" r="3" fill="#E2E8F0" class="anim-smoke-2"/>
+                            <!-- BAY 1 (Stern Bay: x=148 to 226) -->
+                            <!-- Tier 1 -->
+                            <rect x="150" y="122" width="36" height="20" rx="1" fill="#EA580C"/>
+                            <rect x="150" y="122" width="36" height="20" fill="url(#ctnRibs2)"/>
+                            <rect x="188" y="122" width="36" height="20" rx="1" fill="#0284C7"/>
+                            <rect x="188" y="122" width="36" height="20" fill="url(#ctnRibs2)"/>
 
-                            <!-- Main Mast & Radar -->
-                            <line x1="310" y1="58" x2="310" y2="38" stroke="#64748B" stroke-width="1.8"/>
-                            <line x1="304" y1="46" x2="316" y2="46" stroke="#64748B" stroke-width="1.2"/>
+                            <!-- Tier 2 -->
+                            <rect x="150" y="101" width="36" height="20" rx="1" fill="#065F46"/>
+                            <rect x="150" y="101" width="36" height="20" fill="url(#ctnRibs2)"/>
+                            <rect x="188" y="101" width="36" height="20" rx="1" fill="#BE185D"/>
+                            <rect x="188" y="101" width="36" height="20" fill="url(#ctnRibs2)"/>
+
+                            <!-- Tier 3 -->
+                            <rect x="150" y="80" width="36" height="20" rx="1" fill="#1E3A8A"/>
+                            <rect x="150" y="80" width="36" height="20" fill="url(#ctnRibs2)"/>
+                            <rect x="188" y="80" width="36" height="20" rx="1" fill="#F1F5F9"/>
+                            <rect x="188" y="80" width="36" height="20" fill="url(#ctnRibs2)"/>
+                            <!-- Reefer cooling unit grille -->
+                            <rect x="216" y="83" width="7" height="14" rx="0.5" fill="#0284C7"/>
+                            <line x1="217" y1="86" x2="222" y2="86" stroke="#FFFFFF" stroke-width="0.8"/>
+                            <line x1="217" y1="90" x2="222" y2="90" stroke="#FFFFFF" stroke-width="0.8"/>
+                            <line x1="217" y1="94" x2="222" y2="94" stroke="#FFFFFF" stroke-width="0.8"/>
+
+                            <!-- BAY 2 (Midship Bay: x=232 to 320) -->
+                            <!-- Tier 1 -->
+                            <rect x="232" y="122" width="42" height="20" rx="1" fill="#0284C7"/>
+                            <rect x="232" y="122" width="42" height="20" fill="url(#ctnRibs2)"/>
+                            <!-- Maersk White Star Emblem -->
+                            <circle cx="253" cy="132" r="3" fill="#FFFFFF" opacity="0.9"/>
+                            <polygon points="253,130 254,132 256,132 254.5,133.5 255,135.5 253,134 251,135.5 251.5,133.5 250,132 252,132" fill="#0284C7"/>
+
+                            <rect x="276" y="122" width="42" height="20" rx="1" fill="#065F46"/>
+                            <rect x="276" y="122" width="42" height="20" fill="url(#ctnRibs2)"/>
+
+                            <!-- Tier 2 -->
+                            <rect x="232" y="101" width="42" height="20" rx="1" fill="#EA580C"/>
+                            <rect x="232" y="101" width="42" height="20" fill="url(#ctnRibs2)"/>
+                            <rect x="276" y="101" width="42" height="20" rx="1" fill="#1E3A8A"/>
+                            <rect x="276" y="101" width="42" height="20" fill="url(#ctnRibs2)"/>
+
+                            <!-- Tier 3 -->
+                            <rect x="232" y="80" width="42" height="20" rx="1" fill="#BE185D"/>
+                            <rect x="232" y="80" width="42" height="20" fill="url(#ctnRibs2)"/>
+                            <rect x="276" y="80" width="42" height="20" rx="1" fill="#F1F5F9"/>
+                            <rect x="276" y="80" width="42" height="20" fill="url(#ctnRibs2)"/>
+
+                            <!-- Tier 4 (Top Stack on Midship) -->
+                            <rect x="245" y="59" width="42" height="20" rx="1" fill="#0284C7"/>
+                            <rect x="245" y="59" width="42" height="20" fill="url(#ctnRibs2)"/>
+
+                            <!-- BAY 3 (Forward Bay: x=326 to 414) -->
+                            <!-- Tier 1 -->
+                            <rect x="326" y="122" width="42" height="20" rx="1" fill="#1E3A8A"/>
+                            <rect x="326" y="122" width="42" height="20" fill="url(#ctnRibs2)"/>
+                            <rect x="370" y="122" width="42" height="20" rx="1" fill="#EA580C"/>
+                            <rect x="370" y="122" width="42" height="20" fill="url(#ctnRibs2)"/>
+
+                            <!-- Tier 2 -->
+                            <rect x="326" y="101" width="42" height="20" rx="1" fill="#065F46"/>
+                            <rect x="326" y="101" width="42" height="20" fill="url(#ctnRibs2)"/>
+                            <rect x="370" y="101" width="42" height="20" rx="1" fill="#0284C7"/>
+                            <rect x="370" y="101" width="42" height="20" fill="url(#ctnRibs2)"/>
+
+                            <!-- Tier 3 -->
+                            <rect x="338" y="80" width="42" height="20" rx="1" fill="#BE185D"/>
+                            <rect x="338" y="80" width="42" height="20" fill="url(#ctnRibs2)"/>
+
+                            <!-- Diagonal Steel Lashing Rods (Silang Pengikat Kontainer Kapal Samudra) -->
+                            <g stroke="#E2E8F0" stroke-width="0.7" opacity="0.45" stroke-dasharray="1.5,1">
+                                <line x1="150" y1="142" x2="186" y2="101"/>
+                                <line x1="186" y1="142" x2="150" y2="101"/>
+                                <line x1="188" y1="142" x2="224" y2="101"/>
+                                <line x1="224" y1="142" x2="188" y2="101"/>
+                                <line x1="232" y1="142" x2="274" y2="101"/>
+                                <line x1="274" y1="142" x2="232" y2="101"/>
+                                <line x1="276" y1="142" x2="318" y2="101"/>
+                                <line x1="318" y1="142" x2="276" y2="101"/>
+                                <line x1="326" y1="142" x2="368" y2="101"/>
+                                <line x1="368" y1="142" x2="326" y2="101"/>
+                                <line x1="370" y1="142" x2="412" y2="101"/>
+                                <line x1="412" y1="142" x2="370" y2="101"/>
+                            </g>
+
+                            <!-- Modern Twistlock Corner Castings (Ujung Sudut Kontainer Standar ISO) -->
+                            <g fill="#94A3B8" opacity="0.8">
+                                <rect x="149" y="122" width="2" height="2.5"/>
+                                <rect x="185" y="122" width="2" height="2.5"/>
+                                <rect x="149" y="139" width="2" height="2.5"/>
+                                <rect x="185" y="139" width="2" height="2.5"/>
+                                <rect x="231" y="122" width="2" height="2.5"/>
+                                <rect x="273" y="122" width="2" height="2.5"/>
+                                <rect x="275" y="122" width="2" height="2.5"/>
+                                <rect x="317" y="122" width="2" height="2.5"/>
+                            </g>
+
+                            <!-- ACCOMMODATION SUPERSTRUCTURE & NAVIGATION BRIDGE (Anjungan Kapal) -->
+                            <!-- Deckhouse Base Structure -->
+                            <rect x="420" y="102" width="38" height="40" rx="1.5" fill="#F8FAFC"/>
+                            <!-- Porthole Cabins (Jendela Kabin Awak Kapal) -->
+                            <circle cx="428" cy="114" r="1.5" fill="#0F172A"/>
+                            <circle cx="436" cy="114" r="1.5" fill="#0F172A"/>
+                            <circle cx="444" cy="114" r="1.5" fill="#0F172A"/>
+                            <circle cx="428" cy="126" r="1.5" fill="#0F172A"/>
+                            <circle cx="436" cy="126" r="1.5" fill="#0F172A"/>
+                            <circle cx="444" cy="126" r="1.5" fill="#0F172A"/>
+
+                            <!-- Navigation Bridge Upper Deck -->
+                            <rect x="416" y="86" width="46" height="17" rx="1.5" fill="#F8FAFC"/>
+                            <!-- Extended Aerodynamic Bridge Wings -->
+                            <rect x="412" y="90" width="5" height="4" rx="0.8" fill="#E2E8F0"/>
+                            <rect x="461" y="90" width="5" height="4" rx="0.8" fill="#E2E8F0"/>
+
+                            <!-- Illuminated Panoramic Bridge Cockpit Windows -->
+                            <rect x="419" y="89" width="38" height="6.5" rx="1" fill="#0B132B"/>
+                            <rect x="420" y="90" width="36" height="4.5" rx="0.8" fill="#38BDF8" opacity="0.85"/>
+                            <!-- Console Glow Interior -->
+                            <circle cx="426" cy="92" r="1.2" fill="#10B981"/>
+                            <circle cx="438" cy="92" r="1.2" fill="#FDE047"/>
+                            <circle cx="448" cy="92" r="1.2" fill="#38BDF8"/>
+                            <line x1="428" y1="89" x2="428" y2="95" stroke="#0F172A" stroke-width="0.8"/>
+                            <line x1="436" y1="89" x2="436" y2="95" stroke="#0F172A" stroke-width="0.8"/>
+                            <line x1="444" y1="89" x2="444" y2="95" stroke="#0F172A" stroke-width="0.8"/>
+
+                            <!-- Ship Funnel (Cerobong Asap Kapal Modern) -->
+                            <path d="M444 86 L454 86 L451 70 L441 70 Z" fill="#DC2626"/>
+                            <rect x="441" y="68" width="10" height="3" fill="#0F172A"/>
+                            <!-- Funnel Company Emblem -->
+                            <circle cx="447" cy="78" r="2.5" fill="#FFFFFF"/>
+
+                            <!-- Funnel Exhaust Heat & Vapor Dispersion -->
+                            <circle cx="446" cy="64" r="3.2" fill="#E2E8F0" class="anim-smoke-1"/>
+                            <circle cx="446" cy="64" r="3.5" fill="#CBD5E1" class="anim-smoke-2"/>
+
+                            <!-- Main Mast, Radar & Communication Domes -->
+                            <line x1="436" y1="86" x2="436" y2="56" stroke="#475569" stroke-width="1.8"/>
+                            <line x1="430" y1="67" x2="442" y2="67" stroke="#475569" stroke-width="1.2"/>
+                            <!-- Satcom Dome (Antena Satelit Kubah Putih) -->
+                            <circle cx="430" cy="84" r="2.5" fill="#F8FAFC"/>
+                            <circle cx="436" cy="84" r="2.5" fill="#F8FAFC"/>
+
+                            <!-- Spinning X-Band Marine Radar Scanner -->
                             <g class="anim-radar">
-                                <line x1="305" y1="38" x2="315" y2="38" stroke="#38BDF8" stroke-width="2" stroke-linecap="round"/>
+                                <line x1="430" y1="58" x2="442" y2="58" stroke="#38BDF8" stroke-width="2" stroke-linecap="round"/>
                             </g>
-                            <circle cx="310" cy="36" r="2" fill="#38BDF8" class="anim-beacon"/>
+                            <!-- Masthead Navigation White Strobe -->
+                            <circle cx="436" cy="54" r="1.8" fill="#F8FAFC" class="anim-nav-white"/>
                         </g>
 
-                        <!-- 4. QUAYSIDE DERMAGA -->
+                        <!-- 4. QUAYSIDE DERMAGA (Dermaga Pelabuhan Petikemas Internasional) -->
                         <g>
-                            <rect x="0" y="132" width="112" height="78" fill="#1E293B"/>
-                            <rect x="0" y="132" width="112" height="7" fill="#334155"/>
-                            <g opacity="0.85">
-                                <polygon points="0,132 8,132 3,139 0,139" fill="#F59E0B"/>
-                                <polygon points="12,132 20,132 15,139 7,139" fill="#F59E0B"/>
-                                <polygon points="24,132 32,132 27,139 19,139" fill="#F59E0B"/>
-                                <polygon points="36,132 44,132 39,139 31,139" fill="#F59E0B"/>
-                                <polygon points="48,132 56,132 51,139 43,139" fill="#F59E0B"/>
-                                <polygon points="60,132 68,132 63,139 55,139" fill="#F59E0B"/>
-                                <polygon points="72,132 80,132 75,139 67,139" fill="#F59E0B"/>
-                                <polygon points="84,132 92,132 87,139 79,139" fill="#F59E0B"/>
-                                <polygon points="96,132 104,132 99,139 91,139" fill="#F59E0B"/>
-                                <polygon points="108,132 112,132 111,139 103,139" fill="#F59E0B"/>
+                            <!-- Concrete Pavement Berth Floor -->
+                            <rect x="0" y="156" width="124" height="84" fill="#1E293B"/>
+                            <!-- Pavement Concrete Joint Lines -->
+                            <line x1="40" y1="156" x2="40" y2="240" stroke="#0F172A" stroke-width="1"/>
+                            <line x1="80" y1="156" x2="80" y2="240" stroke="#0F172A" stroke-width="1"/>
+
+                            <!-- Heavy Crane Rail Tracks embedded in pavement -->
+                            <line x1="24" y1="156" x2="24" y2="240" stroke="#64748B" stroke-width="2"/>
+                            <line x1="90" y1="156" x2="90" y2="240" stroke="#64748B" stroke-width="2"/>
+
+                            <!-- Wharf Edge Concrete Curbing with Safety Hazard Stripes -->
+                            <rect x="0" y="156" width="124" height="6" fill="url(#quayHazardPattern)"/>
+                            <rect x="0" y="162" width="124" height="3" fill="#0F172A"/>
+
+                            <!-- Hanging Heavy Rubber Cylindrical Marine Fenders -->
+                            <g fill="#020617" stroke="#475569" stroke-width="0.8">
+                                <!-- Fender 1 -->
+                                <line x1="30" y1="165" x2="30" y2="169" stroke="#94A3B8" stroke-width="0.8"/>
+                                <rect x="26" y="169" width="8" height="15" rx="3.5"/>
+                                <!-- Fender 2 -->
+                                <line x1="72" y1="165" x2="72" y2="169" stroke="#94A3B8" stroke-width="0.8"/>
+                                <rect x="68" y="169" width="8" height="15" rx="3.5"/>
+                                <!-- Fender 3 -->
+                                <line x1="112" y1="165" x2="112" y2="169" stroke="#94A3B8" stroke-width="0.8"/>
+                                <rect x="108" y="169" width="8" height="15" rx="3.5"/>
                             </g>
 
-                            <!-- Bollard & Line -->
-                            <rect x="98" y="128" width="6" height="5" rx="1.5" fill="#0F172A"/>
-                            <path d="M101 130 Q 112 136, 126 138" stroke="#78716C" stroke-width="1" fill="none" stroke-dasharray="2,1"/>
+                            <!-- Heavy Cast-Steel Mooring Bollards (Bolder Tambat) -->
+                            <rect x="94" y="150" width="7" height="7" rx="1.5" fill="#0F172A"/>
+                            <circle cx="97.5" cy="150" r="4" fill="#334155"/>
+                            <rect x="118" y="150" width="7" height="7" rx="1.5" fill="#0F172A"/>
+                            <circle cx="121.5" cy="150" r="4" fill="#334155"/>
 
-                            <!-- Kontainer Dermaga -->
-                            <rect x="25" y="112" width="28" height="20" rx="1.5" fill="#059669"/>
-                            <rect x="25" y="112" width="28" height="20" fill="url(#ctnRibs)"/>
-                            <rect x="55" y="112" width="28" height="20" rx="1.5" fill="#D97706"/>
-                            <rect x="55" y="112" width="28" height="20" fill="url(#ctnRibs)"/>
-                            <rect x="40" y="92" width="28" height="20" rx="1.5" fill="#0284C7"/>
-                            <rect x="40" y="92" width="28" height="20" fill="url(#ctnRibs)"/>
+                            <!-- TERMINAL PRIME MOVER (Truk Petikemas Kalmar/Terberg di Dermaga) -->
+                            <g>
+                                <!-- Headlights Beam on Pavement -->
+                                <polygon points="34,149 0,147 0,157 34,153" fill="url(#craneFloodGrad)" opacity="0.65"/>
+                                
+                                <!-- Prime Mover Cabin -->
+                                <rect x="34" y="142" width="16" height="13" rx="1.5" fill="#F8FAFC"/>
+                                <rect x="34" y="143" width="7" height="6" rx="0.8" fill="#0284C7"/>
+                                <!-- Windshield tinted glass -->
+                                <rect x="35" y="144" width="5" height="4" rx="0.5" fill="#38BDF8" opacity="0.85"/>
+                                <!-- Headlamp -->
+                                <circle cx="34.5" cy="150.5" r="1.2" fill="#FDE047"/>
+                                <!-- Roof amber warning light -->
+                                <circle cx="42" cy="141.5" r="1" fill="#F59E0B"/>
+
+                                <!-- Skeletal Chassis Trailer Frame -->
+                                <rect x="49" y="149" width="46" height="3.5" rx="0.8" fill="#F59E0B"/>
+                                <line x1="56" y1="149" x2="56" y2="154" stroke="#0F172A" stroke-width="1.5"/>
+                                <line x1="84" y1="149" x2="84" y2="154" stroke="#0F172A" stroke-width="1.5"/>
+
+                                <!-- Truck Wheels with Rims -->
+                                <circle cx="40" cy="154.5" r="2.8" fill="#020617"/>
+                                <circle cx="40" cy="154.5" r="1.2" fill="#94A3B8"/>
+                                <circle cx="78" cy="154.5" r="2.8" fill="#020617"/>
+                                <circle cx="78" cy="154.5" r="1.2" fill="#94A3B8"/>
+                                <circle cx="86" cy="154.5" r="2.8" fill="#020617"/>
+                                <circle cx="86" cy="154.5" r="1.2" fill="#94A3B8"/>
+                            </g>
                         </g>
 
-                        <!-- 5. STS GANTRY CRANE -->
+                        <!-- 5. REALISTIC SHIP-TO-SHORE (STS) GANTRY CRANE -->
                         <g>
-                            <polygon points="84,36 120,135 240,135 150,36" fill="url(#craneLightGrad)" class="anim-crane-floodlight"/>
+                            <!-- High-Intensity Volumetric Floodlight Beam Illuminating Ship & Dock -->
+                            <polygon points="84,40 28,172 260,172 170,40" fill="url(#craneFloodGrad)" class="anim-crane-floodlight"/>
 
-                            <line x1="28" y1="132" x2="48" y2="34" stroke="#F59E0B" stroke-width="4.5" stroke-linecap="round"/>
-                            <line x1="28" y1="132" x2="48" y2="34" stroke="#D97706" stroke-width="2"/>
-                            <line x1="88" y1="132" x2="72" y2="34" stroke="#F59E0B" stroke-width="4.5" stroke-linecap="round"/>
-                            <line x1="88" y1="132" x2="72" y2="34" stroke="#D97706" stroke-width="2"/>
+                            <!-- PORTAL LEGS & TRUSS FRAMEWORK -->
+                            <!-- Gantry Travel Bogies on Dock Rails -->
+                            <rect x="20" y="152" width="10" height="5" rx="1.2" fill="#0F172A"/>
+                            <circle cx="23" cy="155.5" r="1.5" fill="#F59E0B"/>
+                            <circle cx="27" cy="155.5" r="1.5" fill="#F59E0B"/>
+                            <rect x="85" y="152" width="10" height="5" rx="1.2" fill="#0F172A"/>
+                            <circle cx="88" cy="155.5" r="1.5" fill="#F59E0B"/>
+                            <circle cx="92" cy="155.5" r="1.5" fill="#F59E0B"/>
 
-                            <line x1="34" y1="105" x2="82" y2="105" stroke="#F59E0B" stroke-width="2"/>
-                            <line x1="38" y1="80" x2="78" y2="80" stroke="#F59E0B" stroke-width="2"/>
-                            <line x1="34" y1="105" x2="78" y2="80" stroke="#B45309" stroke-width="1.2"/>
-                            <line x1="82" y1="105" x2="38" y2="80" stroke="#B45309" stroke-width="1.2"/>
-                            <line x1="42" y1="58" x2="74" y2="58" stroke="#F59E0B" stroke-width="2.5"/>
+                            <!-- Heavy Structural Portal Legs (Twin A-Frames) -->
+                            <!-- Waterside Leg -->
+                            <line x1="25" y1="152" x2="52" y2="40" stroke="url(#craneSteelGrad)" stroke-width="5" stroke-linecap="round"/>
+                            <line x1="25" y1="152" x2="52" y2="40" stroke="#F59E0B" stroke-width="1.8"/>
+                            <!-- Landside Leg -->
+                            <line x1="90" y1="152" x2="78" y2="40" stroke="url(#craneSteelGrad)" stroke-width="5" stroke-linecap="round"/>
+                            <line x1="90" y1="152" x2="78" y2="40" stroke="#F59E0B" stroke-width="1.8"/>
 
-                            <rect x="44" y="32" width="32" height="12" rx="2" fill="#0F172A"/>
-                            <rect x="54" y="34" width="12" height="7" rx="1" fill="#FDE047" opacity="0.95"/>
+                            <!-- Portal Leg Cross-Bracing Girders & K-Trusses -->
+                            <line x1="33" y1="120" x2="84" y2="120" stroke="#1E293B" stroke-width="2.5"/>
+                            <line x1="39" y1="90" x2="81" y2="90" stroke="#1E293B" stroke-width="2.5"/>
+                            <line x1="33" y1="120" x2="81" y2="90" stroke="#F59E0B" stroke-width="1.2"/>
+                            <line x1="84" y1="120" x2="39" y2="90" stroke="#F59E0B" stroke-width="1.2"/>
+                            <line x1="45" y1="64" x2="79" y2="64" stroke="#1E293B" stroke-width="3"/>
 
-                            <line x1="12" y1="24" x2="275" y2="24" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
-                            <line x1="12" y1="34" x2="275" y2="34" stroke="#F59E0B" stroke-width="3.5" stroke-linecap="round"/>
+                            <!-- Safety Access Ladders & Cage -->
+                            <line x1="47" y1="120" x2="47" y2="42" stroke="#F59E0B" stroke-width="1" stroke-dasharray="2,2"/>
 
-                            <line x1="25" y1="24" x2="35" y2="34" stroke="#D97706" stroke-width="1.4"/>
-                            <line x1="45" y1="24" x2="55" y2="34" stroke="#D97706" stroke-width="1.4"/>
-                            <line x1="75" y1="24" x2="85" y2="34" stroke="#D97706" stroke-width="1.4"/>
-                            <line x1="105" y1="24" x2="115" y2="34" stroke="#D97706" stroke-width="1.4"/>
-                            <line x1="135" y1="24" x2="145" y2="34" stroke="#D97706" stroke-width="1.4"/>
-                            <line x1="165" y1="24" x2="175" y2="34" stroke="#D97706" stroke-width="1.4"/>
-                            <line x1="195" y1="24" x2="205" y2="34" stroke="#D97706" stroke-width="1.4"/>
-                            <line x1="225" y1="24" x2="235" y2="34" stroke="#D97706" stroke-width="1.4"/>
-                            <line x1="255" y1="24" x2="265" y2="34" stroke="#D97706" stroke-width="1.4"/>
+                            <!-- UPPER MACHINERY HOUSE & APEX TOWER -->
+                            <!-- Machinery Room (Counterweight Winch House at Rear) -->
+                            <rect x="42" y="36" width="38" height="15" rx="2" fill="#0F172A"/>
+                            <rect x="46" y="39" width="12" height="7" rx="1" fill="#FDE047" opacity="0.9"/>
+                            <circle cx="52" cy="42.5" r="1.5" fill="#B45309"/>
 
-                            <line x1="58" y1="34" x2="60" y2="8" stroke="#F59E0B" stroke-width="3.5"/>
-                            <line x1="60" y1="8" x2="15" y2="24" stroke="#78716C" stroke-width="1.2"/>
-                            <line x1="60" y1="8" x2="200" y2="24" stroke="#78716C" stroke-width="1.2"/>
-                            <circle cx="60" cy="7" r="1.8" fill="#EF4444" class="anim-beacon"/>
+                            <!-- Tower A-Frame Apex to Boom -->
+                            <line x1="62" y1="38" x2="65" y2="12" stroke="#F59E0B" stroke-width="4"/>
+                            <line x1="65" y1="12" x2="15" y2="30" stroke="#94A3B8" stroke-width="1.5"/>
+                            <line x1="65" y1="12" x2="230" y2="30" stroke="#94A3B8" stroke-width="1.5"/>
+                            
+                            <!-- Red Aviation Safety Obstruction Beacon at Apex -->
+                            <circle cx="65" cy="11" r="2.2" fill="#EF4444" class="anim-beacon"/>
 
-                            <!-- DYNAMIC TROLLEY -->
+                            <!-- MAIN LATTICE BOOM (Belalai Box-Girder Crane Melintang di atas Kapal) -->
+                            <!-- Boom Upper & Lower Main Chords -->
+                            <line x1="10" y1="28" x2="330" y2="28" stroke="#F59E0B" stroke-width="3.2" stroke-linecap="round"/>
+                            <line x1="10" y1="40" x2="330" y2="40" stroke="#F59E0B" stroke-width="4" stroke-linecap="round"/>
+                            <!-- Internal Web Diagonal Lacing along the entire boom -->
+                            <g stroke="#B45309" stroke-width="1.4">
+                                <line x1="20" y1="28" x2="32" y2="40"/>
+                                <line x1="44" y1="28" x2="32" y2="40"/>
+                                <line x1="44" y1="28" x2="56" y2="40"/>
+                                <line x1="68" y1="28" x2="56" y2="40"/>
+                                <line x1="68" y1="28" x2="80" y2="40"/>
+                                <line x1="92" y1="28" x2="80" y2="40"/>
+                                <line x1="92" y1="28" x2="104" y2="40"/>
+                                <line x1="116" y1="28" x2="104" y2="40"/>
+                                <line x1="116" y1="28" x2="128" y2="40"/>
+                                <line x1="140" y1="28" x2="128" y2="40"/>
+                                <line x1="140" y1="28" x2="152" y2="40"/>
+                                <line x1="164" y1="28" x2="152" y2="40"/>
+                                <line x1="164" y1="28" x2="176" y2="40"/>
+                                <line x1="188" y1="28" x2="176" y2="40"/>
+                                <line x1="188" y1="28" x2="200" y2="40"/>
+                                <line x1="212" y1="28" x2="200" y2="40"/>
+                                <line x1="212" y1="28" x2="224" y2="40"/>
+                                <line x1="236" y1="28" x2="224" y2="40"/>
+                                <line x1="236" y1="28" x2="248" y2="40"/>
+                                <line x1="260" y1="28" x2="248" y2="40"/>
+                                <line x1="260" y1="28" x2="272" y2="40"/>
+                                <line x1="284" y1="28" x2="272" y2="40"/>
+                                <line x1="284" y1="28" x2="296" y2="40"/>
+                                <line x1="308" y1="28" x2="296" y2="40"/>
+                                <line x1="308" y1="28" x2="320" y2="40"/>
+                            </g>
+
+                            <!-- Operator's Panoramic Suspended Glass Cabin -->
+                            <rect x="58" y="42" width="16" height="12" rx="2" fill="#0F172A"/>
+                            <rect x="59" y="44" width="14" height="9" rx="1" fill="#38BDF8" opacity="0.8"/>
+                            <circle cx="65" cy="49" r="2" fill="#FDE047"/>
+
+                            <!-- DYNAMIC WORKING TROLLEY ASSEMBLY (Kereta Troli Crane Bergerak 60FPS) -->
                             <g class="anim-crane-trolley">
-                                <rect x="74" y="31" width="20" height="6" rx="1.5" fill="#1E293B"/>
-                                <circle cx="78" cy="31" r="2" fill="#D97706"/>
-                                <circle cx="90" cy="31" r="2" fill="#D97706"/>
-                                <circle cx="84" cy="37" r="1.8" fill="#FDE047"/>
+                                <!-- Heavy Trolley Carriage Body -->
+                                <rect x="70" y="36" width="24" height="8" rx="2" fill="#0F172A"/>
+                                <circle cx="75" cy="36" r="2.5" fill="#F59E0B"/>
+                                <circle cx="89" cy="36" r="2.5" fill="#F59E0B"/>
+                                <!-- Trolley Warning Strobe & LED spotlight -->
+                                <circle cx="82" cy="43.5" r="2" fill="#FDE047"/>
                             </g>
 
-                            <!-- Hoist Cables -->
+                            <!-- DYNAMIC HIGH-TENSILE STEEL HOIST WIRE ROPES (Kabel Baja Pengangkat) -->
                             <g class="anim-crane-trolley">
                                 <g class="anim-crane-cable">
-                                    <line x1="79" y1="36" x2="79" y2="62" stroke="#E2E8F0" stroke-width="1" stroke-dasharray="2,1"/>
-                                    <line x1="89" y1="36" x2="89" y2="62" stroke="#E2E8F0" stroke-width="1" stroke-dasharray="2,1"/>
+                                    <line x1="75" y1="42" x2="75" y2="100" stroke="#F1F5F9" stroke-width="1" stroke-dasharray="3,1.5"/>
+                                    <line x1="89" y1="42" x2="89" y2="100" stroke="#F1F5F9" stroke-width="1" stroke-dasharray="3,1.5"/>
                                 </g>
                             </g>
 
-                            <!-- Spreader Bar & Lifted Container -->
+                            <!-- TELESCOPIC SPREADER HEADBLOCK (Kepala Spreader Twistlock) -->
+                            <g class="anim-spreader-headblock">
+                                <rect x="68" y="94" width="28" height="5" rx="1.2" fill="#F59E0B"/>
+                                <rect x="67" y="96" width="3" height="6" fill="#0F172A"/>
+                                <rect x="94" y="96" width="3" height="6" fill="#0F172A"/>
+                                <!-- Twistlock indicator lights -->
+                                <circle cx="71" cy="96" r="1" fill="#10B981"/>
+                                <circle cx="93" cy="96" r="1" fill="#10B981"/>
+                            </g>
+
+                            <!-- LIFTED 40FT CONTAINER (Kontainer Diangkat Crane dari Dermaga ke Kapal) -->
                             <g class="anim-container-lift">
-                                <rect x="70" y="60" width="28" height="4" rx="1" fill="#F59E0B"/>
-                                <rect x="69" y="62" width="2" height="4" fill="#0F172A"/>
-                                <rect x="97" y="62" width="2" height="4" fill="#0F172A"/>
-                                
-                                <rect x="70" y="64" width="28" height="20" rx="1.5" fill="#0284C7"/>
-                                <rect x="70" y="64" width="28" height="20" fill="url(#ctnRibs)"/>
-                                <text x="74" y="76" font-family="'JetBrains Mono', monospace" font-size="5" font-weight="700" fill="#FFFFFF" opacity="0.9">MAERSK</text>
+                                <rect x="68" y="99" width="28" height="20" rx="1.5" fill="#0284C7"/>
+                                <rect x="68" y="99" width="28" height="20" fill="url(#ctnRibs2)"/>
+                                <!-- Corner Castings & ISO Twistlock Holes -->
+                                <rect x="68" y="99" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="94" y="99" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="68" y="116.5" width="2" height="2.5" fill="#94A3B8"/>
+                                <rect x="94" y="116.5" width="2" height="2.5" fill="#94A3B8"/>
+                                <!-- Shipping Line White Star Mark -->
+                                <circle cx="82" cy="109" r="2.2" fill="#FFFFFF" opacity="0.9"/>
                             </g>
                         </g>
 
-                        <!-- 6. FOREGROUND WAVES -->
+                        <!-- 6. FOREGROUND WATER WAVES & BERTH FOAM (Ombak Laut Depan) -->
                         <g class="anim-wave-front">
-                            <path d="M-20 148 Q 40 143, 100 148 T 220 148 T 340 148 T 460 148 T 580 148 L 580 210 L -20 210 Z" fill="url(#seaGrad1)"/>
-                            <path d="M-20 148 Q 40 143, 100 148 T 220 148 T 340 148 T 460 148 T 580 148" stroke="#BAE6FD" stroke-width="1.2" fill="none" opacity="0.75"/>
+                            <path d="M-20 178 Q 50 173, 120 178 T 260 178 T 400 178 T 540 178 T 680 178 L 680 240 L -20 240 Z" fill="url(#seaGrad1)"/>
+                            <path d="M-20 178 Q 50 173, 120 178 T 260 178 T 400 178 T 540 178 T 680 178" stroke="#93C5FD" stroke-width="1.2" fill="none" opacity="0.8"/>
                         </g>
                     </svg>
                 </div>
