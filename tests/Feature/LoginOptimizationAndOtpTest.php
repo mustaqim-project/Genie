@@ -39,10 +39,13 @@ class LoginOptimizationAndOtpTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Persona Akun Demo');
-        $response->assertSee('WAN HAI 315');
-        $response->assertSee('STS CRANE ACTIVE');
         $response->assertSee('anim-vessel');
         $response->assertSee('anim-crane-trolley');
+        // Informasi redundan telah dibersihkan
+        $response->assertDontSee('WAN HAI 315');
+        $response->assertDontSee('STS CRANE ACTIVE');
+        $response->assertDontSee('CEISA 4.0 READY');
+        $response->assertDontSee('CEISA 4.0 Open API');
     }
 
     public function test_login_page_hides_demo_accounts_in_production(): void
@@ -58,8 +61,13 @@ class LoginOptimizationAndOtpTest extends TestCase
         $response->assertDontSee('⚡ Persona Akun Demo (Uji Coba Cepat RBAC)');
         $response->assertDontSee('Wajib 2FA (123456)');
         // Kapal dan crane tetap tampil megah
-        $response->assertSee('WAN HAI 315');
-        $response->assertSee('STS CRANE ACTIVE');
+        $response->assertSee('anim-vessel');
+        $response->assertSee('anim-crane-trolley');
+        // Informasi redundan telah dibersihkan
+        $response->assertDontSee('WAN HAI 315');
+        $response->assertDontSee('STS CRANE ACTIVE');
+        $response->assertDontSee('CEISA 4.0 READY');
+        $response->assertDontSee('CEISA 4.0 Open API');
     }
 
     public function test_quick_login_is_forbidden_in_production(): void

@@ -201,7 +201,7 @@
 
                 <!-- SVG Cargo Ship & Containers Illustration With Dynamic Port Animation -->
                 <div class="bg-slate-950/90 rounded-2xl p-4 sm:p-5 border border-slate-800/80 shadow-2xl backdrop-blur-md overflow-hidden relative group">
-                    <svg viewBox="0 0 460 210" width="100%" class="h-auto select-none" role="img" aria-label="Animasi Kapal Kontainer WAN HAI 315 dan STS CRANE ACTIVE Pelabuhan Logistik">
+                    <svg viewBox="0 0 460 210" width="100%" class="h-auto select-none" role="img" aria-label="Animasi Kapal Kontainer dan Crane Pelabuhan Logistik">
                         <defs>
                             <!-- Sky Gradient -->
                             <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
@@ -264,7 +264,7 @@
                             <path d="M-40 142 Q 20 138, 80 142 T 200 142 T 320 142 T 440 142 T 560 142 L 560 210 L -40 210 Z" fill="url(#seaGrad2)"/>
                         </g>
 
-                        <!-- 3. CARGO VESSEL WAN HAI 315 (Beranimasi Mengapung & Berayun) -->
+                        <!-- 3. CARGO VESSEL (Beranimasi Mengapung & Berayun) -->
                         <g class="anim-vessel">
                             <!-- Waterline wake & reflection -->
                             <ellipse cx="250" cy="154" rx="145" ry="5" fill="#38BDF8" opacity="0.25"/>
@@ -273,9 +273,6 @@
                             <path d="M120 114 L360 114 L395 130 L380 152 L132 152 L120 135 Z" fill="url(#hullGrad)"/>
                             <!-- Waterline Stripe -->
                             <line x1="130" y1="140" x2="384" y2="140" stroke="#FFFFFF" stroke-width="1.2" opacity="0.85"/>
-                            
-                            <!-- Vessel Name On Bow -->
-                            <text x="345" y="125" font-family="'JetBrains Mono', monospace" font-size="6.5" font-weight="700" fill="#E2E8F0" letter-spacing="0.5">WAN HAI 315</text>
                             
                             <!-- Hawsehole & Anchor -->
                             <circle cx="378" cy="126" r="2" fill="#0B132B"/>
@@ -447,26 +444,12 @@
                             <path d="M-20 148 Q 40 143, 100 148 T 220 148 T 340 148 T 460 148 T 580 148" stroke="#BAE6FD" stroke-width="1.2" fill="none" opacity="0.75"/>
                         </g>
                     </svg>
-
-                    <!-- Clean Single-Line Telemetry Status (Informasi Ringkas & Bersih) -->
-                    <div class="mt-3.5 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-800/70 pt-2.5 font-mono">
-                        <div class="flex items-center gap-2">
-                            <span class="text-slate-200 font-semibold tracking-wide">WAN HAI 315</span>
-                            <span class="text-slate-600">&bull;</span>
-                            <span class="text-slate-400 text-[10px]">STS CRANE ACTIVE</span>
-                        </div>
-                        <div class="flex items-center gap-1.5 text-emerald-400 font-medium">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                            <span>CEISA 4.0 READY</span>
-                        </div>
-                    </div>
                 </div>
             </div>
 
             <!-- Footer Identitas Perusahaan -->
-            <div class="text-xs text-slate-500 flex items-center justify-between pt-4 border-t border-slate-900/60 font-mono">
+            <div class="text-xs text-slate-500 pt-4 border-t border-slate-900/60 font-mono">
                 <span>PT Agung Trans Solusindo</span>
-                <span>v2.0 &bull; CEISA 4.0 Open API</span>
             </div>
         </div>
 
