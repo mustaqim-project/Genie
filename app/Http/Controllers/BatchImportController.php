@@ -63,13 +63,15 @@ class BatchImportController extends Controller
             'files' => 'required|array|min:1',
             'files.*' => 'file|max:51200', // max 50 MB per file
             'client_id' => 'nullable|uuid|exists:clients,id',
+            'type' => 'required|in:IMPORT,EXPORT',
             'notes' => 'nullable|string|max:500',
         ]);
 
         $batch = $this->importService->createBatch(
             $request->file('files'),
             $request->client_id,
-            $request->notes
+            $request->notes,
+            $request->type
         );
 
         return redirect()->route('core.import.show', $batch->id)
@@ -180,5 +182,65 @@ class BatchImportController extends Controller
         } catch (\DomainException $e) {
             return back()->with('error', $e->getMessage());
         }
+    }
+
+    /**
+     * Hapus batch import draft beserta seluruh aset file fisik & record turunannya.
+     */
+    public function destroy(Request $request, string $id)
+    {
+        $user = auth()->user();
+        if (!$user || (!$user->isSuperAdmin() && !$user->hasAnyPermission(['document.create', 'document.edit', 'document.delete']))) {
+            abort(403, 'Anda tidak memiliki hak akses untuk menghapus draft batch import.');
+        }
+
+        $batch = ImportBatch::findOrFail($id);
+
+        try {
+            $result = $this->importService->deleteBatchAndAssets($batch);
+        } catch (\RuntimeException $e) {
+            if ($request->expectsJson()) {
+                return response()->json(['status' => 'error', 'message' => $e->getMessage()], 422);
+            }
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+
+        $msg = "Draft Batch {$result['batch_no']} dan {$result['deleted_files']} file aset dokumen berhasil dihapus permanen.";
+        if ($request->expectsJson()) {
+            return response()->json(['status' => 'success', 'message' => $msg, 'data' => $result]);
+        }
+
+        return redirect()->route('core.import.index')->with('success', $msg);
+    }
+
+    /**
+     * Hapus satu dokumen hasil ekstraksi draft dalam batch beserta aset file fisiknya.
+     */
+    public function destroyDocument(Request $request, string $docId)
+    {
+        $user = auth()->user();
+        if (!$user || (!$user->isSuperAdmin() && !$user->hasAnyPermission(['document.create', 'document.edit', 'document.delete']))) {
+            abort(403, 'Anda tidak memiliki hak akses untuk menghapus draft dokumen.');
+        }
+
+        $document = \App\Models\ImportDocument::findOrFail($docId);
+
+        try {
+            $result = $this->importService->deleteDocumentAndAssets($document);
+        } catch (\RuntimeException $e) {
+            if ($request->expectsJson()) {
+                return response()->json(['status' => 'error', 'message' => $e->getMessage()], 422);
+            }
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+
+        $msg = "Draft dokumen berhasil dihapus beserta {$result['deleted_files']} file asetnya.";
+        if ($request->expectsJson()) {
+            return response()->json(['status' => 'success', 'message' => $msg, 'data' => $result]);
+        }
+
+        return $result['batch_id']
+            ? redirect()->route('core.import.show', $result['batch_id'])->with('success', $msg)
+            : redirect()->route('core.import.index')->with('success', $msg);
     }
 }

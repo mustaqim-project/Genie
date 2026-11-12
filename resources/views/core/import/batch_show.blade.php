@@ -18,6 +18,11 @@
                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#007AFF]/10 text-[#007AFF]">
                     {{ $documents->count() }} Dokumen Logis
                 </span>
+                @if($batch->type === 'EXPORT')
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#AF52DE]/15 text-[#AF52DE]">EKSPOR (BC 3.0)</span>
+                @elseif($batch->type === 'IMPORT')
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#007AFF]/15 text-[#007AFF]">IMPOR (BC 2.0)</span>
+                @endif
             </div>
             <p class="text-[13px] text-black/50 dark:text-white/50 mt-1 leading-snug">
                 Diunggah oleh {{ $batch->uploader?->name ?? 'System' }} pada {{ $batch->created_at->format('d M Y H:i') }} | Status: {{ $batch->status }}
@@ -25,6 +30,16 @@
         </div>
 
         <div class="flex items-center gap-2">
+            @if(auth()->user()->isSuperAdmin() || auth()->user()->hasAnyPermission(['document.create', 'document.edit', 'document.delete']))
+                <form action="{{ route('core.import.destroy', $batch->id) }}" method="POST" class="inline"
+                      onsubmit="return confirm('Hapus draft batch {{ $batch->batch_no }} beserta seluruh aset berkas fisiknya?');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="px-3 py-1.5 rounded-[10px] text-[13px] font-semibold bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 transition cursor-pointer">
+                        Hapus Draft Batch &amp; File
+                    </button>
+                </form>
+            @endif
             <a href="{{ route('core.import.index') }}" class="px-3 py-1.5 rounded-[10px] text-[13px] font-medium bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-black dark:text-white transition">
                 Daftar Batch
             </a>
@@ -88,11 +103,23 @@
                                 <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#FF9500]/10 text-[#FF9500]">Perlu Review</span>
                             @endif
                         </td>
-                        <td class="px-6 py-4 text-right">
+                        <td class="px-6 py-4 text-right whitespace-nowrap space-x-1">
                             <a href="{{ route('core.import.review', $doc->id) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[12px] font-semibold bg-[#007AFF] hover:bg-[#0066CC] text-white transition shadow-sm">
                                 Review Layar Terbagi
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
                             </a>
+                            @if(auth()->user()->isSuperAdmin() || auth()->user()->hasAnyPermission(['document.create', 'document.edit', 'document.delete']))
+                                <form action="{{ route('core.import.doc.destroy', $doc->id) }}" method="POST" class="inline"
+                                      onsubmit="return confirm('Hapus draft dokumen ini beserta file aset fisiknya?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit"
+                                            class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-[8px] text-[12px] font-semibold bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 transition cursor-pointer"
+                                            title="Hapus Draft Dokumen & File Aset">
+                                        Hapus Draft
+                                    </button>
+                                </form>
+                            @endif
                         </td>
                     </tr>
                     @empty

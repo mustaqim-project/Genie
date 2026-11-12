@@ -18,10 +18,11 @@ class Shipment extends Model
         static::addGlobalScope('client_access', function (\Illuminate\Database\Eloquent\Builder $builder) {
             if (auth()->check()) {
                 $user = auth()->user();
-                // Eksekutif, SuperAdmin, Manager, dan Tim Operasional Dokumen/DO/Traffic bebas melihat semua shipment
+                // Eksekutif, SuperAdmin, Manager, Tim Operasional Dokumen/DO/Traffic, atau pemilik izin dokumen/rollback bebas melihat semua shipment
                 if (
                     $user->isSuperAdmin()
                     || $user->hasRole(['R-ADM', 'R-OWN', 'R-MGR', 'R-DOC', 'R-DOC-SPV', 'R-DO', 'R-TRF', 'R-SYS'])
+                    || $user->hasAnyPermission(['document.view', 'document.edit', 'document.edit_after_ceisa', 'workflow.rollback_stage'])
                 ) {
                     return;
                 }
@@ -543,7 +544,7 @@ class Shipment extends Model
     public static function generateProjectNo(): string
     {
         $prefix = 'SHP-' . date('Ym') . '-';
-        $existing = self::withTrashed()->where('project_no', 'like', "{$prefix}%")->pluck('project_no')->toArray();
+        $existing = self::withoutGlobalScopes()->withTrashed()->where('project_no', 'like', "{$prefix}%")->pluck('project_no')->toArray();
         $maxNum = 0;
         foreach ($existing as $pNo) {
             $num = (int) substr($pNo, strlen($prefix));
@@ -839,6 +840,34 @@ class Shipment extends Model
         ]) 
         || !empty($this->billing_code) 
         || ($this->ceisaDocument && $this->ceisaDocument->isBillingLocked());
+    }
+
+    /**
+     * Cek apakah proyek pengapalan masih berstatus DRAFT dan aman dihapus
+     * beserta seluruh aset dokumen fisiknya.
+     */
+    public function isDraftDeletable(): bool
+    {
+        if ($this->isBillingLocked()) {
+            return false;
+        }
+
+        $ceisaDoc = $this->ceisaDocument;
+        if (!empty($this->nomor_daftar) || !empty($this->no_do) || !empty($ceisaDoc?->nomor_daftar) || !empty($ceisaDoc?->nomor_sppb_npe)) {
+            return false;
+        }
+
+        $ceisaStatus = strtoupper((string) ($ceisaDoc?->status ?? ''));
+        if ($ceisaStatus !== '' && !in_array($ceisaStatus, ['DRAFT', 'REJECT'], true)) {
+            return false;
+        }
+
+        return in_array($this->status_tahap, [
+            'DOC_COLLECTING',
+            'DOC_READY',
+            'HS_DETECTED',
+            'DRAFT_REVIEW',
+        ], true);
     }
 }
 

@@ -175,6 +175,20 @@
                     <span>Sinkron</span>
                 </button>
             </form>
+
+            @if($shipment->isDraftDeletable() && (auth()->user()->isSuperAdmin() || auth()->user()->hasAnyPermission(['document.create', 'document.edit', 'document.delete'])))
+                <form action="{{ route('core.document.destroy', $shipment->id) }}" method="POST" class="inline"
+                      onsubmit="return confirm('Hapus draft proyek {{ $shipment->project_no }} beserta seluruh aset file dokumen yang terunggah? Tindakan ini tidak dapat dibatalkan.');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit"
+                            class="btn-apple-gray text-xs px-3 py-1.5 inline-flex items-center gap-1.5 !text-rose-600 dark:!text-rose-400 !border-rose-300/60 hover:!bg-rose-500/10 cursor-pointer font-semibold"
+                            title="Hapus Draft Proyek & Aset File Dokumen">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        <span>Hapus Draft</span>
+                    </button>
+                </form>
+            @endif
         </div>
     </div>
 

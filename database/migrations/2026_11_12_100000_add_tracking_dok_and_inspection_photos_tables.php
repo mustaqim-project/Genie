@@ -14,6 +14,13 @@ return new class extends Migration
         if (DB::getDriverName() === 'mysql') {
             DB::statement("ALTER TABLE shipments MODIFY COLUMN status_tahap VARCHAR(50) NOT NULL DEFAULT 'DOC_COLLECTING'");
             DB::statement("ALTER TABLE shipment_documents MODIFY COLUMN jenis_dokumen VARCHAR(60) NOT NULL");
+        } elseif (DB::getDriverName() === 'sqlite') {
+            Schema::table('shipments', function (Blueprint $table) {
+                $table->string('status_tahap', 50)->default('DOC_COLLECTING')->change();
+            });
+            Schema::table('shipment_documents', function (Blueprint $table) {
+                $table->string('jenis_dokumen', 60)->change();
+            });
         }
 
         // 1. Tambah kolom Tracking Dok & Operasional Impor/Ekspor pada tabel shipments

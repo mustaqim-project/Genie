@@ -21,6 +21,7 @@ class ImportBatch extends Model
         'batch_no',
         'uploaded_by_id',
         'client_id',
+        'type',
         'status',
         'total_files',
         'processed_files',

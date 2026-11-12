@@ -2,17 +2,26 @@
 
 namespace App\Services\Shipment;
 
+use App\Models\AuditLog;
+use App\Models\CeisaApiLog;
 use App\Models\CeisaDocument;
 use App\Models\Client;
 use App\Models\ClientInvoice;
+use App\Models\ImportApplication;
+use App\Models\ImportDocument;
+use App\Models\ImportFile;
+use App\Models\InspectionPhoto;
 use App\Models\Shipment;
 use App\Models\ShipmentDocument;
 use App\Models\ShipmentItem;
+use App\Models\ShipmentItemDocument;
 use App\Models\ShippingVendor;
 use App\Services\Ceisa\CeisaDocumentService;
 use App\Services\Ceisa\DocumentBC20Service;
 use App\Services\Ceisa\DocumentBC30Service;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
 class ShipmentWorkflowService
@@ -50,6 +59,9 @@ class ShipmentWorkflowService
         $rawEta = $data['eta_date'] ?? $data['eta'] ?? null;
         $eta = $rawEta ? Carbon::parse($rawEta) : now()->addDays(3);
         $freeTimeDays = (int) ($data['free_time_days'] ?? 7);
+        if ($freeTimeDays <= 0) {
+            $freeTimeDays = 7;
+        }
         $freeTimeExpiredAt = (clone $eta)->addDays($freeTimeDays);
 
         $valuta = $data['kode_valuta'] ?? $data['currency'] ?? 'USD';
@@ -61,8 +73,11 @@ class ShipmentWorkflowService
         $nilaiValuta = (float) ($data['total_nilai_valuta'] ?? $data['total_cif'] ?? 25000);
         $nilaiIdr = $nilaiValuta * $ndbm;
 
-        $rawType = $data['jenis_layanan'] ?? $data['type'] ?? 'IMPORT_BC20';
-        $jenisLayanan = in_array($rawType, ['EXPORT', 'EKSPORT_BC30']) ? 'EKSPORT_BC30' : 'IMPORT_BC20';
+        $rawType = strtoupper(trim((string) ($data['jenis_layanan'] ?? $data['type'] ?? '')));
+        if (!in_array($rawType, ['IMPORT', 'EXPORT', 'IMPORT_BC20', 'EKSPORT_BC30'], true)) {
+            throw new \InvalidArgumentException('Tipe kepabeanan (IMPORT atau EXPORT) wajib dipilih salah satu.');
+        }
+        $jenisLayanan = in_array($rawType, ['EXPORT', 'EKSPORT_BC30'], true) ? 'EKSPORT_BC30' : 'IMPORT_BC20';
 
         $shipment = Shipment::create([
             'project_no' => $projectNo,
@@ -85,7 +100,7 @@ class ShipmentWorkflowService
             'total_kontainer' => (int) ($data['total_kontainer'] ?? 1),
             'nomor_kontainer' => $data['nomor_kontainer'] ?? 'WHLU-9182341 (1x40HC)',
             'total_kemasan' => (int) ($data['total_kemasan'] ?? 150),
-            'jenis_kemasan' => $data['jenis_kemasan'] ?? 'CTN (Cartons)',
+            'jenis_kemasan' => mb_substr((string) ($data['jenis_kemasan'] ?? 'CTN (Cartons)'), 0, 50),
             'total_bruto' => (float) ($data['total_bruto'] ?? 8500.00),
             'total_netto' => (float) ($data['total_netto'] ?? 7800.00),
             'kode_valuta' => $valuta,
@@ -139,7 +154,10 @@ class ShipmentWorkflowService
     public function createProjectFromUploadedDocuments(array $files, array $overrides = [], int|string|null $userId = null): Shipment
     {
         $useAi = filter_var($overrides['use_ai'] ?? false, FILTER_VALIDATE_BOOLEAN);
-        $preferredType = !empty($overrides['type']) ? (string) $overrides['type'] : null;
+        $preferredType = strtoupper(trim((string) ($overrides['type'] ?? '')));
+        if (!in_array($preferredType, ['IMPORT', 'EXPORT'], true)) {
+            throw new \InvalidArgumentException('Tipe kepabeanan (IMPORT atau EXPORT) wajib dipilih terlebih dahulu.');
+        }
         $aiModel = !empty($overrides['ai_model']) ? (string) $overrides['ai_model'] : null;
 
         // 1. Jalankan ekstraksi dokumen (default tanpa AI)
@@ -319,7 +337,13 @@ class ShipmentWorkflowService
             }
         }
 
-        $extracted = $this->extractionService->extractFromDocuments($filesToExtract, $shipment->client_id);
+        $extracted = $this->extractionService->extractFromDocuments(
+            $filesToExtract,
+            $shipment->client_id,
+            null,
+            false,
+            $shipment->type
+        );
 
         $currency = $extracted['currency'] ?? ($shipment->kode_valuta ?? 'USD');
         $cifValuta = (float) ($extracted['total_cif'] ?? $shipment->total_nilai_valuta);
@@ -339,7 +363,7 @@ class ShipmentWorkflowService
             'total_kontainer' => $extracted['total_kontainer'] ?? $shipment->total_kontainer,
             'nomor_kontainer' => $extracted['nomor_kontainer'] ?? $shipment->nomor_kontainer,
             'total_kemasan' => $extracted['total_kemasan'] ?? $shipment->total_kemasan,
-            'jenis_kemasan' => $extracted['jenis_kemasan'] ?? $shipment->jenis_kemasan,
+            'jenis_kemasan' => mb_substr((string) ($extracted['jenis_kemasan'] ?? $shipment->jenis_kemasan), 0, 50),
             'total_bruto' => $extracted['total_bruto'] ?? $shipment->total_bruto,
             'total_netto' => $extracted['total_netto'] ?? $shipment->total_netto,
             'kode_valuta' => $currency,
@@ -960,13 +984,15 @@ class ShipmentWorkflowService
      */
     public function ensureShipmentForCeisaDocument(CeisaDocument $doc): Shipment
     {
-        // 1. Cek relasi langsung atau relasi melalui foreign key
-        if ($doc->shipment) {
-            return $doc->shipment;
-        }
-
-        $existing = Shipment::where('ceisa_document_id', $doc->id)->first();
+        // 1. Cek relasi langsung atau relasi melalui foreign key (abaikan client_access scope agar tidak duplikat)
+        $existing = Shipment::withoutGlobalScope('client_access')
+            ->withTrashed()
+            ->where('ceisa_document_id', $doc->id)
+            ->first();
         if ($existing) {
+            if ($existing->trashed()) {
+                $existing->restore();
+            }
             return $existing;
         }
 
@@ -1086,5 +1112,206 @@ class ShipmentWorkflowService
         $this->autoAssignPics($shipment);
 
         return $shipment;
+    }
+
+    /**
+     * Hapus file fisik pada disk 'public' hanya jika tidak lagi dirujuk oleh record dokumen lain.
+     */
+    public function deleteStorageFileIfUnreferenced(
+        ?string $filePath,
+        array $excludeShipmentDocIds = [],
+        array $excludeImportFileIds = [],
+        array $excludeItemDocIds = [],
+        array $excludePhotoIds = []
+    ): bool {
+        if (empty($filePath)) {
+            return false;
+        }
+
+        $stillReferencedByShipmentDoc = ShipmentDocument::withTrashed()
+            ->where('file_path', $filePath)
+            ->when(!empty($excludeShipmentDocIds), fn($q) => $q->whereNotIn('id', $excludeShipmentDocIds))
+            ->exists();
+
+        if ($stillReferencedByShipmentDoc) {
+            return false;
+        }
+
+        $stillReferencedByImportFile = ImportFile::query()
+            ->where('file_path', $filePath)
+            ->when(!empty($excludeImportFileIds), fn($q) => $q->whereNotIn('id', $excludeImportFileIds))
+            ->exists();
+
+        if ($stillReferencedByImportFile) {
+            return false;
+        }
+
+        $stillReferencedByItemDoc = ShipmentItemDocument::withTrashed()
+            ->where('file_path', $filePath)
+            ->when(!empty($excludeItemDocIds), fn($q) => $q->whereNotIn('id', $excludeItemDocIds))
+            ->exists();
+
+        if ($stillReferencedByItemDoc) {
+            return false;
+        }
+
+        $stillReferencedByPhoto = InspectionPhoto::withTrashed()
+            ->where('file_path', $filePath)
+            ->when(!empty($excludePhotoIds), fn($q) => $q->whereNotIn('id', $excludePhotoIds))
+            ->exists();
+
+        if ($stillReferencedByPhoto) {
+            return false;
+        }
+
+        $disk = Storage::disk('public');
+        if ($disk->exists($filePath)) {
+            return (bool) $disk->delete($filePath);
+        }
+
+        return false;
+    }
+
+    /**
+     * Hapus permanen proyek DRAFT beserta seluruh aset file dokumen & record turunannya.
+     */
+    public function deleteDraftProjectAndAssets(Shipment $shipment, bool $deleteLinkedCeisaDraft = true): array
+    {
+        if (!$shipment->isDraftDeletable()) {
+            throw new \RuntimeException('Hanya proyek berstatus DRAFT (sebelum kirim CEISA & belum ada kode billing) yang dapat dihapus.');
+        }
+
+        return DB::transaction(function () use ($shipment, $deleteLinkedCeisaDraft) {
+            $shipment->loadMissing(['ceisaDocument']);
+
+            $shipmentDocs = $shipment->allDocuments()->withTrashed()->get();
+            $itemDocs = $shipment->itemCustomsDocuments()->withTrashed()->get();
+            $photos = $shipment->inspectionPhotos()->withTrashed()->get();
+
+            $docIds = $shipmentDocs->pluck('id')->all();
+            $itemDocIds = $itemDocs->pluck('id')->all();
+            $photoIds = $photos->pluck('id')->all();
+
+            $deletedFiles = 0;
+            $disk = Storage::disk('public');
+
+            foreach ($shipmentDocs as $doc) {
+                if ($this->deleteStorageFileIfUnreferenced($doc->file_path, $docIds, [], $itemDocIds, $photoIds)) {
+                    $deletedFiles++;
+                }
+            }
+
+            foreach ($itemDocs as $itemDoc) {
+                if ($this->deleteStorageFileIfUnreferenced($itemDoc->file_path, $docIds, [], $itemDocIds, $photoIds)) {
+                    $deletedFiles++;
+                }
+            }
+
+            foreach ($photos as $photo) {
+                if ($this->deleteStorageFileIfUnreferenced($photo->file_path, $docIds, [], $itemDocIds, $photoIds)) {
+                    $deletedFiles++;
+                }
+            }
+
+            foreach ([$shipment->do_file_path ?? null, $shipment->pod_file_path ?? null] as $extraPath) {
+                if ($this->deleteStorageFileIfUnreferenced($extraPath, $docIds, [], $itemDocIds, $photoIds)) {
+                    $deletedFiles++;
+                }
+            }
+
+            $shipmentDir = "shipment_docs/{$shipment->id}";
+            if ($disk->exists($shipmentDir) && empty($disk->allFiles($shipmentDir))) {
+                $disk->deleteDirectory($shipmentDir);
+            }
+
+            $projectNo = $shipment->project_no;
+            $ceisaDoc = $shipment->ceisaDocument;
+
+            AuditLog::record('DELETE_DRAFT_PROJECT', 'Shipment', $shipment->id, [
+                'project_no' => $projectNo,
+                'status_tahap' => $shipment->status_tahap,
+                'ceisa_document_id' => $ceisaDoc?->id,
+                'deleted_files' => $deletedFiles,
+            ], null);
+
+            if (Schema::hasTable('import_documents')) {
+                ImportDocument::where('shipment_id', $shipment->id)->update(['shipment_id' => null]);
+            }
+            if (Schema::hasTable('import_applications')) {
+                ImportApplication::where('shipment_id', $shipment->id)->delete();
+            }
+            if (Schema::hasTable('shipment_stage_entries')) {
+                DB::table('shipment_stage_entries')->where('shipment_id', $shipment->id)->delete();
+            }
+            if (Schema::hasTable('project_jump_requests')) {
+                DB::table('project_jump_requests')->where('shipment_id', $shipment->id)->delete();
+            }
+
+            $shipment->itemCustomsDocuments()->withTrashed()->forceDelete();
+            $shipment->items()->delete();
+            $shipment->allDocuments()->withTrashed()->forceDelete();
+            $shipment->inspectionPhotos()->withTrashed()->forceDelete();
+            $shipment->pics()->delete();
+            $shipment->events()->delete();
+            $shipment->operationCosts()->delete();
+            $shipment->costItems()->delete();
+
+            $shipment->update(['ceisa_document_id' => null]);
+            $shipment->forceDelete();
+
+            if ($deleteLinkedCeisaDraft && $ceisaDoc && $ceisaDoc->isDraftDeletable()) {
+                if (Schema::hasTable('ceisa_api_logs')) {
+                    CeisaApiLog::where('nomor_aju', $ceisaDoc->nomor_aju)->delete();
+                }
+                $ceisaDoc->delete();
+            }
+
+            return [
+                'project_no' => $projectNo,
+                'deleted_files' => $deletedFiles,
+            ];
+        });
+    }
+
+    /**
+     * Hapus permanen dokumen BC (2.0 / 3.0) berstatus DRAFT beserta proyek & aset dokumen terkait jika masih draft.
+     */
+    public function deleteDraftCeisaDocumentAndAssets(CeisaDocument $doc, bool $deleteDraftShipmentIfLinked = true): array
+    {
+        if (!$doc->isDraftDeletable()) {
+            throw new \RuntimeException('Hanya dokumen pabean berstatus DRAFT (belum terkirim CEISA / belum memiliki kode billing) yang dapat dihapus.');
+        }
+
+        $linkedShipment = Shipment::withoutGlobalScope('client_access')
+            ->withTrashed()
+            ->where('ceisa_document_id', $doc->id)
+            ->first();
+
+        if ($linkedShipment) {
+            if ($deleteDraftShipmentIfLinked) {
+                return $this->deleteDraftProjectAndAssets($linkedShipment, true);
+            }
+
+            throw new \RuntimeException('Dokumen masih terhubung dengan proyek pengapalan aktif.');
+        }
+
+        return DB::transaction(function () use ($doc) {
+            $nomorAju = $doc->nomor_aju;
+            AuditLog::record('DELETE_DRAFT_CEISA_DOCUMENT', 'CeisaDocument', $doc->id, [
+                'nomor_aju' => $nomorAju,
+                'jenis_dokumen' => $doc->jenis_dokumen,
+                'status' => $doc->status,
+            ], null);
+
+            if (Schema::hasTable('ceisa_api_logs')) {
+                CeisaApiLog::where('nomor_aju', $nomorAju)->delete();
+            }
+            $doc->delete();
+
+            return [
+                'nomor_aju' => $nomorAju,
+                'deleted_files' => 0,
+            ];
+        });
     }
 }

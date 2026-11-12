@@ -21,6 +21,7 @@ class BC30Controller extends Controller implements HasMiddleware
         return [
             new Middleware('permission:document.view', only: ['index', 'show']),
             new Middleware('permission:document.create', only: ['create', 'store']),
+            new Middleware('permission:document.create|document.edit', only: ['destroy']),
             new Middleware('permission:document.edit|document.edit_after_ceisa', only: ['edit', 'update']),
             new Middleware('permission:document.edit_after_ceisa', only: ['reopenDraft']),
             new Middleware('permission:ceisa.submit', only: ['submit', 'checkSchema', 'checkStatus', 'fetchResponse']),
@@ -35,6 +36,34 @@ class BC30Controller extends Controller implements HasMiddleware
         $this->documentService = $documentService;
         $this->kursService = $kursService;
         $this->workflowService = $workflowService;
+    }
+
+    /**
+     * Hapus dokumen BC 3.0 berstatus DRAFT beserta proyek & aset file dokumen terkait.
+     */
+    public function destroy(Request $request, CeisaDocument $bc30)
+    {
+        if ($bc30->jenis_dokumen !== '30') {
+            abort(404);
+        }
+
+        try {
+            $result = $this->workflowService->deleteDraftCeisaDocumentAndAssets($bc30, true);
+        } catch (\RuntimeException $e) {
+            if ($request->expectsJson()) {
+                return response()->json(['status' => 'error', 'message' => $e->getMessage()], 422);
+            }
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+
+        $label = $result['project_no'] ?? ($result['nomor_aju'] ?? $bc30->nomor_aju);
+        $msg = "Draft BC 3.0 ({$label}) dan {$result['deleted_files']} aset file dokumen berhasil dihapus permanen.";
+
+        if ($request->expectsJson()) {
+            return response()->json(['status' => 'success', 'message' => $msg, 'data' => $result]);
+        }
+
+        return redirect()->route('bc30.index')->with('success', $msg);
     }
 
     public function index(Request $request)

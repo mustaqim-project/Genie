@@ -95,10 +95,22 @@
                     @if($bc20->status === 'DRAFT')
                         @if($canEditDraft)
                             <a href="{{ route('bc20.edit', $bc20->id) }}" 
-                               class="btn-apple-gray text-xs inline-flex items-center gap-1.5 px-3.5 py-2 !border-[#007AFF]/30 !text-[#007AFF] hover:!bg-[#007AFF]/10">
-                                <i data-lucide="edit-3" class="w-3.5 h-3.5 text-[#007AFF]"></i>
-                                <span>Edit Draft</span>
+                               class="btn-apple-filled text-xs inline-flex items-center gap-1.5 px-3.5 py-2">
+                                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                                <span>Edit Tahapan PIB (9 Tahap &amp; Preview)</span>
                             </a>
+                        @endif
+                        @if($bc20->isDraftDeletable() && (auth()->user()->isSuperAdmin() || auth()->user()->hasAnyPermission(['document.create', 'document.edit', 'document.delete'])))
+                            <form action="{{ route('bc20.destroy', $bc20->id) }}" method="POST" class="inline"
+                                  onsubmit="return confirm('Hapus draft BC 2.0 ({{ $bc20->nomor_aju }}) beserta proyek draft & seluruh aset berkas dokumennya?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                        class="btn-apple-gray text-xs inline-flex items-center gap-1.5 px-3.5 py-2 !text-rose-600 dark:!text-rose-400 !border-rose-300/60 hover:!bg-rose-500/10 cursor-pointer">
+                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                    <span>Hapus Draft &amp; Berkas</span>
+                                </button>
+                            </form>
                         @endif
                     @else
                         @if($canEditAfterCeisa)

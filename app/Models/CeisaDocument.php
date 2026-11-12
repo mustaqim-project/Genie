@@ -86,7 +86,7 @@ class CeisaDocument extends Model
 
     public function shipment()
     {
-        return $this->hasOne(Shipment::class, 'ceisa_document_id');
+        return $this->hasOne(Shipment::class, 'ceisa_document_id')->withoutGlobalScope('client_access');
     }
 
     public function ensureShipment(): Shipment
@@ -196,6 +196,22 @@ class CeisaDocument extends Model
                     'ARRIVED', 'TRAFFIC_HOLD', 'SPPB_RELEASED', 'GATE_OUT', 'DELIVERY', 'DELIVERED_POD', 'COMPLETED'
                 ]) || !empty($this->shipment->billing_code)
             ));
+    }
+
+    /**
+     * Cek apakah dokumen CEISA masih berstatus DRAFT/REJECT dan aman dihapus.
+     */
+    public function isDraftDeletable(): bool
+    {
+        if ($this->isBillingLocked()) {
+            return false;
+        }
+
+        if (!empty($this->nomor_daftar) || !empty($this->nomor_sppb_npe)) {
+            return false;
+        }
+
+        return in_array(strtoupper((string) $this->status), ['DRAFT', 'REJECT'], true);
     }
 }
 

@@ -1,4 +1,4 @@
-# BRIEFING — 2026-11-12T14:30:00Z
+# BRIEFING — 2026-11-12T15:50:00Z
 
 ## Mission
 Orchestrate end-to-end implementation of Export-Import Document Tracking, Bundle Intelligence, Inspection & CEISA 4.0 Automation system in GENIE across Phase 1 through Phase 4.
@@ -26,15 +26,15 @@ Orchestrate end-to-end implementation of Export-Import Document Tracking, Bundle
    - Escalate: report to parent (Project Orchestrator redesigns rather than escalates)
 4. **Succession**: At 16 spawns, write handoff.md, spawn successor gen<N>, pass parent ID and transfer running sub-orchestrators.
 - **Work items**:
-  1. Survey phase: Map scope, blueprint spec & codebase [in-progress]
-  2. Test Infrastructure & E2E Track Setup [pending]
-  3. Milestone 1: Multi-Container Normalization & Workflow Separation [pending]
+  1. Survey phase: Map scope, blueprint spec & codebase [done]
+  2. Test Infrastructure & E2E Track Setup [in-progress]
+  3. Milestone 1: Multi-Container Normalization & Workflow Separation [in-progress]
   4. Milestone 2: Security Hardening & Approval Gate [pending]
   5. Milestone 3: Bundle Extraction, Provenance & HS Code Workbench [pending]
   6. Milestone 4: Inspections, Delivery Tracking & Financial Control [pending]
   7. Final Milestone: E2E Test Suite Pass (Tiers 1-4) & Coverage Hardening (Tier 5) [pending]
-- **Current phase**: 0 (Survey)
-- **Current focus**: Survey phase with 3 Explorers / Spec Miners
+- **Current phase**: 1 & E2E Track
+- **Current focus**: Dual Track execution — E2E Testing Track Orchestrator & Milestone 1 Sub-Orchestrator
 
 ## 🔒 Key Constraints
 - Never write, modify, or create source code files directly.
@@ -51,24 +51,29 @@ Orchestrate end-to-end implementation of Export-Import Document Tracking, Bundle
 
 ## Key Decisions Made
 - Selected Project Pattern with Dual Track (Implementation Track + E2E Testing Track).
-- Survey phase initiated with 3 Explorers/Spec-Miners: Explorer 1 (Spec Miner for Blueprint Architecture), Explorer 2 (Current Codebase Audit: Models, Migrations, State Machine, Validations), Explorer 3 (Current Codebase Audit: Security, MCP, CEISA, Operations).
+- Dispatched E2E Testing Track Orchestrator (`9e9dd00c-2979-44b9-b380-eddfbfe119fb`) and Milestone 1 Sub-Orchestrator (`c9a703fa-acca-47ce-93a9-b7983725bd6a`). Both are running their dependent subagents.
 
 ## Team Roster
 | Agent | Type | Work Item | Status | Conv ID |
 |-------|------|-----------|--------|---------|
+| spec_miner_blueprint_2 | teamwork_spec_miner | Survey blueprint architecture spec (Gen 2) | completed | a5b283c1-b4bb-4b0a-96c7-fe6736f4d0e4 |
+| explorer_codebase_core_2 | teamwork_explorer | Survey core models, migrations, state machines (Gen 2) | completed | 6f08f8d4-cfc3-4590-b96f-2391642d84cf |
+| explorer_codebase_integrations_2 | teamwork_explorer | Survey security, MCP, CEISA, operations (Gen 2) | completed | 5e959c41-a1ca-4d8f-a66d-f1f89bf43f6f |
+| sub_orch_e2e_testing | self | E2E Testing Track Orchestrator | in-progress | 9e9dd00c-2979-44b9-b380-eddfbfe119fb |
+| sub_orch_milestone_1 | self | Sub-Orchestrator Milestone 1 | in-progress | c9a703fa-acca-47ce-93a9-b7983725bd6a |
 
 ## Succession Status
 - Succession required: no
-- Spawn count: 0 / 16
-- Pending subagents: none
+- Spawn count: 8 / 16
+- Pending subagents: 9e9dd00c-2979-44b9-b380-eddfbfe119fb, c9a703fa-acca-47ce-93a9-b7983725bd6a
 - Predecessor: none
 - Successor spawned: not yet spawned
 - Successor generation: none
 - Successor state folder: none
 
 ## Active Timers
-- Heartbeat cron: not started
-- Safety timer: none
+- Heartbeat cron: b0ddf190-c06b-41f0-99dc-4f1c82097b30/task-26
+- Safety timer: b0ddf190-c06b-41f0-99dc-4f1c82097b30/task-206
 - On succession: kill all timers before spawning successor
 - On context truncation: handle timers as step 4 of the State Recovery section of your prompt says
 
@@ -77,3 +82,5 @@ Orchestrate end-to-end implementation of Export-Import Document Tracking, Bundle
 - c:\laragon\www\GENIE\.agents\teamwork\orchestrator\DISPATCH.md — Dispatch log
 - c:\laragon\www\GENIE\.agents\teamwork\orchestrator\BRIEFING.md — Persistent briefing and memory
 - c:\laragon\www\GENIE\.agents\teamwork\orchestrator\progress.md — Liveness and iteration status
+- c:\laragon\www\GENIE\.agents\teamwork\orchestrator\PROJECT.md — Global Project Blueprint & Feature Inventory
+- c:\laragon\www\GENIE\.agents\teamwork\PROJECT.md — Shared Project Blueprint copy

@@ -7,3 +7,4 @@ return [
     'token' => 'Token atur ulang kata sandi ini tidak valid.',
     'user' => 'Kami tidak dapat menemukan pengguna dengan alamat email tersebut.',
 ];
+

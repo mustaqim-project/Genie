@@ -343,6 +343,18 @@
                                         <span>Tracking 11 Pos</span>
                                         <i data-lucide="chevron-right" class="w-3 h-3"></i>
                                     </a>
+                                    @if($doc->isDraftDeletable() && (auth()->user()->isSuperAdmin() || auth()->user()->hasAnyPermission(['document.create', 'document.edit', 'document.delete'])))
+                                        <form action="{{ route('bc20.destroy', $doc->id) }}" method="POST" class="inline"
+                                              onsubmit="return confirm('Hapus draft BC 2.0 ({{ $doc->nomor_aju }}) beserta aset file dokumen terkait?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                    class="btn-apple-gray text-[11px] px-2.5 py-1.5 inline-flex items-center !text-rose-600 dark:!text-rose-400 !border-rose-300/60 hover:!bg-rose-500/10 cursor-pointer"
+                                                    title="Hapus Draft BC 2.0 & Aset Berkas">
+                                                <i data-lucide="trash-2" class="w-3 h-3"></i>
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

@@ -1311,6 +1311,17 @@ class CeisaHsCodeService
         // Ambil seluruh dokumen pelengkap yang terlampir pada shipment items
         $allItemDocs = \App\Models\ShipmentItemDocument::where('shipment_id', $shipment->id)->get();
 
+        $shipmentDocs = $shipment->documents()->whereNotNull('file_path')->get();
+        $findUploadedDoc = function (array $types) use ($shipmentDocs) {
+            return $shipmentDocs->firstWhere(fn($d) => in_array($d->jenis_dokumen, $types, true) && $d->is_current)
+                ?? $shipmentDocs->firstWhere(fn($d) => in_array($d->jenis_dokumen, $types, true));
+        };
+
+        $invUpload = $findUploadedDoc(['INVOICE', 'INV']);
+        $blUpload = $findUploadedDoc(['BL_AWB', 'BL']);
+        $plUpload = $findUploadedDoc(['PACKING_LIST', 'PL']);
+        $cooUpload = $findUploadedDoc(['COO_FORME', 'COO']);
+
         $headerDokumen = [];
         $invoiceNo = $isBC20 
             ? ('INV/' . ($shipment->nomor_bl_awb ?? date('Ymd'))) 
@@ -1319,28 +1330,42 @@ class CeisaHsCodeService
         $plNo = ($isBC20 ? 'PL/' : 'EXP-PL/') . ($shipment->nomor_bl_awb ?? date('Ymd'));
         $docDate = $shipment->tgl_bl_awb ? $shipment->tgl_bl_awb->format('Y-m-d') : date('Y-m-d');
 
-        // 1. Dokumen Pokok Standar
+        // 1. Dokumen Pokok Standar (ditautkan ke file terunggah jika ada)
         $headerDokumen[] = [
             'seriDokumen' => 1,
             'kodeDokumen' => '380', // Invoice
             'nomorDokumen' => $invoiceNo,
             'tanggalDokumen' => $docDate,
+            'shipmentDocumentId' => $invUpload?->id,
         ];
         $headerDokumen[] = [
             'seriDokumen' => 2,
             'kodeDokumen' => ($shipment->cara_angkut ?? '1') === '4' ? '740' : '705', // 705: B/L, 740: AWB
             'nomorDokumen' => $blNo,
             'tanggalDokumen' => $docDate,
+            'shipmentDocumentId' => $blUpload?->id,
         ];
         $headerDokumen[] = [
             'seriDokumen' => 3,
             'kodeDokumen' => '217', // Packing List
             'nomorDokumen' => $plNo,
             'tanggalDokumen' => $docDate,
+            'shipmentDocumentId' => $plUpload?->id,
         ];
 
-        // 2. Tambahkan Dokumen Tambahan / Perizinan Lartas Hasil Pengecekan Packing List
         $seriDocCounter = 4;
+        if ($cooUpload) {
+            $headerDokumen[] = [
+                'seriDokumen' => $seriDocCounter,
+                'kodeDokumen' => '861', // e-COO / Certificate of Origin
+                'nomorDokumen' => 'COO/' . ($shipment->nomor_bl_awb ?? date('Ymd')),
+                'tanggalDokumen' => $docDate,
+                'shipmentDocumentId' => $cooUpload->id,
+            ];
+            $seriDocCounter++;
+        }
+
+        // 2. Tambahkan Dokumen Tambahan / Perizinan Lartas Hasil Pengecekan Packing List
         $docSeriMapping = [];
 
         foreach ($allItemDocs as $doc) {

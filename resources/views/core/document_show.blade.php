@@ -3,7 +3,20 @@
 @section('title', 'Detail Proyek Pengapalan — ' . ($shipment->shipment_number ?? $shipment->project_no))
 
 @section('content')
-<div class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12" x-data="{ activeTab: 'docs' }">
+<div class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12"
+     x-data="{
+         activeTab: 'docs',
+         previewModalOpen: false,
+         previewUrl: '',
+         previewTitle: '',
+         previewIsImage: false,
+         openDocPreview(url, title, isImg) {
+             this.previewUrl = url;
+             this.previewTitle = title;
+             this.previewIsImage = !!isImg;
+             this.previewModalOpen = true;
+         }
+     }">
 
     <!-- 0. Header Proyek & 11 Pos Workflow Stepper (Persis Gambar Acuan) -->
     @include('core.components.workflow_pos_stepper')
@@ -192,7 +205,13 @@
             </div>
 
             <div class="mt-4 pt-3 border-t border-black/[0.06] dark:border-white/[0.06] space-y-2">
-                @if($shipment->ceisaDocument && $shipment->ceisaDocument->status !== 'DRAFT')
+                @if($shipment->ceisaDocument && $shipment->ceisaDocument->jenis_dokumen === '20' && !$shipment->ceisaDocument->isBillingLocked())
+                    <a href="{{ route('bc20.edit', $shipment->ceisaDocument->id) }}"
+                       class="btn-apple-filled w-full py-2.5 px-4 font-semibold text-xs flex items-center justify-center gap-2">
+                        <i data-lucide="layout-list" class="w-3.5 h-3.5"></i>
+                        <span>Buka Wizard PIB 9 Tahap & Preview</span>
+                    </a>
+                @elseif($shipment->ceisaDocument && $shipment->ceisaDocument->status !== 'DRAFT')
                     <a href="{{ $shipment->ceisaDocument->jenis_dokumen === '20' ? route('bc20.show', $shipment->ceisaDocument->id) : route('bc30.show', $shipment->ceisaDocument->id) }}"
                        class="btn-apple-tinted w-full py-2.5 px-4 font-semibold text-xs flex items-center justify-center gap-2">
                         <span>Buka Draf Resmi BC {{ $shipment->ceisaDocument->jenis_dokumen }}</span>
@@ -339,11 +358,23 @@
 
                                 <div class="flex items-center justify-between pt-1">
                                     @if($doc->file_path)
-                                        <a href="{{ route('core.document.download-doc', [$shipment->id, $doc->id]) }}" target="_blank"
-                                           class="text-[11px] text-[#007AFF] hover:underline font-semibold flex items-center gap-1">
-                                            <span>Lihat Berkas</span>
-                                            <i data-lucide="external-link" class="w-3 h-3"></i>
-                                        </a>
+                                        @php
+                                            $docExt = strtolower(pathinfo((string) ($doc->nama_file ?? $doc->file_path), PATHINFO_EXTENSION));
+                                            $isImgDoc = in_array($docExt, ['png', 'jpg', 'jpeg', 'webp', 'gif'], true);
+                                        @endphp
+                                        <div class="flex items-center gap-3">
+                                            <button type="button"
+                                                    @click="openDocPreview('{{ route('core.document.preview-doc', [$shipment->id, $doc->id]) }}', '{{ addslashes($doc->nama_file ?? $doc->jenis_dokumen) }}', {{ $isImgDoc ? 'true' : 'false' }})"
+                                                    class="text-[11px] text-[#007AFF] hover:underline font-semibold inline-flex items-center gap-1 cursor-pointer">
+                                                <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                                                <span>Preview</span>
+                                            </button>
+                                            <a href="{{ route('core.document.download-doc', [$shipment->id, $doc->id]) }}" target="_blank"
+                                               class="text-[11px] text-slate-600 dark:text-slate-300 hover:underline font-semibold inline-flex items-center gap-1">
+                                                <i data-lucide="download" class="w-3 h-3"></i>
+                                                <span>Unduh</span>
+                                            </a>
+                                        </div>
                                     @else
                                         <span></span>
                                     @endif
@@ -1708,6 +1739,35 @@
             </form>
         </div>
 
+    </div>
+</div>
+
+<!-- Inline Document Preview Modal -->
+<div x-show="previewModalOpen" x-cloak class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div @click.away="previewModalOpen = false" class="bg-white dark:bg-[#1C1C1E] rounded-3xl border border-black/10 dark:border-white/15 shadow-2xl max-w-5xl w-full h-[85vh] flex flex-col overflow-hidden">
+        <div class="px-5 py-3.5 bg-slate-50 dark:bg-white/[0.04] border-b border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2 min-w-0">
+                <i data-lucide="file-text" class="w-4 h-4 text-[#007AFF] shrink-0"></i>
+                <span class="font-mono font-bold text-xs text-slate-800 dark:text-white truncate" x-text="previewTitle"></span>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+                <a :href="previewUrl" target="_blank" class="btn-apple-gray text-xs px-3 py-1.5 inline-flex items-center gap-1">
+                    <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                    <span>Buka Penuh</span>
+                </a>
+                <button type="button" @click="previewModalOpen = false" class="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-white/10 text-xs font-semibold cursor-pointer">
+                    Tutup
+                </button>
+            </div>
+        </div>
+        <div class="flex-1 bg-slate-100 dark:bg-[#111113] overflow-auto flex items-center justify-center p-2">
+            <template x-if="previewIsImage && previewUrl">
+                <img :src="previewUrl" :alt="previewTitle" class="max-w-full max-h-full rounded-xl shadow-md object-contain">
+            </template>
+            <template x-if="!previewIsImage && previewUrl">
+                <iframe :src="previewUrl" class="w-full h-full rounded-xl border-0 bg-white"></iframe>
+            </template>
+        </div>
     </div>
 </div>
 @endsection

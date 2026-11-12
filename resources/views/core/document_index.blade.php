@@ -1,48 +1,78 @@
 @extends('layouts.app')
 
-@section('title', 'Proyek Pengapalan & Dokumen Pabean')
+@section('title', 'Tim Document & Dokumen Pabean (BC 2.0 & BC 3.0) — CEISA 4.0')
 
 @section('content')
 <div x-data="aiHsMatcher()" class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12">
 
-    <!-- 1. TOOLBAR / PAGE HEADER (macOS Sonoma Toolbar Style from Cooca Core) -->
-    <header class="rounded-[16px] backdrop-blur-md bg-white/75 dark:bg-[#1C1C1E]/75 border border-black/5 dark:border-white/10 px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+    <!-- 1. TOOLBAR / PAGE HEADER (Gabungan Tim Document + BC 2.0 PIB + BC 3.0 PEB) -->
+    <header class="rounded-[16px] backdrop-blur-md bg-white/75 dark:bg-[#1C1C1E]/75 border border-black/5 dark:border-white/10 px-4 sm:px-6 py-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 shadow-sm">
         <div>
-            <div class="flex items-center gap-2.5">
+            <nav class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium mb-1" aria-label="Breadcrumb">
+                <a href="{{ route('dashboard') }}" class="hover:text-[#007AFF] transition-colors flex items-center gap-1">
+                    <i data-lucide="home" class="w-3.5 h-3.5"></i>
+                    <span>Dashboard</span>
+                </a>
+                <i data-lucide="chevron-right" class="w-3 h-3 text-slate-300 dark:text-slate-600"></i>
+                <span class="text-slate-800 dark:text-white font-semibold">Tim Document &bull; Gabungan BC 2.0 &amp; BC 3.0</span>
+            </nav>
+            <div class="flex flex-wrap items-center gap-2">
                 <h1 class="text-[20px] sm:text-[22px] font-bold text-black dark:text-white tracking-tight">
-                    Tim Document & Dokumen Pabean
+                    Tim Document &amp; Dokumen Pabean
                 </h1>
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#007AFF]/10 text-[#007AFF]">
-                    Siklus P01–P10
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#007AFF]/10 text-[#007AFF]">
+                    BC 2.0 (PIB) + BC 3.0 (PEB)
+                </span>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/50">
+                    CEISA 4.0 DJBC &bull; Siklus P01–P10
                 </span>
             </div>
             <p class="text-[13px] text-black/50 dark:text-white/50 mt-1 leading-snug">
-                Registrasi pengapalan impor & ekspor, verifikasi berkas (Invoice, Packing List, B/L), pos tarif HS Code, dan integrasi CEISA 4.0 DJBC.
+                Workspace terpadu gabungan Pengajuan Impor (BC 2.0 PIB), Pengajuan Ekspor (BC 3.0 PEB), proyek pengapalan, penjaluran CEISA 4.0, Billing/SPPB/NPE, dan audit Lartas.
             </p>
         </div>
 
         <!-- Action Buttons Toolbar -->
-        <div class="flex items-center gap-2 w-full sm:w-auto shrink-0 flex-wrap">
+        <div class="flex items-center gap-2 w-full lg:w-auto shrink-0 flex-wrap">
             @can('setting.manage')
+            <form action="{{ route('config.sync-all') }}" method="POST" class="inline">
+                @csrf
+                <button type="submit"
+                        class="btn-apple-gray text-[12px] font-semibold !text-emerald-700 dark:!text-emerald-400 hover:!bg-emerald-500/10 flex items-center gap-1.5"
+                        title="Tarik seluruh status terbaru dokumen BC 2.0 & BC 3.0 dari CEISA 4.0">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-emerald-600"></i>
+                    <span>Sync Semua CEISA</span>
+                </button>
+            </form>
             <button type="button"
                     onclick="document.getElementById('modal-sync-ceisa').classList.remove('hidden')"
-                    class="btn-apple-gray text-[13px] font-semibold !text-emerald-700 dark:!text-emerald-400 hover:!bg-emerald-500/10 flex items-center gap-2">
-                <i data-lucide="download-cloud" class="w-4 h-4 text-emerald-600"></i>
+                    class="btn-apple-gray text-[12px] font-semibold !text-emerald-700 dark:!text-emerald-400 hover:!bg-emerald-500/10 flex items-center gap-1.5">
+                <i data-lucide="download-cloud" class="w-3.5 h-3.5 text-emerald-600"></i>
                 <span>Tarik Data CEISA</span>
             </button>
             @endcan
 
-            <button type="button" 
-                    @click="aiModalOpen = true" 
-                    class="btn-apple-gray text-[13px] font-semibold !text-[#007AFF] hover:!bg-[#007AFF]/10 flex items-center gap-2">
-                <i data-lucide="sparkles" class="w-4 h-4 text-[#007AFF]"></i>
-                <span>✨ Deteksi HS Code & Lartas AI</span>
+            <button type="button"
+                    @click="aiModalOpen = true"
+                    class="btn-apple-gray text-[12px] font-semibold !text-[#007AFF] hover:!bg-[#007AFF]/10 flex items-center gap-1.5">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5 text-[#007AFF]"></i>
+                <span>✨ Deteksi HS Code &amp; Lartas AI</span>
             </button>
 
             @can('document.create')
-            <button type="button" 
-                    onclick="document.getElementById('modal-create-project').classList.remove('hidden')" 
-                    class="btn-apple-filled w-full sm:w-auto">
+            <a href="{{ route('bc20.create') }}"
+               class="btn-apple-gray text-[12px] font-semibold !text-[#007AFF] !border-[#007AFF]/25 hover:!bg-[#007AFF]/10 flex items-center gap-1.5">
+                <i data-lucide="arrow-down-left" class="w-3.5 h-3.5"></i>
+                <span>Buat BC 2.0 (PIB)</span>
+            </a>
+            <a href="{{ route('bc30.create') }}"
+               class="btn-apple-gray text-[12px] font-semibold !text-indigo-600 dark:!text-indigo-400 !border-indigo-500/25 hover:!bg-indigo-500/10 flex items-center gap-1.5">
+                <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+                <span>Buat BC 3.0 (PEB)</span>
+            </a>
+            <button type="button"
+                    onclick="document.getElementById('modal-create-project').classList.remove('hidden')"
+                    class="btn-apple-filled w-full sm:w-auto text-[12px]">
                 <i data-lucide="plus" class="w-4 h-4"></i>
                 <span>Buka Proyek Baru</span>
             </button>
@@ -50,74 +80,79 @@
         </div>
     </header>
 
-    <!-- 2. 5 APPLE HIG BENTO KPI STATS CARDS -->
+    <!-- 2. 5 APPLE HIG BENTO KPI STATS CARDS (Gabungan Proyek + BC 2.0 + BC 3.0) -->
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4">
-        <!-- Card 1: Total Proyek -->
+        <!-- Card 1: Total Dokumen & Proyek -->
         <div class="rounded-[16px] bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/5 p-4 flex flex-col justify-between shadow-sm">
             <div class="flex items-center justify-between">
-                <span class="text-[11px] uppercase tracking-wider font-semibold text-black/45 dark:text-white/45">Total Proyek</span>
+                <span class="text-[11px] uppercase tracking-wider font-semibold text-black/45 dark:text-white/45">Total BC 2.0 + BC 3.0</span>
                 <div class="w-8 h-8 rounded-[10px] bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center">
-                    <i data-lucide="folder" class="w-4 h-4"></i>
+                    <i data-lucide="layers" class="w-4 h-4"></i>
                 </div>
             </div>
             <div class="mt-2">
                 <div class="text-[22px] sm:text-[24px] font-bold tabular-nums text-black dark:text-white tracking-tight">
                     {{ $stats['total'] ?? 0 }}
                 </div>
-                <div class="text-[11px] text-black/45 dark:text-white/45 mt-0.5 truncate">Semua pengapalan aktif</div>
+                <div class="text-[11px] text-black/50 dark:text-white/50 mt-0.5 truncate">
+                    {{ $stats['bc20_total'] ?? 0 }} PIB Impor &bull; {{ $stats['bc30_total'] ?? 0 }} PEB Ekspor
+                </div>
             </div>
         </div>
 
-        <!-- Card 2: Kumpul Berkas -->
+        <!-- Card 2: Draft Disiapkan -->
         <div class="rounded-[16px] bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/5 p-4 flex flex-col justify-between shadow-sm">
             <div class="flex items-center justify-between">
-                <span class="text-[11px] uppercase tracking-wider font-semibold text-black/45 dark:text-white/45">Kumpul Berkas</span>
+                <span class="text-[11px] uppercase tracking-wider font-semibold text-black/45 dark:text-white/45">Draft &amp; Persiapan</span>
                 <div class="w-8 h-8 rounded-[10px] bg-[#FF9500]/10 text-[#FF9500] flex items-center justify-center">
-                    <i data-lucide="clock" class="w-4 h-4"></i>
+                    <i data-lucide="file-edit" class="w-4 h-4"></i>
                 </div>
             </div>
             <div class="mt-2">
                 <div class="text-[22px] sm:text-[24px] font-bold tabular-nums text-[#FF9500] dark:text-[#FF9F0A] tracking-tight">
-                    {{ $stats['collecting'] ?? 0 }}
+                    {{ $stats['draft'] ?? 0 }}
                 </div>
-                <div class="text-[11px] text-black/45 dark:text-white/45 mt-0.5 truncate">Menunggu kelengkapan klien</div>
+                <div class="text-[11px] text-black/45 dark:text-white/45 mt-0.5 truncate">Belum submit CEISA / kumpul berkas</div>
             </div>
         </div>
 
-        <!-- Card 3: Review & HS Code -->
+        <!-- Card 3: Proses & Billing -->
         <div class="rounded-[16px] bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/5 p-4 flex flex-col justify-between shadow-sm">
             <div class="flex items-center justify-between">
-                <span class="text-[11px] uppercase tracking-wider font-semibold text-black/45 dark:text-white/45">Review & HS Code</span>
+                <span class="text-[11px] uppercase tracking-wider font-semibold text-black/45 dark:text-white/45">Proses &amp; Billing</span>
                 <div class="w-8 h-8 rounded-[10px] bg-[#5856D6]/10 text-[#5856D6] flex items-center justify-center">
-                    <i data-lucide="scan" class="w-4 h-4"></i>
+                    <i data-lucide="receipt" class="w-4 h-4"></i>
                 </div>
             </div>
             <div class="mt-2">
                 <div class="text-[22px] sm:text-[24px] font-bold tabular-nums text-[#5856D6] dark:text-[#5E5CE6] tracking-tight">
-                    {{ $stats['ready'] ?? 0 }}
+                    {{ $stats['billing'] ?? 0 }}
                 </div>
-                <div class="text-[11px] text-black/45 dark:text-white/45 mt-0.5 truncate">Siap aju ke CEISA 4.0</div>
+                <div class="text-[11px] text-black/45 dark:text-white/45 mt-0.5 truncate">Validasi CEISA &amp; MPN G3 aktif</div>
             </div>
         </div>
 
-        <!-- Card 4: Billing Terbit -->
+        <!-- Card 4: SPPB & NPE Terbit -->
         <div class="rounded-[16px] bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/5 p-4 flex flex-col justify-between shadow-sm">
             <div class="flex items-center justify-between">
-                <span class="text-[11px] uppercase tracking-wider font-semibold text-black/45 dark:text-white/45">Billing Terbit</span>
+                <span class="text-[11px] uppercase tracking-wider font-semibold text-black/45 dark:text-white/45">SPPB &amp; NPE Terbit</span>
                 <div class="w-8 h-8 rounded-[10px] bg-[#34C759]/10 text-[#34C759] flex items-center justify-center">
-                    <i data-lucide="check-circle" class="w-4 h-4"></i>
+                    <i data-lucide="check-circle-2" class="w-4 h-4"></i>
                 </div>
             </div>
             <div class="mt-2">
                 <div class="text-[22px] sm:text-[24px] font-bold tabular-nums text-[#248A3D] dark:text-[#30D158] tracking-tight">
-                    {{ $stats['billing'] ?? 0 }}
+                    {{ $stats['released'] ?? 0 }}
                 </div>
-                <div class="text-[11px] text-black/45 dark:text-white/45 mt-0.5 truncate">Handoff ke Tim DO aktif</div>
+                <div class="text-[11px] text-black/50 dark:text-white/50 mt-0.5 truncate">
+                    {{ $stats['sppb'] ?? 0 }} SPPB Impor &bull; {{ $stats['npe'] ?? 0 }} NPE Ekspor
+                </div>
             </div>
         </div>
 
-        <!-- Card 5: Produk Kena Lartas (Permintaan Khusus User) -->
-        <div class="rounded-[16px] bg-white dark:bg-[#1C1C1E] border border-amber-500/20 dark:border-amber-400/20 p-4 flex flex-col justify-between shadow-sm relative overflow-hidden">
+        <!-- Card 5: Produk Kena Lartas -->
+        <a href="{{ route('core.document.index', ['lartas' => 'yes']) }}"
+           class="rounded-[16px] bg-amber-50/70 dark:bg-amber-950/20 border border-amber-500/25 dark:border-amber-400/25 p-4 flex flex-col justify-between shadow-sm relative overflow-hidden hover:border-amber-500 transition-all col-span-2 md:col-span-1">
             <div class="absolute -right-3 -bottom-3 w-16 h-16 bg-amber-500/10 rounded-full blur-xl pointer-events-none"></div>
             <div class="flex items-center justify-between">
                 <span class="text-[11px] uppercase tracking-wider font-semibold text-amber-600 dark:text-amber-400">Produk Kena Lartas</span>
@@ -129,41 +164,52 @@
                 <div class="text-[22px] sm:text-[24px] font-bold tabular-nums text-amber-600 dark:text-amber-400 tracking-tight">
                     {{ $stats['lartas_products'] ?? 0 }} <span class="text-[12px] font-medium text-black/50 dark:text-white/50">Produk</span>
                 </div>
-                <div class="text-[11px] text-amber-600/80 dark:text-amber-400/80 mt-0.5 truncate">
-                    {{ $stats['lartas_shipments'] ?? 0 }} proyek wajib izin K/L
+                <div class="text-[11px] text-amber-700/80 dark:text-amber-400/80 mt-0.5 truncate">
+                    {{ $stats['lartas_shipments'] ?? 0 }} dok/proyek wajib izin K/L &rarr;
                 </div>
             </div>
-        </div>
+        </a>
     </div>
 
-    <!-- 3. FILTER & SEARCH BAR (Apple Standard Inputs) -->
+    <!-- 3. FILTER & SEARCH BAR (Gabungan Pencarian Proyek, Nomor Aju, Status CEISA, BC 2.0/3.0, & Lartas) -->
     <div class="rounded-[16px] bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/10 shadow-sm p-4 space-y-3">
         <form method="GET" action="{{ route('core.document.index') }}" class="grid grid-cols-1 sm:grid-cols-12 gap-3 text-[13px]">
             <div class="sm:col-span-4 relative">
                 <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-black/40 dark:text-white/40"></i>
-                <input type="text" name="search" value="{{ request('search') }}" 
-                       placeholder="Cari Nomor Job, B/L, Nama Kapal, No Kontainer, atau Importir..." 
+                <input type="text" name="search" value="{{ request('search') }}"
+                       placeholder="Cari No. Aju, Nopen, No. Proyek, B/L, Kantor, Mitra LN, Importir/Eksportir..."
                        class="w-full pl-9 pr-3.5 py-2 rounded-[10px] bg-black/[0.03] dark:bg-white/[0.06] border border-black/10 dark:border-white/10 text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF] focus:ring-2 focus:ring-[#007AFF]/20 transition-all placeholder:text-black/40 dark:placeholder:text-white/40">
             </div>
 
             <div class="sm:col-span-2">
                 <select name="type" class="w-full px-3 py-2 rounded-[10px] bg-black/[0.03] dark:bg-white/[0.06] border border-black/10 dark:border-white/10 text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF] focus:ring-2 focus:ring-[#007AFF]/20 transition-all">
-                    <option value="">Semua Layanan</option>
-                    <option value="IMPORT" {{ request('type') === 'IMPORT' ? 'selected' : '' }}>Impor (BC 2.0 / PIB)</option>
-                    <option value="EXPORT" {{ request('type') === 'EXPORT' ? 'selected' : '' }}>Ekspor (BC 3.0 / PEB)</option>
+                    <option value="">Semua (BC 2.0 + BC 3.0)</option>
+                    <option value="IMPORT" {{ request('type') === 'IMPORT' ? 'selected' : '' }}>Impor — BC 2.0 (PIB)</option>
+                    <option value="EXPORT" {{ request('type') === 'EXPORT' ? 'selected' : '' }}>Ekspor — BC 3.0 (PEB)</option>
                 </select>
             </div>
 
             <div class="sm:col-span-2">
                 <select name="status" class="w-full px-3 py-2 rounded-[10px] bg-black/[0.03] dark:bg-white/[0.06] border border-black/10 dark:border-white/10 text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF] focus:ring-2 focus:ring-[#007AFF]/20 transition-all">
                     <option value="">Semua Status</option>
-                    <option value="DOC_COLLECTING" {{ request('status') === 'DOC_COLLECTING' ? 'selected' : '' }}>Kumpul Berkas</option>
-                    <option value="DOC_READY" {{ request('status') === 'DOC_READY' ? 'selected' : '' }}>Dokumen Lengkap</option>
-                    <option value="HS_DETECTED" {{ request('status') === 'HS_DETECTED' ? 'selected' : '' }}>HS Terdeteksi</option>
-                    <option value="DRAFT_REVIEW" {{ request('status') === 'DRAFT_REVIEW' ? 'selected' : '' }}>Draft Review</option>
-                    <option value="BILLING_ISSUED" {{ request('status') === 'BILLING_ISSUED' ? 'selected' : '' }}>Billing Terbit</option>
-                    <option value="DO_PROCESSING" {{ request('status') === 'DO_PROCESSING' ? 'selected' : '' }}>Proses Tim DO</option>
-                    <option value="DELIVERED_POD" {{ request('status') === 'DELIVERED_POD' ? 'selected' : '' }}>Selesai (POD)</option>
+                    <optgroup label="Status CEISA 4.0">
+                        <option value="DRAFT" {{ request('status') === 'DRAFT' ? 'selected' : '' }}>DRAFT (Pengisian Awal)</option>
+                        <option value="SUBMITTED" {{ request('status') === 'SUBMITTED' ? 'selected' : '' }}>SUBMITTED (Terkirim)</option>
+                        <option value="PROSES" {{ request('status') === 'PROSES' ? 'selected' : '' }}>PROSES (Validasi)</option>
+                        <option value="BILLING" {{ request('status') === 'BILLING' ? 'selected' : '' }}>BILLING (MPN G3)</option>
+                        <option value="SPPB" {{ request('status') === 'SPPB' ? 'selected' : '' }}>SPPB (BC 2.0 Keluar)</option>
+                        <option value="NPE" {{ request('status') === 'NPE' ? 'selected' : '' }}>NPE (BC 3.0 Muat)</option>
+                        <option value="REJECT" {{ request('status') === 'REJECT' ? 'selected' : '' }}>REJECT (Ditolak)</option>
+                    </optgroup>
+                    <optgroup label="Status Siklus Proyek">
+                        <option value="DOC_COLLECTING" {{ request('status') === 'DOC_COLLECTING' ? 'selected' : '' }}>Kumpul Berkas</option>
+                        <option value="DOC_READY" {{ request('status') === 'DOC_READY' ? 'selected' : '' }}>Dokumen Lengkap</option>
+                        <option value="HS_DETECTED" {{ request('status') === 'HS_DETECTED' ? 'selected' : '' }}>HS Terdeteksi</option>
+                        <option value="DRAFT_REVIEW" {{ request('status') === 'DRAFT_REVIEW' ? 'selected' : '' }}>Draft Review</option>
+                        <option value="BILLING_ISSUED" {{ request('status') === 'BILLING_ISSUED' ? 'selected' : '' }}>Billing Terbit</option>
+                        <option value="DO_PROCESSING" {{ request('status') === 'DO_PROCESSING' ? 'selected' : '' }}>Proses Tim DO</option>
+                        <option value="DELIVERED_POD" {{ request('status') === 'DELIVERED_POD' ? 'selected' : '' }}>Selesai (POD)</option>
+                    </optgroup>
                 </select>
             </div>
 
@@ -186,122 +232,194 @@
             </div>
         </form>
 
-        <!-- Quick Filter Chips -->
+        <!-- Quick Filter Chips (Jenis BC 2.0 / BC 3.0 & Lartas) -->
         <div class="flex items-center gap-2 pt-2 border-t border-black/5 dark:border-white/5 text-[12px] overflow-x-auto pb-1">
             <span class="text-black/45 dark:text-white/45 font-medium shrink-0">Filter Cepat:</span>
-            <a href="{{ route('core.document.index', array_merge(request()->except('lartas', 'page'))) }}" 
-               class="px-3 py-1 rounded-full border transition-all shrink-0 {{ !request()->filled('lartas') ? 'bg-[#007AFF] text-white border-transparent font-medium shadow-sm' : 'bg-black/[0.03] dark:bg-white/[0.05] border-black/5 dark:border-white/10 text-black/70 dark:text-white/70 hover:bg-black/[0.06]' }}">
-                Semua Proyek ({{ $stats['total'] ?? 0 }})
+            <a href="{{ route('core.document.index', array_merge(request()->except('type', 'lartas', 'page'))) }}"
+               class="px-3 py-1 rounded-full border transition-all shrink-0 {{ !request()->filled('type') && !request()->filled('lartas') ? 'bg-[#007AFF] text-white border-transparent font-medium shadow-sm' : 'bg-black/[0.03] dark:bg-white/[0.05] border-black/5 dark:border-white/10 text-black/70 dark:text-white/70 hover:bg-black/[0.06]' }}">
+                Semua ({{ $stats['total'] ?? 0 }})
             </a>
-            <a href="{{ route('core.document.index', array_merge(request()->except('page'), ['lartas' => 'yes'])) }}" 
+            <a href="{{ route('core.document.index', array_merge(request()->except('page'), ['type' => 'IMPORT'])) }}"
+               class="px-3 py-1 rounded-full border transition-all shrink-0 {{ request('type') === 'IMPORT' ? 'bg-[#007AFF] text-white border-transparent font-semibold shadow-sm' : 'bg-sky-500/10 border-sky-500/20 text-[#007AFF] hover:bg-sky-500/20' }}">
+                BC 2.0 Impor / PIB ({{ $stats['bc20_total'] ?? 0 }})
+            </a>
+            <a href="{{ route('core.document.index', array_merge(request()->except('page'), ['type' => 'EXPORT'])) }}"
+               class="px-3 py-1 rounded-full border transition-all shrink-0 {{ request('type') === 'EXPORT' ? 'bg-indigo-600 text-white border-transparent font-semibold shadow-sm' : 'bg-indigo-500/10 border-indigo-500/20 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-500/20' }}">
+                BC 3.0 Ekspor / PEB ({{ $stats['bc30_total'] ?? 0 }})
+            </a>
+            <a href="{{ route('core.document.index', array_merge(request()->except('page'), ['lartas' => 'yes'])) }}"
                class="px-3 py-1 rounded-full border transition-all shrink-0 flex items-center gap-1.5 {{ request('lartas') === 'yes' ? 'bg-amber-500 text-white border-transparent font-semibold shadow-sm' : 'bg-amber-500/10 border-amber-500/20 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20' }}">
-                <span>⚠️ Wajib Lartas ({{ $stats['lartas_shipments'] ?? 0 }} proyek · {{ $stats['lartas_products'] ?? 0 }} barang)</span>
+                <span>⚠️ Wajib Lartas ({{ $stats['lartas_shipments'] ?? 0 }} dok &bull; {{ $stats['lartas_products'] ?? 0 }} produk)</span>
             </a>
-            <a href="{{ route('core.document.index', array_merge(request()->except('page'), ['lartas' => 'no'])) }}" 
+            <a href="{{ route('core.document.index', array_merge(request()->except('page'), ['lartas' => 'no'])) }}"
                class="px-3 py-1 rounded-full border transition-all shrink-0 flex items-center gap-1.5 {{ request('lartas') === 'no' ? 'bg-emerald-600 text-white border-transparent font-semibold shadow-sm' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20' }}">
-                <span>✓ Bebas Lartas ({{ $stats['non_lartas_shipments'] ?? 0 }} proyek)</span>
+                <span>✓ Bebas Lartas ({{ $stats['non_lartas_shipments'] ?? 0 }})</span>
             </a>
         </div>
     </div>
 
-    <!-- 4. DATA TABLE (Apple Standard Table from Cooca Core) -->
+    <!-- 4. DATA LEDGER TABLE GABUNGAN (BC 2.0 PIB + BC 3.0 PEB + PROYEK PENGAPALAN) -->
     <div class="rounded-[16px] bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/10 shadow-sm overflow-hidden flex flex-col">
-        <div class="p-4 sm:p-5 border-b border-black/5 dark:border-white/5 flex items-center justify-between">
+        <div class="p-4 sm:p-5 border-b border-black/5 dark:border-white/5 flex items-center justify-between gap-3 flex-wrap">
             <div class="font-semibold text-[13px] text-black dark:text-white flex items-center space-x-2">
-                <span>Daftar Proyek Shipment Aktif</span>
+                <span>Ledger Gabungan BC 2.0 (PIB Impor) &amp; BC 3.0 (PEB Ekspor)</span>
                 <span class="px-2 py-0.5 rounded-full text-[11px] bg-black/[0.05] dark:bg-white/[0.08] text-black/70 dark:text-white/70 font-mono">{{ $shipments->total() }} Data</span>
             </div>
             <div class="text-[12px] text-black/45 dark:text-white/45 hidden sm:block">
-                Kelola 9 slot dokumen berkas pengapalan & integrasi CEISA 4.0
+                Menampilkan pengajuan PIB BC 2.0, PEB BC 3.0, Nomor Aju/Nopen, Lartas, Valuasi CIF/FOB, Billing/SPPB/NPE &amp; Audit Berkas
             </div>
         </div>
 
-        <div class="table-responsive flex-1">
+        <div class="table-responsive flex-1 overflow-x-auto">
             <table class="w-full text-left text-[13px]">
                 <thead class="text-[11px] font-semibold text-black/50 dark:text-white/50 uppercase tracking-wider bg-black/[0.02] dark:bg-white/[0.02] border-b border-black/5 dark:border-white/10">
                     <tr>
-                        <th class="py-3 px-4">No. Proyek & B/L</th>
-                        <th class="py-3 px-4">Klien / Importir</th>
-                        <th class="py-3 px-4">Pengangkutan & Kontainer</th>
-                        <th class="py-3 px-4">Audit 9 Berkas</th>
-                        <th class="py-3 px-4">Produk & Lartas</th>
-                        <th class="py-3 px-4">Status Siklus</th>
-                        <th class="py-3 px-4">Billing MPN G3</th>
+                        <th class="py-3 px-4">Jenis, No. Aju &amp; Proyek</th>
+                        <th class="py-3 px-4">Kantor &amp; Pengangkutan</th>
+                        <th class="py-3 px-4">Entitas &amp; Mitra LN</th>
+                        <th class="py-3 px-4">Produk, Lartas &amp; Berkas</th>
+                        <th class="py-3 px-4 text-right">Valuasi (CIF / FOB)</th>
+                        <th class="py-3 px-4 text-center">Status CEISA &amp; Siklus</th>
+                        <th class="py-3 px-4">Billing MPN / SPPB / NPE</th>
                         <th class="py-3 px-4 text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-black/5 dark:divide-white/5">
-                    @forelse($shipments as $shp)
+                    @php
+                        $statusMap = [
+                            'DOC_COLLECTING' => ['label' => 'Kumpul Berkas', 'class' => 'bg-black/[0.05] text-black/70 dark:bg-white/[0.08] dark:text-white/70'],
+                            'DOC_READY' => ['label' => 'Berkas Lengkap', 'class' => 'bg-[#5856D6]/12 text-[#5856D6] dark:text-[#5E5CE6]'],
+                            'HS_DETECTED' => ['label' => 'HS Terdeteksi', 'class' => 'bg-[#5856D6]/12 text-[#5856D6] dark:text-[#5E5CE6]'],
+                            'DRAFT_REVIEW' => ['label' => 'Review SPV', 'class' => 'bg-[#007AFF]/12 text-[#007AFF]'],
+                            'CEISA_SUBMITTED' => ['label' => 'Terkirim CEISA', 'class' => 'bg-[#007AFF]/12 text-[#007AFF]'],
+                            'BILLING_ISSUED' => ['label' => 'Billing Terbit', 'class' => 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158] font-bold'],
+                            'DO_PROCESSING' => ['label' => 'Proses DO', 'class' => 'bg-[#FF9500]/15 text-[#B25E00] dark:text-[#FF9F0A]'],
+                            'DO_RELEASED' => ['label' => 'DO Rilis', 'class' => 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158] font-bold'],
+                            'TRAFFIC_HOLD' => ['label' => 'Hold TPS', 'class' => 'bg-[#FF3B30]/15 text-[#C41E17] dark:text-[#FF453A]'],
+                            'TRAFFIC_SPPB' => ['label' => 'SPPB Rilis', 'class' => 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158] font-bold'],
+                            'TRAFFIC_GATE_OUT' => ['label' => 'Gate Out TPS', 'class' => 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158] font-bold'],
+                            'DELIVERED_POD' => ['label' => 'Tiba di Gudang', 'class' => 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158] font-bold'],
+                            'INVOICED_P19' => ['label' => 'Invoice Terbit', 'class' => 'bg-[#5856D6]/12 text-[#5856D6]'],
+                            'COMPLETED' => ['label' => 'Selesai', 'class' => 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158] font-bold'],
+                        ];
+                    @endphp
+                    @forelse($shipments as $entry)
+                        @php
+                            $shp = $entry->shipment;
+                            $ceisa = $entry->ceisa;
+                            $isExport = $entry->flow === 'EXPORT';
+                            $lInfo = $entry->lartas_info;
+                            $ceisaDetailRoute = $ceisa
+                                ? ($isExport ? route('bc30.show', $ceisa->id) : route('bc20.show', $ceisa->id))
+                                : null;
+                            $ceisaEditRoute = $ceisa
+                                ? ($isExport ? route('bc30.edit', $ceisa->id) : route('bc20.edit', $ceisa->id))
+                                : null;
+                            $canEditCeisa = false;
+                            if ($ceisa && !$ceisa->isBillingLocked()) {
+                                if ($ceisa->status === 'DRAFT') {
+                                    $canEditCeisa = auth()->user()->isSuperAdmin() || auth()->user()->hasAnyPermission(['document.edit', 'document.edit_after_ceisa']);
+                                } else {
+                                    $canEditCeisa = auth()->user()->isSuperAdmin() || auth()->user()->hasPermission('document.edit_after_ceisa');
+                                }
+                            }
+                        @endphp
                         <tr class="hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
+                            <!-- 1. Jenis, No Aju & Proyek -->
                             <td class="py-3.5 px-4 font-mono">
-                                <a href="{{ route('core.document.show', $shp->id) }}" class="font-bold text-[#007AFF] hover:underline flex items-center space-x-1.5">
-                                    <span>{{ $shp->shipment_number ?? $shp->project_no }}</span>
-                                </a>
-                                <div class="text-[11px] text-black/50 dark:text-white/50 mt-0.5 font-sans">
-                                    B/L: <strong class="text-black dark:text-white font-mono">{{ $shp->bl_number ?? '-' }}</strong>
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <span class="inline-block px-2 py-0.5 rounded-[6px] text-[10px] font-bold {{ $isExport ? 'bg-indigo-500/12 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20' : 'bg-[#007AFF]/12 text-[#007AFF] border border-[#007AFF]/20' }}">
+                                        {{ $isExport ? 'BC 3.0 EKSPOR' : 'BC 2.0 IMPOR' }}
+                                    </span>
+                                    @if($shp)
+                                        <a href="{{ route('core.document.show', $shp->id) }}" class="font-bold text-[#007AFF] hover:underline text-[12px]">
+                                            {{ $shp->shipment_number ?? $shp->project_no }}
+                                        </a>
+                                    @endif
                                 </div>
-                                <span class="inline-block mt-1 px-2 py-0.5 rounded-[6px] text-[10px] font-bold font-mono {{ $shp->type === 'EXPORT' ? 'bg-[#FF9500]/12 text-[#B25E00] dark:text-[#FF9F0A]' : 'bg-[#007AFF]/12 text-[#007AFF]' }}">
-                                    {{ $shp->type === 'EXPORT' ? 'BC 3.0 EKSPOR' : 'BC 2.0 IMPOR' }}
-                                </span>
-                                @if($shp->ceisaDocument)
-                                    <div class="mt-1.5 text-[10px] font-mono text-black/60 dark:text-white/60">
-                                        Aju: <span class="font-bold text-black dark:text-white">{{ $shp->ceisaDocument->nomor_aju }}</span>
-                                        <span class="ml-1 px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-bold">
-                                            {{ $shp->ceisaDocument->status ?? 'DRAFT' }}
-                                        </span>
+
+                                @if($ceisa)
+                                    <div class="mt-1">
+                                        <a href="{{ $ceisaDetailRoute }}" class="text-[11px] font-bold text-slate-900 dark:text-white hover:text-[#007AFF] hover:underline">
+                                            {{ $ceisa->nomor_aju }}
+                                        </a>
+                                    </div>
+                                    @if($ceisa->nomor_daftar)
+                                        <div class="text-[10px] text-slate-500 dark:text-slate-400 tabular-nums">
+                                            No Pen: {{ $ceisa->nomor_daftar }} ({{ $ceisa->tanggal_daftar?->format('d/m/Y') }})
+                                        </div>
+                                    @endif
+                                @endif
+
+                                @if($shp)
+                                    <div class="text-[11px] text-black/50 dark:text-white/50 mt-0.5 font-sans">
+                                        B/L: <strong class="text-black dark:text-white font-mono">{{ $shp->bl_number ?? '-' }}</strong>
+                                    </div>
+                                @elseif($ceisa && $ceisa->created_at)
+                                    <div class="text-[10px] text-slate-400 dark:text-slate-500 font-sans mt-0.5 tabular-nums">
+                                        {{ $ceisa->created_at->format('d M Y, H:i') }}
                                     </div>
                                 @endif
                             </td>
 
-                            <td class="py-3.5 px-4">
-                                <div class="font-semibold text-black dark:text-white text-[13px] leading-tight" title="{{ $shp->client->name ?? '-' }}">
-                                    {{ $shp->client->name ?? '-' }}
-                                </div>
-                                <div class="text-[11px] text-black/45 dark:text-white/45 font-mono mt-0.5">NPWP: {{ $shp->client->npwp ?? '-' }}</div>
-                                @if($shp->shippingVendor)
-                                    <div class="text-[11px] text-black/60 dark:text-white/60 mt-0.5">Pelayaran: <strong>{{ $shp->shippingVendor->name }}</strong></div>
-                                @endif
-                            </td>
-
+                            <!-- 2. Kantor Pabean & Pengangkutan -->
                             <td class="py-3.5 px-4 text-black/80 dark:text-white/80">
-                                <div class="font-medium text-black dark:text-white truncate max-w-[150px]">{{ $shp->vessel_name ?? '-' }}</div>
-                                <div class="text-[11px] text-black/45 dark:text-white/45">Voy: {{ $shp->voyage_number ?? '-' }} &bull; ETA: {{ $shp->eta ? $shp->eta->format('d/m/Y') : '-' }}</div>
-                                <div class="text-[11px] font-mono text-black/50 dark:text-white/50 mt-0.5">{{ $shp->nomor_kontainer ?? '1 Kontainer' }}</div>
-                            </td>
-
-                            <td class="py-3.5 px-4">
-                                @php
-                                    $verifiedCount = $shp->documents->where('status', 'VERIFIED')->count();
-                                    $uploadedCount = $shp->documents->where('status', 'UPLOADED')->count();
-                                    $percent = $shp->document_completion_rate;
-                                @endphp
-                                <div class="flex items-center space-x-2">
-                                    <div class="w-16 bg-black/[0.06] dark:bg-white/[0.08] rounded-full h-2 overflow-hidden">
-                                        <div class="h-2 rounded-full transition-all duration-300 {{ $percent >= 100 ? 'bg-[#34C759]' : ($percent >= 50 ? 'bg-[#007AFF]' : 'bg-[#FF9500]') }}" 
-                                             style="width: {{ $percent }}%"></div>
+                                @if($entry->kode_kantor)
+                                    <div class="font-mono font-semibold text-slate-800 dark:text-white text-[12px]">
+                                        {{ $entry->kode_kantor }}
                                     </div>
-                                    <span class="font-mono font-bold text-[11px] tabular-nums {{ $percent >= 100 ? 'text-[#248A3D] dark:text-[#30D158]' : 'text-black dark:text-white' }}">{{ $percent }}%</span>
-                                </div>
-                                <div class="text-[11px] text-black/45 dark:text-white/45 mt-0.5">
-                                    {{ $verifiedCount }} verified &bull; {{ $uploadedCount }} baru
-                                </div>
+                                    <div class="text-[10px] text-slate-500 dark:text-slate-400 truncate max-w-[160px]" title="{{ $entry->nama_kantor }}">
+                                        {{ $entry->nama_kantor }}
+                                    </div>
+                                @endif
+                                @if($shp)
+                                    <div class="font-medium text-black dark:text-white text-[12px] truncate max-w-[160px] {{ $entry->kode_kantor ? 'mt-1 pt-1 border-t border-black/5 dark:border-white/5' : '' }}">
+                                        {{ $shp->vessel_name ?? '-' }}
+                                    </div>
+                                    <div class="text-[10px] text-black/45 dark:text-white/45">
+                                        Voy: {{ $shp->voyage_number ?? '-' }} &bull; ETA: {{ $shp->eta ? $shp->eta->format('d/m/Y') : '-' }}
+                                    </div>
+                                    <div class="text-[10px] font-mono text-black/50 dark:text-white/50">{{ $shp->nomor_kontainer ?? '1 Kontainer' }}</div>
+                                @elseif(!$entry->kode_kantor)
+                                    <span class="text-black/30 dark:text-white/30 text-[11px]">-</span>
+                                @endif
                             </td>
 
-                            <!-- Kolom Informasi Produk & Status Lartas (Permintaan User) -->
+                            <!-- 3. Entitas & Mitra Luar Negeri -->
                             <td class="py-3.5 px-4">
-                                @php
-                                    $lInfo = $shp->lartas_info;
-                                @endphp
-                                <div class="font-bold text-black dark:text-white text-[12px] flex items-center gap-1.5 mb-1">
-                                    <span class="font-mono tabular-nums">{{ $lInfo['total_products'] }}</span> Barang
+                                <div class="font-semibold text-black dark:text-white text-[12px] leading-tight truncate max-w-[190px]" title="{{ $entry->local_name }}">
+                                    {{ $entry->local_name }}
                                 </div>
-                                @if($lInfo['has_lartas'])
+                                <div class="text-[10px] text-black/45 dark:text-white/45 font-mono mt-0.5">
+                                    {{ $isExport ? 'Eksportir' : 'Importir' }} &bull; {{ $entry->local_npwp }}
+                                </div>
+                                @if($entry->partner_name)
+                                    <div class="mt-1 pt-1 border-t border-black/5 dark:border-white/5">
+                                        <div class="text-[11px] font-medium text-slate-700 dark:text-slate-300 truncate max-w-[190px]" title="{{ $entry->partner_name }}">
+                                            {{ $isExport ? 'Pembeli LN:' : 'Supplier:' }} {{ $entry->partner_name }}
+                                        </div>
+                                        <div class="text-[10px] text-slate-400 font-mono">
+                                            {{ $isExport ? 'Tujuan:' : 'Asal:' }} {{ $entry->partner_country ?? 'LN' }}
+                                        </div>
+                                    </div>
+                                @endif
+                                @if($shp?->shippingVendor)
+                                    <div class="text-[10px] text-black/55 dark:text-white/55 mt-0.5">Pelayaran: <strong>{{ $shp->shippingVendor->name }}</strong></div>
+                                @endif
+                            </td>
+
+                            <!-- 4. Produk, Lartas & Audit 9 Berkas -->
+                            <td class="py-3.5 px-4">
+                                <div class="font-bold text-black dark:text-white text-[12px] flex items-center gap-1.5 mb-1">
+                                    <span class="font-mono tabular-nums">{{ $lInfo['total_products'] ?? 0 }}</span> Barang
+                                </div>
+                                @if(!empty($lInfo['has_lartas']))
                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/25">
                                         <i data-lucide="alert-triangle" class="w-3 h-3 text-amber-600 shrink-0"></i>
                                         <span>{{ $lInfo['lartas_count'] }} Kena Lartas</span>
                                     </span>
                                     @if(!empty($lInfo['primary_lartas']))
-                                        <div class="text-[10px] text-black/50 dark:text-white/50 mt-1 truncate max-w-[170px]" title="{{ $lInfo['primary_lartas'] }}">
+                                        <div class="text-[10px] text-black/50 dark:text-white/50 mt-0.5 truncate max-w-[165px]" title="{{ $lInfo['primary_lartas'] }}">
                                             {{ $lInfo['primary_lartas'] }}
                                         </div>
                                     @endif
@@ -311,78 +429,159 @@
                                         <span>Bebas Lartas</span>
                                     </span>
                                 @endif
+
+                                @if($shp)
+                                    @php
+                                        $verifiedCount = $shp->documents->where('status', 'VERIFIED')->count();
+                                        $uploadedCount = $shp->documents->where('status', 'UPLOADED')->count();
+                                        $percent = $shp->document_completion_rate;
+                                    @endphp
+                                    <div class="mt-2 pt-1.5 border-t border-black/5 dark:border-white/5">
+                                        <div class="flex items-center space-x-2">
+                                            <div class="w-14 bg-black/[0.06] dark:bg-white/[0.08] rounded-full h-1.5 overflow-hidden">
+                                                <div class="h-1.5 rounded-full {{ $percent >= 100 ? 'bg-[#34C759]' : ($percent >= 50 ? 'bg-[#007AFF]' : 'bg-[#FF9500]') }}"
+                                                     style="width: {{ $percent }}%"></div>
+                                            </div>
+                                            <span class="font-mono font-bold text-[10px] tabular-nums {{ $percent >= 100 ? 'text-[#248A3D] dark:text-[#30D158]' : 'text-black/70 dark:text-white/70' }}">{{ $percent }}%</span>
+                                        </div>
+                                        <div class="text-[10px] text-black/45 dark:text-white/45">{{ $verifiedCount }} verified &bull; {{ $uploadedCount }} baru</div>
+                                    </div>
+                                @endif
                             </td>
 
-                            <td class="py-3.5 px-4">
-                                @php
-                                    $rawStatus = $shp->status ?? $shp->status_tahap;
-                                    $statusMap = [
-                                        'DOC_COLLECTING' => ['label' => 'Kumpul Berkas', 'class' => 'bg-black/[0.05] text-black/70 dark:bg-white/[0.08] dark:text-white/70'],
-                                        'DOC_READY' => ['label' => 'Berkas Lengkap', 'class' => 'bg-[#5856D6]/12 text-[#5856D6] dark:text-[#5E5CE6]'],
-                                        'HS_DETECTED' => ['label' => 'HS Terdeteksi', 'class' => 'bg-[#5856D6]/12 text-[#5856D6] dark:text-[#5E5CE6]'],
-                                        'DRAFT_REVIEW' => ['label' => 'Review SPV', 'class' => 'bg-[#007AFF]/12 text-[#007AFF]'],
-                                        'CEISA_SUBMITTED' => ['label' => 'Terkirim CEISA', 'class' => 'bg-[#007AFF]/12 text-[#007AFF]'],
-                                        'BILLING_ISSUED' => ['label' => 'Billing Terbit', 'class' => 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158] font-bold'],
-                                        'DO_PROCESSING' => ['label' => 'Proses DO', 'class' => 'bg-[#FF9500]/15 text-[#B25E00] dark:text-[#FF9F0A]'],
-                                        'DO_RELEASED' => ['label' => 'DO Rilis', 'class' => 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158] font-bold'],
-                                        'TRAFFIC_HOLD' => ['label' => 'Hold TPS', 'class' => 'bg-[#FF3B30]/15 text-[#C41E17] dark:text-[#FF453A]'],
-                                        'TRAFFIC_SPPB' => ['label' => 'SPPB Rilis', 'class' => 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158] font-bold'],
-                                        'TRAFFIC_GATE_OUT' => ['label' => 'Gate Out TPS', 'class' => 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158] font-bold'],
-                                        'DELIVERED_POD' => ['label' => 'Tiba di Gudang', 'class' => 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158] font-bold'],
-                                        'INVOICED_P19' => ['label' => 'Invoice Terbit', 'class' => 'bg-[#5856D6]/12 text-[#5856D6]'],
-                                        'COMPLETED' => ['label' => 'Selesai', 'class' => 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158] font-bold'],
-                                    ];
-                                    $statusInfo = $statusMap[$rawStatus] ?? ['label' => str_replace('_', ' ', $rawStatus), 'class' => 'bg-black/[0.05] text-black/70'];
-                                @endphp
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold {{ $statusInfo['class'] }}">
-                                    {{ $statusInfo['label'] }}
+                            <!-- 5. Valuasi Pabean (CIF untuk BC 2.0 / FOB untuk BC 3.0) -->
+                            <td class="py-3.5 px-4 text-right font-mono">
+                                <span class="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold uppercase mb-0.5 {{ $isExport ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-sky-500/10 text-[#007AFF]' }}">
+                                    {{ $entry->valuation_label }}
                                 </span>
+                                <div class="font-bold text-slate-900 dark:text-white text-[12px] tabular-nums">
+                                    {{ $entry->kode_valuta }} {{ number_format($entry->total_nilai, 2) }}
+                                </div>
+                                <div class="text-[10px] text-slate-400 dark:text-slate-500 tabular-nums">
+                                    Rp {{ number_format($entry->total_nilai_idr, 0, ',', '.') }}
+                                </div>
                             </td>
 
+                            <!-- 6. Status CEISA & Siklus -->
+                            <td class="py-3.5 px-4 text-center space-y-1">
+                                @if($ceisa)
+                                    <div>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold {{ $ceisa->status_badge_class }}">
+                                            {{ $ceisa->status }}
+                                        </span>
+                                    </div>
+                                    @if($ceisa->jalur)
+                                        <div>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold font-mono {{ $ceisa->jalur === 'HIJAU' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : ($ceisa->jalur === 'KUNING' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-rose-50 text-rose-700 border border-rose-200') }}">
+                                                Jalur {{ $ceisa->jalur }}
+                                            </span>
+                                        </div>
+                                    @endif
+                                @endif
+
+                                @if($shp)
+                                    @php
+                                        $rawStatus = $shp->status ?? $shp->status_tahap;
+                                        $statusInfo = $statusMap[$rawStatus] ?? ['label' => str_replace('_', ' ', $rawStatus), 'class' => 'bg-black/[0.05] text-black/70'];
+                                    @endphp
+                                    <div>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold {{ $statusInfo['class'] }}">
+                                            {{ $statusInfo['label'] }}
+                                        </span>
+                                    </div>
+                                @endif
+                            </td>
+
+                            <!-- 7. Billing MPN G3 / Nomor SPPB / Nomor NPE -->
                             <td class="py-3.5 px-4 font-mono">
-                                @if($shp->billing_code || $shp->ceisaDocument?->kode_billing)
-                                    <div class="font-bold text-[#5856D6] dark:text-[#5E5CE6] text-[12px] tracking-wider tabular-nums">
-                                        {{ $shp->billing_code ?? $shp->ceisaDocument?->kode_billing }}
+                                @if($shp?->billing_code || $ceisa?->kode_billing)
+                                    <div class="font-bold text-purple-600 dark:text-purple-400 text-[12px] tracking-wider tabular-nums">
+                                        {{ $shp?->billing_code ?? $ceisa?->kode_billing }}
                                     </div>
-                                    <div class="text-[10px] text-[#248A3D] dark:text-[#30D158] font-bold font-sans flex items-center gap-1 mt-0.5">
-                                        <i data-lucide="check" class="w-3 h-3"></i>
-                                        <span>CEISA 4.0</span>
+                                    @if($ceisa?->total_billing)
+                                        <div class="text-[10px] text-slate-500 dark:text-slate-400 tabular-nums">Rp {{ number_format($ceisa->total_billing, 0, ',', '.') }}</div>
+                                    @endif
+                                @endif
+
+                                @if($ceisa?->nomor_sppb_npe)
+                                    <div class="{{ ($shp?->billing_code || $ceisa?->kode_billing) ? 'mt-1 pt-1 border-t border-black/5 dark:border-white/5' : '' }}">
+                                        <span class="text-[9px] font-bold uppercase text-emerald-600 dark:text-emerald-400">
+                                            {{ $isExport ? 'NPE:' : 'SPPB:' }}
+                                        </span>
+                                        <span class="text-emerald-700 dark:text-emerald-300 font-bold text-[11px] tabular-nums">{{ $ceisa->nomor_sppb_npe }}</span>
+                                        @if($ceisa->tanggal_sppb_npe)
+                                            <div class="text-[10px] text-slate-400 tabular-nums">{{ $ceisa->tanggal_sppb_npe->format('d/m/Y') }}</div>
+                                        @endif
                                     </div>
-                                @else
+                                @elseif(!($shp?->billing_code || $ceisa?->kode_billing))
                                     <span class="text-black/30 dark:text-white/30 text-[11px]">-</span>
                                 @endif
                             </td>
 
-                            <td class="py-3.5 px-4 text-right space-x-1.5 whitespace-nowrap">
-                                <a href="{{ route('core.document.show', $shp->id) }}" 
-                                   class="btn-apple-tinted !h-8 !px-3 !text-[11px]">
+                            <!-- 8. Aksi Gabungan (BC 2.0 / BC 3.0 / Proyek) -->
+                            <td class="py-3.5 px-4 text-right space-x-1 whitespace-nowrap">
+                                @if($ceisaDetailRoute)
+                                    <a href="{{ $ceisaDetailRoute }}"
+                                       class="btn-apple-gray !h-8 !px-2.5 !text-[11px] font-semibold {{ $isExport ? '!text-indigo-600 dark:!text-indigo-400 !border-indigo-500/30 hover:!bg-indigo-500/10' : '!text-[#007AFF] !border-[#007AFF]/30 hover:!bg-[#007AFF]/10' }}"
+                                       title="Buka pelacakan alur 11 Pos dan detail pabean {{ $isExport ? 'BC 3.0' : 'BC 2.0' }}">
+                                        <i data-lucide="milestone" class="w-3.5 h-3.5"></i>
+                                        <span>11 Pos</span>
+                                    </a>
+                                @endif
+
+                                @if($canEditCeisa && $ceisaEditRoute)
+                                    <a href="{{ $ceisaEditRoute }}"
+                                       class="btn-apple-gray !h-8 !px-2.5 !text-[11px] font-semibold !text-amber-700 dark:!text-amber-400 !border-amber-500/30 hover:!bg-amber-500/10"
+                                       title="Buka Editor / Wizard {{ $isExport ? 'BC 3.0 PEB' : 'BC 2.0 PIB' }}">
+                                        <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                                        <span>Edit</span>
+                                    </a>
+                                @endif
+
+                                <a href="{{ $shp ? route('core.document.show', $shp->id) : route('core.document.show', $ceisa->id) }}"
+                                   class="btn-apple-tinted !h-8 !px-2.5 !text-[11px]">
                                     <span>Detail</span>
                                     <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
                                 </a>
 
-                                <button type="button" 
-                                        onclick="openPortalModal('{{ $shp->id }}', '{{ $shp->project_no }}', '{{ addslashes($shp->client->name ?? '-') }}', '{{ $shp->portal_token ? route('portal.track', $shp->portal_token) : '' }}', '{{ $shp->portal_status }}', '{{ $shp->portal_expires_at ? $shp->portal_expires_at->format('d/m/Y H:i') : '' }}', '{{ $shp->portal_duration_days ?? 7 }}', '{{ $shp->client->pic_phone ?? ($shp->client->phone ?? '') }}', '{{ $shp->nomor_bl_awb ?? '' }}')"
-                                        class="btn-apple-gray !h-8 !px-2.5 !text-[11px] {{ $shp->isPortalActive() ? '!text-[#007AFF] !border-[#007AFF]/30' : '!text-black/50' }}"
-                                        title="Bagikan Tautan Pelacakan Portal Klien & Atur Timer">
-                                    <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
-                                    <span class="hidden xl:inline">Portal</span>
-                                    @if($shp->isPortalActive())
-                                        <span class="w-1.5 h-1.5 rounded-full bg-[#34C759]"></span>
-                                    @endif
-                                </button>
+                                @if($shp)
+                                    <button type="button"
+                                            onclick="openPortalModal('{{ $shp->id }}', '{{ $shp->project_no }}', '{{ addslashes($shp->client->name ?? '-') }}', '{{ $shp->portal_token ? route('portal.track', $shp->portal_token) : '' }}', '{{ $shp->portal_status }}', '{{ $shp->portal_expires_at ? $shp->portal_expires_at->format('d/m/Y H:i') : '' }}', '{{ $shp->portal_duration_days ?? 7 }}', '{{ $shp->client->pic_phone ?? ($shp->client->phone ?? '') }}', '{{ $shp->nomor_bl_awb ?? '' }}')"
+                                            class="btn-apple-gray !h-8 !px-2 !text-[11px] {{ $shp->isPortalActive() ? '!text-[#007AFF] !border-[#007AFF]/30' : '!text-black/50' }}"
+                                            title="Bagikan Tautan Portal Klien">
+                                        <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+                                    </button>
 
-                                @if($shp->type === 'EXPORT')
-                                    <a href="{{ route('pdf.peb', $shp->id) }}" target="_blank"
-                                       class="btn-apple-gray !h-8 !px-2.5 !text-[11px]" title="Cetak PEB BC 3.0">
-                                        <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
-                                        <span>PEB</span>
-                                    </a>
-                                @else
-                                    <a href="{{ route('pdf.pib', $shp->id) }}" target="_blank"
-                                       class="btn-apple-gray !h-8 !px-2.5 !text-[11px]" title="Cetak PIB BC 2.0">
-                                        <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
-                                        <span>PIB</span>
-                                    </a>
+                                    @if($isExport)
+                                        <a href="{{ route('pdf.peb', $shp->id) }}" target="_blank"
+                                           class="btn-apple-gray !h-8 !px-2 !text-[11px]" title="Cetak PEB BC 3.0">
+                                            <span>PEB</span>
+                                        </a>
+                                    @else
+                                        <a href="{{ route('pdf.pib', $shp->id) }}" target="_blank"
+                                           class="btn-apple-gray !h-8 !px-2 !text-[11px]" title="Cetak PIB BC 2.0">
+                                            <span>PIB</span>
+                                        </a>
+                                    @endif
+                                @endif
+
+                                @if($entry->is_draft_deletable && (auth()->user()->isSuperAdmin() || auth()->user()->hasAnyPermission(['document.create', 'document.edit', 'document.delete'])))
+                                    @php
+                                        $destroyAction = $shp
+                                            ? route('core.document.destroy', $shp->id)
+                                            : ($isExport ? route('bc30.destroy', $ceisa->id) : route('bc20.destroy', $ceisa->id));
+                                        $destroyLabel = $shp ? $shp->project_no : ($ceisa?->nomor_aju ?? 'Draft');
+                                    @endphp
+                                    <form action="{{ $destroyAction }}" method="POST" class="inline"
+                                          onsubmit="return confirm('Hapus draft {{ $destroyLabel }} beserta seluruh aset berkas fisiknya? Tindakan ini tidak dapat dibatalkan.');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit"
+                                                class="btn-apple-gray !h-8 !px-2 !text-[11px] !text-rose-600 dark:!text-rose-400 !border-rose-300/60 hover:!bg-rose-500/10 cursor-pointer"
+                                                title="Hapus Draft & Aset Dokumen">
+                                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                        </button>
+                                    </form>
                                 @endif
                             </td>
                         </tr>
@@ -390,7 +589,7 @@
                         <tr>
                             <td colspan="8" class="py-12 text-center text-black/40 dark:text-white/40 text-[13px]">
                                 <i data-lucide="package-open" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
-                                <div>Tidak ada proyek shipment yang cocok dengan kriteria pencarian.</div>
+                                <div>Tidak ada dokumen BC 2.0, BC 3.0, atau proyek shipment yang cocok dengan filter.</div>
                             </td>
                         </tr>
                     @endforelse
@@ -426,7 +625,7 @@
             exporter_name: '',
             shipping_vendor_id: '',
             shipping_vendor_name: '',
-            type: 'IMPORT',
+            type: '',
             bl_number: '',
             invoice_number: '',
             vessel_name: '',
@@ -453,7 +652,7 @@
         handleBundleFiles(event) {
             const files = event.target.files;
             this.bundleFileNames = files ? Array.from(files).map(f => f.name) : [];
-            if (this.bundleFileNames.length > 0) {
+            if (this.bundleFileNames.length > 0 && ['IMPORT', 'EXPORT'].includes(this.detected.type)) {
                 this.scanFiles();
             }
         },
@@ -461,12 +660,16 @@
             const files = event.target.files;
             if (files && files[0]) {
                 this.fileNames[type] = files[0].name;
-                if ((this.fileNames.bl || this.fileNames.invoice || this.fileNames.pl || this.bundleFileNames.length > 0) && !this.scanned) {
+                if ((this.fileNames.bl || this.fileNames.invoice || this.fileNames.pl || this.bundleFileNames.length > 0) && !this.scanned && ['IMPORT', 'EXPORT'].includes(this.detected.type)) {
                     this.scanFiles();
                 }
             }
         },
         async scanFiles() {
+            if (!['IMPORT', 'EXPORT'].includes(this.detected.type)) {
+                alert('Wajib memilih Tipe Kepabeanan terlebih dahulu: Impor (BC 2.0) atau Ekspor (BC 3.0).');
+                return;
+            }
             const bundleInput = document.getElementById('input-bundle-files');
             const blInput = document.getElementById('input-bl-file');
             const invInput = document.getElementById('input-inv-file');
@@ -496,7 +699,8 @@
             if (lartasInput?.files?.[0]) formData.append('lartas_file', lartasInput.files[0]);
 
             formData.append('use_ai', this.useAi ? '1' : '0');
-            if (this.detected.type) formData.append('type', this.detected.type);
+            const chosenType = this.detected.type;
+            formData.append('type', chosenType);
 
             const clientSelect = document.getElementById('smart-client-select');
             if (clientSelect?.value) formData.append('client_id', clientSelect.value);
@@ -510,9 +714,9 @@
                     body: formData
                 });
                 const res = await response.json();
-                if (res.status === 'success' && res.data) {
+                if (response.ok && res.status === 'success' && res.data) {
                     this.scanned = true;
-                    this.detected = { ...this.detected, ...res.data };
+                    this.detected = { ...this.detected, ...res.data, type: chosenType };
                     this.detectedBundleFiles = res.data.bundle_files_detected || [];
                     this.crossValidation = res.data.cross_validation || null;
 
@@ -627,7 +831,8 @@
             </button>
         </div>
 
-        <form action="{{ route('core.document.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+        <form action="{{ route('core.document.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4"
+              @submit="if (!['IMPORT', 'EXPORT'].includes(detected.type)) { $event.preventDefault(); alert('Wajib pilih Tipe Kepabeanan terlebih dahulu: Impor (BC 2.0) atau Ekspor (BC 3.0).'); }">
             @csrf
 
             <!-- ============================================== -->
@@ -645,16 +850,19 @@
                                 <span>+ Klien Baru</span>
                             </button>
                         </div>
-                        <select name="client_id" id="smart-client-select" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                        <select name="client_id" id="smart-client-select" x-model="detected.client_id" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
                             <option value="">-- Auto-Deteksi dari Dokumen atau Pilih --</option>
                             @foreach($clients as $c)
-                                <option value="{{ $c->id }}" :selected="detected.client_id === '{{ $c->id }}'">{{ $c->name }} (NPWP: {{ $c->npwp ?? '-' }})</option>
+                                <option value="{{ $c->id }}">{{ $c->name }} (NPWP: {{ $c->npwp ?? '-' }})</option>
                             @endforeach
                         </select>
                     </div>
                     <div>
-                        <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Tipe Kepabeanan</label>
-                        <select name="type" x-model="detected.type" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                        <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Tipe Kepabeanan <span class="text-rose-500">*</span></label>
+                        <select name="type" x-model="detected.type" :required="tab === 'ai'"
+                                @change="if (['IMPORT','EXPORT'].includes(detected.type) && !scanned && !scanning && (bundleFileNames.length > 0 || fileNames.bl || fileNames.invoice || fileNames.pl)) { scanFiles(); }"
+                                class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                            <option value="">-- Wajib Pilih: Impor atau Ekspor --</option>
                             <option value="IMPORT">IMPOR (BC 2.0 / PIB)</option>
                             <option value="EXPORT">EKSPOR (BC 3.0 / PEB)</option>
                         </select>
@@ -950,24 +1158,24 @@
                 </div>
 
                 <!-- Hidden inputs agar data terdeteksi terkirim ke server -->
-                <input type="hidden" name="bl_number" :value="detected.bl_number">
-                <input type="hidden" name="shipping_vendor_id" :value="detected.shipping_vendor_id">
-                <input type="hidden" name="vessel_name" :value="detected.vessel_name">
-                <input type="hidden" name="voyage_number" :value="detected.voyage_number">
-                <input type="hidden" name="port_of_loading" :value="detected.port_of_loading">
-                <input type="hidden" name="port_of_discharge" :value="detected.port_of_discharge">
-                <input type="hidden" name="eta" :value="detected.eta">
-                <input type="hidden" name="total_kontainer" :value="detected.total_kontainer">
-                <input type="hidden" name="nomor_kontainer" :value="detected.nomor_kontainer">
-                <input type="hidden" name="total_kemasan" :value="detected.total_kemasan">
-                <input type="hidden" name="jenis_kemasan" :value="detected.jenis_kemasan">
-                <input type="hidden" name="total_bruto" :value="detected.total_bruto">
-                <input type="hidden" name="total_netto" :value="detected.total_netto">
-                <input type="hidden" name="total_cif" :value="detected.total_cif">
-                <input type="hidden" name="currency" :value="detected.currency">
-                <input type="hidden" name="ndbm_kurs" :value="detected.ndbm_kurs">
-                <input type="hidden" name="etd_date" :value="detected.etd_date">
-                <input type="hidden" name="commodity_summary" :value="detected.commodity_summary">
+                <input type="hidden" name="bl_number" :value="detected.bl_number" :disabled="tab === 'ai' && !scanned">
+                <input type="hidden" name="shipping_vendor_id" :value="detected.shipping_vendor_id" :disabled="tab === 'ai' && !scanned">
+                <input type="hidden" name="vessel_name" :value="detected.vessel_name" :disabled="tab === 'ai' && !scanned">
+                <input type="hidden" name="voyage_number" :value="detected.voyage_number" :disabled="tab === 'ai' && !scanned">
+                <input type="hidden" name="port_of_loading" :value="detected.port_of_loading" :disabled="tab === 'ai' && !scanned">
+                <input type="hidden" name="port_of_discharge" :value="detected.port_of_discharge" :disabled="tab === 'ai' && !scanned">
+                <input type="hidden" name="eta" :value="detected.eta" :disabled="tab === 'ai' && !scanned">
+                <input type="hidden" name="total_kontainer" :value="detected.total_kontainer" :disabled="tab === 'ai' && !scanned">
+                <input type="hidden" name="nomor_kontainer" :value="detected.nomor_kontainer" :disabled="tab === 'ai' && !scanned">
+                <input type="hidden" name="total_kemasan" :value="detected.total_kemasan" :disabled="tab === 'ai' && !scanned">
+                <input type="hidden" name="jenis_kemasan" :value="detected.jenis_kemasan" :disabled="tab === 'ai' && !scanned">
+                <input type="hidden" name="total_bruto" :value="detected.total_bruto" :disabled="tab === 'ai' && !scanned">
+                <input type="hidden" name="total_netto" :value="detected.total_netto" :disabled="tab === 'ai' && !scanned">
+                <input type="hidden" name="total_cif" :value="detected.total_cif" :disabled="tab === 'ai' && !scanned">
+                <input type="hidden" name="currency" :value="detected.currency" :disabled="tab === 'ai' && !scanned">
+                <input type="hidden" name="ndbm_kurs" :value="detected.ndbm_kurs" :disabled="tab === 'ai' && !scanned">
+                <input type="hidden" name="etd_date" :value="detected.etd_date" :disabled="tab === 'ai' && !scanned">
+                <input type="hidden" name="commodity_summary" :value="detected.commodity_summary" :disabled="tab === 'ai' && !scanned">
                 <input type="hidden" name="use_ai" :value="useAi ? '1' : '0'">
                 <input type="hidden" name="after_action" :value="afterAction">
 
@@ -1000,15 +1208,15 @@
                         </div>
                         <div>
                             <label class="block font-semibold text-black dark:text-white mb-0.5 text-[11px]">Kemasan</label>
-                            <input type="number" x-model="detected.total_kemasan" class="w-full px-2.5 py-1.5 rounded-[8px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[12px]">
+                            <input type="number" min="0" x-model="detected.total_kemasan" class="w-full px-2.5 py-1.5 rounded-[8px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[12px]">
                         </div>
                         <div>
                             <label class="block font-semibold text-black dark:text-white mb-0.5 text-[11px]">Bruto (Kg)</label>
-                            <input type="number" step="0.01" x-model="detected.total_bruto" class="w-full px-2.5 py-1.5 rounded-[8px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[12px]">
+                            <input type="number" min="0" step="0.01" x-model="detected.total_bruto" class="w-full px-2.5 py-1.5 rounded-[8px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[12px]">
                         </div>
                         <div>
                             <label class="block font-semibold text-black dark:text-white mb-0.5 text-[11px]">Nilai Valuta (CIF)</label>
-                            <input type="number" step="0.01" x-model="detected.total_cif" class="w-full px-2.5 py-1.5 rounded-[8px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[12px]">
+                            <input type="number" min="0" step="0.01" x-model="detected.total_cif" class="w-full px-2.5 py-1.5 rounded-[8px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[12px]">
                         </div>
                     </div>
 
@@ -1067,7 +1275,7 @@
                                 <span>+ Klien Baru</span>
                             </button>
                         </div>
-                        <select name="client_id_manual" id="manual-client-select" @change="detected.client_id = $event.target.value" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                        <select name="client_id_manual" id="manual-client-select" x-model="detected.client_id" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
                             <option value="">-- Pilih Importir / Eksportir --</option>
                             @foreach($clients as $c)
                                 <option value="{{ $c->id }}">{{ $c->name }} (NPWP: {{ $c->npwp ?? '-' }})</option>
@@ -1075,8 +1283,9 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Tipe Kepabeanan</label>
-                        <select name="type_manual" @change="detected.type = $event.target.value" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                        <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Tipe Kepabeanan <span class="text-rose-500">*</span></label>
+                        <select name="type_manual" x-model="detected.type" :required="tab === 'manual'" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                            <option value="">-- Wajib Pilih: Impor atau Ekspor --</option>
                             <option value="IMPORT">IMPOR (BC 2.0 / PIB)</option>
                             <option value="EXPORT">EKSPOR (BC 3.0 / PEB)</option>
                         </select>
@@ -1086,7 +1295,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div class="sm:col-span-2">
                         <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Vendor Pihak Pelayaran (Shipping Line)</label>
-                        <select name="shipping_vendor_id_manual" @change="detected.shipping_vendor_id = $event.target.value" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                        <select name="shipping_vendor_id_manual" x-model="detected.shipping_vendor_id" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
                             <option value="">-- Pilih Pelayaran --</option>
                             @foreach($vendors as $v)
                                 <option value="{{ $v->id }}">{{ $v->name }} (PIC: {{ $v->pic_name ?? 'Import Desk' }})</option>
@@ -1128,7 +1337,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 bg-black/[0.02] dark:bg-white/[0.02] p-3 rounded-[14px] border border-black/5 dark:border-white/5">
                     <div>
                         <label class="block font-semibold text-black dark:text-white mb-1 text-[11px]">Jml Kontainer</label>
-                        <input type="number" x-model="detected.total_kontainer" min="1" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px]">
+                        <input type="number" x-model="detected.total_kontainer" min="0" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px]">
                     </div>
                     <div>
                         <label class="block font-semibold text-black dark:text-white mb-1 text-[11px]">Nomor Kontainer</label>
@@ -1136,7 +1345,7 @@
                     </div>
                     <div>
                         <label class="block font-semibold text-black dark:text-white mb-1 text-[11px]">Kemasan</label>
-                        <input type="number" x-model="detected.total_kemasan" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px]">
+                        <input type="number" min="0" x-model="detected.total_kemasan" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px]">
                     </div>
                     <div>
                         <label class="block font-semibold text-black dark:text-white mb-1 text-[11px]">Jenis Kemasan</label>
@@ -1147,15 +1356,15 @@
                 <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
                     <div>
                         <label class="block font-semibold text-black dark:text-white mb-1 text-[11px]">Berat Bruto (Kg)</label>
-                        <input type="number" step="0.01" x-model="detected.total_bruto" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px]">
+                        <input type="number" min="0" step="0.01" x-model="detected.total_bruto" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px]">
                     </div>
                     <div>
                         <label class="block font-semibold text-black dark:text-white mb-1 text-[11px]">Berat Netto (Kg)</label>
-                        <input type="number" step="0.01" x-model="detected.total_netto" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px]">
+                        <input type="number" min="0" step="0.01" x-model="detected.total_netto" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px]">
                     </div>
                     <div>
                         <label class="block font-semibold text-black dark:text-white mb-1 text-[11px]">Nilai CIF (Valuta)</label>
-                        <input type="number" step="0.01" x-model="detected.total_cif" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px]">
+                        <input type="number" min="0" step="0.01" x-model="detected.total_cif" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px]">
                     </div>
                     <div>
                         <label class="block font-semibold text-black dark:text-white mb-1 text-[11px]">Mata Uang & Kurs</label>
@@ -1167,7 +1376,7 @@
                                 <option value="SGD">SGD</option>
                                 <option value="JPY">JPY</option>
                             </select>
-                            <input type="number" step="0.01" x-model="detected.ndbm_kurs" title="Kurs NDBM KMK" class="w-full px-2 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[12px]">
+                            <input type="number" min="0" step="0.01" x-model="detected.ndbm_kurs" title="Kurs NDBM KMK" class="w-full px-2 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[12px]">
                         </div>
                     </div>
                 </div>
@@ -1178,34 +1387,27 @@
                 <textarea name="catatan" rows="2" placeholder="Catatan perlakuan dokumen khusus, instruksi jalur hijau, atau persyaratan lartas surveyor..." class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]"></textarea>
             </div>
 
-            <!-- Aksi Lanjutan Otomatis -->
+            <!-- Aksi Lanjutan Otomatis (Wajib Draft untuk Ditinjau) -->
             <div class="p-3 rounded-[14px] bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/10 space-y-2">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div>
                         <span class="font-bold text-[12px] text-black dark:text-white">Aksi Otomatis Setelah Simpan</span>
-                        <p class="text-[11px] text-black/50 dark:text-white/50">Pilih apakah sistem langsung mengisi form BC 2.0 / BC 3.0 dan memposting ke CEISA API.</p>
+                        <p class="text-[11px] text-black/50 dark:text-white/50">Seluruh unggahan dokumen massal disimpan sebagai <strong>DRAFT</strong> untuk ditinjau &amp; diverifikasi sebelum dikirim ke CEISA.</p>
                     </div>
-                    @if(config('ceisa.api.read_only', true))
-                        <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300">
-                            Mode CEISA Read-Only Aktif (Simpan Draft Aman)
-                        </span>
-                    @endif
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300">
+                        Mode Draft-First Aktif
+                    </span>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px]">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
                     <label class="flex items-center gap-2 p-2.5 rounded-[10px] border cursor-pointer transition-colors"
                            :class="afterAction === 'project' ? 'border-[#007AFF] bg-[#007AFF]/10 text-[#007AFF] font-semibold' : 'border-black/10 dark:border-white/10 text-black/70 dark:text-white/70'">
                         <input type="radio" x-model="afterAction" value="project" class="text-[#007AFF]">
-                        <span>Simpan Proyek &amp; Tracking</span>
+                        <span>Simpan sebagai Draft Proyek &amp; Tracking</span>
                     </label>
                     <label class="flex items-center gap-2 p-2.5 rounded-[10px] border cursor-pointer transition-colors"
                            :class="afterAction === 'fill_bc_form' ? 'border-[#5856D6] bg-[#5856D6]/10 text-[#5856D6] font-semibold' : 'border-black/10 dark:border-white/10 text-black/70 dark:text-white/70'">
                         <input type="radio" x-model="afterAction" value="fill_bc_form" class="text-[#5856D6]">
-                        <span>Auto-Fill Form PIB / PEB</span>
-                    </label>
-                    <label class="flex items-center gap-2 p-2.5 rounded-[10px] border cursor-pointer transition-colors"
-                           :class="afterAction === 'post_ceisa' ? 'border-[#34C759] bg-[#34C759]/10 text-[#248A3D] dark:text-[#30D158] font-semibold' : 'border-black/10 dark:border-white/10 text-black/70 dark:text-white/70'">
-                        <input type="radio" x-model="afterAction" value="post_ceisa" class="text-[#34C759]">
-                        <span>Auto-Fill &amp; Post CEISA API</span>
+                        <span>Simpan Draft &amp; Auto-Fill Form PIB / PEB</span>
                     </label>
                 </div>
             </div>
@@ -1217,7 +1419,7 @@
                 </button>
                 <button type="submit" class="btn-apple-filled !h-9 text-[12px]">
                     <i data-lucide="check" class="w-4 h-4"></i>
-                    <span x-text="afterAction === 'post_ceisa' ? 'Proses Bundle & Post CEISA' : (afterAction === 'fill_bc_form' ? 'Proses Bundle & Isi Form BC' : 'Simpan & Inisialisasi Proyek')"></span>
+                    <span x-text="afterAction === 'fill_bc_form' ? 'Simpan Draft &amp; Isi Form BC' : 'Simpan Draft Proyek'"></span>
                 </button>
             </div>
         </form>

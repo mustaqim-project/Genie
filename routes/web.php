@@ -62,6 +62,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/{bc20}', [BC20Controller::class, 'show'])->name('show');
         Route::get('/{bc20}/edit', [BC20Controller::class, 'edit'])->name('edit');
         Route::put('/{bc20}', [BC20Controller::class, 'update'])->name('update');
+        Route::delete('/{bc20}', [BC20Controller::class, 'destroy'])->name('destroy');
+        Route::post('/{bc20}/upload-document', [BC20Controller::class, 'uploadWizardDocument'])->name('upload-document');
         Route::post('/{bc20}/reopen-draft', [BC20Controller::class, 'reopenDraft'])->name('reopen-draft');
         Route::post('/{bc20}/check-schema', [BC20Controller::class, 'checkSchema'])->name('check-schema');
         Route::post('/{bc20}/submit', [BC20Controller::class, 'submit'])->name('submit');
@@ -76,6 +78,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/{bc30}', [BC30Controller::class, 'show'])->name('show');
         Route::get('/{bc30}/edit', [BC30Controller::class, 'edit'])->name('edit');
         Route::put('/{bc30}', [BC30Controller::class, 'update'])->name('update');
+        Route::delete('/{bc30}', [BC30Controller::class, 'destroy'])->name('destroy');
         Route::post('/{bc30}/reopen-draft', [BC30Controller::class, 'reopenDraft'])->name('reopen-draft');
         Route::post('/{bc30}/check-schema', [BC30Controller::class, 'checkSchema'])->name('check-schema');
         Route::post('/{bc30}/submit', [BC30Controller::class, 'submit'])->name('submit');
@@ -291,7 +294,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [\App\Http\Controllers\BatchImportController::class, 'index'])->name('index');
         Route::post('/store', [\App\Http\Controllers\BatchImportController::class, 'store'])->name('store');
         Route::get('/batch/{id}', [\App\Http\Controllers\BatchImportController::class, 'show'])->name('show');
+        Route::delete('/batch/{id}', [\App\Http\Controllers\BatchImportController::class, 'destroy'])->name('destroy');
         Route::get('/review/{docId}', [\App\Http\Controllers\BatchImportController::class, 'review'])->name('review');
+        Route::delete('/doc/{docId}', [\App\Http\Controllers\BatchImportController::class, 'destroyDocument'])->name('doc.destroy');
         Route::post('/fields/{fieldId}/update', [\App\Http\Controllers\BatchImportController::class, 'updateField'])->name('fields.update');
         Route::post('/apply/{docId}', [\App\Http\Controllers\BatchImportController::class, 'applyToShipment'])->name('apply');
         Route::post('/jump/{shipmentId}', [\App\Http\Controllers\BatchImportController::class, 'jumpStage'])->name('jump');
@@ -303,9 +308,11 @@ Route::middleware('auth')->group(function () {
         Route::post('/store', [\App\Http\Controllers\ShipmentProjectController::class, 'store'])->name('store');
         Route::post('/parse-documents', [\App\Http\Controllers\ShipmentProjectController::class, 'parseDocuments'])->name('parse-documents');
         Route::get('/{id}', [\App\Http\Controllers\ShipmentProjectController::class, 'show'])->name('show');
+        Route::delete('/{id}', [\App\Http\Controllers\ShipmentProjectController::class, 'destroy'])->name('destroy');
         Route::post('/{id}/sync-from-docs', [\App\Http\Controllers\ShipmentProjectController::class, 'reSyncFromDocs'])->name('sync-from-docs');
         Route::post('/{id}/upload-document', [\App\Http\Controllers\ShipmentProjectController::class, 'uploadDocument'])->name('upload-document');
         Route::get('/{id}/download-doc/{docId}', [\App\Http\Controllers\ShipmentProjectController::class, 'downloadDocument'])->name('download-doc');
+        Route::get('/{id}/preview-doc/{docId}', [\App\Http\Controllers\ShipmentProjectController::class, 'previewDocument'])->name('preview-doc');
         Route::post('/{id}/verify-document/{docId}', [\App\Http\Controllers\ShipmentProjectController::class, 'verifyDocument'])->name('verify-document');
         Route::post('/{id}/verify-all', [\App\Http\Controllers\ShipmentProjectController::class, 'verifyAllDocuments'])->name('verify-all');
         Route::post('/{id}/item-document/store', [\App\Http\Controllers\ShipmentProjectController::class, 'addItemCustomsDocument'])->name('item-document.store');

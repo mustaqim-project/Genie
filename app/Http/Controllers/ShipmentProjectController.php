@@ -22,51 +22,134 @@ class ShipmentProjectController extends Controller
     }
 
     /**
-     * Tampilan daftar seluruh project shipment (Tim Dokumen)
+     * Hapus proyek berstatus DRAFT beserta seluruh aset file dokumen dan draft BC terkait.
+     */
+    public function destroy(Request $request, string $id)
+    {
+        $user = auth()->user();
+        if (!$user || (!$user->isSuperAdmin() && !$user->hasAnyPermission(['document.create', 'document.edit', 'document.delete']))) {
+            abort(403, 'Anda tidak memiliki hak akses untuk menghapus draft dokumen.');
+        }
+
+        $shipment = Shipment::findOrFail($id);
+
+        try {
+            $result = $this->workflowService->deleteDraftProjectAndAssets($shipment, true);
+        } catch (\RuntimeException $e) {
+            if ($request->expectsJson()) {
+                return response()->json(['status' => 'error', 'message' => $e->getMessage()], 422);
+            }
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+
+        $msg = "Draft proyek {$result['project_no']} dan {$result['deleted_files']} berkas aset dokumen berhasil dihapus permanen.";
+        if ($request->expectsJson()) {
+            return response()->json(['status' => 'success', 'message' => $msg, 'data' => $result]);
+        }
+
+        return redirect()->route('core.document.index')->with('success', $msg);
+    }
+
+    /**
+     * Tampilan gabungan seluruh Proyek Pengapalan + Dokumen BC 2.0 (PIB Impor) + Dokumen BC 3.0 (PEB Ekspor)
      * Hak Akses: document.view
      */
     public function index(Request $request)
     {
         Gate::authorize('document.view');
 
-        $query = Shipment::with(['client', 'shippingVendor', 'documents', 'ceisaDocument', 'items.customsDocuments']);
+        $shipmentsList = Shipment::with(['client', 'shippingVendor', 'documents', 'ceisaDocument', 'items.customsDocuments'])
+            ->latest()
+            ->get();
+
+        $user = auth()->user();
+        $canSeeAllCeisaDocs = $user && (
+            $user->isSuperAdmin()
+            || $user->hasRole(['R-ADM', 'R-OWN', 'R-MGR', 'R-DOC', 'R-DOC-SPV', 'R-DO', 'R-TRF', 'R-SYS'])
+            || $user->hasAnyPermission(['document.view', 'document.edit', 'document.edit_after_ceisa', 'workflow.rollback_stage'])
+        );
+
+        $linkedCeisaIds = Shipment::withoutGlobalScopes()
+            ->whereNotNull('ceisa_document_id')
+            ->pluck('ceisa_document_id')
+            ->all();
+
+        $standaloneCeisaDocs = $canSeeAllCeisaDocs
+            ? \App\Models\CeisaDocument::whereIn('jenis_dokumen', ['20', '30'])
+                ->whereNotIn('id', $linkedCeisaIds)
+                ->latest()
+                ->get()
+            : collect();
+
+        $allEntries = collect();
+        foreach ($shipmentsList as $shp) {
+            $allEntries->push($this->buildUnifiedDocumentEntry($shp, $shp->ceisaDocument));
+        }
+        foreach ($standaloneCeisaDocs as $ceisaDoc) {
+            $allEntries->push($this->buildUnifiedDocumentEntry(null, $ceisaDoc));
+        }
+
+        $allEntries = $allEntries->sortByDesc('sort_timestamp')->values();
+
+        // Statistik KPI Gabungan (Proyek + BC 2.0 Impor + BC 3.0 Ekspor)
+        $totalCount = $allEntries->count();
+        $bc20Total = $allEntries->where('flow', 'IMPORT')->count();
+        $bc30Total = $allEntries->where('flow', 'EXPORT')->count();
+        $draftCount = $allEntries->filter(function ($e) {
+            if ($e->ceisa) {
+                return $e->ceisa_status === 'DRAFT';
+            }
+            return in_array($e->shipment_status, ['DOC_COLLECTING', 'DOC_READY', 'HS_DETECTED', 'DRAFT_REVIEW'], true);
+        })->count();
+        $billingProsesCount = $allEntries->filter(function ($e) {
+            return in_array($e->ceisa_status, ['SUBMITTED', 'PROSES', 'BILLING'], true)
+                || in_array($e->shipment_status, ['CEISA_SUBMITTED', 'BILLING_ISSUED', 'DO_PROCESSING'], true);
+        })->count();
+        $sppbCount = $allEntries->filter(function ($e) {
+            return $e->flow === 'IMPORT' && (
+                $e->ceisa_status === 'SPPB'
+                || in_array($e->shipment_status, ['TRAFFIC_SPPB', 'SPPB_RELEASED', 'TRAFFIC_GATE_OUT', 'DELIVERED_POD', 'COMPLETED'], true)
+            );
+        })->count();
+        $npeCount = $allEntries->filter(function ($e) {
+            return $e->flow === 'EXPORT' && (
+                $e->ceisa_status === 'NPE'
+                || in_array($e->shipment_status, ['TRAFFIC_SPPB', 'COMPLETED'], true)
+            );
+        })->count();
+
+        // Filter search, type (IMPORT=BC20 / EXPORT=BC30), status (CEISA atau Siklus)
+        $filtered = $allEntries;
 
         if ($request->filled('search')) {
-            $s = $request->search;
-            $query->where(function ($q) use ($s) {
-                $q->where('project_no', 'like', "%{$s}%")
-                  ->orWhere('nomor_bl_awb', 'like', "%{$s}%")
-                  ->orWhere('nama_kapal', 'like', "%{$s}%")
-                  ->orWhere('nomor_kontainer', 'like', "%{$s}%")
-                  ->orWhereHas('client', fn($cq) => $cq->where('name', 'like', "%{$s}%"));
-            });
+            $needle = mb_strtolower(trim((string) $request->search));
+            $filtered = $filtered->filter(fn ($e) => str_contains($e->search_haystack, $needle))->values();
         }
 
         if ($request->filled('type')) {
-            $type = $request->type;
-            if ($type === 'IMPORT') {
-                $query->where('jenis_layanan', 'IMPORT_BC20');
-            } elseif ($type === 'EXPORT') {
-                $query->where('jenis_layanan', 'EKSPORT_BC30');
+            $type = strtoupper((string) $request->type);
+            if (in_array($type, ['IMPORT', 'EXPORT'], true)) {
+                $filtered = $filtered->where('flow', $type)->values();
             }
         }
 
         if ($request->filled('status')) {
-            $query->where('status_tahap', $request->status);
+            $statusFilter = strtoupper((string) $request->status);
+            $filtered = $filtered->filter(function ($e) use ($statusFilter) {
+                return $e->ceisa_status === $statusFilter || $e->shipment_status === $statusFilter;
+            })->values();
         }
 
-        $allShipments = $query->latest()->get();
-
-        // Hitung statistik Lartas produk & proyek
+        // Hitung statistik Lartas pada scope aktif
         $lartasShipmentsCount = 0;
         $lartasProductsCount = 0;
         $nonLartasShipmentsCount = 0;
 
-        foreach ($allShipments as $shp) {
-            $info = $shp->lartas_info;
-            if ($info['has_lartas']) {
+        foreach ($filtered as $entry) {
+            $info = $entry->lartas_info;
+            if (!empty($info['has_lartas'])) {
                 $lartasShipmentsCount++;
-                $lartasProductsCount += $info['lartas_count'];
+                $lartasProductsCount += (int) ($info['lartas_count'] ?? 0);
             } else {
                 $nonLartasShipmentsCount++;
             }
@@ -76,19 +159,19 @@ class ShipmentProjectController extends Controller
         if ($request->filled('lartas')) {
             $filterLartas = $request->lartas;
             if ($filterLartas === 'yes' || $filterLartas === '1') {
-                $allShipments = $allShipments->filter(fn($s) => $s->lartas_info['has_lartas'])->values();
+                $filtered = $filtered->filter(fn ($e) => !empty($e->lartas_info['has_lartas']))->values();
             } elseif ($filterLartas === 'no' || $filterLartas === '0') {
-                $allShipments = $allShipments->filter(fn($s) => !$s->lartas_info['has_lartas'])->values();
+                $filtered = $filtered->filter(fn ($e) => empty($e->lartas_info['has_lartas']))->values();
             }
         }
 
         // Manual pagination
         $page = \Illuminate\Pagination\Paginator::resolveCurrentPage() ?: 1;
         $perPage = 10;
-        $currentPageItems = $allShipments->slice(($page - 1) * $perPage, $perPage)->values();
+        $currentPageItems = $filtered->slice(($page - 1) * $perPage, $perPage)->values();
         $shipments = new \Illuminate\Pagination\LengthAwarePaginator(
             $currentPageItems,
-            $allShipments->count(),
+            $filtered->count(),
             $perPage,
             $page,
             ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath(), 'query' => $request->query()]
@@ -97,18 +180,106 @@ class ShipmentProjectController extends Controller
         $clients = Client::orderBy('name')->get();
         $vendors = ShippingVendor::where('is_active', true)->orderBy('name')->get();
 
-        // Statistik Proyek Tim Document
+        // Statistik Proyek & Dokumen Gabungan (BC 2.0 + BC 3.0)
         $stats = [
-            'total' => Shipment::count(),
+            'total' => $totalCount,
+            'bc20_total' => $bc20Total,
+            'bc30_total' => $bc30Total,
+            'draft' => $draftCount,
             'collecting' => Shipment::where('status_tahap', 'DOC_COLLECTING')->count(),
             'ready' => Shipment::whereIn('status_tahap', ['DOC_READY', 'HS_DETECTED', 'DRAFT_REVIEW'])->count(),
-            'billing' => Shipment::whereIn('status_tahap', ['BILLING_ISSUED', 'DO_PROCESSING', 'DO_RELEASED', 'TRAFFIC_SPPB', 'COMPLETED'])->count(),
+            'billing' => $billingProsesCount,
+            'sppb' => $sppbCount,
+            'npe' => $npeCount,
+            'released' => $sppbCount + $npeCount,
             'lartas_shipments' => $lartasShipmentsCount,
             'lartas_products' => $lartasProductsCount,
             'non_lartas_shipments' => $nonLartasShipmentsCount,
         ];
 
         return view('core.document_index', compact('shipments', 'clients', 'vendors', 'stats'));
+    }
+
+    /**
+     * Normalisasi baris gabungan Shipment + CeisaDocument (BC 2.0 / BC 3.0) untuk tampilan terpadu /core/document.
+     */
+    protected function buildUnifiedDocumentEntry(?Shipment $shp, ?\App\Models\CeisaDocument $ceisa): object
+    {
+        $ceisa = $ceisa ?? $shp?->ceisaDocument;
+        $flow = $shp ? $shp->type : (($ceisa?->jenis_dokumen === '30') ? 'EXPORT' : 'IMPORT');
+        $docCode = $flow === 'EXPORT' ? '30' : '20';
+
+        $lartasInfo = $shp
+            ? $shp->lartas_info
+            : ($ceisa ? $ceisa->lartas_info : [
+                'has_lartas' => false,
+                'total_products' => 0,
+                'lartas_count' => 0,
+                'primary_lartas' => null,
+            ]);
+
+        $ceisaStatus = strtoupper((string) ($ceisa?->status ?? ''));
+        $shipmentStatus = strtoupper((string) ($shp ? ($shp->status ?? $shp->status_tahap) : ''));
+
+        $kodeValuta = $ceisa?->kode_valuta ?? $shp?->kode_valuta ?? $shp?->currency ?? 'USD';
+        $totalNilai = (float) ($ceisa?->total_nilai ?? $shp?->total_cif ?? $shp?->total_nilai_valuta ?? 0);
+        $kurs = (float) ($ceisa?->ndbm_kurs ?? $shp?->ndbm_kurs ?? 16000);
+        $totalNilaiIdr = (float) ($ceisa?->total_nilai_idr ?? $shp?->total_nilai_idr ?? ($totalNilai * $kurs));
+
+        $localName = $shp?->client?->name ?? ($ceisa?->nama_perusahaan_lokal ?: '-');
+        $localNpwp = $shp?->client?->npwp ?? ($ceisa?->npwp_perusahaan_lokal ?: '-');
+        $partnerName = $ceisa?->nama_mitra_luar_negeri ?: null;
+        $partnerCountry = $ceisa?->negara_mitra_luar_negeri ?: null;
+        $kodeKantor = $ceisa?->kode_kantor ?: null;
+        $namaKantor = $ceisa?->nama_kantor ?: null;
+
+        $haystack = mb_strtolower(implode(' ', array_filter([
+            $shp?->project_no,
+            $shp?->shipment_number,
+            $shp?->nomor_bl_awb,
+            $shp?->nama_kapal,
+            $shp?->nomor_kontainer,
+            $localName,
+            $localNpwp,
+            $partnerName,
+            $partnerCountry,
+            $ceisa?->nomor_aju,
+            $ceisa?->nomor_daftar,
+            $kodeKantor,
+            $namaKantor,
+            $shp?->billing_code,
+            $ceisa?->kode_billing,
+            $ceisa?->nomor_sppb_npe,
+        ])));
+
+        $isDraftDeletable = $shp
+            ? $shp->isDraftDeletable()
+            : ($ceisa ? $ceisa->isDraftDeletable() : false);
+
+        return (object) [
+            'row_type' => $shp ? 'shipment' : 'ceisa',
+            'shipment' => $shp,
+            'ceisa' => $ceisa,
+            'flow' => $flow,
+            'doc_code' => $docCode,
+            'sort_timestamp' => ($shp?->created_at ?? $ceisa?->created_at)?->timestamp ?? 0,
+            'created_at' => $shp?->created_at ?? $ceisa?->created_at,
+            'search_haystack' => $haystack,
+            'lartas_info' => $lartasInfo,
+            'ceisa_status' => $ceisaStatus,
+            'shipment_status' => $shipmentStatus,
+            'kode_kantor' => $kodeKantor,
+            'nama_kantor' => $namaKantor,
+            'local_name' => $localName,
+            'local_npwp' => $localNpwp,
+            'partner_name' => $partnerName,
+            'partner_country' => $partnerCountry,
+            'valuation_label' => $flow === 'EXPORT' ? 'FOB' : 'CIF',
+            'kode_valuta' => $kodeValuta,
+            'total_nilai' => $totalNilai,
+            'total_nilai_idr' => $totalNilaiIdr,
+            'is_draft_deletable' => $isDraftDeletable,
+        ];
     }
 
     /**
@@ -141,7 +312,14 @@ class ShipmentProjectController extends Controller
         $clientId = $request->input('client_id');
         $aiModel = $request->input('ai_model') ?? $request->input('model');
         $useAi = filter_var($request->input('use_ai', false), FILTER_VALIDATE_BOOLEAN);
-        $preferredType = $request->input('type') ?: null;
+        $preferredType = strtoupper(trim((string) $request->input('type', '')));
+
+        if (!in_array($preferredType, ['IMPORT', 'EXPORT'], true)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Tipe kepabeanan (Impor atau Ekspor) wajib dipilih salah satu sebelum memindai dokumen.',
+            ], 422);
+        }
 
         $extracted = $this->workflowService->parseDocumentsForPreview($files, $clientId, $aiModel, $useAi, $preferredType);
 
@@ -172,10 +350,14 @@ class ShipmentProjectController extends Controller
             || $request->hasFile('etc_file')
             || $request->hasFile('documents');
 
+        if (!$request->filled('type') && $request->filled('type_manual')) {
+            $request->merge(['type' => $request->input('type_manual')]);
+        }
+
         $validated = $request->validate([
             'client_id' => $hasFiles ? 'nullable|uuid|exists:clients,id' : 'required|uuid|exists:clients,id',
             'shipping_vendor_id' => 'nullable|uuid|exists:shipping_vendors,id',
-            'type' => 'nullable|in:IMPORT,EXPORT',
+            'type' => 'required|in:IMPORT,EXPORT',
             'bl_number' => $hasFiles ? 'nullable|string|max:100' : 'required|string|max:100',
             'tgl_bl' => 'nullable|date',
             'etd_date' => 'nullable|date',
@@ -184,16 +366,16 @@ class ShipmentProjectController extends Controller
             'port_of_loading' => 'nullable|string|max:100',
             'port_of_discharge' => 'nullable|string|max:100',
             'eta' => 'nullable|date',
-            'free_time_days' => 'nullable|integer|min:1|max:60',
-            'total_kontainer' => 'nullable|integer|min:1',
+            'free_time_days' => 'nullable|integer|min:0|max:60',
+            'total_kontainer' => 'nullable|integer|min:0',
             'nomor_kontainer' => 'nullable|string|max:100',
-            'total_kemasan' => 'nullable|integer|min:1',
+            'total_kemasan' => 'nullable|integer|min:0',
             'jenis_kemasan' => 'nullable|string|max:50',
             'total_bruto' => 'nullable|numeric|min:0',
             'total_netto' => 'nullable|numeric|min:0',
             'total_cif' => 'nullable|numeric|min:0',
             'currency' => 'nullable|string|size:3',
-            'ndbm_kurs' => 'nullable|numeric|min:1',
+            'ndbm_kurs' => 'nullable|numeric|min:0',
             'commodity_summary' => 'nullable|string|max:255',
             'catatan' => 'nullable|string|max:500',
             'use_ai' => 'nullable',
@@ -230,6 +412,11 @@ class ShipmentProjectController extends Controller
         }
 
         $afterAction = $validated['after_action'] ?? 'project';
+        $isBulkOrFileUpload = $request->hasFile('bundle_files')
+            || $request->hasFile('documents')
+            || collect(['bl_file', 'invoice_file', 'packing_list_file', 'coo_file', 'sc_po_file', 'insurance_file', 'booking_file', 'lartas_file', 'etc_file'])
+                ->contains(fn($fk) => $request->hasFile($fk));
+
         if (in_array($afterAction, ['fill_bc_form', 'post_ceisa'], true)) {
             $hsCodeService = app(\App\Services\Ceisa\CeisaHsCodeService::class);
             $shipment->load(['documents', 'items', 'client', 'vendor']);
@@ -238,7 +425,17 @@ class ShipmentProjectController extends Controller
                 $shipment->refresh()->load(['documents', 'items', 'client', 'vendor']);
             }
             $ceisaDoc = $hsCodeService->generatePibOrPebFromPackingList($shipment);
-            $routeName = ($ceisaDoc->jenis_dokumen === '30') ? 'bc30.show' : 'bc20.show';
+            $canEditBc20 = auth()->user()?->isSuperAdmin() || auth()->user()?->hasAnyPermission(['document.edit', 'document.edit_after_ceisa']);
+            $routeName = ($ceisaDoc->jenis_dokumen === '30')
+                ? 'bc30.show'
+                : ($canEditBc20 ? 'bc20.edit' : 'bc20.show');
+
+            // Semua proses unggah dokumen massal (bulk upload) wajib tersimpan sebagai DRAFT untuk ditinjau terlebih dahulu
+            if ($isBulkOrFileUpload) {
+                $flashType = $afterAction === 'post_ceisa' ? 'warning' : 'success';
+                return redirect()->route($routeName, $ceisaDoc->id)
+                    ->with($flashType, "{$msg} Seluruh proses unggah dokumen massal otomatis disimpan sebagai DRAFT Form BC {$ceisaDoc->jenis_dokumen} ({$ceisaDoc->nomor_aju}) agar dapat ditinjau & diedit sebelum dikirim ke CEISA.");
+            }
 
             if ($afterAction === 'post_ceisa') {
                 if ((bool) config('ceisa.api.read_only', true)) {
@@ -262,7 +459,8 @@ class ShipmentProjectController extends Controller
                 ->with('success', "{$msg} Form BC {$ceisaDoc->jenis_dokumen} ({$ceisaDoc->nomor_aju}) telah terisi otomatis & siap ditinjau.");
         }
 
-        return redirect()->route('core.document.show', $shipment->id)->with('success', $msg);
+        return redirect()->route('core.document.show', $shipment->id)
+            ->with('success', $isBulkOrFileUpload ? "{$msg} Proyek & aset dokumen tersimpan sebagai DRAFT untuk ditinjau." : $msg);
     }
 
     /**
@@ -360,7 +558,7 @@ class ShipmentProjectController extends Controller
     }
 
     /**
-     * Download / Preview Berkas Dokumen yang Diunggah
+     * Download Berkas Dokumen yang Diunggah
      * Hak Akses: document.view
      */
     public function downloadDocument(string $id, string $docId)
@@ -375,6 +573,42 @@ class ShipmentProjectController extends Controller
         }
 
         return Storage::disk('public')->download($doc->file_path, $doc->nama_file ?? 'dokumen.pdf');
+    }
+
+    /**
+     * Preview Inline Berkas Dokumen (PDF, JPG, PNG, TXT) untuk Split-Screen & Modal
+     * Hak Akses: document.view
+     */
+    public function previewDocument(string $id, string $docId)
+    {
+        Gate::authorize('document.view');
+
+        $shipment = Shipment::findOrFail($id);
+        $doc = $shipment->documents()->findOrFail($docId);
+
+        if (!$doc->file_path || !Storage::disk('public')->exists($doc->file_path)) {
+            abort(404, 'Berkas fisik tidak ditemukan di penyimpanan server.');
+        }
+
+        $disk = Storage::disk('public');
+        $fullPath = $disk->path($doc->file_path);
+        $ext = strtolower(pathinfo($doc->nama_file ?? $doc->file_path, PATHINFO_EXTENSION));
+        $mime = match ($ext) {
+            'pdf' => 'application/pdf',
+            'png' => 'image/png',
+            'jpg', 'jpeg' => 'image/jpeg',
+            'webp' => 'image/webp',
+            'gif' => 'image/gif',
+            'txt', 'csv' => 'text/plain; charset=UTF-8',
+            default => ($disk->mimeType($doc->file_path) ?: 'application/octet-stream'),
+        };
+
+        return response()->file($fullPath, [
+            'Content-Type' => $mime,
+            'Content-Disposition' => 'inline; filename="' . addslashes($doc->nama_file ?? 'dokumen.pdf') . '"',
+            'X-Frame-Options' => 'SAMEORIGIN',
+            'Cache-Control' => 'private, max-age=300',
+        ]);
     }
 
     /**
@@ -563,7 +797,8 @@ class ShipmentProjectController extends Controller
             ]);
         }
 
-        $routeName = ($doc->jenis_dokumen === '20') ? 'bc20.show' : 'bc30.show';
+        $canEditBc20 = auth()->user()?->isSuperAdmin() || auth()->user()?->hasAnyPermission(['document.edit', 'document.edit_after_ceisa']);
+        $routeName = ($doc->jenis_dokumen === '20') ? ($canEditBc20 ? 'bc20.edit' : 'bc20.show') : 'bc30.show';
         return redirect()->route($routeName, $doc->id)
             ->with('success', "Draft dokumen BC {$doc->jenis_dokumen} ({$doc->nomor_aju}) berhasil digenerate dari Packing List.");
     }

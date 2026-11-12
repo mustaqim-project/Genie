@@ -45,10 +45,16 @@ class DocumentExtractionService
     }
 
     /**
-     * Ekstraksi cerdas dari seluruh dokumen yang diunggah (B/L, Invoice, Packing List, dll)
+     * Ekstraksi cerdas dari seluruh dokumen yang diunggah (B/L, Invoice, Packing List, dll).
+     * Tipe kepabeanan (IMPORT atau EXPORT) wajib dipilih eksplisit — tidak ada deteksi otomatis.
      */
     public function extractFromDocuments(array $files, ?string $selectedClientId = null, ?string $aiModel = null, bool $useAi = false, ?string $preferredType = null): array
     {
+        $normalizedType = strtoupper(trim((string) $preferredType));
+        if (!in_array($normalizedType, ['IMPORT', 'EXPORT'], true)) {
+            throw new \InvalidArgumentException('Tipe kepabeanan (IMPORT atau EXPORT) wajib dipilih terlebih dahulu.');
+        }
+
         $this->ensurePdfParserAutoloaded();
         $expanded = $this->expandAndClassifyBundle($files);
         $rawTextCombined = $expanded['combined_text'];
@@ -56,10 +62,8 @@ class DocumentExtractionService
         $bundleFilesDetected = $expanded['bundle_files_detected'];
         $hasImageOnlyFiles = $expanded['has_image_only'];
 
-        // 1. Deteksi Jenis Layanan (Impor BC 2.0 atau Ekspor BC 3.0)
-        $isExport = $preferredType
-            ? (strtoupper($preferredType) === 'EXPORT')
-            : $this->detectIsExport($rawTextCombined, $fileNames);
+        // 1. Jenis Layanan sesuai pilihan eksplisit pengguna (Impor BC 2.0 atau Ekspor BC 3.0)
+        $isExport = ($normalizedType === 'EXPORT');
         $jenisLayanan = $isExport ? 'EKSPORT_BC30' : 'IMPORT_BC20';
 
         // 2. Deteksi Vendor Pelayaran (Shipping Line) terlebih dahulu untuk petunjuk B/L & Kontainer
@@ -317,23 +321,11 @@ class DocumentExtractionService
     }
 
     /**
-     * Deteksi apakah proyek ini merupakan Ekspor (BC 3.0) atau Impor (BC 2.0)
+     * Penjaga agar tidak ada lagi deteksi otomatis Import vs Export.
      */
     protected function detectIsExport(string $text, array $fileNames): bool
     {
-        $upper = strtoupper($text . ' ' . implode(' ', $fileNames));
-
-        if (str_contains($upper, 'PEB') || str_contains($upper, 'BC 3.0') || str_contains($upper, 'BC30')) {
-            return true;
-        }
-
-        // Cek Pelabuhan Muat: jika POL Tanjung Priok/Perak dan POD Luar Negeri
-        if (preg_match('/PORT OF LOADING[:\s]*(?:IDTPP|IDSUB|TANJUNG PRIOK|TANJUNG PERAK|JAKARTA|SURABAYA)/i', $upper) &&
-            !preg_match('/PORT OF LOADING[:\s]*(?:QINGDAO|SHANGHAI|NINGBO|SHENZHEN|SINGAPORE)/i', $upper)) {
-            return true;
-        }
-
-        return false;
+        throw new \LogicException('Deteksi otomatis Import/Export dinonaktifkan; pilih IMPORT atau EXPORT secara eksplisit.');
     }
 
     /**
@@ -1032,7 +1024,7 @@ class DocumentExtractionService
             'hs_legal_basis' => $mainItem['legal'],
             'negara_asal' => ($jenisLayanan === 'EKSPORT_BC30') ? 'ID' : 'CN',
             'jumlah_kemasan' => $packages['total_kemasan'],
-            'jenis_kemasan' => $packages['jenis_kemasan'] ?? 'CTN',
+            'jenis_kemasan' => \App\Models\ShipmentItem::normalizeJenisKemasan($packages['jenis_kemasan'] ?? 'CTN', 'CTN'),
             'berat_netto' => $packages['total_netto'],
             'berat_bruto' => $packages['total_bruto'],
             'nilai_fob' => $commercial['value'],

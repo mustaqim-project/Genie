@@ -13,7 +13,10 @@ class CrossDocumentValidationService
      */
     public function validateDocument(ImportDocument $document): array
     {
-        $fields = $document->fields()->pluck('corrected_value', 'field_name')->toArray();
+        $fields = $document->fields()
+            ->get()
+            ->mapWithKeys(fn($f) => [$f->field_key => $f->effective_value])
+            ->toArray();
         $batchId = $document->file ? $document->file->batch_id : null;
         
         $results = [];
@@ -47,11 +50,9 @@ class CrossDocumentValidationService
                     'rule_code' => $res['rule_code'],
                 ],
                 [
-                    'rule_name' => $res['rule_name'],
                     'severity' => $res['severity'],
-                    'status' => $res['status'],
                     'message' => $res['message'],
-                    'field_references' => $res['field_references'] ?? [],
+                    'is_passed' => ($res['status'] ?? '') === 'PASSED',
                 ]
             );
         }
@@ -61,7 +62,7 @@ class CrossDocumentValidationService
 
     protected function ruleV01BlConsistency(ImportDocument $doc, array $fields, ?string $batchId): array
     {
-        $blNumber = $fields['bl_number'] ?? $fields['bill_of_lading'] ?? null;
+        $blNumber = $fields['nomor_bl_awb'] ?? $fields['bl_number'] ?? $fields['bill_of_lading'] ?? null;
         if (!$blNumber) {
             return [
                 'rule_code' => 'V01',
@@ -81,7 +82,10 @@ class CrossDocumentValidationService
                 ->get();
 
             foreach ($otherDocs as $other) {
-                $otherBl = $other->fields()->whereIn('field_name', ['bl_number', 'bill_of_lading'])->value('corrected_value');
+                $otherBlField = $other->fields()
+                    ->whereIn('field_key', ['nomor_bl_awb', 'bl_number', 'bill_of_lading'])
+                    ->first();
+                $otherBl = $otherBlField?->effective_value;
                 if ($otherBl && strtoupper(trim($otherBl)) !== strtoupper(trim($blNumber))) {
                     return [
                         'rule_code' => 'V01',

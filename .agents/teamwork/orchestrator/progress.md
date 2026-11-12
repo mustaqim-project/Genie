@@ -1,12 +1,13 @@
 # Orchestrator Progress
 
 ## Current Status
-Last visited: 2026-11-12T14:30:00Z
+Last visited: 2026-11-12T17:18:00Z
 - [x] Initialized orchestrator briefing, dispatch log, and progress tracker
-- [ ] Step 0: Survey phase — map blueprint specification and current codebase state
-- [ ] Synthesize Survey Findings & Feature Inventory into PROJECT.md
-- [ ] Dispatch E2E Testing Track Orchestrator
-- [ ] Milestone 1: Multi-Container Normalization & Workflow Separation (R1)
+- [x] Step 0: Survey phase — mapped blueprint specification and current codebase state
+  - [x] Synthesized findings into master PROJECT.md with 28 inventoried features and interface contracts
+- [x] Dual-Track Dispatch:
+  - [/] E2E Testing Track Orchestrator (9e9dd00c-2979-44b9-b380-eddfbfe119fb) — Running: published TEST_INFRA.md, test_writer_1 actively implementing BaseE2ETestCase and Tier 1-4 suites
+  - [/] Milestone 1 Sub-Orchestrator (c9a703fa-acca-47ce-93a9-b7983725bd6a) — Running: explorer_containers & explorer_statemachine COMPLETE, explorer_crossval finalizing report; worker dispatch in ~10-15 min
 - [ ] Milestone 2: Security Hardening & Human Approval Gate (R2)
 - [ ] Milestone 3: Bundle Extraction, Provenance & HS Code Workbench (R3)
 - [ ] Milestone 4: Inspections, Delivery Tracking & Financial Control (R4)
@@ -16,4 +17,4 @@ Last visited: 2026-11-12T14:30:00Z
 Current iteration: 0 / 32
 
 ## Notes & Retrospectives
-Initiating Survey phase with 3 parallel Explorers / Spec Miners per Project Pattern guidelines.
+Milestone 1 sub-orchestrator confirmed explorer completion status and upcoming worker dispatch. E2E track test writer is implementing tests under `tests/E2E/`.

@@ -63,20 +63,32 @@
         <form action="{{ route('core.import.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
             @csrf
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-[12px] font-semibold text-black/70 dark:text-white/70 mb-1">Tipe Kepabeanan <span class="text-rose-500">*</span></label>
+                    <select name="type" required class="w-full rounded-[10px] bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/15 px-3 py-2 text-[13px] text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[#007AFF]">
+                        <option value="" {{ old('type') ? '' : 'selected' }}>-- Wajib Pilih: Impor atau Ekspor --</option>
+                        <option value="IMPORT" {{ old('type') === 'IMPORT' ? 'selected' : '' }}>IMPOR (BC 2.0 / PIB)</option>
+                        <option value="EXPORT" {{ old('type') === 'EXPORT' ? 'selected' : '' }}>EKSPOR (BC 3.0 / PEB)</option>
+                    </select>
+                    @error('type')
+                        <p class="mt-1 text-[11px] text-rose-500">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 <div>
                     <label class="block text-[12px] font-semibold text-black/70 dark:text-white/70 mb-1">Pilih Klien Importir/Eksportir (Opsional)</label>
                     <select name="client_id" class="w-full rounded-[10px] bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/15 px-3 py-2 text-[13px] text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[#007AFF]">
-                        <option value="">-- Deteksi Otomatis dari Dokumen --</option>
+                        <option value="">-- Pilih Klien --</option>
                         @foreach($clients as $c)
-                            <option value="{{ $c->id }}">{{ $c->name }} (NPWP: {{ $c->npwp }})</option>
+                            <option value="{{ $c->id }}" {{ old('client_id') == $c->id ? 'selected' : '' }}>{{ $c->name }} (NPWP: {{ $c->npwp }})</option>
                         @endforeach
                     </select>
                 </div>
 
                 <div>
                     <label class="block text-[12px] font-semibold text-black/70 dark:text-white/70 mb-1">Catatan Batch / Keterangan Arsip</label>
-                    <input type="text" name="notes" placeholder="Contoh: Arsip Pengapalan Q3 2026 atau Proyek Khusus" class="w-full rounded-[10px] bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/15 px-3 py-2 text-[13px] text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[#007AFF]">
+                    <input type="text" name="notes" value="{{ old('notes') }}" placeholder="Contoh: Arsip Pengapalan Q3 2026 atau Proyek Khusus" class="w-full rounded-[10px] bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/15 px-3 py-2 text-[13px] text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[#007AFF]">
                 </div>
             </div>
 
@@ -110,6 +122,7 @@
                 <thead class="bg-black/[0.02] dark:bg-white/[0.02] text-black/50 dark:text-white/50 text-[11px] uppercase tracking-wider">
                     <tr>
                         <th class="px-6 py-3">Nomor Batch</th>
+                        <th class="px-6 py-3">Tipe</th>
                         <th class="px-6 py-3">Waktu Unggah</th>
                         <th class="px-6 py-3">Klien Target</th>
                         <th class="px-6 py-3 text-center">Jumlah Berkas</th>
@@ -122,6 +135,15 @@
                     <tr class="hover:bg-black/[0.01] dark:hover:bg-white/[0.01] transition">
                         <td class="px-6 py-4 font-mono font-semibold text-[#007AFF]">
                             <a href="{{ route('core.import.show', $b->id) }}">{{ $b->batch_no }}</a>
+                        </td>
+                        <td class="px-6 py-4">
+                            @if($b->type === 'EXPORT')
+                                <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#AF52DE]/15 text-[#AF52DE]">EKSPOR (BC 3.0)</span>
+                            @elseif($b->type === 'IMPORT')
+                                <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#007AFF]/15 text-[#007AFF]">IMPOR (BC 2.0)</span>
+                            @else
+                                <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-black/10 dark:bg-white/10 text-black/60 dark:text-white/60">-</span>
+                            @endif
                         </td>
                         <td class="px-6 py-4 text-black/70 dark:text-white/70">
                             {{ $b->created_at->format('d M Y H:i') }}
@@ -137,22 +159,36 @@
                         <td class="px-6 py-4 text-center">
                             @if($b->status === 'COMPLETED')
                                 <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#34C759]/10 text-[#34C759]">Selesai</span>
+                            @elseif($b->status === 'DRAFT')
+                                <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#FF9500]/15 text-[#FF9500]">Draft</span>
                             @elseif($b->status === 'PROCESSING')
                                 <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#007AFF]/10 text-[#007AFF]">Memproses</span>
                             @else
                                 <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#FF3B30]/10 text-[#FF3B30]">{{ $b->status }}</span>
                             @endif
                         </td>
-                        <td class="px-6 py-4 text-right">
+                        <td class="px-6 py-4 text-right whitespace-nowrap space-x-1">
                             <a href="{{ route('core.import.show', $b->id) }}" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-[8px] text-[12px] font-semibold bg-[#007AFF]/10 hover:bg-[#007AFF]/20 text-[#007AFF] transition">
                                 Buka Batch
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
                             </a>
+                            @if(auth()->user()->isSuperAdmin() || auth()->user()->hasAnyPermission(['document.create', 'document.edit', 'document.delete']))
+                                <form action="{{ route('core.import.destroy', $b->id) }}" method="POST" class="inline"
+                                      onsubmit="return confirm('Hapus draft batch {{ $b->batch_no }} beserta seluruh aset berkas fisiknya?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit"
+                                            class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-[8px] text-[12px] font-semibold bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 transition cursor-pointer"
+                                            title="Hapus Draft Batch & Aset Berkas">
+                                        Hapus Draft
+                                    </button>
+                                </form>
+                            @endif
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="px-6 py-12 text-center text-black/40 dark:text-white/40">
+                        <td colspan="7" class="px-6 py-12 text-center text-black/40 dark:text-white/40">
                             Belum ada batch import yang diunggah. Unggah berkas dokumen pertama Anda di atas.
                         </td>
                     </tr>

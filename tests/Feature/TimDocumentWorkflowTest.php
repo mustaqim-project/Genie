@@ -259,6 +259,7 @@ class TimDocumentWorkflowTest extends TestCase
 
         $response = $this->actingAs($this->docStaff)->postJson(route('core.document.parse-documents'), [
             'client_id' => $this->client->id,
+            'type' => 'IMPORT',
             'bl_file' => $blFile,
             'invoice_file' => $invFile,
             'packing_list_file' => $plFile,
@@ -287,9 +288,10 @@ class TimDocumentWorkflowTest extends TestCase
         $invFile = UploadedFile::fake()->create('Commercial_Invoice_2026.pdf', 250, 'application/pdf');
         $plFile = UploadedFile::fake()->create('Packing_List_Cargo.pdf', 200, 'application/pdf');
 
-        // Note: No manual bl_number or carrier supplied by user!
+        // Note: No manual bl_number or carrier supplied by user, but type (IMPORT/EXPORT) is mandatory.
         $postData = [
             'client_id' => $this->client->id,
+            'type' => 'IMPORT',
             'bl_file' => $blFile,
             'invoice_file' => $invFile,
             'packing_list_file' => $plFile,
@@ -348,5 +350,86 @@ class TimDocumentWorkflowTest extends TestCase
 
         $shipment->refresh();
         $this->assertNotNull($shipment->nomor_bl_awb);
+    }
+
+    public function test_document_store_allows_zero_defaults_for_kemasan_kontainer_and_kurs()
+    {
+        $response = $this->actingAs($this->docStaff)->post(route('core.document.store'), [
+            'client_id' => $this->client->id,
+            'type' => 'IMPORT',
+            'bl_number' => 'BL-ZERO-001',
+            'total_kontainer' => 0,
+            'total_kemasan' => 0,
+            'total_bruto' => 0,
+            'total_netto' => 0,
+            'total_cif' => 0,
+            'currency' => 'USD',
+            'ndbm_kurs' => 0,
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $response->assertRedirect();
+
+        $shipment = Shipment::where('nomor_bl_awb', 'BL-ZERO-001')->first();
+        $this->assertNotNull($shipment);
+        $this->assertEquals(0, $shipment->total_kemasan);
+        $this->assertEquals(0, $shipment->total_kontainer);
+        $this->assertGreaterThan(0, (float) $shipment->ndbm_kurs);
+    }
+
+    public function test_validation_min_numeric_error_is_translated_to_indonesian()
+    {
+        app()->setLocale('id');
+
+        $response = $this->actingAs($this->docStaff)->from(route('core.document.index'))->post(route('core.document.store'), [
+            'client_id' => $this->client->id,
+            'type' => 'IMPORT',
+            'bl_number' => 'BL-NEG-001',
+            'total_kemasan' => -1,
+        ]);
+
+        $response->assertRedirect(route('core.document.index'));
+        $response->assertSessionHasErrors('total_kemasan');
+
+        $errors = session('errors')->get('total_kemasan');
+        $this->assertStringNotContainsString('validation.min.numeric', $errors[0]);
+        $this->assertStringContainsString('minimal', $errors[0]);
+    }
+
+    public function test_shipment_item_normalizes_long_jenis_kemasan_to_fit_column()
+    {
+        $shipment = Shipment::create([
+            'project_no' => 'SHP-TEST-KEMASAN',
+            'client_id' => $this->client->id,
+            'jenis_layanan' => 'IMPORT_BC20',
+            'nomor_bl_awb' => 'BL-KEMASAN-01',
+        ]);
+
+        $item = $shipment->items()->create([
+            'nomor_urut' => 1,
+            'uraian_barang' => 'Barang Pos Tarif 95105059',
+            'kode_hs' => '84713020',
+            'jumlah_kemasan' => 421,
+            'jenis_kemasan' => 'PKGS (Wooden Boxes, Pallets, Bags, Rolls)',
+            'berat_netto' => 28563,
+            'berat_bruto' => 28741.35,
+            'nilai_fob' => 584,
+        ]);
+
+        $this->assertEquals('PKGS', $item->jenis_kemasan);
+        $this->assertLessThanOrEqual(20, mb_strlen($item->jenis_kemasan));
+
+        $itemLong = $shipment->items()->create([
+            'nomor_urut' => 2,
+            'uraian_barang' => 'Barang Lainnya',
+            'kode_hs' => '84713020',
+            'jumlah_kemasan' => 10,
+            'jenis_kemasan' => 'VERY_LONG_PACKAGE_UNIT_DESCRIPTION_EXCEEDING_LIMIT',
+            'berat_netto' => 100,
+            'berat_bruto' => 110,
+            'nilai_fob' => 200,
+        ]);
+
+        $this->assertEquals(20, mb_strlen($itemLong->jenis_kemasan));
     }
 }

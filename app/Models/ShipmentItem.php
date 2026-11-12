@@ -117,4 +117,28 @@ class ShipmentItem extends Model
     {
         return $this->negara_asal;
     }
+
+    /**
+     * Normalisasi kode jenis kemasan agar selalu aman untuk kolom VARCHAR(20).
+     */
+    public static function normalizeJenisKemasan(?string $value, string $default = 'PKG'): string
+    {
+        $clean = trim((string) ($value ?? ''));
+        if ($clean === '') {
+            return $default;
+        }
+
+        if (mb_strlen($clean) > 20) {
+            if (preg_match('/^([A-Za-z0-9\-_\/]+)\s*\(/', $clean, $matches)) {
+                $clean = $matches[1];
+            }
+        }
+
+        return mb_substr($clean, 0, 20);
+    }
+
+    public function setJenisKemasanAttribute(?string $value): void
+    {
+        $this->attributes['jenis_kemasan'] = static::normalizeJenisKemasan($value);
+    }
 }

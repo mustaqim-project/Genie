@@ -27,8 +27,11 @@ Supervise execution of End-to-End Export-Import Document Tracking, Bundle Intell
 - **Delivered results**: none
 
 ## Project Status
-- **Phase**: in progress
+- **Phase**: in progress (Dual Track: Milestone 1 + E2E Testing Track active)
 - **Routing Decision**: General path -> teamwork_orchestrator (full-stack SWE multi-phase architecture execution)
+- **Active Sub-Orchestrators**:
+  - `sub_orch_e2e_testing` (conv: 9e9dd00c-2979-44b9-b380-eddfbfe119fb)
+  - `sub_orch_milestone_1` (conv: c9a703fa-acca-47ce-93a9-b7983725bd6a)
 
 ## Victory Audit Status
 - **Auditor**: to be spawned on victory claim
