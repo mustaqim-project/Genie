@@ -106,19 +106,24 @@
                 <div x-show="open && !sidebarCollapsed" 
                      x-collapse 
                      class="ml-3.5 pl-2.5 border-l border-black/[0.08] dark:border-white/[0.1] space-y-0.5 mt-0.5">
+                    @php
+                        $isBc20Active = request()->routeIs('bc20.*') || (request()->routeIs('core.document.show') && isset($shipment) && $shipment->type === 'IMPORT');
+                        $isBc30Active = request()->routeIs('bc30.*') || (request()->routeIs('core.document.show') && isset($shipment) && $shipment->type === 'EXPORT');
+                        $isCoreIndexActive = request()->routeIs('core.document.index') || (!$isBc20Active && !$isBc30Active && request()->routeIs('core.document.*'));
+                    @endphp
                     <a href="{{ route('core.document.index') }}" 
-                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('core.document.*') ? 'bg-[#007AFF] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
-                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('core.document.*') ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ $isCoreIndexActive ? 'bg-[#007AFF] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
+                        <span class="w-1.5 h-1.5 rounded-full {{ $isCoreIndexActive ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
                         <span class="truncate">Semua Proyek</span>
                     </a>
                     <a href="{{ route('bc20.index') }}" 
-                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('bc20.*') ? 'bg-[#007AFF] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
-                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('bc20.*') ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ $isBc20Active ? 'bg-[#007AFF] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
+                        <span class="w-1.5 h-1.5 rounded-full {{ $isBc20Active ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
                         <span class="truncate">BC 2.0 (PIB)</span>
                     </a>
                     <a href="{{ route('bc30.index') }}" 
-                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('bc30.*') ? 'bg-[#007AFF] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
-                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('bc30.*') ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ $isBc30Active ? 'bg-[#007AFF] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
+                        <span class="w-1.5 h-1.5 rounded-full {{ $isBc30Active ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
                         <span class="truncate">BC 3.0 (PEB)</span>
                     </a>
                 </div>
@@ -134,6 +139,14 @@
                 <span x-show="!sidebarCollapsed" class="truncate">Tracking 11 Pos</span>
             </a>
             @endif
+
+            <!-- MENU TO-DO & DELEGASI TUGAS (F23) -->
+            <a href="{{ route('todos.index') }}" 
+               class="flex items-center space-x-2.5 px-2.5 py-1.5 rounded-[9px] font-medium transition-all group min-h-[36px] active:scale-[0.98] {{ request()->routeIs('todos.*') ? 'bg-[#007AFF] text-white font-semibold shadow-[0_2px_8px_rgba(0,122,255,0.30)]' : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.06]' }}"
+               title="Papan Tugas & Delegasi Rekan (To-Do)">
+                <i data-lucide="check-square" class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('todos.*') ? 'text-white' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white' }}"></i>
+                <span x-show="!sidebarCollapsed" class="truncate">Tugas & Delegasi (To-Do)</span>
+            </a>
 
             <!-- MENU 2: TIM DO (DELIVERY ORDER) -->
             @if(!auth()->check() || auth()->user()->hasPermission('do.view'))
@@ -252,9 +265,19 @@
                      x-collapse 
                      class="ml-3.5 pl-2.5 border-l border-black/[0.08] dark:border-white/[0.1] space-y-0.5 mt-0.5">
                     <a href="{{ route('crm.index') }}" 
-                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('crm.*') ? 'bg-[#007AFF] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
-                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('crm.*') ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
-                        <span class="truncate">Direktori Klien & Sales</span>
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('crm.index') ? 'bg-[#007AFF] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
+                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('crm.index') ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
+                        <span class="truncate">Direktori Klien</span>
+                    </a>
+                    <a href="{{ route('crm.quotations.index') }}" 
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('crm.quotations.*') ? 'bg-[#007AFF] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
+                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('crm.quotations.*') ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
+                        <span class="truncate">Penawaran (Quotation & SO)</span>
+                    </a>
+                    <a href="{{ route('crm.sales-visits.index') }}" 
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('crm.sales-visits.*') ? 'bg-[#007AFF] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
+                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('crm.sales-visits.*') ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
+                        <span class="truncate">Kunjungan Sales (GPS)</span>
                     </a>
                     <a href="{{ route('inbox.index') }}" 
                        class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('inbox.*') ? 'bg-[#007AFF] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">

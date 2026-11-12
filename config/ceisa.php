@@ -30,7 +30,9 @@ return [
         'api_key' => env('CEISA_API_KEY', 'pats-ceisa-mock-key-0403'),
         'application_id' => env('CEISA_APPLICATION_ID', ''),
         'whatsapp_no' => env('CEISA_WHATSAPP_NO', ''),
+        'webhook_secret' => env('CEISA_WEBHOOK_SECRET', ''),
         'mock_mode' => env('CEISA_MOCK_MODE', true),
+        'read_only' => env('CEISA_READ_ONLY', true),
         'timeout' => 30, // detik
         'token_cache_ttl' => 240, // 4 menit (token berlaku ~5 menit)
     ],

@@ -49,8 +49,11 @@ class DatabaseSeeder extends Seeder
             // Core Bisnis - Document
             ['code' => 'document.view', 'name' => 'Melihat Dokumen Pabean', 'module' => 'Core Bisnis - Document'],
             ['code' => 'document.create', 'name' => 'Membuat Dokumen PIB/PEB', 'module' => 'Core Bisnis - Document'],
+            ['code' => 'document.edit', 'name' => 'Mengedit Dokumen Pabean (Draft)', 'module' => 'Core Bisnis - Document'],
+            ['code' => 'document.edit_after_ceisa', 'name' => 'Mengedit Dokumen Pabean Pasca-CEISA', 'module' => 'Core Bisnis - Document'],
             ['code' => 'document.approve', 'name' => 'Menyetujui Dokumen Pabean', 'module' => 'Core Bisnis - Document'],
             ['code' => 'ceisa.submit', 'name' => 'Mengirim Dokumen ke CEISA 4.0', 'module' => 'Core Bisnis - Document'],
+            ['code' => 'workflow.rollback_stage', 'name' => 'Membuka & Mengembalikan Pos Alur Sebelumnya', 'module' => 'Core Bisnis - Document'],
 
             // Core Bisnis - DO
             ['code' => 'do.view', 'name' => 'Melihat Data Delivery Order', 'module' => 'Core Bisnis - DO'],
@@ -106,13 +109,17 @@ class DatabaseSeeder extends Seeder
             $permissions['dashboard.view']->id,
             $permissions['document.view']->id,
             $permissions['document.create']->id,
+            $permissions['document.edit']->id,
         ]);
         $roles['R-DOC-SPV']->permissions()->sync([
             $permissions['dashboard.view']->id,
             $permissions['document.view']->id,
             $permissions['document.create']->id,
+            $permissions['document.edit']->id,
+            $permissions['document.edit_after_ceisa']->id,
             $permissions['document.approve']->id,
             $permissions['ceisa.submit']->id,
+            $permissions['workflow.rollback_stage']->id,
         ]);
 
         // R-DO
@@ -714,8 +721,12 @@ class DatabaseSeeder extends Seeder
         // 11. MASTER HS CODE & BTKI 2022 BEA CUKAI (F2 & CEISA 4.0)
         $this->call(Btki2022DatabaseSeeder::class);
 
-        // 12. AUTO-ASSIGN PIC WORKFLOW 11 POS UNTUK SEMUA SHIPMENT AKTIF
+        // 12. AUTO-ASSIGN PIC WORKFLOW 11 POS & SINKRONISASI SHIPMENT TRACKING UNTUK SEMUA CEISA DOCUMENT
         $workflowService = app(\App\Services\Shipment\ShipmentWorkflowService::class);
+        foreach (\App\Models\CeisaDocument::all() as $cDoc) {
+            $workflowService->ensureShipmentForCeisaDocument($cDoc);
+        }
+
         $activeShipments = \App\Models\Shipment::whereNull('closed_at')->get();
         foreach ($activeShipments as $s) {
             $workflowService->autoAssignPics($s);

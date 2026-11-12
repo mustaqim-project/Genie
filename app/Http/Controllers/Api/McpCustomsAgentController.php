@@ -268,12 +268,13 @@ class McpCustomsAgentController extends Controller
     public function parsePackingList(Request $request): JsonResponse
     {
         $rawText = $request->input('raw_text');
-        $direction = $request->input('direction');
+        $direction = $request->input('direction', 'IMPORT_BC20');
+        $model = $request->input('model') ?? $request->input('ai_model');
 
         // Jika upload file via multipart
         if ($request->hasFile('file')) {
             $file = $request->file('file');
-            $result = $this->extractionService->parsePackingListContent($file, $direction);
+            $result = $this->extractionService->parsePackingListContent($file, $direction, $model);
             return response()->json($result);
         }
 
@@ -292,14 +293,14 @@ class McpCustomsAgentController extends Controller
                 true
             );
 
-            $result = $this->extractionService->parsePackingListContent($uploadedFile, $direction);
+            $result = $this->extractionService->parsePackingListContent($uploadedFile, $direction, $model);
             @unlink($tmpPath);
             return response()->json($result);
         }
 
         // Jika teks mentah
         if (!empty($rawText)) {
-            $result = $this->extractionService->parsePackingListContent($rawText, $direction);
+            $result = $this->extractionService->parsePackingListContent($rawText, $direction, $model);
             return response()->json($result);
         }
 
@@ -316,12 +317,28 @@ class McpCustomsAgentController extends Controller
     {
         $query = $request->input('query') ?? $request->input('hs_code') ?? $request->input('text');
         $direction = $request->input('direction');
+        $model = $request->input('model') ?? $request->input('ai_model');
 
         if (empty($query)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Parameter query atau hs_code wajib diisi.',
             ], 422);
+        }
+
+        // Coba klasifikasi via AI jika ada model atau query berupa deskripsi komoditas
+        if ($model || !preg_match('/^[0-9\.\s\-]{4,12}$/', trim($query))) {
+            try {
+                /** @var \App\Services\Ai\OpenAiCustomsService $aiService */
+                $aiService = app(\App\Services\Ai\OpenAiCustomsService::class);
+                $result = $aiService->classifyCommodity($query, $model, $direction);
+                return response()->json([
+                    'success' => true,
+                    'data' => $result,
+                ]);
+            } catch (\Throwable $e) {
+                Log::warning('AI checkHs error, falling back to rule service: ' . $e->getMessage());
+            }
         }
 
         $result = $this->hsCodeService->classifyCommodity($query, $direction);

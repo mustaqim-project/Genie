@@ -76,6 +76,23 @@ class Employee extends Model
     /**
      * Stored compliance & credential documents (KTP, NPWP, PPJK Certificate, BPJS).
      */
+    public function getPrivatePhotoUrlAttribute(): ?string
+    {
+        if (!$this->photo_url) {
+            return null;
+        }
+
+        if (str_starts_with($this->photo_url, 'http://') || str_starts_with($this->photo_url, 'https://')) {
+            return $this->photo_url;
+        }
+
+        return \Illuminate\Support\Facades\URL::temporarySignedRoute(
+            'private.biometric',
+            now()->addMinutes(15),
+            ['employeeId' => $this->id]
+        );
+    }
+
     public function documents(): HasMany
     {
         return $this->hasMany(EmployeeDocument::class, 'employee_id');

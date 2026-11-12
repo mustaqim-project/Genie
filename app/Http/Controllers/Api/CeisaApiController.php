@@ -31,6 +31,13 @@ class CeisaApiController extends Controller
      */
     public function submitBC20(Request $request): JsonResponse
     {
+        if ((bool) config('ceisa.api.read_only', true)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Mode Tarik Data Saja (Read-Only) aktif: upload BC 2.0 ke CEISA diblokir.',
+            ], 403);
+        }
+
         $validated = $request->validate([
             'kode_kantor' => 'nullable|string',
             'ndbm_kurs' => 'nullable|numeric',
@@ -93,6 +100,13 @@ class CeisaApiController extends Controller
      */
     public function submitBC30(Request $request): JsonResponse
     {
+        if ((bool) config('ceisa.api.read_only', true)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Mode Tarik Data Saja (Read-Only) aktif: upload BC 3.0 ke CEISA diblokir.',
+            ], 403);
+        }
+
         $validated = $request->validate([
             'kode_kantor' => 'nullable|string',
             'ndbm_kurs' => 'nullable|numeric',
@@ -228,6 +242,37 @@ class CeisaApiController extends Controller
     {
         $startTime = microtime(true);
         $payload = $request->all();
+
+        // Verifikasi optional webhook secret / token jika dikonfigurasi di Setting Genie
+        $configuredSecret = (string) config('ceisa.api.webhook_secret', '');
+        if ($configuredSecret !== '') {
+            $providedSecret = (string) (
+                $request->header('X-CEISA-Webhook-Secret')
+                ?? $request->header('X-Webhook-Token')
+                ?? $request->query('token')
+                ?? ''
+            );
+
+            if (!hash_equals($configuredSecret, $providedSecret)) {
+                \App\Models\CeisaApiLog::create([
+                    'nomor_aju' => $request->input('nomorAju') ?? $request->input('nomor_aju'),
+                    'endpoint' => '/api/v1/ceisa/webhook',
+                    'method' => 'POST',
+                    'status_code' => 401,
+                    'request_header' => $request->headers->all(),
+                    'request_body' => $payload,
+                    'response_body' => ['status' => 'error', 'message' => 'Token callback webhook CEISA tidak valid.'],
+                    'duration_ms' => (int) ((microtime(true) - $startTime) * 1000),
+                    'is_success' => false,
+                ]);
+
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Unauthorized: Token callback webhook CEISA tidak sah.',
+                ], 401);
+            }
+        }
+
         $nomorAju = $request->input('nomorAju') 
             ?? $request->input('nomor_aju') 
             ?? $request->input('dataStatus.0.nomorAju')
@@ -241,9 +286,9 @@ class CeisaApiController extends Controller
                 'endpoint' => '/api/v1/ceisa/webhook',
                 'method' => 'POST',
                 'status_code' => 400,
-                'request_headers' => $request->headers->all(),
-                'request_payload' => $payload,
-                'response_payload' => ['status' => 'error', 'message' => 'Nomor Aju tidak ditemukan dalam payload webhook.'],
+                'request_header' => $request->headers->all(),
+                'request_body' => $payload,
+                'response_body' => ['status' => 'error', 'message' => 'Nomor Aju tidak ditemukan dalam payload webhook.'],
                 'duration_ms' => $duration,
                 'is_success' => false,
             ]);
@@ -338,19 +383,22 @@ class CeisaApiController extends Controller
 
         if ($doc) {
             $doc->update($updates);
+            $doc->refresh();
 
-            // Update status shipment jika terhubung
+            // Update status shipment sesuai tahapan di Genie jika terhubung
             if ($doc->shipment) {
-                if (in_array($doc->status, ['SPPB', 'NPE'])) {
-                    $doc->shipment->update([
-                        'customs_status' => $doc->status,
-                        'current_step' => 'delivery',
-                    ]);
-                } else {
-                    $doc->shipment->update([
-                        'customs_status' => $doc->status,
-                    ]);
+                $shipUpdates = [
+                    'status_tahap' => \App\Services\Ceisa\CeisaDocumentSyncService::resolveShipmentStage(
+                        $doc->status,
+                        $doc->jalur,
+                        $doc->kode_billing,
+                        $doc->shipment->status_tahap
+                    ),
+                ];
+                if (!empty($doc->jalur)) {
+                    $shipUpdates['customs_channel'] = strtoupper($doc->jalur);
                 }
+                $doc->shipment->update($shipUpdates);
             }
         }
 
@@ -361,9 +409,9 @@ class CeisaApiController extends Controller
             'endpoint' => '/api/v1/ceisa/webhook',
             'method' => 'POST',
             'status_code' => 200,
-            'request_headers' => $request->headers->all(),
-            'request_payload' => $payload,
-            'response_payload' => [
+            'request_header' => $request->headers->all(),
+            'request_body' => $payload,
+            'response_body' => [
                 'status' => 'success',
                 'message' => 'Webhook berhasil diproses',
                 'document_found' => (bool) $doc,

@@ -20,41 +20,43 @@ class CeisaKursService
      * Dapatkan Kurs Pajak (NDPBM / KMK) yang aktif untuk valuta dan tanggal tertentu.
      * Alur: Cache -> Database Lokal (CeisaExchangeRate) -> API CEISA 4.0 (/kurs/{valuta}) -> Fallback
      */
-    public function getActiveKurs(string $kodeValuta = 'USD', ?string $targetDate = null): array
+    public function getActiveKurs(string $kodeValuta = 'USD', ?string $targetDate = null, bool $forceRefresh = false): array
     {
         $valuta = strtoupper(trim($kodeValuta));
         $date = $targetDate ? Carbon::parse($targetDate)->format('Y-m-d') : now()->format('Y-m-d');
         $cacheKey = "ceisa_kurs_{$valuta}_{$date}";
 
-        // 1. Cek Cache In-Memory / Redis / File
-        $cached = Cache::get($cacheKey);
-        if ($cached) {
-            $cached['source'] = 'CACHE';
-            return $cached;
-        }
+        if (!$forceRefresh) {
+            // 1. Cek Cache In-Memory / Redis / File
+            $cached = Cache::get($cacheKey);
+            if ($cached) {
+                $cached['source'] = 'CACHE';
+                return $cached;
+            }
 
-        // 2. Cek Database Lokal
-        $dbRecord = CeisaExchangeRate::where('kode_valuta', $valuta)
-            ->activeOn($date)
-            ->latest('created_at')
-            ->first();
+            // 2. Cek Database Lokal
+            $dbRecord = CeisaExchangeRate::where('kode_valuta', $valuta)
+                ->activeOn($date)
+                ->latest('created_at')
+                ->first();
 
-        if ($dbRecord) {
-            $result = [
-                'success' => true,
-                'kode_valuta' => $dbRecord->kode_valuta,
-                'nilai_kurs' => (float) $dbRecord->nilai_kurs,
-                'tanggal_mulai' => $dbRecord->tanggal_mulai->format('Y-m-d'),
-                'tanggal_selesai' => $dbRecord->tanggal_selesai->format('Y-m-d'),
-                'nomor_kmk' => $dbRecord->nomor_kmk,
-                'source' => $dbRecord->sumber,
-            ];
+            if ($dbRecord) {
+                $result = [
+                    'success' => true,
+                    'kode_valuta' => $dbRecord->kode_valuta,
+                    'nilai_kurs' => (float) $dbRecord->nilai_kurs,
+                    'tanggal_mulai' => $dbRecord->tanggal_mulai->format('Y-m-d'),
+                    'tanggal_selesai' => $dbRecord->tanggal_selesai->format('Y-m-d'),
+                    'nomor_kmk' => $dbRecord->nomor_kmk,
+                    'source' => $dbRecord->sumber,
+                ];
 
-            // Simpan ke Cache sampai tanggal selesai
-            $ttl = Carbon::parse($dbRecord->tanggal_selesai)->endOfDay();
-            Cache::put($cacheKey, $result, $ttl);
+                // Simpan ke Cache sampai tanggal selesai
+                $ttl = Carbon::parse($dbRecord->tanggal_selesai)->endOfDay();
+                Cache::put($cacheKey, $result, $ttl);
 
-            return $result;
+                return $result;
+            }
         }
 
         // 3. Tarik dari API Resmi CEISA 4.0 Open API
@@ -62,8 +64,16 @@ class CeisaKursService
             $response = $this->client->get("/kurs/{$valuta}");
 
             if ($response['success'] && !empty($response['data'])) {
-                $apiData = $response['data'];
+                $raw = $response['data']['data'] ?? $response['data'];
+                $apiData = (is_array($raw) && isset($raw[0]) && is_array($raw[0]))
+                    ? $raw[0]
+                    : (is_array($raw) ? $raw : []);
+
                 $nilaiKurs = (float) ($apiData['nilaiKurs'] ?? $apiData['nilai_kurs'] ?? 0);
+                if ($nilaiKurs <= 0) {
+                    throw new \RuntimeException("Nilai kurs CEISA kosong atau nol untuk valuta {$valuta}.");
+                }
+
                 $tglMulai = $apiData['tanggalMulai'] ?? $apiData['tanggal_mulai'] ?? Carbon::parse($date)->startOfWeek()->format('Y-m-d');
                 $tglSelesai = $apiData['tanggalSelesai'] ?? $apiData['tanggal_selesai'] ?? Carbon::parse($date)->endOfWeek()->format('Y-m-d');
                 $nomorKmk = $apiData['nomorKmk'] ?? $apiData['nomor_kmk'] ?? ('KMK-NDPBM/' . Carbon::parse($date)->format('Y-W'));
@@ -145,13 +155,13 @@ class CeisaKursService
     /**
      * Sinkronisasi massal seluruh kurs valuta asing utama
      */
-    public function syncMajorRates(): array
+    public function syncMajorRates(bool $forceRefresh = false): array
     {
         $currencies = ['USD', 'EUR', 'CNY', 'JPY', 'SGD', 'AUD', 'MYR', 'GBP'];
         $results = [];
 
         foreach ($currencies as $curr) {
-            $results[$curr] = $this->getActiveKurs($curr);
+            $results[$curr] = $this->getActiveKurs($curr, null, $forceRefresh);
         }
 
         return $results;

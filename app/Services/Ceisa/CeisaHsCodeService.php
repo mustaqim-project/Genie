@@ -712,44 +712,48 @@ class CeisaHsCodeService
         $cleanCode = str_replace(['.', ' ', '-'], '', trim($hsCode));
 
         // 1. Cek Database Master Lokal (Tabel hs_codes) TERLEBIH DAHULU
-        $dbHs = HsCode::where('code', $hsCode)
-            ->orWhere('code', $cleanCode)
-            ->orWhereRaw("REPLACE(REPLACE(REPLACE(code, '.', ''), ' ', ''), '-', '') = ?", [$cleanCode])
-            ->first();
+        try {
+            $dbHs = HsCode::where('code', $hsCode)
+                ->orWhere('code', $cleanCode)
+                ->orWhereRaw("REPLACE(REPLACE(REPLACE(code, '.', ''), ' ', ''), '-', '') = ?", [$cleanCode])
+                ->first();
 
-        if ($dbHs) {
-            $regulations = HsRegulation::where(function ($q) use ($cleanCode) {
-                $q->where('hs_from', '<=', $cleanCode)
-                  ->where('hs_to', '>=', $cleanCode);
-            })->orWhere('hs_from', $cleanCode)->get();
+            if ($dbHs) {
+                $regulations = HsRegulation::where(function ($q) use ($cleanCode) {
+                    $q->where('hs_from', '<=', $cleanCode)
+                      ->where('hs_to', '>=', $cleanCode);
+                })->orWhere('hs_from', $cleanCode)->get();
 
-            $reqDocs = [];
-            foreach ($regulations as $reg) {
-                $cond = $reg->doc_condition ?? [];
-                $reqDocs[] = [
-                    'kode_dokumen' => $cond['code'] ?? '860',
-                    'nama_dokumen' => $cond['title'] ?? ($reg->required_doc ?? 'Dokumen Perizinan Lartas'),
-                    'instansi' => $reg->source_regulation ?? 'Kementerian Teknis Terkait',
-                    'is_mandatory' => true,
+                $reqDocs = [];
+                foreach ($regulations as $reg) {
+                    $cond = $reg->doc_condition ?? [];
+                    $reqDocs[] = [
+                        'kode_dokumen' => $cond['code'] ?? '860',
+                        'nama_dokumen' => $cond['title'] ?? ($reg->required_doc ?? 'Dokumen Perizinan Lartas'),
+                        'instansi' => $reg->source_regulation ?? 'Kementerian Teknis Terkait',
+                        'is_mandatory' => true,
+                    ];
+                }
+
+                return [
+                    'success' => true,
+                    'source' => $dbHs->source ?? 'DJBC_BTKI_2022',
+                    'code' => $dbHs->code,
+                    'clean_code' => $cleanCode,
+                    'desc' => $dbHs->description,
+                    'bm' => (float) $dbHs->duty_bm,
+                    'ppn' => (float) ($dbHs->duty_ppn ?? 11.0),
+                    'pph' => (float) ($dbHs->duty_pph ?? 2.5),
+                    'bk' => (float) ($dbHs->duty_bk ?? 0.0),
+                    'satuan' => $dbHs->satuan ?? 'PCE',
+                    'has_lartas' => (bool) ($dbHs->has_lartas || count($reqDocs) > 0),
+                    'lartas' => $dbHs->lartas_desc ?? (count($reqDocs) > 0 ? "Lartas ({$regulations->first()->required_doc})" : 'Bebas Lartas (Non-Lartas)'),
+                    'legal' => $dbHs->btki ?? ("BTKI 2022 Pos {$dbHs->code}"),
+                    'required_documents' => $reqDocs,
                 ];
             }
-
-            return [
-                'success' => true,
-                'source' => $dbHs->source ?? 'DJBC_BTKI_2022',
-                'code' => $dbHs->code,
-                'clean_code' => $cleanCode,
-                'desc' => $dbHs->description,
-                'bm' => (float) $dbHs->duty_bm,
-                'ppn' => (float) ($dbHs->duty_ppn ?? 11.0),
-                'pph' => (float) ($dbHs->duty_pph ?? 2.5),
-                'bk' => (float) ($dbHs->duty_bk ?? 0.0),
-                'satuan' => $dbHs->satuan ?? 'PCE',
-                'has_lartas' => (bool) ($dbHs->has_lartas || count($reqDocs) > 0),
-                'lartas' => $dbHs->lartas_desc ?? (count($reqDocs) > 0 ? "Lartas ({$regulations->first()->required_doc})" : 'Bebas Lartas (Non-Lartas)'),
-                'legal' => $dbHs->btki ?? ("BTKI 2022 Pos {$dbHs->code}"),
-                'required_documents' => $reqDocs,
-            ];
+        } catch (\Throwable $e) {
+            // Fallback ke built-in knowledge base jika tabel DB belum dimigrasikan atau terjadi error koneksi
         }
 
         // 2. Cek Built-in Knowledge Base
@@ -1416,7 +1420,9 @@ class CeisaHsCodeService
         }
 
         if ($isBC20) {
-            // BC 2.0 PIB Builder
+            // BC 2.0 PIB Builder — prioritaskan data nyata Client, Container, & Shipment
+            $client = $shipment->client;
+            $invDoc = $shipment->documents()->where('jenis_dokumen', 'INVOICE')->first();
             $input = array_merge([
                 'nomor_aju' => $nomorAju,
                 'kode_kantor' => $kodeKantor,
@@ -1427,18 +1433,28 @@ class CeisaHsCodeService
                 'asuransi' => $asuransi,
                 'bruto' => $verification['total_bruto'] ?: $shipment->total_bruto,
                 'netto' => $verification['total_netto'] ?: $shipment->total_netto,
-                'supplier_nama' => $shipment->client?->name ? ($shipment->client->name . ' OVERSEAS CO., LTD') : 'GLOBAL TRADING CORP',
-                'supplier_negara' => 'CN',
-                'invoice_no' => 'INV/' . ($shipment->nomor_bl_awb ?? date('Ymd')),
+                'importir_nama' => $client?->name ?? config('ceisa.company.name'),
+                'importir_npwp' => $client?->npwp ?? config('ceisa.company.npwp'),
+                'importir_alamat' => $client?->address ?? config('ceisa.company.address'),
+                'importir_nib' => $client?->nib ?? config('ceisa.company.nib'),
+                'supplier_nama' => $overrides['supplier_nama'] ?? ($shipment->commodity_summary ? 'OVERSEAS SUPPLIER (' . $shipment->commodity_summary . ')' : 'OVERSEAS EXPORT CO., LTD.'),
+                'supplier_negara' => $overrides['supplier_negara'] ?? ($shipment->items->first()?->negara_asal ?: 'CN'),
+                'invoice_no' => $overrides['invoice_no'] ?? ($invDoc?->catatan && str_contains($invDoc->catatan, 'No:') ? trim(\Illuminate\Support\Str::after($invDoc->catatan, 'No:')) : 'INV/' . ($shipment->nomor_bl_awb ?? date('Ymd'))),
                 'invoice_date' => $shipment->tgl_bl_awb ? $shipment->tgl_bl_awb->format('Y-m-d') : date('Y-m-d'),
+                'bl_no' => $shipment->nomor_bl_awb ?? ('BL-' . date('Ymd')),
+                'bl_date' => $shipment->tgl_bl_awb ? $shipment->tgl_bl_awb->format('Y-m-d') : date('Y-m-d'),
                 'nama_sarana_pengangkut' => $shipment->nama_kapal ?? 'COSCO SHIPPING TAURUS',
+                'nomor_voyage' => $shipment->voyage_no ?? '001E',
                 'pelabuhan_muat' => $shipment->pelabuhan_muat ?? 'CNSHA',
                 'pelabuhan_bongkar' => $shipment->pelabuhan_bongkar ?? 'IDTPP',
+                'jumlah_kontainer' => $shipment->total_kontainer ?? 1,
+                'nomor_kontainer' => explode(',', (string) ($shipment->nomor_kontainer ?? 'TEMU1234567'))[0],
+                'jumlah_kemasan' => $shipment->total_kemasan ?? 100,
                 'nomor_bc11' => $shipment->nomor_bc11 ?? '004567',
                 'tanggal_bc11' => $shipment->tanggal_bc11 ?? now()->toDateString(),
                 'pos_bc11' => $shipment->pos_bc11 ?? '0012',
                 'subpos_bc11' => $shipment->subpos_bc11 ?? '0000',
-                'kode_tps' => $shipment->kode_tps ?? 'TPS01',
+                'kode_tps' => $shipment->tps_location ?? ($shipment->kode_tps ?? 'TPS01'),
                 'tanggal_tiba' => $shipment->eta ? $shipment->eta->format('Y-m-d') : now()->toDateString(),
                 'dokumen' => $headerDokumen,
                 'barang' => $barangPayload,
@@ -1450,8 +1466,11 @@ class CeisaHsCodeService
             $jenisDokumen = '20';
             $mitraNama = $input['supplier_nama'];
             $mitraNegara = $input['supplier_negara'];
+            $localName = $input['importir_nama'];
+            $localNpwp = $input['importir_npwp'];
         } else {
-            // BC 3.0 PEB Builder
+            // BC 3.0 PEB Builder — prioritaskan data nyata Eksportir, Container, & Shipment
+            $client = $shipment->client;
             $input = array_merge([
                 'nomor_aju' => $nomorAju,
                 'kode_kantor' => $kodeKantor,
@@ -1462,16 +1481,24 @@ class CeisaHsCodeService
                 'asuransi' => 0,
                 'bruto' => $verification['total_bruto'] ?: $shipment->total_bruto,
                 'netto' => $verification['total_netto'] ?: $shipment->total_netto,
-                'buyer_nama' => 'GLOBAL COMMODITIES TRADING PTE LTD',
-                'buyer_negara' => 'SG',
-                'invoice_no' => 'EXP-INV/' . ($shipment->nomor_bl_awb ?? date('Ymd')),
-                'invoice_date' => date('Y-m-d'),
+                'eksportir_nama' => $client?->name ?? config('ceisa.company.name'),
+                'eksportir_npwp' => $client?->npwp ?? config('ceisa.company.npwp'),
+                'eksportir_alamat' => $client?->address ?? config('ceisa.company.address'),
+                'eksportir_nib' => $client?->nib ?? config('ceisa.company.nib'),
+                'buyer_nama' => $overrides['buyer_nama'] ?? 'OVERSEAS BUYER CORP',
+                'buyer_negara' => $overrides['buyer_negara'] ?? 'SG',
+                'invoice_no' => $overrides['invoice_no'] ?? ('EXP-INV/' . ($shipment->nomor_bl_awb ?? date('Ymd'))),
+                'invoice_date' => $shipment->tgl_bl_awb ? $shipment->tgl_bl_awb->format('Y-m-d') : date('Y-m-d'),
+                'bl_no' => $shipment->nomor_bl_awb ?? ('BL-' . date('Ymd')),
                 'nama_sarana_pengangkut' => $shipment->nama_kapal ?? 'EVER GIVEN',
-                'pelabuhan_muat' => $shipment->pelabuhan_bongkar ?? 'IDTPP',
-                'pelabuhan_bongkar' => 'SGSIN',
-                'pic_pembuat' => 'BAMBANG SUTRISNO',
+                'nomor_voyage' => $shipment->voyage_no ?? '001N',
+                'pelabuhan_muat' => $shipment->pelabuhan_muat ?? 'IDTPP',
+                'pelabuhan_bongkar' => $shipment->pelabuhan_bongkar ?? 'SGSIN',
+                'jumlah_kontainer' => $shipment->total_kontainer ?? 1,
+                'nomor_kontainer' => explode(',', (string) ($shipment->nomor_kontainer ?? 'FFAU1855322'))[0],
+                'pic_pembuat' => auth()->user()?->name ?? 'STAF DOKUMEN EKSPOR',
                 'telepon_pembuat' => '081298765432',
-                'lokasi_siap_periksa' => 'GUDANG EKSPORTIR CAKUNG',
+                'lokasi_siap_periksa' => $shipment->tps_location ?? 'GUDANG EKSPORTIR',
                 'tanggal_periksa' => now()->toDateString(),
                 'bank_kode' => 'BMRI',
                 'bank_nama' => 'PT BANK MANDIRI (PERSERO) TBK',
@@ -1485,6 +1512,8 @@ class CeisaHsCodeService
             $jenisDokumen = '30';
             $mitraNama = $input['buyer_nama'];
             $mitraNegara = $input['buyer_negara'];
+            $localName = $input['eksportir_nama'];
+            $localNpwp = $input['eksportir_npwp'];
         }
 
         // Simpan / Perbarui dokumen pabean resmi
@@ -1494,7 +1523,7 @@ class CeisaHsCodeService
             'kode_kantor' => $kodeKantor,
             'nama_kantor' => config('ceisa.kantor_pabean.' . $kodeKantor, $existingDoc?->nama_kantor ?: 'KPU Tanjung Priok'),
             'status' => 'DRAFT',
-            'status_description' => "Draft dokumen BC {$jenisDokumen} berhasil disiapkan dari verifikasi Packing List.",
+            'status_description' => "Draft dokumen BC {$jenisDokumen} berhasil disiapkan otomatis dari Bundle Dokumen & Packing List.",
             'kode_valuta' => $input['kode_valuta'],
             'ndbm_kurs' => $kurs,
             'total_nilai' => $totalNilai,
@@ -1504,8 +1533,8 @@ class CeisaHsCodeService
             'total_kemasan' => $verification['total_kemasan'],
             'total_kontainer' => $shipment->total_kontainer ?? 1,
             'total_barang' => count($barangPayload),
-            'nama_perusahaan_lokal' => config('ceisa.company.name'),
-            'npwp_perusahaan_lokal' => config('ceisa.company.npwp'),
+            'nama_perusahaan_lokal' => $localName ?? config('ceisa.company.name'),
+            'npwp_perusahaan_lokal' => $localNpwp ?? config('ceisa.company.npwp'),
             'nama_mitra_luar_negeri' => $mitraNama,
             'negara_mitra_luar_negeri' => $mitraNegara,
             'nomor_bc11' => $input['nomor_bc11'] ?? null,

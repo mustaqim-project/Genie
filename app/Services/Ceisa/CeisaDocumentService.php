@@ -18,6 +18,15 @@ class CeisaDocumentService
      */
     public function checkSchema(CeisaDocument $document): array
     {
+        if ((bool) config('ceisa.api.read_only', true)) {
+            return [
+                'status_code' => 403,
+                'success' => false,
+                'message' => 'Mode Tarik Data Saja (Read-Only) aktif: validasi/upload skema ke CEISA diblokir.',
+                'data' => ['message' => 'Mode Tarik Data Saja (Read-Only) aktif.'],
+            ];
+        }
+
         if (empty($document->raw_payload)) {
             $shipment = $document->shipment ?? \App\Models\Shipment::where('ceisa_document_id', $document->id)->first();
             if ($shipment) {
@@ -42,6 +51,15 @@ class CeisaDocumentService
      */
     public function submit(CeisaDocument $document): array
     {
+        if ((bool) config('ceisa.api.read_only', true)) {
+            return [
+                'status_code' => 403,
+                'success' => false,
+                'message' => 'Mode Tarik Data Saja (Read-Only) aktif: pengiriman/upload dokumen ke CEISA diblokir.',
+                'data' => ['message' => 'Mode Tarik Data Saja (Read-Only) aktif.'],
+            ];
+        }
+
         if (empty($document->raw_payload)) {
             $shipment = $document->shipment ?? \App\Models\Shipment::where('ceisa_document_id', $document->id)->first();
             if ($shipment) {
@@ -122,77 +140,41 @@ class CeisaDocumentService
 
         if ($result['success'] ?? false) {
             $data = $result['data'] ?? [];
-            
+            $parsed = CeisaDocumentSyncService::parseCeisaStatusResponse(
+                is_array($data['data'] ?? null) ? $data['data'] : $data,
+                (string) ($document->jenis_dokumen ?? '20')
+            );
+
             $updates = [
                 'last_response' => $data,
+                'status' => $parsed['status'],
+                'status_description' => $parsed['status_description'],
+                'status_billing' => $parsed['status_billing'],
             ];
 
-            // 1. Ekstraksi data pendaftaran dari dataStatus / root
-            if (!empty($data['dataStatus']) && is_array($data['dataStatus'])) {
-                $statusItem = end($data['dataStatus']);
-                if (!empty($statusItem['nomorDaftar'])) {
-                    $updates['nomor_daftar'] = $statusItem['nomorDaftar'];
-                }
-                if (!empty($statusItem['tanggalDaftar'])) {
-                    $updates['tanggal_daftar'] = $statusItem['tanggalDaftar'];
-                }
+            if (!empty($parsed['nomor_daftar'])) {
+                $updates['nomor_daftar'] = $parsed['nomor_daftar'];
             }
-
-            if (!empty($data['nomorDaftar'])) {
-                $updates['nomor_daftar'] = $data['nomorDaftar'];
+            if (!empty($parsed['tanggal_daftar'])) {
+                $updates['tanggal_daftar'] = $parsed['tanggal_daftar'];
             }
-            if (!empty($data['tanggalDaftar'])) {
-                $updates['tanggal_daftar'] = $data['tanggalDaftar'];
+            if (!empty($parsed['jalur'])) {
+                $updates['jalur'] = strtoupper($parsed['jalur']);
             }
-            if (!empty($data['jalur'])) {
-                $updates['jalur'] = $data['jalur'];
+            if (!empty($parsed['nomor_sppb_npe'])) {
+                $updates['nomor_sppb_npe'] = $parsed['nomor_sppb_npe'];
             }
-            if (!empty($data['status'])) {
-                $updates['status'] = $data['status'];
+            if (!empty($parsed['tanggal_sppb_npe'])) {
+                $updates['tanggal_sppb_npe'] = $parsed['tanggal_sppb_npe'];
             }
-            if (!empty($data['keterangan'])) {
-                $updates['status_description'] = $data['keterangan'];
+            if (!empty($parsed['kode_billing'])) {
+                $updates['kode_billing'] = $parsed['kode_billing'];
             }
-
-            // 2. Ekstraksi data respon resmi dari dataRespon DJBC
-            if (!empty($data['dataRespon']) && is_array($data['dataRespon'])) {
-                $responItem = end($data['dataRespon']);
-                $kodeRespon = strtoupper($responItem['kodeRespon'] ?? '');
-
-                if ($kodeRespon === 'SPPB') {
-                    $updates['nomor_sppb_npe'] = $responItem['nomorRespon'] ?? null;
-                    $updates['tanggal_sppb_npe'] = $responItem['tanggalRespon'] ?? now();
-                    $updates['status'] = 'SPPB';
-                } elseif ($kodeRespon === 'NPE') {
-                    $updates['nomor_sppb_npe'] = $responItem['nomorRespon'] ?? null;
-                    $updates['tanggal_sppb_npe'] = $responItem['tanggalRespon'] ?? now();
-                    $updates['status'] = 'NPE';
-                }
-
-                if (!empty($responItem['keterangan'])) {
-                    $updates['status_description'] = $responItem['keterangan'];
-                }
+            if (!empty($parsed['total_billing'])) {
+                $updates['total_billing'] = $parsed['total_billing'];
             }
-
-            // 3. Billing info
-            if (!empty($data['billing'])) {
-                $updates['kode_billing'] = $data['billing']['kodeBilling'] ?? null;
-                $updates['total_billing'] = $data['billing']['totalNominal'] ?? null;
-                $updates['tgl_jatuh_tempo_billing'] = $data['billing']['tglKadaluarsa'] ?? null;
-                $updates['status_billing'] = 'UNPAID';
-            }
-
-            // 4. SPPB / NPE fallback
-            if (!empty($data['sppb'])) {
-                $updates['nomor_sppb_npe'] = $data['sppb']['nomorSppb'] ?? null;
-                $updates['tanggal_sppb_npe'] = $data['sppb']['tanggalSppb'] ?? null;
-                $updates['status'] = 'SPPB';
-            }
-
-            if (!empty($data['npe'])) {
-                $updates['nomor_sppb_npe'] = $data['npe']['nomorNpe'] ?? null;
-                $updates['tanggal_sppb_npe'] = $data['npe']['tanggalNpe'] ?? null;
-                $updates['status'] = 'NPE';
+            if (!empty($parsed['tgl_jatuh_tempo_billing'])) {
+                $updates['tgl_jatuh_tempo_billing'] = $parsed['tgl_jatuh_tempo_billing'];
             }
 
             $document->update($updates);

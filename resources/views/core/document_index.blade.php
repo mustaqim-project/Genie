@@ -3,7 +3,7 @@
 @section('title', 'Proyek Pengapalan & Dokumen Pabean')
 
 @section('content')
-<div class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12">
+<div x-data="aiHsMatcher()" class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12">
 
     <!-- 1. TOOLBAR / PAGE HEADER (macOS Sonoma Toolbar Style from Cooca Core) -->
     <header class="rounded-[16px] backdrop-blur-md bg-white/75 dark:bg-[#1C1C1E]/75 border border-black/5 dark:border-white/10 px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
@@ -22,7 +22,23 @@
         </div>
 
         <!-- Action Buttons Toolbar -->
-        <div class="flex items-center gap-2 w-full sm:w-auto shrink-0">
+        <div class="flex items-center gap-2 w-full sm:w-auto shrink-0 flex-wrap">
+            @can('setting.manage')
+            <button type="button"
+                    onclick="document.getElementById('modal-sync-ceisa').classList.remove('hidden')"
+                    class="btn-apple-gray text-[13px] font-semibold !text-emerald-700 dark:!text-emerald-400 hover:!bg-emerald-500/10 flex items-center gap-2">
+                <i data-lucide="download-cloud" class="w-4 h-4 text-emerald-600"></i>
+                <span>Tarik Data CEISA</span>
+            </button>
+            @endcan
+
+            <button type="button" 
+                    @click="aiModalOpen = true" 
+                    class="btn-apple-gray text-[13px] font-semibold !text-[#007AFF] hover:!bg-[#007AFF]/10 flex items-center gap-2">
+                <i data-lucide="sparkles" class="w-4 h-4 text-[#007AFF]"></i>
+                <span>✨ Deteksi HS Code & Lartas AI</span>
+            </button>
+
             @can('document.create')
             <button type="button" 
                     onclick="document.getElementById('modal-create-project').classList.remove('hidden')" 
@@ -34,8 +50,8 @@
         </div>
     </header>
 
-    <!-- 2. 4 APPLE HIG KPI STATS CARDS -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+    <!-- 2. 5 APPLE HIG BENTO KPI STATS CARDS -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4">
         <!-- Card 1: Total Proyek -->
         <div class="rounded-[16px] bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/5 p-4 flex flex-col justify-between shadow-sm">
             <div class="flex items-center justify-between">
@@ -99,19 +115,38 @@
                 <div class="text-[11px] text-black/45 dark:text-white/45 mt-0.5 truncate">Handoff ke Tim DO aktif</div>
             </div>
         </div>
+
+        <!-- Card 5: Produk Kena Lartas (Permintaan Khusus User) -->
+        <div class="rounded-[16px] bg-white dark:bg-[#1C1C1E] border border-amber-500/20 dark:border-amber-400/20 p-4 flex flex-col justify-between shadow-sm relative overflow-hidden">
+            <div class="absolute -right-3 -bottom-3 w-16 h-16 bg-amber-500/10 rounded-full blur-xl pointer-events-none"></div>
+            <div class="flex items-center justify-between">
+                <span class="text-[11px] uppercase tracking-wider font-semibold text-amber-600 dark:text-amber-400">Produk Kena Lartas</span>
+                <div class="w-8 h-8 rounded-[10px] bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                    <i data-lucide="shield-alert" class="w-4 h-4"></i>
+                </div>
+            </div>
+            <div class="mt-2">
+                <div class="text-[22px] sm:text-[24px] font-bold tabular-nums text-amber-600 dark:text-amber-400 tracking-tight">
+                    {{ $stats['lartas_products'] ?? 0 }} <span class="text-[12px] font-medium text-black/50 dark:text-white/50">Produk</span>
+                </div>
+                <div class="text-[11px] text-amber-600/80 dark:text-amber-400/80 mt-0.5 truncate">
+                    {{ $stats['lartas_shipments'] ?? 0 }} proyek wajib izin K/L
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- 3. FILTER & SEARCH BAR (Apple Standard Inputs) -->
-    <div class="rounded-[16px] bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/10 shadow-sm p-4">
+    <div class="rounded-[16px] bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/10 shadow-sm p-4 space-y-3">
         <form method="GET" action="{{ route('core.document.index') }}" class="grid grid-cols-1 sm:grid-cols-12 gap-3 text-[13px]">
-            <div class="sm:col-span-5 relative">
+            <div class="sm:col-span-4 relative">
                 <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-black/40 dark:text-white/40"></i>
                 <input type="text" name="search" value="{{ request('search') }}" 
                        placeholder="Cari Nomor Job, B/L, Nama Kapal, No Kontainer, atau Importir..." 
                        class="w-full pl-9 pr-3.5 py-2 rounded-[10px] bg-black/[0.03] dark:bg-white/[0.06] border border-black/10 dark:border-white/10 text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF] focus:ring-2 focus:ring-[#007AFF]/20 transition-all placeholder:text-black/40 dark:placeholder:text-white/40">
             </div>
 
-            <div class="sm:col-span-3">
+            <div class="sm:col-span-2">
                 <select name="type" class="w-full px-3 py-2 rounded-[10px] bg-black/[0.03] dark:bg-white/[0.06] border border-black/10 dark:border-white/10 text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF] focus:ring-2 focus:ring-[#007AFF]/20 transition-all">
                     <option value="">Semua Layanan</option>
                     <option value="IMPORT" {{ request('type') === 'IMPORT' ? 'selected' : '' }}>Impor (BC 2.0 / PIB)</option>
@@ -132,6 +167,14 @@
                 </select>
             </div>
 
+            <div class="sm:col-span-2">
+                <select name="lartas" class="w-full px-3 py-2 rounded-[10px] bg-black/[0.03] dark:bg-white/[0.06] border border-black/10 dark:border-white/10 text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF] focus:ring-2 focus:ring-[#007AFF]/20 transition-all font-medium">
+                    <option value="">Semua Status Lartas</option>
+                    <option value="yes" {{ request('lartas') === 'yes' ? 'selected' : '' }}>⚠️ Wajib Izin Lartas ({{ $stats['lartas_shipments'] ?? 0 }})</option>
+                    <option value="no" {{ request('lartas') === 'no' ? 'selected' : '' }}>✓ Bebas Lartas ({{ $stats['non_lartas_shipments'] ?? 0 }})</option>
+                </select>
+            </div>
+
             <div class="sm:col-span-2 flex items-center space-x-2">
                 <button type="submit" class="btn-apple-gray w-full !h-9 text-[12px] font-semibold hover:!bg-[#007AFF]/10 hover:!text-[#007AFF]">
                     <i data-lucide="filter" class="w-3.5 h-3.5"></i>
@@ -142,6 +185,23 @@
                 </a>
             </div>
         </form>
+
+        <!-- Quick Filter Chips -->
+        <div class="flex items-center gap-2 pt-2 border-t border-black/5 dark:border-white/5 text-[12px] overflow-x-auto pb-1">
+            <span class="text-black/45 dark:text-white/45 font-medium shrink-0">Filter Cepat:</span>
+            <a href="{{ route('core.document.index', array_merge(request()->except('lartas', 'page'))) }}" 
+               class="px-3 py-1 rounded-full border transition-all shrink-0 {{ !request()->filled('lartas') ? 'bg-[#007AFF] text-white border-transparent font-medium shadow-sm' : 'bg-black/[0.03] dark:bg-white/[0.05] border-black/5 dark:border-white/10 text-black/70 dark:text-white/70 hover:bg-black/[0.06]' }}">
+                Semua Proyek ({{ $stats['total'] ?? 0 }})
+            </a>
+            <a href="{{ route('core.document.index', array_merge(request()->except('page'), ['lartas' => 'yes'])) }}" 
+               class="px-3 py-1 rounded-full border transition-all shrink-0 flex items-center gap-1.5 {{ request('lartas') === 'yes' ? 'bg-amber-500 text-white border-transparent font-semibold shadow-sm' : 'bg-amber-500/10 border-amber-500/20 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20' }}">
+                <span>⚠️ Wajib Lartas ({{ $stats['lartas_shipments'] ?? 0 }} proyek · {{ $stats['lartas_products'] ?? 0 }} barang)</span>
+            </a>
+            <a href="{{ route('core.document.index', array_merge(request()->except('page'), ['lartas' => 'no'])) }}" 
+               class="px-3 py-1 rounded-full border transition-all shrink-0 flex items-center gap-1.5 {{ request('lartas') === 'no' ? 'bg-emerald-600 text-white border-transparent font-semibold shadow-sm' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20' }}">
+                <span>✓ Bebas Lartas ({{ $stats['non_lartas_shipments'] ?? 0 }} proyek)</span>
+            </a>
+        </div>
     </div>
 
     <!-- 4. DATA TABLE (Apple Standard Table from Cooca Core) -->
@@ -164,6 +224,7 @@
                         <th class="py-3 px-4">Klien / Importir</th>
                         <th class="py-3 px-4">Pengangkutan & Kontainer</th>
                         <th class="py-3 px-4">Audit 9 Berkas</th>
+                        <th class="py-3 px-4">Produk & Lartas</th>
                         <th class="py-3 px-4">Status Siklus</th>
                         <th class="py-3 px-4">Billing MPN G3</th>
                         <th class="py-3 px-4 text-right">Aksi</th>
@@ -182,6 +243,14 @@
                                 <span class="inline-block mt-1 px-2 py-0.5 rounded-[6px] text-[10px] font-bold font-mono {{ $shp->type === 'EXPORT' ? 'bg-[#FF9500]/12 text-[#B25E00] dark:text-[#FF9F0A]' : 'bg-[#007AFF]/12 text-[#007AFF]' }}">
                                     {{ $shp->type === 'EXPORT' ? 'BC 3.0 EKSPOR' : 'BC 2.0 IMPOR' }}
                                 </span>
+                                @if($shp->ceisaDocument)
+                                    <div class="mt-1.5 text-[10px] font-mono text-black/60 dark:text-white/60">
+                                        Aju: <span class="font-bold text-black dark:text-white">{{ $shp->ceisaDocument->nomor_aju }}</span>
+                                        <span class="ml-1 px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-bold">
+                                            {{ $shp->ceisaDocument->status ?? 'DRAFT' }}
+                                        </span>
+                                    </div>
+                                @endif
                             </td>
 
                             <td class="py-3.5 px-4">
@@ -216,6 +285,32 @@
                                 <div class="text-[11px] text-black/45 dark:text-white/45 mt-0.5">
                                     {{ $verifiedCount }} verified &bull; {{ $uploadedCount }} baru
                                 </div>
+                            </td>
+
+                            <!-- Kolom Informasi Produk & Status Lartas (Permintaan User) -->
+                            <td class="py-3.5 px-4">
+                                @php
+                                    $lInfo = $shp->lartas_info;
+                                @endphp
+                                <div class="font-bold text-black dark:text-white text-[12px] flex items-center gap-1.5 mb-1">
+                                    <span class="font-mono tabular-nums">{{ $lInfo['total_products'] }}</span> Barang
+                                </div>
+                                @if($lInfo['has_lartas'])
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/25">
+                                        <i data-lucide="alert-triangle" class="w-3 h-3 text-amber-600 shrink-0"></i>
+                                        <span>{{ $lInfo['lartas_count'] }} Kena Lartas</span>
+                                    </span>
+                                    @if(!empty($lInfo['primary_lartas']))
+                                        <div class="text-[10px] text-black/50 dark:text-white/50 mt-1 truncate max-w-[170px]" title="{{ $lInfo['primary_lartas'] }}">
+                                            {{ $lInfo['primary_lartas'] }}
+                                        </div>
+                                    @endif
+                                @else
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25">
+                                        <i data-lucide="check" class="w-3 h-3 text-emerald-600 shrink-0"></i>
+                                        <span>Bebas Lartas</span>
+                                    </span>
+                                @endif
                             </td>
 
                             <td class="py-3.5 px-4">
@@ -293,7 +388,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="py-12 text-center text-black/40 dark:text-white/40 text-[13px]">
+                            <td colspan="8" class="py-12 text-center text-black/40 dark:text-white/40 text-[13px]">
                                 <i data-lucide="package-open" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
                                 <div>Tidak ada proyek shipment yang cocok dengan kriteria pencarian.</div>
                             </td>
@@ -314,10 +409,15 @@
 <div id="modal-create-project" class="hidden fixed inset-0 z-[200] overflow-y-auto bg-black/60 backdrop-blur-md flex items-center justify-center p-4"
      x-data="{
         tab: 'ai',
+        useAi: false,
+        afterAction: 'fill_bc_form',
         scanning: false,
         scanned: false,
         showDetails: false,
         showSpecialDocs: false,
+        bundleFileNames: [],
+        detectedBundleFiles: [],
+        crossValidation: null,
         fileNames: { bl: '', invoice: '', pl: '', coo: '', insurance: '', lartas: '' },
         detected: {
             client_id: '',
@@ -334,43 +434,69 @@
             port_of_loading: '',
             port_of_discharge: '',
             eta: '',
+            etd_date: '',
+            commodity_summary: '',
+            extraction_mode: 'RULE_ENGINE_NO_AI',
             total_kontainer: 1,
             nomor_kontainer: '',
             total_kemasan: 0,
             jenis_kemasan: '',
             total_bruto: 0,
             total_netto: 0,
-            currency: 'CNY',
+            currency: 'USD',
             total_cif: 0,
             total_fob: 0,
             freight: 0,
-            ndbm_kurs: 2200,
+            ndbm_kurs: 15850,
             items: []
+        },
+        handleBundleFiles(event) {
+            const files = event.target.files;
+            this.bundleFileNames = files ? Array.from(files).map(f => f.name) : [];
+            if (this.bundleFileNames.length > 0) {
+                this.scanFiles();
+            }
         },
         updateFileName(type, event) {
             const files = event.target.files;
             if (files && files[0]) {
                 this.fileNames[type] = files[0].name;
-                if ((this.fileNames.bl || this.fileNames.invoice || this.fileNames.pl) && !this.scanned) {
+                if ((this.fileNames.bl || this.fileNames.invoice || this.fileNames.pl || this.bundleFileNames.length > 0) && !this.scanned) {
                     this.scanFiles();
                 }
             }
         },
         async scanFiles() {
+            const bundleInput = document.getElementById('input-bundle-files');
             const blInput = document.getElementById('input-bl-file');
             const invInput = document.getElementById('input-inv-file');
             const plInput = document.getElementById('input-pl-file');
+            const cooInput = document.getElementById('input-coo-file');
+            const insInput = document.getElementById('input-insurance-file');
+            const lartasInput = document.getElementById('input-lartas-file');
 
-            if ((!blInput?.files?.length) && (!invInput?.files?.length) && (!plInput?.files?.length)) {
-                alert('Silakan pilih minimal 1 berkas dokumen (B/L, Commercial Invoice, atau Packing List) untuk dipindai.');
+            const hasBundle = bundleInput?.files?.length > 0;
+            const hasSingle = blInput?.files?.length || invInput?.files?.length || plInput?.files?.length || cooInput?.files?.length || insInput?.files?.length || lartasInput?.files?.length;
+
+            if (!hasBundle && !hasSingle) {
+                alert('Silakan pilih minimal 1 berkas (Bundle Multi-File/ZIP, B/L, Commercial Invoice, atau Packing List) untuk dipindai.');
                 return;
             }
 
             this.scanning = true;
             const formData = new FormData();
+            if (hasBundle) {
+                Array.from(bundleInput.files).forEach(f => formData.append('bundle_files[]', f));
+            }
             if (blInput?.files?.[0]) formData.append('bl_file', blInput.files[0]);
             if (invInput?.files?.[0]) formData.append('invoice_file', invInput.files[0]);
             if (plInput?.files?.[0]) formData.append('packing_list_file', plInput.files[0]);
+            if (cooInput?.files?.[0]) formData.append('coo_file', cooInput.files[0]);
+            if (insInput?.files?.[0]) formData.append('insurance_file', insInput.files[0]);
+            if (lartasInput?.files?.[0]) formData.append('lartas_file', lartasInput.files[0]);
+
+            formData.append('use_ai', this.useAi ? '1' : '0');
+            if (this.detected.type) formData.append('type', this.detected.type);
 
             const clientSelect = document.getElementById('smart-client-select');
             if (clientSelect?.value) formData.append('client_id', clientSelect.value);
@@ -387,7 +513,9 @@
                 if (res.status === 'success' && res.data) {
                     this.scanned = true;
                     this.detected = { ...this.detected, ...res.data };
-                    
+                    this.detectedBundleFiles = res.data.bundle_files_detected || [];
+                    this.crossValidation = res.data.cross_validation || null;
+
                     if (clientSelect && res.data.client_id) {
                         let opt = clientSelect.querySelector(`option[value='${res.data.client_id}']`);
                         if (!opt) {
@@ -533,7 +661,60 @@
                     </div>
                 </div>
 
-                <!-- 3 Dropzone Upload Dokumen Utama -->
+                <!-- DROPZONE BUNDLE DOKUMEN (MULTI-FILE / ZIP SEKALI UPLOAD) -->
+                <div class="p-3.5 rounded-[14px] border-2 border-dashed border-[#007AFF]/40 hover:border-[#007AFF] bg-gradient-to-r from-[#007AFF]/5 via-[#5856D6]/5 to-transparent transition-colors">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div class="flex items-start gap-2.5">
+                            <div class="w-9 h-9 rounded-[10px] bg-[#007AFF]/15 text-[#007AFF] flex items-center justify-center shrink-0">
+                                <i data-lucide="layers" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-black dark:text-white text-[13px] flex items-center gap-2">
+                                    <span>Upload Bundle Dokumen Sekaligus (Multi-File / ZIP)</span>
+                                    <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158]">Jalan Tanpa AI</span>
+                                </div>
+                                <p class="text-[11px] text-black/55 dark:text-white/55 mt-0.5">
+                                    Pilih sekaligus BL, Commercial Invoice, Packing List, COO, SC/PO, Asuransi, atau arsip <code>.zip</code> — sistem deteksi otomatis &amp; siap mengisi form PIB/PEB.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="shrink-0">
+                            <input type="file" id="input-bundle-files" name="bundle_files[]" multiple accept=".pdf,.xlsx,.xls,.csv,.txt,.zip,.png,.jpg,.jpeg" class="hidden" @change="handleBundleFiles($event)">
+                            <button type="button" onclick="document.getElementById('input-bundle-files').click()"
+                                    class="btn-apple-filled !h-9 !px-3.5 text-[12px]">
+                                <i data-lucide="folder-up" class="w-3.5 h-3.5"></i>
+                                <span x-text="bundleFileNames.length ? bundleFileNames.length + ' Berkas Bundle Dipilih' : 'Pilih Bundle Dokumen'"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Daftar Berkas Bundle yang Terklasifikasi Otomatis -->
+                    <div x-show="detectedBundleFiles.length > 0" class="mt-3 pt-2.5 border-t border-black/5 dark:border-white/5 grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                        <template x-for="(bf, idx) in detectedBundleFiles" :key="idx">
+                            <div class="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-[8px] bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/10 text-[11px]">
+                                <div class="min-w-0 flex items-center gap-1.5">
+                                    <i data-lucide="file-check" class="w-3.5 h-3.5 text-[#34C759] shrink-0"></i>
+                                    <span class="truncate font-medium text-black dark:text-white" x-text="bf.filename"></span>
+                                    <span x-show="bf.is_image_only" class="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-600 font-semibold shrink-0">Scan/Img</span>
+                                </div>
+                                <select :name="'bundle_classifications[' + bf.filename + ']'" x-model="bf.doc_type"
+                                        class="px-2 py-0.5 rounded-[6px] border border-black/10 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.06] text-[10px] font-bold text-[#007AFF] shrink-0">
+                                    <option value="BL">BL / AWB</option>
+                                    <option value="INV">Commercial Invoice</option>
+                                    <option value="PL">Packing List</option>
+                                    <option value="COO">COO / SKA</option>
+                                    <option value="SC_PO">SC / PO</option>
+                                    <option value="INS">Insurance</option>
+                                    <option value="BOOKING_RECEIPT">Booking / NPE</option>
+                                    <option value="LARTAS">Izin Lartas</option>
+                                    <option value="ETC">ETC</option>
+                                </select>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- 3 Dropzone Upload Dokumen Utama (Opsional Per Slot) -->
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <!-- 1. Bill of Lading (B/L) -->
                     <div class="p-3 rounded-[14px] border-2 border-dashed border-[#007AFF]/30 hover:border-[#007AFF] bg-[#007AFF]/5 transition-colors flex flex-col justify-between">
@@ -660,24 +841,32 @@
                     </div>
                 </div>
 
-                <!-- Tombol Pemicu Ekstraksi Cerdas -->
-                <div class="flex items-center justify-between p-3 rounded-[14px] bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5">
+                <!-- Tombol Pemicu Ekstraksi (Mode Tanpa AI Default + Opsi AI) -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-[14px] bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5">
                     <div class="flex items-center space-x-2.5">
-                        <div class="w-8 h-8 rounded-[8px] bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center">
+                        <div class="w-8 h-8 rounded-[8px] bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center shrink-0">
                             <i data-lucide="cpu" class="w-4 h-4"></i>
                         </div>
                         <div>
-                            <div class="font-semibold text-black dark:text-white text-[13px]">AI Document Parser & BTKI Classifier</div>
-                            <div class="text-[11px] text-black/50 dark:text-white/50">Membaca teks dari berkas, mendeteksi kargo, dan mengklasifikasikan pos tarif kepabeanan.</div>
+                            <div class="font-semibold text-black dark:text-white text-[13px] flex items-center gap-2">
+                                <span>Document Parser &amp; BTKI Classifier</span>
+                                <label class="inline-flex items-center gap-1.5 text-[11px] font-medium px-2 py-0.5 rounded-full bg-black/[0.04] dark:bg-white/[0.08] cursor-pointer">
+                                    <input type="checkbox" x-model="useAi" class="rounded border-black/20 text-[#007AFF]">
+                                    <span x-text="useAi ? 'Mode AI Aktif' : 'Tanpa AI (Rule Engine + DB BTKI)'"></span>
+                                </label>
+                            </div>
+                            <div class="text-[11px] text-black/50 dark:text-white/50">
+                                PDF, Excel, CSV &amp; ZIP diekstrak deterministik 100% tanpa AI; aktifkan AI hanya jika dokumen berupa foto/hasil scan gambar.
+                            </div>
                         </div>
                     </div>
-                    <button type="button" 
-                            @click="scanFiles()" 
+                    <button type="button"
+                            @click="scanFiles()"
                             :disabled="scanning"
-                            class="btn-apple-filled !h-9 text-[12px] disabled:opacity-50">
-                        <i data-lucide="sparkles" class="w-3.5 h-3.5" x-show="!scanning"></i>
+                            class="btn-apple-filled !h-9 text-[12px] disabled:opacity-50 shrink-0">
+                        <i data-lucide="scan-line" class="w-3.5 h-3.5" x-show="!scanning"></i>
                         <span x-show="scanning" class="animate-spin">⏳</span>
-                        <span x-text="scanning ? 'Memindai Dokumen...' : 'Pindai & Ekstrak'"></span>
+                        <span x-text="scanning ? 'Memindai Bundle...' : 'Pindai & Auto-Detect'"></span>
                     </button>
                 </div>
 
@@ -687,11 +876,25 @@
                         <div class="flex items-center space-x-2">
                             <span class="w-5 h-5 rounded-full bg-[#34C759] text-white flex items-center justify-center font-bold text-xs">✓</span>
                             <div>
-                                <span class="font-bold text-[#248A3D] dark:text-[#30D158] text-[13px]">Dokumen Berhasil Dipindai & Terklasifikasi Otomatis</span>
-                                <span class="text-[11px] text-[#248A3D]/80 dark:text-[#30D158]/80 block">Identifikasi Pemasok, Klien, Sarana Pengangkut, dan Pos Tarif BTKI 2022 Siap Produksi</span>
+                                <span class="font-bold text-[#248A3D] dark:text-[#30D158] text-[13px]">Bundle Dokumen Terdeteksi &amp; Siap Masuk Form CEISA</span>
+                                <span class="text-[11px] text-[#248A3D]/80 dark:text-[#30D158]/80 block" x-text="'Engine: ' + (detected.extraction_mode === 'AI_HYBRID' ? 'AI Hybrid + Rule Engine' : 'Rule Engine Offline (100% Tanpa AI)')"></span>
                             </div>
                         </div>
-                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#34C759]/20 text-[#248A3D] dark:text-[#30D158]">Akurasi 99.8%</span>
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#34C759]/20 text-[#248A3D] dark:text-[#30D158]"
+                              x-text="'Skor Kesiapan ' + (crossValidation?.score || 95) + '%'"></span>
+                    </div>
+
+                    <!-- Cross Validation Checks -->
+                    <div x-show="crossValidation && crossValidation.checks" class="grid grid-cols-1 sm:grid-cols-3 gap-1.5 text-[10px]">
+                        <template x-for="(chk, cIdx) in (crossValidation?.checks || [])" :key="cIdx">
+                            <div class="px-2.5 py-1.5 rounded-[8px] bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/5 flex items-start gap-1.5">
+                                <span :class="chk.status === 'ok' ? 'text-[#34C759]' : 'text-amber-500'" class="font-bold mt-0.2" x-text="chk.status === 'ok' ? '✓' : '!'"></span>
+                                <div class="min-w-0">
+                                    <div class="font-semibold text-black dark:text-white truncate" x-text="chk.label"></div>
+                                    <div class="text-black/55 dark:text-white/55 truncate" x-text="chk.detail"></div>
+                                </div>
+                            </div>
+                        </template>
                     </div>
 
                     <!-- Ringkasan Profil Klien & Pemasok -->
@@ -763,6 +966,10 @@
                 <input type="hidden" name="total_cif" :value="detected.total_cif">
                 <input type="hidden" name="currency" :value="detected.currency">
                 <input type="hidden" name="ndbm_kurs" :value="detected.ndbm_kurs">
+                <input type="hidden" name="etd_date" :value="detected.etd_date">
+                <input type="hidden" name="commodity_summary" :value="detected.commodity_summary">
+                <input type="hidden" name="use_ai" :value="useAi ? '1' : '0'">
+                <input type="hidden" name="after_action" :value="afterAction">
 
                 <!-- COLLAPSIBLE FORM REVIEW / EDIT RINCIAN & TABEL ITEM -->
                 <div x-show="showDetails" class="p-4 rounded-[14px] bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 space-y-3">
@@ -971,6 +1178,38 @@
                 <textarea name="catatan" rows="2" placeholder="Catatan perlakuan dokumen khusus, instruksi jalur hijau, atau persyaratan lartas surveyor..." class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]"></textarea>
             </div>
 
+            <!-- Aksi Lanjutan Otomatis -->
+            <div class="p-3 rounded-[14px] bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/10 space-y-2">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                        <span class="font-bold text-[12px] text-black dark:text-white">Aksi Otomatis Setelah Simpan</span>
+                        <p class="text-[11px] text-black/50 dark:text-white/50">Pilih apakah sistem langsung mengisi form BC 2.0 / BC 3.0 dan memposting ke CEISA API.</p>
+                    </div>
+                    @if(config('ceisa.api.read_only', true))
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300">
+                            Mode CEISA Read-Only Aktif (Simpan Draft Aman)
+                        </span>
+                    @endif
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px]">
+                    <label class="flex items-center gap-2 p-2.5 rounded-[10px] border cursor-pointer transition-colors"
+                           :class="afterAction === 'project' ? 'border-[#007AFF] bg-[#007AFF]/10 text-[#007AFF] font-semibold' : 'border-black/10 dark:border-white/10 text-black/70 dark:text-white/70'">
+                        <input type="radio" x-model="afterAction" value="project" class="text-[#007AFF]">
+                        <span>Simpan Proyek &amp; Tracking</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2.5 rounded-[10px] border cursor-pointer transition-colors"
+                           :class="afterAction === 'fill_bc_form' ? 'border-[#5856D6] bg-[#5856D6]/10 text-[#5856D6] font-semibold' : 'border-black/10 dark:border-white/10 text-black/70 dark:text-white/70'">
+                        <input type="radio" x-model="afterAction" value="fill_bc_form" class="text-[#5856D6]">
+                        <span>Auto-Fill Form PIB / PEB</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2.5 rounded-[10px] border cursor-pointer transition-colors"
+                           :class="afterAction === 'post_ceisa' ? 'border-[#34C759] bg-[#34C759]/10 text-[#248A3D] dark:text-[#30D158] font-semibold' : 'border-black/10 dark:border-white/10 text-black/70 dark:text-white/70'">
+                        <input type="radio" x-model="afterAction" value="post_ceisa" class="text-[#34C759]">
+                        <span>Auto-Fill &amp; Post CEISA API</span>
+                    </label>
+                </div>
+            </div>
+
             <!-- Footer Action Buttons -->
             <div class="pt-3 border-t border-black/5 dark:border-white/5 flex items-center justify-end space-x-2">
                 <button type="button" onclick="document.getElementById('modal-create-project').classList.add('hidden')" class="btn-apple-gray !h-9 text-[12px]">
@@ -978,7 +1217,7 @@
                 </button>
                 <button type="submit" class="btn-apple-filled !h-9 text-[12px]">
                     <i data-lucide="check" class="w-4 h-4"></i>
-                    <span>Simpan & Inisialisasi Proyek</span>
+                    <span x-text="afterAction === 'post_ceisa' ? 'Proses Bundle & Post CEISA' : (afterAction === 'fill_bc_form' ? 'Proses Bundle & Isi Form BC' : 'Simpan & Inisialisasi Proyek')"></span>
                 </button>
             </div>
         </form>
@@ -1180,6 +1419,294 @@
             setTimeout(function() { btnText.innerText = 'Salin'; }, 2000);
         });
     }
+
+    function aiHsMatcher() {
+        return {
+            aiModalOpen: false,
+            productText: '',
+            direction: 'import',
+            aiModel: 'cx/gpt-6-astra',
+            loading: false,
+            errorMsg: null,
+            result: null,
+
+            async detect() {
+                if (!this.productText.trim()) return;
+                this.loading = true;
+                this.errorMsg = null;
+                this.result = null;
+
+                try {
+                    const res = await fetch('{{ route('ai.classify-hs') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            text: this.productText,
+                            direction: this.direction,
+                            model: this.aiModel
+                        })
+                    });
+
+                    const data = await res.json();
+                    if (!res.ok) {
+                        throw new Error(data.message || 'Gagal memproses klasifikasi AI.');
+                    }
+                    this.result = data;
+                    this.$nextTick(() => {
+                        if (window.lucide) window.lucide.createIcons();
+                    });
+                } catch (err) {
+                    this.errorMsg = err.message || 'Terjadi kesalahan jaringan atau server OpenAI.';
+                } finally {
+                    this.loading = false;
+                }
+            }
+        };
+    }
 </script>
 
+    <!-- 5. MODAL DETEKSI & PENCOCOKAN HS CODE DENGAN PRODUK MENGGUNAKAN AI -->
+    <div x-show="aiModalOpen" 
+         x-cloak 
+         class="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div @click.away="aiModalOpen = false" 
+             class="bg-white dark:bg-[#1C1C1E] rounded-3xl border border-black/10 dark:border-white/10 shadow-2xl max-w-2xl w-full p-6 text-xs space-y-4">
+            
+            <div class="flex items-center justify-between pb-3 border-b border-black/[0.06] dark:border-white/[0.06]">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-sky-500 text-white flex items-center justify-center font-bold shadow-xs">
+                        ✨
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900 dark:text-white">AI HS Code & Lartas Product Detector (BTKI 2022)</h3>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400">Pencocokan pos tarif 8-digit BTKI, tarif BM/BK/PPN, dan persyaratan dokumen perizinan K/L.</p>
+                    </div>
+                </div>
+                <button type="button" @click="aiModalOpen = false" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <!-- Form Input Komoditas Produk & Direction -->
+            <div class="space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                            Arah Layanan Pabean:
+                        </label>
+                        <select x-model="direction" class="w-full px-3 py-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-slate-50 dark:bg-white/5 font-medium text-slate-800 dark:text-slate-200 focus:outline-none">
+                            <option value="import">Impor (BC 2.0 / PIB)</option>
+                            <option value="export">Ekspor (BC 3.0 / PEB)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                            Model AI Engine:
+                        </label>
+                        <select x-model="aiModel" class="w-full px-3 py-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-slate-50 dark:bg-white/5 font-mono text-[11px] font-semibold text-slate-800 dark:text-slate-200 focus:outline-none">
+                            <option value="cx/gpt-6-astra">cx/gpt-6-astra (Rekomendasi Utama)</option>
+                            <option value="cx/gpt-6-astra-xhigh">cx/gpt-6-astra-xhigh (Ultra Precision)</option>
+                            <option value="cx/gpt-5.6-terra">cx/gpt-5.6-terra (Customs Specialized)</option>
+                            <option value="cx/gpt-5.6-sol">cx/gpt-5.6-sol</option>
+                            <option value="ag/gemini-3.8-flash-high">ag/gemini-3.8-flash-high</option>
+                            <option value="ag/gemini-3.8-flash-medium">ag/gemini-3.8-flash-medium</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        Deskripsi / Uraian Produk Komoditas:
+                    </label>
+                    <textarea x-model="productText" 
+                              rows="3" 
+                              placeholder="Ketik nama produk, spesifikasi bahan baku, merek, atau deskripsi barang (contoh: Laptop Asus ROG Intel i7 RAM 16GB, Kopi Arabika Gayo, Kaos Polos Katun Combed 30s...)" 
+                              class="w-full px-3.5 py-2.5 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-[#007AFF]"></textarea>
+                </div>
+
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pt-1">
+                    <div class="flex items-center gap-1 text-[11px] text-slate-400">
+                        <span>Contoh cepat:</span>
+                        <button type="button" @click="productText = 'Laptop Gaming 15.6 inch Intel Core i7 SSD 512GB RAM 16GB'; direction = 'import';" class="text-[#007AFF] hover:underline font-semibold">Laptop (Lartas)</button>
+                        <span>&bull;</span>
+                        <button type="button" @click="productText = 'Kopi Arabika Roasting Kemasan Retail 250 Gram Asli Gayo'; direction = 'export';" class="text-[#007AFF] hover:underline font-semibold">Kopi (Ekspor)</button>
+                        <span>&bull;</span>
+                        <button type="button" @click="productText = 'Kain Tenun Sutra Motif Batik Tradisional'; direction = 'import';" class="text-[#007AFF] hover:underline font-semibold">Tekstil</button>
+                    </div>
+
+                    <button type="button" 
+                            @click="detect()" 
+                            :disabled="loading || !productText.trim()" 
+                            class="px-4 py-2 rounded-xl bg-[#007AFF] hover:bg-[#0062CC] text-white font-bold text-xs inline-flex items-center gap-1.5 shadow-xs transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer">
+                        <template x-if="loading">
+                            <span class="inline-flex items-center gap-1.5">
+                                <svg class="animate-spin h-3.5 w-3.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                <span>Menganalisis BTKI & Lartas...</span>
+                            </span>
+                        </template>
+                        <template x-if="!loading">
+                            <span class="inline-flex items-center gap-1.5">
+                                <span>Pindai & Cocokkan Pos Tarif AI</span>
+                            </span>
+                        </template>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Pesan Error -->
+            <template x-if="errorMsg">
+                <div class="p-3 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-xs">
+                    <strong class="font-bold">Error:</strong> <span x-text="errorMsg"></span>
+                </div>
+            </template>
+
+            <!-- Box Hasil Analisis AI -->
+            <div x-show="result" x-cloak class="mt-4 p-4 rounded-2xl border border-black/10 dark:border-white/10 bg-slate-50/70 dark:bg-white/[0.02] space-y-3">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Hasil Pencocokan Pos Tarif BTKI 2022</div>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <span class="font-mono font-black text-lg text-indigo-700 dark:text-indigo-400" x-text="result?.code"></span>
+                            <button type="button" @click="navigator.clipboard.writeText(result?.code); alert('Pos tarif disalin!');" class="text-slate-400 hover:text-slate-700 text-xs cursor-pointer" title="Salin Pos Tarif">
+                                📋
+                            </button>
+                        </div>
+                        <div class="font-semibold text-slate-900 dark:text-white mt-1" x-text="result?.desc"></div>
+                        <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5" x-text="result?.legal"></div>
+                    </div>
+
+                    <!-- Badge Status Lartas Hasil AI -->
+                    <div class="shrink-0 text-right">
+                        <template x-if="result?.has_lartas">
+                            <div>
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-amber-100 text-amber-800 border border-amber-300 inline-flex items-center gap-1">
+                                    <span>⚠️</span>
+                                    <span>WAJIB LARTAS</span>
+                                </span>
+                                <div class="text-[10px] text-amber-700 dark:text-amber-400 font-semibold mt-1" x-text="result?.lartas"></div>
+                            </div>
+                        </template>
+                        <template x-if="!result?.has_lartas">
+                            <div>
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300 inline-flex items-center gap-1">
+                                    <span>✓</span>
+                                    <span>BEBAS LARTAS</span>
+                                </span>
+                                <div class="text-[10px] text-emerald-700 dark:text-emerald-400 font-medium mt-1">Non-Lartas (Langsung Proses)</div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Tarif Bea Masuk & PPN/PPh -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-black/[0.06] dark:border-white/[0.06] text-center">
+                    <div class="p-2 rounded-xl bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/10">
+                        <span class="block text-[9px] text-slate-400 uppercase font-bold" x-text="direction === 'import' ? 'Bea Masuk (BM)' : 'Bea Keluar (BK)'"></span>
+                        <span class="font-mono font-bold text-xs text-slate-900 dark:text-white" x-text="(result?.rates?.bm ?? result?.bm ?? result?.rates?.bk ?? result?.bk ?? 0) + '%'"></span>
+                    </div>
+                    <div class="p-2 rounded-xl bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/10">
+                        <span class="block text-[9px] text-slate-400 uppercase font-bold">PPN Impor</span>
+                        <span class="font-mono font-bold text-xs text-slate-900 dark:text-white" x-text="(result?.rates?.ppn ?? result?.ppn ?? 11) + '%'"></span>
+                    </div>
+                    <div class="p-2 rounded-xl bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/10">
+                        <span class="block text-[9px] text-slate-400 uppercase font-bold">AI Model Used</span>
+                        <span class="font-mono font-bold text-[10px] text-indigo-600 dark:text-indigo-400" x-text="result?.ai_model_used || aiModel"></span>
+                    </div>
+                    <div class="p-2 rounded-xl bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/10">
+                        <span class="block text-[9px] text-slate-400 uppercase font-bold">Confidence</span>
+                        <span class="font-mono font-bold text-xs text-emerald-600" x-text="(result?.confidence ?? 98) + '%'"></span>
+                    </div>
+                </div>
+
+                <div class="pt-2 flex justify-end gap-2 border-t border-black/[0.06] dark:border-white/[0.06]">
+                    <template x-if="direction === 'import'">
+                        <a :href="'{{ route('bc20.create') }}?pos_tarif=' + encodeURIComponent(result?.code) + '&uraian=' + encodeURIComponent(result?.desc)" 
+                           class="btn-apple-filled text-xs py-1.5 px-3 inline-flex items-center gap-1">
+                            <span>Buat PIB BC 2.0 dengan HS Ini &rarr;</span>
+                        </a>
+                    </template>
+                    <template x-if="direction === 'export'">
+                        <a :href="'{{ route('bc30.create') }}?pos_tarif=' + encodeURIComponent(result?.code) + '&uraian=' + encodeURIComponent(result?.desc)" 
+                           class="btn-apple-filled text-xs py-1.5 px-3 inline-flex items-center gap-1">
+                            <span>Buat PEB BC 3.0 dengan HS Ini &rarr;</span>
+                        </a>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Tarik & Impor Data CEISA 4.0 (Read-Only) -->
+    @can('setting.manage')
+    <div id="modal-sync-ceisa" x-data="{ tab: 'api' }" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
+        <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl border border-black/10 dark:border-white/10 max-w-xl w-full p-6 shadow-xl space-y-4">
+            <div class="flex items-center justify-between border-b border-black/5 dark:border-white/10 pb-3">
+                <div>
+                    <h3 class="text-base font-bold text-black dark:text-white">Tarik &amp; Impor Data CEISA 4.0</h3>
+                    <p class="text-xs text-black/50 dark:text-white/50 mt-0.5">Tarik status real-time via Nomor Aju atau impor file ekspor Portal CEISA (.xlsx / .json / .pdf) untuk melengkapi item barang, importir, dan kontainer.</p>
+                </div>
+                <button type="button" onclick="document.getElementById('modal-sync-ceisa').classList.add('hidden')" class="text-black/40 hover:text-black dark:text-white/40 dark:hover:text-white text-lg font-bold px-2">&times;</button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 p-1 rounded-xl bg-black/[0.04] dark:bg-white/[0.06] text-xs font-semibold">
+                <button type="button" @click="tab = 'api'"
+                        :class="tab === 'api' ? 'bg-white dark:bg-[#2C2C2E] text-black dark:text-white shadow-2xs' : 'text-black/55 dark:text-white/55'"
+                        class="py-2 px-3 rounded-lg transition">
+                    1. Tarik Status API (26 Digit)
+                </button>
+                <button type="button" @click="tab = 'import'"
+                        :class="tab === 'import' ? 'bg-white dark:bg-[#2C2C2E] text-black dark:text-white shadow-2xs' : 'text-black/55 dark:text-white/55'"
+                        class="py-2 px-3 rounded-lg transition">
+                    2. Impor File CEISA (.xlsx/.json/.pdf)
+                </button>
+            </div>
+
+            <form x-show="tab === 'api'" action="{{ route('config.sync-document') }}" method="POST" class="space-y-4">
+                @csrf
+                <div>
+                    <label for="doc_sync_nomor_aju" class="block text-xs font-bold text-black/80 dark:text-white/80 mb-1.5">Nomor Aju (26 Digit) <span class="text-red-500">*</span></label>
+                    <input type="text" id="doc_sync_nomor_aju" name="nomor_aju" required maxlength="30"
+                           placeholder="Contoh: 000020AGO29220260929001562"
+                           class="w-full px-3.5 py-2.5 rounded-xl border border-black/15 dark:border-white/15 bg-white dark:bg-[#2C2C2E] text-sm font-mono text-black dark:text-white">
+                </div>
+                <label class="inline-flex items-center space-x-2 text-xs text-black/70 dark:text-white/70 cursor-pointer">
+                    <input type="checkbox" name="auto_create_shipment" value="1" checked class="w-4 h-4 text-[#007AFF] rounded">
+                    <span>Otomatis buat proyek baru di Tim Document jika Nomor Aju belum ada</span>
+                </label>
+                <div class="flex items-center justify-end gap-2 pt-2 border-t border-black/5 dark:border-white/10">
+                    <button type="button" onclick="document.getElementById('modal-sync-ceisa').classList.add('hidden')" class="btn-apple-gray text-xs">Batal</button>
+                    <button type="submit" class="btn-apple-filled text-xs">Tarik Status CEISA</button>
+                </div>
+            </form>
+
+            <form x-show="tab === 'import'" action="{{ route('config.import-document') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                @csrf
+                <div>
+                    <label for="ceisa_export_file" class="block text-xs font-bold text-black/80 dark:text-white/80 mb-1.5">File Ekspor Portal CEISA 4.0 <span class="text-red-500">*</span></label>
+                    <input type="file" id="ceisa_export_file" name="ceisa_file" required accept=".xlsx,.xls,.json,.txt,.pdf"
+                           class="w-full px-3 py-2 rounded-xl border border-dashed border-black/20 dark:border-white/20 bg-black/[0.02] dark:bg-white/[0.03] text-xs text-black dark:text-white">
+                    <p class="text-[11px] text-black/50 dark:text-white/50 mt-1">Mendukung Excel CEISA (sheet HEADER, ENTITAS, KONTAINER, BARANG), JSON CEISA 4.0, atau PDF Cetak PIB/PEB.</p>
+                </div>
+                <div>
+                    <label for="import_nomor_aju" class="block text-xs font-bold text-black/80 dark:text-white/80 mb-1.5">Nomor Aju (Opsional jika sudah ada di file)</label>
+                    <input type="text" id="import_nomor_aju" name="nomor_aju" maxlength="30"
+                           placeholder="Otomatis dibaca dari file, atau isi 26 digit jika perlu"
+                           class="w-full px-3.5 py-2 rounded-xl border border-black/15 dark:border-white/15 bg-white dark:bg-[#2C2C2E] text-sm font-mono text-black dark:text-white">
+                </div>
+                <label class="inline-flex items-center space-x-2 text-xs text-black/70 dark:text-white/70 cursor-pointer">
+                    <input type="checkbox" name="sync_status_after" value="1" checked class="w-4 h-4 text-[#007AFF] rounded">
+                    <span>Otomatis gabungkan dengan status &amp; respon real-time API CEISA (SPJM / SPPB / Gate Out)</span>
+                </label>
+                <div class="flex items-center justify-end gap-2 pt-2 border-t border-black/5 dark:border-white/10">
+                    <button type="button" onclick="document.getElementById('modal-sync-ceisa').classList.add('hidden')" class="btn-apple-gray text-xs">Batal</button>
+                    <button type="submit" class="btn-apple-filled text-xs">Impor &amp; Sinkronkan Dokumen</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    @endcan
 @endsection

@@ -245,8 +245,18 @@ class VendorBillController extends Controller
             'notes' => 'nullable|string',
         ]);
 
+        if (\App\Models\AccountingPeriod::isDateLocked($request->paid_at)) {
+            return back()->with('error', "Pembayaran ditolak: Tanggal pembayaran [{$request->paid_at}] berada pada periode akuntansi yang telah DIKUNCI.");
+        }
+
         $account = CashBankAccount::findOrFail($request->account_id);
         $amount = (float) $bill->amount;
+
+        // Validasi saldo kas/bank mencukupi
+        $currentBalance = (float) $account->transactions()->sum('amount');
+        if ($currentBalance < $amount) {
+            return back()->with('error', "Saldo rekening [{$account->name}] tidak mencukupi (Tersedia: Rp " . number_format($currentBalance, 2) . ", Dibutuhkan: Rp " . number_format($amount, 2) . ").");
+        }
 
         // 1. Catat VendorPayment
         VendorPayment::create([

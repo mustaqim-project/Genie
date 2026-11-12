@@ -29,7 +29,7 @@ class ShipmentProjectController extends Controller
     {
         Gate::authorize('document.view');
 
-        $query = Shipment::with(['client', 'shippingVendor', 'documents', 'ceisaDocument']);
+        $query = Shipment::with(['client', 'shippingVendor', 'documents', 'ceisaDocument', 'items.customsDocuments']);
 
         if ($request->filled('search')) {
             $s = $request->search;
@@ -55,7 +55,45 @@ class ShipmentProjectController extends Controller
             $query->where('status_tahap', $request->status);
         }
 
-        $shipments = $query->latest()->paginate(10)->withQueryString();
+        $allShipments = $query->latest()->get();
+
+        // Hitung statistik Lartas produk & proyek
+        $lartasShipmentsCount = 0;
+        $lartasProductsCount = 0;
+        $nonLartasShipmentsCount = 0;
+
+        foreach ($allShipments as $shp) {
+            $info = $shp->lartas_info;
+            if ($info['has_lartas']) {
+                $lartasShipmentsCount++;
+                $lartasProductsCount += $info['lartas_count'];
+            } else {
+                $nonLartasShipmentsCount++;
+            }
+        }
+
+        // Filter berdasarkan status Lartas
+        if ($request->filled('lartas')) {
+            $filterLartas = $request->lartas;
+            if ($filterLartas === 'yes' || $filterLartas === '1') {
+                $allShipments = $allShipments->filter(fn($s) => $s->lartas_info['has_lartas'])->values();
+            } elseif ($filterLartas === 'no' || $filterLartas === '0') {
+                $allShipments = $allShipments->filter(fn($s) => !$s->lartas_info['has_lartas'])->values();
+            }
+        }
+
+        // Manual pagination
+        $page = \Illuminate\Pagination\Paginator::resolveCurrentPage() ?: 1;
+        $perPage = 10;
+        $currentPageItems = $allShipments->slice(($page - 1) * $perPage, $perPage)->values();
+        $shipments = new \Illuminate\Pagination\LengthAwarePaginator(
+            $currentPageItems,
+            $allShipments->count(),
+            $perPage,
+            $page,
+            ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath(), 'query' => $request->query()]
+        );
+
         $clients = Client::orderBy('name')->get();
         $vendors = ShippingVendor::where('is_active', true)->orderBy('name')->get();
 
@@ -65,6 +103,9 @@ class ShipmentProjectController extends Controller
             'collecting' => Shipment::where('status_tahap', 'DOC_COLLECTING')->count(),
             'ready' => Shipment::whereIn('status_tahap', ['DOC_READY', 'HS_DETECTED', 'DRAFT_REVIEW'])->count(),
             'billing' => Shipment::whereIn('status_tahap', ['BILLING_ISSUED', 'DO_PROCESSING', 'DO_RELEASED', 'TRAFFIC_SPPB', 'COMPLETED'])->count(),
+            'lartas_shipments' => $lartasShipmentsCount,
+            'lartas_products' => $lartasProductsCount,
+            'non_lartas_shipments' => $nonLartasShipmentsCount,
         ];
 
         return view('core.document_index', compact('shipments', 'clients', 'vendors', 'stats'));
@@ -79,23 +120,15 @@ class ShipmentProjectController extends Controller
         Gate::authorize('document.create');
 
         $files = [];
-        if ($request->hasFile('bl_file')) {
-            $files['bl_file'] = $request->file('bl_file');
+        foreach (['bl_file', 'invoice_file', 'packing_list_file', 'coo_file', 'sc_po_file', 'insurance_file', 'booking_file', 'lartas_file', 'etc_file'] as $singleKey) {
+            if ($request->hasFile($singleKey)) {
+                $files[$singleKey] = $request->file($singleKey);
+            }
         }
-        if ($request->hasFile('invoice_file')) {
-            $files['invoice_file'] = $request->file('invoice_file');
-        }
-        if ($request->hasFile('packing_list_file')) {
-            $files['packing_list_file'] = $request->file('packing_list_file');
-        }
-        if ($request->hasFile('coo_file')) {
-            $files['coo_file'] = $request->file('coo_file');
-        }
-        if ($request->hasFile('insurance_file')) {
-            $files['insurance_file'] = $request->file('insurance_file');
-        }
-        if ($request->hasFile('documents')) {
-            $files['documents'] = $request->file('documents');
+        foreach (['bundle_files', 'documents'] as $multiKey) {
+            if ($request->hasFile($multiKey)) {
+                $files[$multiKey] = $request->file($multiKey);
+            }
         }
 
         if (empty($files)) {
@@ -106,7 +139,11 @@ class ShipmentProjectController extends Controller
         }
 
         $clientId = $request->input('client_id');
-        $extracted = $this->workflowService->parseDocumentsForPreview($files, $clientId);
+        $aiModel = $request->input('ai_model') ?? $request->input('model');
+        $useAi = filter_var($request->input('use_ai', false), FILTER_VALIDATE_BOOLEAN);
+        $preferredType = $request->input('type') ?: null;
+
+        $extracted = $this->workflowService->parseDocumentsForPreview($files, $clientId, $aiModel, $useAi, $preferredType);
 
         return response()->json([
             'status' => 'success',
@@ -116,19 +153,23 @@ class ShipmentProjectController extends Controller
 
     /**
      * Form & Pembuatan Project Baru (P01) oleh Tim Dokumen
-     * Mendukung Pembuatan Otomatis berbasis Upload Berkas (Auto-Deteksi AI)
+     * Mendukung Bundle Upload (100% Tanpa AI maupun AI opsional) + Auto-Fill Form BC 2.0/3.0 / Post CEISA.
      * Hak Akses: document.create
      */
     public function store(Request $request)
     {
         Gate::authorize('document.create');
 
-        $hasFiles = $request->hasFile('bl_file') 
-            || $request->hasFile('invoice_file') 
-            || $request->hasFile('packing_list_file') 
-            || $request->hasFile('coo_file') 
-            || $request->hasFile('insurance_file') 
-            || $request->hasFile('lartas_file') 
+        $hasFiles = $request->hasFile('bundle_files')
+            || $request->hasFile('bl_file')
+            || $request->hasFile('invoice_file')
+            || $request->hasFile('packing_list_file')
+            || $request->hasFile('coo_file')
+            || $request->hasFile('sc_po_file')
+            || $request->hasFile('insurance_file')
+            || $request->hasFile('booking_file')
+            || $request->hasFile('lartas_file')
+            || $request->hasFile('etc_file')
             || $request->hasFile('documents');
 
         $validated = $request->validate([
@@ -137,6 +178,7 @@ class ShipmentProjectController extends Controller
             'type' => 'nullable|in:IMPORT,EXPORT',
             'bl_number' => $hasFiles ? 'nullable|string|max:100' : 'required|string|max:100',
             'tgl_bl' => 'nullable|date',
+            'etd_date' => 'nullable|date',
             'vessel_name' => 'nullable|string|max:150',
             'voyage_number' => 'nullable|string|max:50',
             'port_of_loading' => 'nullable|string|max:100',
@@ -152,31 +194,72 @@ class ShipmentProjectController extends Controller
             'total_cif' => 'nullable|numeric|min:0',
             'currency' => 'nullable|string|size:3',
             'ndbm_kurs' => 'nullable|numeric|min:1',
+            'commodity_summary' => 'nullable|string|max:255',
             'catatan' => 'nullable|string|max:500',
+            'use_ai' => 'nullable',
+            'ai_model' => 'nullable|string|max:100',
+            'after_action' => 'nullable|in:project,fill_bc_form,post_ceisa',
+            'bundle_classifications' => 'nullable|array',
             'bl_file' => 'nullable|file|max:20480',
             'invoice_file' => 'nullable|file|max:20480',
             'packing_list_file' => 'nullable|file|max:20480',
             'coo_file' => 'nullable|file|max:20480',
+            'sc_po_file' => 'nullable|file|max:20480',
             'insurance_file' => 'nullable|file|max:20480',
+            'booking_file' => 'nullable|file|max:20480',
             'lartas_file' => 'nullable|file|max:20480',
+            'etc_file' => 'nullable|file|max:20480',
+            'bundle_files.*' => 'nullable|file|max:51200',
             'documents.*' => 'nullable|file|max:20480',
         ]);
 
         if ($hasFiles) {
             $files = [];
-            if ($request->hasFile('bl_file')) $files['bl_file'] = $request->file('bl_file');
-            if ($request->hasFile('invoice_file')) $files['invoice_file'] = $request->file('invoice_file');
-            if ($request->hasFile('packing_list_file')) $files['packing_list_file'] = $request->file('packing_list_file');
-            if ($request->hasFile('coo_file')) $files['coo_file'] = $request->file('coo_file');
-            if ($request->hasFile('insurance_file')) $files['insurance_file'] = $request->file('insurance_file');
-            if ($request->hasFile('lartas_file')) $files['lartas_file'] = $request->file('lartas_file');
-            if ($request->hasFile('documents')) $files['documents'] = $request->file('documents');
+            foreach (['bl_file', 'invoice_file', 'packing_list_file', 'coo_file', 'sc_po_file', 'insurance_file', 'booking_file', 'lartas_file', 'etc_file', 'bundle_files', 'documents'] as $fk) {
+                if ($request->hasFile($fk)) {
+                    $files[$fk] = $request->file($fk);
+                }
+            }
 
             $shipment = $this->workflowService->createProjectFromUploadedDocuments($files, $validated, auth()->id());
-            $msg = "Proyek {$shipment->shipment_number} berhasil dibuat secara otomatis dari berkas yang diunggah! Data B/L, Invoice, dan Packing List telah diproses & HS Code diklasifikasi otomatis.";
+            $modeLabel = filter_var($validated['use_ai'] ?? false, FILTER_VALIDATE_BOOLEAN) ? 'AI + Rule Engine' : 'Rule Engine Offline (Tanpa AI)';
+            $msg = "Proyek {$shipment->project_no} berhasil dibuat otomatis dari bundle dokumen ({$modeLabel}).";
         } else {
             $shipment = $this->workflowService->createProject($validated, auth()->id());
-            $msg = "Proyek {$shipment->shipment_number} berhasil dibuat. 9 Slot checklist dokumen wajib telah diinisialisasi.";
+            $msg = "Proyek {$shipment->project_no} berhasil dibuat. Slot checklist dokumen wajib telah diinisialisasi.";
+        }
+
+        $afterAction = $validated['after_action'] ?? 'project';
+        if (in_array($afterAction, ['fill_bc_form', 'post_ceisa'], true)) {
+            $hsCodeService = app(\App\Services\Ceisa\CeisaHsCodeService::class);
+            $shipment->load(['documents', 'items', 'client', 'vendor']);
+            if ($shipment->items->isEmpty()) {
+                $this->workflowService->detectHsCodeFromPackingList($shipment);
+                $shipment->refresh()->load(['documents', 'items', 'client', 'vendor']);
+            }
+            $ceisaDoc = $hsCodeService->generatePibOrPebFromPackingList($shipment);
+            $routeName = ($ceisaDoc->jenis_dokumen === '30') ? 'bc30.show' : 'bc20.show';
+
+            if ($afterAction === 'post_ceisa') {
+                if ((bool) config('ceisa.api.read_only', true)) {
+                    return redirect()->route($routeName, $ceisaDoc->id)
+                        ->with('warning', "{$msg} Form BC {$ceisaDoc->jenis_dokumen} ({$ceisaDoc->nomor_aju}) sudah terisi otomatis, tetapi pengiriman ke CEISA ditahan karena Mode Read-Only (Tarik Data Saja) sedang aktif.");
+                }
+
+                if (Gate::allows('document.submit')) {
+                    try {
+                        $submittedDoc = $this->workflowService->submitCeisaAndAdvanceToDo($shipment);
+                        return redirect()->route($routeName, $submittedDoc->id)
+                            ->with('success', "{$msg} Form BC {$submittedDoc->jenis_dokumen} ({$submittedDoc->nomor_aju}) terisi otomatis & berhasil diposting ke CEISA API.");
+                    } catch (\Throwable $e) {
+                        return redirect()->route($routeName, $ceisaDoc->id)
+                            ->with('warning', "{$msg} Form BC {$ceisaDoc->jenis_dokumen} ({$ceisaDoc->nomor_aju}) sudah terisi otomatis, namun posting CEISA gagal: " . $e->getMessage());
+                    }
+                }
+            }
+
+            return redirect()->route($routeName, $ceisaDoc->id)
+                ->with('success', "{$msg} Form BC {$ceisaDoc->jenis_dokumen} ({$ceisaDoc->nomor_aju}) telah terisi otomatis & siap ditinjau.");
         }
 
         return redirect()->route('core.document.show', $shipment->id)->with('success', $msg);
@@ -213,8 +296,33 @@ class ShipmentProjectController extends Controller
             'itemCustomsDocuments.verifier',
             'itemCustomsDocuments.item',
             'ceisaDocument.logs',
+            'inspectionPhotos.uploader',
+            'operationCosts',
             'invoice'
-        ])->findOrFail($id);
+        ])->find($id);
+
+        if (!$shipment) {
+            $ceisaDoc = \App\Models\CeisaDocument::find($id);
+            if ($ceisaDoc) {
+                $shipment = $ceisaDoc->shipment ?? $this->workflowService->ensureShipmentForCeisaDocument($ceisaDoc);
+                $shipment->load([
+                    'client',
+                    'shippingVendor',
+                    'documents.verifier',
+                    'items.customsDocuments.verifier',
+                    'itemCustomsDocuments.verifier',
+                    'itemCustomsDocuments.item',
+                    'ceisaDocument.logs',
+                    'inspectionPhotos.uploader',
+                    'operationCosts',
+                    'invoice'
+                ]);
+            }
+        }
+
+        if (!$shipment) {
+            abort(404, 'Proyek shipment kepabeanan tidak ditemukan.');
+        }
 
         $completionRate = $shipment->document_completion_rate;
         $threeWay = $shipment->three_way_matching;
@@ -468,6 +576,10 @@ class ShipmentProjectController extends Controller
     {
         Gate::authorize('document.submit');
 
+        if ((bool) config('ceisa.api.read_only', true)) {
+            return back()->with('error', 'Mode Tarik Data Saja (Read-Only) aktif: upload/pengiriman dokumen ke CEISA dinonaktifkan. Gunakan fitur Tarik Data CEISA.');
+        }
+
         $shipment = Shipment::with(['documents', 'items', 'client', 'vendor'])->findOrFail($id);
 
         if (!$shipment->is_all_mandatory_documents_verified) {
@@ -655,5 +767,79 @@ class ShipmentProjectController extends Controller
         $doc->delete();
 
         return back()->with('success', "Dokumen [{$doc->kode_dokumen}] {$doc->nama_dokumen} berhasil dihapus.");
+    }
+
+    /**
+     * Membuka / Mengembalikan Alur Shipment ke Pos atau Tahap Sebelumnya
+     * Hak Akses: workflow.rollback_stage (atau SuperAdmin/Owner/Supervisor)
+     */
+    public function rollbackStage(Request $request, string $id)
+    {
+        $user = auth()->user();
+        if (!$user->isSuperAdmin() && !$user->hasPermission('workflow.rollback_stage')) {
+            abort(403, 'Akses Ditolak: Anda memerlukan hak akses izin "workflow.rollback_stage" untuk membuka atau mengembalikan alur proses shipment ke pos sebelumnya.');
+        }
+
+        $validated = $request->validate([
+            'target_stage' => 'required|string',
+            'alasan' => 'nullable|string|max:500',
+            'reopen_ceisa_draft' => 'nullable|boolean',
+        ]);
+
+        $shipment = Shipment::findOrFail($id);
+        $oldTahap = $shipment->status_tahap;
+        $targetStage = $validated['target_stage'];
+
+        // Definisi tahap yang didukung untuk pembukaan kembali
+        $allowedStages = [
+            'DOC_COLLECTING' => 'Pos 1: Pengumpulan & Verifikasi Berkas',
+            'DOC_READY' => 'Pos 1: Berkas Lengkap (Doc Ready)',
+            'HS_DETECTED' => 'Pos 2: Deteksi HS Code & Lartas',
+            'DRAFT_REVIEW' => 'Pos 3: Review Draft Dokumen Pabean (PIB/PEB)',
+            'CEISA_SUBMITTED' => 'Pos 3: Diajukan ke Gateway CEISA 4.0',
+            'BILLING_ISSUED' => 'Pos 4: Billing Kepabeanan Terbit',
+            'BILLING_PAID' => 'Pos 5: Pembayaran Billing Lunas',
+            'DO_PROCESSING' => 'Pos 5: Proses Rilis DO Pelayaran',
+            'DO_RELEASED' => 'Pos 5: Delivery Order (DO) Dirilis',
+            'ARRIVED' => 'Pos 6: Kedatangan Kapal & Penentuan Jalur',
+            'TRAFFIC_HOLD' => 'Pos 7: Hold / Pemeriksaan Fisik Bea Cukai',
+            'SPPB_RELEASED' => 'Pos 8: SPPB / NPE Terbit',
+            'GATE_OUT' => 'Pos 9: Pengeluaran Peti Kemas (Gate Out)',
+            'DELIVERY' => 'Pos 10: Pengiriman Truk ke Gudang Tujuan',
+        ];
+
+        if (!array_key_exists($targetStage, $allowedStages)) {
+            return back()->with('error', 'Tahap alur yang dipilih tidak valid.');
+        }
+
+        // Kunci alur jika sudah terbit billing: Tidak boleh rollback ke tahap sebelum billing (Pos 1, Pos 2, Pos 3)
+        if ($shipment->isBillingLocked() && in_array($targetStage, ['DOC_COLLECTING', 'DOC_READY', 'HS_DETECTED', 'DRAFT_REVIEW', 'CEISA_SUBMITTED'])) {
+            $billingCode = $shipment->billing_code ?? $shipment->ceisaDocument?->kode_billing ?? 'MPN G3';
+            return back()->with('error', "Pembukaan alur ke tahap sebelum billing ditolak: Proyek telah menerbitkan Billing Kepabeanan (Kode Billing: {$billingCode}). Dokumen pabean terkunci dan tidak dapat diedit atau dikembalikan ke DRAFT. Namun Anda tetap dapat melihat seluruh data proses sebelumnya.");
+        }
+
+        $catatanTambahan = "[Buka Proses Sebelumnya: {$allowedStages[$targetStage]}] " 
+            . ($validated['alasan'] ? $validated['alasan'] . " " : "")
+            . "(Oleh: {$user->name} pada " . now()->format('d/m/Y H:i') . ")\n";
+
+        // Update tahap shipment
+        $shipment->update([
+            'status_tahap' => $targetStage,
+            'catatan' => $catatanTambahan . ($shipment->catatan ?? ''),
+        ]);
+
+        // Jika opsi reopen_ceisa_draft diaktifkan atau target adalah tahap pembuatan draft / review
+        if ($shipment->ceisaDocument && !$shipment->ceisaDocument->isBillingLocked() && ($request->boolean('reopen_ceisa_draft') || in_array($targetStage, ['DOC_COLLECTING', 'DOC_READY', 'HS_DETECTED', 'DRAFT_REVIEW']))) {
+            if ($user->isSuperAdmin() || $user->hasPermission('document.edit_after_ceisa')) {
+                $shipment->ceisaDocument->update([
+                    'status' => 'DRAFT',
+                    'status_description' => "Dokumen pabean dikembalikan ke status DRAFT seiring pembukaan kembali proses ke {$allowedStages[$targetStage]} oleh {$user->name}.",
+                    'is_schema_valid' => false,
+                    'schema_validation_message' => 'Status dikembalikan ke DRAFT untuk penyesuaian data.',
+                ]);
+            }
+        }
+
+        return back()->with('success', "Alur shipment {$shipment->project_no} berhasil dikembalikan ke {$allowedStages[$targetStage]}. Anda kini dapat melakukan pengeditan atau verifikasi ulang data pada tahap ini.");
     }
 }

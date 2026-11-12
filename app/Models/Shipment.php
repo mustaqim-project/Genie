@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,7 +11,31 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Shipment extends Model
 {
-    use HasFactory, HasUuids, SoftDeletes;
+    use HasFactory, HasUuids, SoftDeletes, Auditable;
+
+    protected static function booted()
+    {
+        static::addGlobalScope('client_access', function (\Illuminate\Database\Eloquent\Builder $builder) {
+            if (auth()->check()) {
+                $user = auth()->user();
+                // Eksekutif, SuperAdmin, Manager, dan Tim Operasional Dokumen/DO/Traffic bebas melihat semua shipment
+                if (
+                    $user->isSuperAdmin()
+                    || $user->hasRole(['R-ADM', 'R-OWN', 'R-MGR', 'R-DOC', 'R-DOC-SPV', 'R-DO', 'R-TRF', 'R-SYS'])
+                ) {
+                    return;
+                }
+
+                // Peran lainnya hanya melihat shipment yang dia buat atau ditugaskan sebagai PIC
+                $builder->where(function ($query) use ($user) {
+                    $query->where('created_by_user_id', $user->id)
+                          ->orWhereHas('pics', function ($aq) use ($user) {
+                              $aq->where('user_id', $user->id);
+                          });
+                });
+            }
+        });
+    }
 
     protected $keyType = 'string';
     public $incrementing = false;
@@ -27,6 +52,9 @@ class Shipment extends Model
         'pelabuhan_muat',
         'pelabuhan_bongkar',
         'eta_date',
+        'doc_received_at',
+        'doc_completed_at',
+        'etd_date',
         'actual_arrival_date',
         'total_kontainer',
         'nomor_kontainer',
@@ -49,8 +77,27 @@ class Shipment extends Model
         'status_tahap',
         'customs_channel',
         'trucking_vendor_reason',
+        'trucking_vendor_name',
+        'last_work_status',
+        'odoo_synced',
+        'physical_doc_archived',
+        'spjm_received',
+        'sppb_received',
+        'npd_received',
+        'dnp_received',
+        'nhi_received',
+        'spjm_ticket',
+        'spjm_received_at',
+        'inspection_scheduled_at',
+        'old_seal_number',
+        'new_seal_number',
+        'invoice_jasa_no',
+        'invoice_reimburse_no',
+        'commodity_summary',
+        'tps_location',
         'customs_hold_steps',
         'pod_signed_at',
+        'delivery_date',
         'closed_at',
         'catatan',
         'portal_token',
@@ -63,15 +110,28 @@ class Shipment extends Model
     protected $casts = [
         'tgl_bl_awb' => 'date',
         'eta_date' => 'datetime',
+        'doc_received_at' => 'date',
+        'doc_completed_at' => 'date',
+        'etd_date' => 'datetime',
         'actual_arrival_date' => 'datetime',
         'free_time_expired_at' => 'datetime',
         'do_expired_at' => 'datetime',
         'do_email_sent_at' => 'datetime',
         'pod_signed_at' => 'datetime',
+        'delivery_date' => 'date',
+        'spjm_received_at' => 'datetime',
+        'inspection_scheduled_at' => 'datetime',
         'closed_at' => 'datetime',
         'portal_expires_at' => 'datetime',
         'portal_last_accessed_at' => 'datetime',
         'customs_hold_steps' => 'array',
+        'odoo_synced' => 'boolean',
+        'physical_doc_archived' => 'boolean',
+        'spjm_received' => 'boolean',
+        'sppb_received' => 'boolean',
+        'npd_received' => 'boolean',
+        'dnp_received' => 'boolean',
+        'nhi_received' => 'boolean',
         'total_nilai_valuta' => 'decimal:2',
         'total_nilai_idr' => 'decimal:2',
         'ndbm_kurs' => 'decimal:2',
@@ -93,6 +153,11 @@ class Shipment extends Model
     }
 
     public function documents()
+    {
+        return $this->hasMany(ShipmentDocument::class)->where('is_current', true);
+    }
+
+    public function allDocuments()
     {
         return $this->hasMany(ShipmentDocument::class);
     }
@@ -123,6 +188,57 @@ class Shipment extends Model
         return true;
     }
 
+    /**
+     * Hitung ringkasan status Lartas per barang dan dokumen
+     */
+    public function getLartasInfoAttribute(): array
+    {
+        $items = $this->items ?? collect();
+        $totalProducts = $items->count();
+        $lartasItems = [];
+        $nonLartasItems = [];
+
+        // Fallback ke ceisaDocument jika relasi item kosong tetapi ada ceisaDocument
+        if ($totalProducts === 0 && $this->ceisaDocument) {
+            return $this->ceisaDocument->lartas_info;
+        }
+
+        $hsService = app(\App\Services\Ceisa\CeisaHsCodeService::class);
+
+        foreach ($items as $item) {
+            $check = !empty($item->kode_hs) 
+                ? $hsService->getTariffAndLartas((string)$item->kode_hs) 
+                : ['has_lartas' => false, 'lartas' => 'Bebas Lartas'];
+
+            $hasLartas = ($item->customsDocuments && $item->customsDocuments->count() > 0)
+                || ($check['has_lartas'] ?? false);
+
+            $itemData = [
+                'id' => $item->id,
+                'posTarif' => $item->kode_hs,
+                'uraian' => $item->uraian_barang,
+                'has_lartas' => $hasLartas,
+                'lartas_info' => $check['lartas'] ?? ($hasLartas ? 'Wajib Dokumen Perizinan Lartas' : 'Bebas Lartas'),
+            ];
+
+            if ($hasLartas) {
+                $lartasItems[] = $itemData;
+            } else {
+                $nonLartasItems[] = $itemData;
+            }
+        }
+
+        return [
+            'has_lartas' => count($lartasItems) > 0,
+            'total_products' => $totalProducts,
+            'lartas_count' => count($lartasItems),
+            'non_lartas_count' => count($nonLartasItems),
+            'lartas_items' => $lartasItems,
+            'non_lartas_items' => $nonLartasItems,
+            'primary_lartas' => count($lartasItems) > 0 ? $lartasItems[0]['lartas_info'] : 'Bebas Lartas (Non-Lartas)',
+        ];
+    }
+
     public function ceisaDocument()
     {
         return $this->belongsTo(CeisaDocument::class, 'ceisa_document_id');
@@ -146,6 +262,16 @@ class Shipment extends Model
     public function vendorBills()
     {
         return $this->hasMany(VendorBill::class);
+    }
+
+    public function inspectionPhotos()
+    {
+        return $this->hasMany(InspectionPhoto::class, 'shipment_id')->orderBy('created_at');
+    }
+
+    public function operationCosts()
+    {
+        return $this->hasMany(ShipmentOperationCost::class, 'shipment_id')->orderBy('created_at');
     }
 
     public function creator()
@@ -461,14 +587,87 @@ class Shipment extends Model
             'HS_DETECTED', 'DRAFT_REVIEW' => 2,
             'CEISA_SUBMITTED', 'BILLING_ISSUED' => 3,
             'BILLING_PAID', 'DO_PROCESSING' => 4,
-            'DO_RELEASED', 'ARRIVED' => 5,
+            'DO_RELEASED', 'ARRIVED', 'STUFFING' => 5,
             'TRAFFIC_HOLD', 'INSPECTION_CUSTOMS' => 6,
-            'TRAFFIC_SPPB', 'SPPB_RELEASED' => 7,
-            'TRAFFIC_GATE_OUT', 'GATE_OUT' => 8,
-            'DELIVERY' => 9,
+            'TRAFFIC_SPPB', 'SPPB_RELEASED', 'NPE_ISSUED' => 7,
+            'TRAFFIC_GATE_OUT', 'GATE_OUT', 'VESSEL_DEPARTED' => 8,
+            'DELIVERY', 'DELIVERED' => 9,
             'DELIVERED_POD' => 10,
             default => 0,
         };
+    }
+
+    /**
+     * Matriks Checklist 7 Dokumen (Gaya Sheet TRACKING DOK ATRANS)
+     */
+    public function getTrackingChecklistAttribute(): array
+    {
+        $docs = $this->relationLoaded('documents') ? $this->documents : $this->documents()->get();
+        $isExport = $this->type === 'EXPORT';
+
+        $slots = $isExport
+            ? [
+                'INVOICE' => 'INV',
+                'PACKING_LIST' => 'PL',
+                'BOOKING_RECEIPT' => 'BKG',
+                'BL_AWB' => 'BL',
+                'COO_FORME' => 'COO',
+                'PERIJINAN_LARTAS' => 'LRT',
+                'ETC' => 'ETC',
+            ]
+            : [
+                'BL_AWB' => 'BL',
+                'INVOICE' => 'INV',
+                'PACKING_LIST' => 'PL',
+                'COO_FORME' => 'COO',
+                'SC_PO' => 'SC/PO',
+                'INSURANCE' => 'INS',
+                'ETC' => 'ETC',
+            ];
+
+        $result = [];
+        foreach ($slots as $code => $short) {
+            $doc = $docs->firstWhere('jenis_dokumen', $code);
+            $done = $doc && in_array($doc->status, ['UPLOADED', 'VERIFIED'], true);
+            $result[$code] = [
+                'code' => $code,
+                'label' => $short,
+                'checked' => $done,
+                'verified' => $doc && $doc->status === 'VERIFIED',
+                'status' => $doc?->status ?? 'MISSING',
+                'doc_id' => $doc?->id,
+                'file_name' => $doc?->nama_file,
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Ringkasan Respon CEISA (SPJM, SPPB/NPE, NPD, DNP, NHI) dari DB + API CEISA
+     */
+    public function getCustomsResponsesAttribute(): array
+    {
+        $ceisa = $this->ceisaDocument;
+        $status = strtoupper((string) ($ceisa?->status ?? ''));
+        $jalur = strtoupper((string) ($this->customs_channel ?? $ceisa?->jalur ?? ''));
+
+        $spjm = (bool) $this->spjm_received
+            || $jalur === 'MERAH'
+            || str_contains($status, 'SPJM')
+            || str_contains($status, 'PEMERIKSAAN');
+
+        $sppb = (bool) $this->sppb_received
+            || !empty($ceisa?->nomor_sppb_npe)
+            || in_array($status, ['SPPB', 'NPE', 'GATE_OUT', 'SELESAI'], true);
+
+        return [
+            'SPJM' => $spjm,
+            'SPPB' => $sppb,
+            'NPD' => (bool) $this->npd_received || str_contains($status, 'NPD'),
+            'DNP' => (bool) $this->dnp_received || str_contains($status, 'DNP'),
+            'NHI' => (bool) $this->nhi_received || str_contains($status, 'NHI'),
+        ];
     }
 
     /**
@@ -627,4 +826,19 @@ class Shipment extends Model
     {
         return $this->ceisaDocument?->nomor_aju ?? $this->project_no;
     }
+
+    /**
+     * Cek apakah alur shipment telah mencapai atau melewati tahap Billing Kepabeanan.
+     * Setelah billing terbit, dokumen pabean terkunci dari perubahan atau rollback draft.
+     */
+    public function isBillingLocked(): bool
+    {
+        return in_array($this->status_tahap, [
+            'BILLING_ISSUED', 'BILLING_PAID', 'DO_PROCESSING', 'DO_RELEASED',
+            'ARRIVED', 'TRAFFIC_HOLD', 'SPPB_RELEASED', 'GATE_OUT', 'DELIVERY', 'DELIVERED_POD', 'COMPLETED'
+        ]) 
+        || !empty($this->billing_code) 
+        || ($this->ceisaDocument && $this->ceisaDocument->isBillingLocked());
+    }
 }
+

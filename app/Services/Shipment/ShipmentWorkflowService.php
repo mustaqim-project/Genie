@@ -27,11 +27,17 @@ class ShipmentWorkflowService
     }
 
     /**
-     * Parsing Berkas Dokumen untuk Pratinjau Langsung (Live Preview AJAX)
+     * Parsing Berkas Dokumen untuk Pratinjau Langsung (Live Preview AJAX).
+     * Default $useAi = false (100% Rule Engine + BTKI DB tanpa biaya/ketergantungan AI).
      */
-    public function parseDocumentsForPreview(array $files, ?string $clientId = null): array
-    {
-        return $this->extractionService->extractFromDocuments($files, $clientId);
+    public function parseDocumentsForPreview(
+        array $files,
+        ?string $clientId = null,
+        ?string $aiModel = null,
+        bool $useAi = false,
+        ?string $preferredType = null
+    ): array {
+        return $this->extractionService->extractFromDocuments($files, $clientId, $aiModel, $useAi, $preferredType);
     }
 
     /**
@@ -67,9 +73,13 @@ class ShipmentWorkflowService
             'shipping_vendor_id' => $data['shipping_vendor_id'] ?? null,
             'nama_kapal' => $data['nama_kapal'] ?? $data['vessel_name'] ?? 'MV WAN HAI 315',
             'voyage_no' => $data['voyage_no'] ?? $data['voyage_number'] ?? 'V.042N',
-            'pelabuhan_muat' => $data['pelabuhan_muat'] ?? $data['port_of_loading'] ?? 'CNSHA (Shanghai)',
-            'pelabuhan_bongkar' => $data['pelabuhan_bongkar'] ?? $data['port_of_discharge'] ?? 'IDTPP (Tanjung Priok)',
+            'pelabuhan_muat' => $data['pelabuhan_muat'] ?? $data['port_of_loading'] ?? ($jenisLayanan === 'EKSPORT_BC30' ? 'IDTPP (Tanjung Priok)' : 'CNSHA (Shanghai)'),
+            'pelabuhan_bongkar' => $data['pelabuhan_bongkar'] ?? $data['port_of_discharge'] ?? ($jenisLayanan === 'EKSPORT_BC30' ? 'SGSIN (Singapore)' : 'IDTPP (Tanjung Priok)'),
             'eta_date' => $eta,
+            'etd_date' => !empty($data['etd_date']) ? Carbon::parse($data['etd_date']) : null,
+            'doc_received_at' => $data['doc_received_at'] ?? now(),
+            'doc_completed_at' => $data['doc_completed_at'] ?? null,
+            'commodity_summary' => $data['commodity_summary'] ?? null,
             'free_time_days' => $freeTimeDays,
             'free_time_expired_at' => $freeTimeExpiredAt,
             'total_kontainer' => (int) ($data['total_kontainer'] ?? 1),
@@ -88,18 +98,23 @@ class ShipmentWorkflowService
             'created_by_user_id' => $userId,
         ]);
 
-        // Inisialisasi 9 Slot Checklist Dokumen Berversi
+        // Inisialisasi Slot Checklist Dokumen Berversi (sesuai standar Tracking Dok + Export)
         $slots = [
-            'INVOICE' => 'Commercial Invoice Pemasok Luar Negeri',
+            'INVOICE' => 'Commercial Invoice Pemasok / Eksportir',
             'PACKING_LIST' => 'Packing List Rincian Barang & Kemasan',
             'BL_AWB' => 'Bill of Lading (B/L) Asli / Sea Waybill',
             'COO_FORME' => 'Certificate of Origin (Form E / Form AK / SKA)',
+            'SC_PO' => 'Sales Contract / Purchase Order (SC / PO)',
             'INSURANCE' => 'Polis Sertifikat Asuransi Pengangkutan',
-            'PERIJINAN_LARTAS' => 'Persetujuan Impor / LS Surveyor / BPOM (Jika Lartas)',
+            'PERIJINAN_LARTAS' => 'Persetujuan Impor / LS Surveyor / BPOM / LRT',
             'DO_ORIGINAL' => 'Delivery Order (DO) Pelayaran Rilis Resmi',
             'BUKTI_BAYAR_BILLING' => 'Bukti Penerimaan Negara (BPN) Billing MPN G3',
             'POD_SURAT_JALAN' => 'Bukti Pengantaran Gudang / Surat Jalan (POD)',
+            'ETC' => 'Dokumen Pendukung Lainnya (ETC)',
         ];
+        if ($jenisLayanan === 'EKSPORT_BC30') {
+            $slots['BOOKING_RECEIPT'] = 'Booking Confirmation / Shipping Instruction / NPE';
+        }
 
         foreach ($slots as $code => $label) {
             ShipmentDocument::create([
@@ -118,15 +133,26 @@ class ShipmentWorkflowService
     }
 
     /**
-     * 1b. Tim Document Create Project Cepat Berbasis Upload Dokumen & Auto-Deteksi AI
+     * 1b. Tim Document Create Project Cepat Berbasis Upload Bundle Dokumen
+     * Mendukung mode 100% Tanpa AI (default) maupun AI opsional.
      */
     public function createProjectFromUploadedDocuments(array $files, array $overrides = [], int|string|null $userId = null): Shipment
     {
-        // 1. Jalankan ekstraksi dokumen
-        $extracted = $this->extractionService->extractFromDocuments($files, $overrides['client_id'] ?? null);
+        $useAi = filter_var($overrides['use_ai'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $preferredType = !empty($overrides['type']) ? (string) $overrides['type'] : null;
+        $aiModel = !empty($overrides['ai_model']) ? (string) $overrides['ai_model'] : null;
+
+        // 1. Jalankan ekstraksi dokumen (default tanpa AI)
+        $extracted = $this->extractionService->extractFromDocuments(
+            $files,
+            $overrides['client_id'] ?? null,
+            $aiModel,
+            $useAi,
+            $preferredType
+        );
 
         // 2. Gabungkan data ekstraksi dengan input form (overrides jika user mengoreksi)
-        $mergedData = array_merge($extracted, array_filter($overrides, fn($val) => !is_null($val) && $val !== ''));
+        $mergedData = array_merge($extracted, array_filter($overrides, fn($val) => !is_null($val) && $val !== '' && !is_array($val)));
 
         // Pastikan client_id tersedia
         if (empty($mergedData['client_id'])) {
@@ -137,43 +163,73 @@ class ShipmentWorkflowService
         // 3. Buat Project Shipment
         $shipment = $this->createProject($mergedData, $userId);
 
-        // 4. Hubungkan berkas fisik yang diupload ke 9 Slot Checklist Dokumen Berversi
+        // 4. Hubungkan berkas fisik yang diupload ke Slot Checklist Dokumen Berversi
         $fileMapping = [
             'bl_file' => 'BL_AWB',
             'invoice_file' => 'INVOICE',
             'packing_list_file' => 'PACKING_LIST',
             'coo_file' => 'COO_FORME',
+            'sc_po_file' => 'SC_PO',
             'insurance_file' => 'INSURANCE',
+            'booking_file' => 'BOOKING_RECEIPT',
             'lartas_file' => 'PERIJINAN_LARTAS',
+            'etc_file' => 'ETC',
         ];
+
+        $docCodeMap = [
+            'BL' => 'BL_AWB',
+            'INV' => 'INVOICE',
+            'PL' => 'PACKING_LIST',
+            'COO' => 'COO_FORME',
+            'SC_PO' => 'SC_PO',
+            'INS' => 'INSURANCE',
+            'BOOKING_RECEIPT' => 'BOOKING_RECEIPT',
+            'LARTAS' => 'PERIJINAN_LARTAS',
+            'DO' => 'DO_ORIGINAL',
+            'SPJM' => 'SPJM',
+            'SPPB' => 'SPPB',
+            'NPD' => 'NPD',
+            'DNP' => 'DNP',
+            'NHI' => 'NHI',
+            'BERITA_ACARA' => 'BERITA_ACARA',
+            'ETC' => 'ETC',
+        ];
+
+        $userClassifications = is_array($overrides['bundle_classifications'] ?? null)
+            ? $overrides['bundle_classifications']
+            : [];
 
         foreach ($fileMapping as $inputKey => $docCode) {
             if (isset($files[$inputKey]) && $files[$inputKey]) {
-                $this->uploadDocument($shipment, $docCode, $files[$inputKey], "Diunggah saat pembukaan proyek (Auto-Deteksi AI).");
+                $this->uploadDocument($shipment, $docCode, $files[$inputKey], "Diunggah saat pembukaan proyek (" . ($extracted['extraction_mode'] ?? 'RULE_ENGINE') . ").");
             }
         }
 
-        // Jika user mengunggah berkas multi / array generik `documents[]`
-        if (isset($files['documents']) && is_array($files['documents'])) {
-            foreach ($files['documents'] as $f) {
-                if ($f instanceof \Illuminate\Http\UploadedFile) {
-                    $name = strtoupper($f->getClientOriginalName());
-                    $targetSlot = 'INVOICE';
-                    if (str_contains($name, 'BL') || str_contains($name, 'LADING') || str_contains($name, 'AWB') || str_contains($name, 'WAYBILL')) {
-                        $targetSlot = 'BL_AWB';
-                    } elseif (str_contains($name, 'PACKING') || str_contains($name, 'PL') || str_contains($name, 'LIST')) {
-                        $targetSlot = 'PACKING_LIST';
-                    } elseif (str_contains($name, 'COO') || str_contains($name, 'FORM') || str_contains($name, 'SKA')) {
-                        $targetSlot = 'COO_FORME';
-                    } elseif (str_contains($name, 'INSUR') || str_contains($name, 'ASURANSI')) {
-                        $targetSlot = 'INSURANCE';
+        // Tangani upload bundle_files[] atau documents[] (termasuk jika ada arsip ZIP)
+        foreach (['bundle_files', 'documents'] as $multiKey) {
+            if (isset($files[$multiKey]) && is_array($files[$multiKey])) {
+                foreach ($files[$multiKey] as $f) {
+                    if ($f instanceof \Illuminate\Http\UploadedFile) {
+                        $origName = $f->getClientOriginalName();
+                        $ext = strtolower($f->getClientOriginalExtension());
+
+                        if ($ext === 'zip' && class_exists(\ZipArchive::class)) {
+                            $this->attachZipBundleDocuments($shipment, $f, $userClassifications, $docCodeMap);
+                            continue;
+                        }
+
+                        $rawText = $this->extractionService->extractTextFromFile($f);
+                        $detected = $this->extractionService->classifyBundleFile($origName, $rawText);
+                        $shortCode = strtoupper((string) ($userClassifications[$origName] ?? $detected['doc_type']));
+                        $targetSlot = $docCodeMap[$shortCode] ?? 'ETC';
+
+                        $this->uploadDocument($shipment, $targetSlot, $f, "Auto-detect bundle [{$shortCode}] ({$detected['confidence']}%).");
                     }
-                    $this->uploadDocument($shipment, $targetSlot, $f, "Diunggah saat batch upload proyek.");
                 }
             }
         }
 
-        // 5. Simpan Item Barang Hasil Deteksi AI
+        // 5. Simpan Item Barang Hasil Deteksi
         if (!empty($extracted['items'])) {
             foreach ($extracted['items'] as $itemData) {
                 $itemData['shipment_id'] = $shipment->id;
@@ -182,16 +238,69 @@ class ShipmentWorkflowService
             $shipment->update(['status_tahap' => 'HS_DETECTED']);
         }
 
-        // Jika dokumen inti (BL, Invoice, Packing List) sudah terunggah, sesuaikan status
+        // Jika dokumen inti (BL, Invoice, Packing List) sudah terunggah, sesuaikan status & timestamp
         $hasBL = $shipment->documents()->where('jenis_dokumen', 'BL_AWB')->where('status', '!=', 'MISSING')->exists();
         $hasInv = $shipment->documents()->where('jenis_dokumen', 'INVOICE')->where('status', '!=', 'MISSING')->exists();
         $hasPL = $shipment->documents()->where('jenis_dokumen', 'PACKING_LIST')->where('status', '!=', 'MISSING')->exists();
 
         if ($hasBL && $hasInv && $hasPL) {
-            $shipment->update(['status_tahap' => 'DOC_READY']);
+            $shipment->update([
+                'status_tahap' => 'DOC_READY',
+                'doc_completed_at' => now(),
+            ]);
         }
 
         return $shipment;
+    }
+
+    /**
+     * Ekstrak berkas dalam arsip ZIP dan simpan setiap dokumennya ke ShipmentDocument.
+     */
+    protected function attachZipBundleDocuments(Shipment $shipment, \Illuminate\Http\UploadedFile $zipFile, array $userClassifications, array $docCodeMap): void
+    {
+        $zip = new \ZipArchive();
+        if ($zip->open($zipFile->getRealPath()) !== true) {
+            $this->uploadDocument($shipment, 'ETC', $zipFile, 'Bundle ZIP diunggah sebagai arsip.');
+            return;
+        }
+
+        $tmpDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'genie_attach_' . uniqid('', true);
+        @mkdir($tmpDir, 0755, true);
+        $zip->extractTo($tmpDir);
+        $zip->close();
+
+        $it = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($tmpDir, \FilesystemIterator::SKIP_DOTS));
+        foreach ($it as $entry) {
+            if ($entry->isFile()) {
+                $name = $entry->getFilename();
+                $ext = strtolower($entry->getExtension());
+                if (str_starts_with($name, '.') || $ext === 'zip') {
+                    continue;
+                }
+                $text = $this->extractionService->extractTextFromFile($entry->getPathname());
+                $detected = $this->extractionService->classifyBundleFile($name, $text);
+                $shortCode = strtoupper((string) ($userClassifications[$name] ?? $detected['doc_type']));
+                $targetSlot = $docCodeMap[$shortCode] ?? 'ETC';
+
+                $uploadedProxy = new \Illuminate\Http\UploadedFile(
+                    $entry->getPathname(),
+                    $name,
+                    @mime_content_type($entry->getPathname()) ?: 'application/octet-stream',
+                    null,
+                    true
+                );
+                $this->uploadDocument($shipment, $targetSlot, $uploadedProxy, "Diekstrak otomatis dari bundle ZIP ({$zipFile->getClientOriginalName()}).");
+            }
+        }
+
+        $cleanIt = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($tmpDir, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST
+        );
+        foreach ($cleanIt as $f) {
+            $f->isDir() ? @rmdir($f->getRealPath()) : @unlink($f->getRealPath());
+        }
+        @rmdir($tmpDir);
     }
 
     /**
@@ -255,26 +364,39 @@ class ShipmentWorkflowService
      */
     public function uploadDocument(Shipment $shipment, string $jenisDokumen, $file, ?string $catatan = null): ShipmentDocument
     {
-        $doc = ShipmentDocument::firstOrNew([
+        $existingDoc = ShipmentDocument::where('shipment_id', $shipment->id)
+            ->where('jenis_dokumen', $jenisDokumen)
+            ->where('is_current', true)
+            ->first();
+
+        $newVersion = 1;
+        if ($existingDoc && $existingDoc->file_path) {
+            $newVersion = ($existingDoc->version ?? 1) + 1;
+            $existingDoc->update(['is_current' => false]);
+        }
+
+        $doc = new ShipmentDocument([
             'shipment_id' => $shipment->id,
             'jenis_dokumen' => $jenisDokumen,
+            'version' => $newVersion,
+            'is_current' => true,
         ]);
 
         if (is_object($file) && method_exists($file, 'getClientOriginalName')) {
-            $filename = time() . '_' . $file->getClientOriginalName();
+            $filename = time() . '_v' . $newVersion . '_' . $file->getClientOriginalName();
             $path = $file->storeAs('shipment_docs/' . $shipment->id, $filename, 'public');
             $doc->nama_file = $file->getClientOriginalName();
             $doc->file_path = $path;
             $doc->file_size_kb = round($file->getSize() / 1024);
         } else {
             // Simulasi nama file jika diupload via form dummy / string
-            $doc->nama_file = strtolower($jenisDokumen) . '_' . $shipment->project_no . '.pdf';
+            $doc->nama_file = strtolower($jenisDokumen) . '_v' . $newVersion . '_' . $shipment->project_no . '.pdf';
             $doc->file_path = 'simulated/' . $doc->nama_file;
             $doc->file_size_kb = 480;
         }
 
         $doc->status = 'UPLOADED';
-        $doc->catatan = $catatan ?? "Berkas {$jenisDokumen} berhasil dilampirkan.";
+        $doc->catatan = $catatan ?? "Berkas {$jenisDokumen} versi {$newVersion} berhasil dilampirkan.";
         $doc->save();
 
         return $doc;
@@ -831,5 +953,138 @@ class ShipmentWorkflowService
         $pic->save();
 
         return $pic;
+    }
+
+    /**
+     * 13. Pastikan setiap dokumen CeisaDocument (BC 2.0 / BC 3.0) terhubung dengan entitas Shipment (Tracking 11 Pos)
+     */
+    public function ensureShipmentForCeisaDocument(CeisaDocument $doc): Shipment
+    {
+        // 1. Cek relasi langsung atau relasi melalui foreign key
+        if ($doc->shipment) {
+            return $doc->shipment;
+        }
+
+        $existing = Shipment::where('ceisa_document_id', $doc->id)->first();
+        if ($existing) {
+            return $existing;
+        }
+
+        // 2. Tentukan jenis layanan
+        $isExport = ($doc->jenis_dokumen === '30');
+        $jenisLayanan = $isExport ? 'EKSPORT_BC30' : 'IMPORT_BC20';
+
+        // 3. Tentukan client & vendor
+        $client = null;
+        if (!empty($doc->nama_perusahaan_lokal)) {
+            $client = Client::where('name', 'like', "%{$doc->nama_perusahaan_lokal}%")->first();
+        }
+        if (!$client) {
+            $client = Client::first();
+        }
+        $vendor = ShippingVendor::first();
+
+        // 4. Petakan status tahap
+        $statusTahap = match ($doc->status) {
+            'SPPB', 'NPE' => 'TRAFFIC_SPPB',
+            'BILLING' => 'BILLING_ISSUED',
+            'SUBMITTED', 'PROSES' => 'CEISA_SUBMITTED',
+            default => 'DRAFT_REVIEW',
+        };
+
+        $valuta = $doc->kode_valuta ?: 'USD';
+        $kurs = (float) ($doc->ndbm_kurs ?: 15850.0);
+        $totalValuta = (float) ($doc->total_nilai ?: 25000.0);
+        $totalIdr = (float) ($doc->total_nilai_idr ?: ($totalValuta * $kurs));
+
+        $header = $doc->raw_payload['header'] ?? [];
+
+        $shipment = Shipment::create([
+            'project_no' => Shipment::generateProjectNo(),
+            'client_id' => $client?->id,
+            'jenis_layanan' => $jenisLayanan,
+            'nomor_bl_awb' => $header['nomorBl'] ?? $doc->nomor_bc11 ?? ('BL-' . substr($doc->nomor_aju, -8)),
+            'tgl_bl_awb' => $doc->tanggal_daftar ?? now(),
+            'shipping_vendor_id' => $vendor?->id,
+            'nama_kapal' => $header['namaSaranaPengangkut'] ?? 'MV WAN HAI 315',
+            'voyage_no' => $header['nomorVoyFlight'] ?? 'V.042N',
+            'pelabuhan_muat' => $header['kodePelMuat'] ?? ($isExport ? 'IDTPP (Tanjung Priok)' : 'CNSHA (Shanghai)'),
+            'pelabuhan_bongkar' => $header['kodePelBongkar'] ?? ($isExport ? 'USLAX (Los Angeles)' : 'IDTPP (Tanjung Priok)'),
+            'eta_date' => $doc->tanggal_tiba ? Carbon::parse($doc->tanggal_tiba) : now()->addDays(2),
+            'free_time_days' => 7,
+            'free_time_expired_at' => now()->addDays(7),
+            'total_kontainer' => $doc->total_kontainer ?: 1,
+            'nomor_kontainer' => 'WHLU-9182341 (1x40HC)',
+            'total_kemasan' => $doc->total_kemasan ?: 100,
+            'jenis_kemasan' => 'CTN (Cartons)',
+            'total_bruto' => (float) ($doc->total_bruto ?: 5000.0),
+            'total_netto' => (float) ($doc->total_netto ?: 4500.0),
+            'kode_valuta' => $valuta,
+            'total_nilai_valuta' => $totalValuta,
+            'ndbm_kurs' => $kurs,
+            'total_nilai_idr' => $totalIdr,
+            'ceisa_document_id' => $doc->id,
+            'status_tahap' => $statusTahap,
+            'status_do' => in_array($doc->status, ['SPPB', 'NPE']) ? 'DO_RELEASED' : ($doc->status === 'BILLING' ? 'EMAIL_SENT' : 'PENDING_REQUEST'),
+            'nomor_do' => in_array($doc->status, ['SPPB', 'NPE']) ? ('DO/RELEASE/' . date('Ym') . '/001') : null,
+            'customs_channel' => $doc->jalur ?? 'HIJAU',
+            'catatan' => "Sinkronisasi otomatis dokumen {$doc->jenis_dokumen_label} ({$doc->nomor_aju}) dengan sistem pelacakan 11 Pos alur pengapalan.",
+        ]);
+
+        // Inisialisasi 9 Slot Checklist Dokumen
+        $slots = [
+            'INVOICE' => 'Commercial Invoice Pemasok Luar Negeri',
+            'PACKING_LIST' => 'Packing List Rincian Barang & Kemasan',
+            'BL_AWB' => 'Bill of Lading (B/L) Asli / Sea Waybill',
+            'COO_FORME' => 'Certificate of Origin (Form E / Form AK / SKA)',
+            'INSURANCE' => 'Polis Sertifikat Asuransi Pengangkutan',
+            'PERIJINAN_LARTAS' => 'Persetujuan Impor / LS Surveyor / BPOM (Jika Lartas)',
+            'DO_ORIGINAL' => 'Delivery Order (DO) Pelayaran Rilis Resmi',
+            'BUKTI_BAYAR_BILLING' => 'Bukti Penerimaan Negara (BPN) Billing MPN G3',
+            'POD_SURAT_JALAN' => 'Bukti Pengantaran Gudang / Surat Jalan (POD)',
+        ];
+
+        $isCompletedStatus = in_array($doc->status, ['SPPB', 'NPE']);
+        foreach ($slots as $code => $label) {
+            $isVerified = $isCompletedStatus && in_array($code, ['INVOICE', 'PACKING_LIST', 'BL_AWB', 'COO_FORME', 'BUKTI_BAYAR_BILLING', 'DO_ORIGINAL']);
+            ShipmentDocument::create([
+                'shipment_id' => $shipment->id,
+                'jenis_dokumen' => $code,
+                'nama_file' => $isVerified ? (strtolower($code) . '_verified.pdf') : null,
+                'status' => $isVerified ? 'VERIFIED' : 'MISSING',
+                'catatan' => $label,
+                'verified_at' => $isVerified ? now() : null,
+            ]);
+        }
+
+        // Buat ShipmentItem jika ada di payload
+        $rawBarang = $doc->raw_payload['barang'] ?? ($doc->raw_payload['item'] ?? []);
+        if (!empty($rawBarang) && is_array($rawBarang)) {
+            $urut = 1;
+            foreach ($rawBarang as $b) {
+                ShipmentItem::create([
+                    'shipment_id' => $shipment->id,
+                    'nomor_urut' => $urut++,
+                    'uraian_barang' => $b['uraian'] ?? ($b['uraian_barang'] ?? 'Item Barang Kepabeanan'),
+                    'kode_hs' => $b['hs_code'] ?? ($b['kode_hs'] ?? ($b['posTarif'] ?? '8452.29.00')),
+                    'hs_confidence_score' => 0.95,
+                    'hs_legal_basis' => 'BTKI 2022 / Penetapan Pabean',
+                    'negara_asal' => $b['negara_asal'] ?? ($doc->negara_mitra_luar_negeri ?? 'CN'),
+                    'jumlah_kemasan' => $b['jumlah'] ?? ($b['jumlah_kemasan'] ?? 10),
+                    'jenis_kemasan' => $b['jenis_kemasan'] ?? 'CTN',
+                    'berat_netto' => (float) ($b['netto'] ?? 1000.0),
+                    'berat_bruto' => (float) ($b['bruto'] ?? 1100.0),
+                    'nilai_fob' => (float) ($b['fob'] ?? ($b['cif'] ?? 10000.0)),
+                    'tarif_bm_persen' => (float) ($b['tarif_bm'] ?? 5.0),
+                    'tarif_ppn_persen' => (float) ($b['tarif_ppn'] ?? 11.0),
+                    'tarif_pph_persen' => (float) ($b['tarif_pph'] ?? 2.5),
+                ]);
+            }
+        }
+
+        // Tetapkan PIC 11 Pos
+        $this->autoAssignPics($shipment);
+
+        return $shipment;
     }
 }

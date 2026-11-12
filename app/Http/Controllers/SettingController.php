@@ -260,6 +260,8 @@ class SettingController extends Controller implements HasMiddleware
             'ceisa_api_key' => 'required|string|max:100',
             'ceisa_application_id' => 'nullable|string|max:100',
             'ceisa_whatsapp_no' => 'nullable|string|max:50',
+            'ceisa_webhook_secret' => 'nullable|string|max:150',
+            'ceisa_read_only' => 'nullable|boolean',
 
             // Profil Perusahaan
             'company_name' => 'required|string|max:200',
@@ -286,6 +288,8 @@ class SettingController extends Controller implements HasMiddleware
         \App\Models\SystemSetting::set('ceisa_api_key', $validated['ceisa_api_key'], 'ceisa', 'API Key Resmi DJBC');
         \App\Models\SystemSetting::set('ceisa_application_id', $validated['ceisa_application_id'] ?? '', 'ceisa', 'Application ID Resmi DJBC');
         \App\Models\SystemSetting::set('ceisa_whatsapp_no', $validated['ceisa_whatsapp_no'] ?? '', 'ceisa', 'Nomor WhatsApp Notifikasi DJBC');
+        \App\Models\SystemSetting::set('ceisa_webhook_secret', $validated['ceisa_webhook_secret'] ?? '', 'ceisa', 'Secret Token Verifikasi Webhook Callback CEISA');
+        \App\Models\SystemSetting::set('ceisa_read_only', $request->boolean('ceisa_read_only') ? '1' : '0', 'ceisa', 'Mode Tarik Data Saja (Blokir Kirim ke CEISA)');
 
         \App\Models\SystemSetting::set('company_name', $validated['company_name'], 'company', 'Nama Resmi Perusahaan');
         \App\Models\SystemSetting::set('company_nib', $validated['company_nib'], 'company', 'Nomor Induk Berusaha');

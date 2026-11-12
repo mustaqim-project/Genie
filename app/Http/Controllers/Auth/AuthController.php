@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Mail\LoginOtpMail;
+use App\Models\AuditLog;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -55,6 +56,8 @@ class AuthController extends Controller
             $seconds = RateLimiter::availableIn($throttleKey);
             $minutes = ceil($seconds / 60);
 
+            AuditLog::record('LOCKOUT', 'User', null, null, ['email' => $credentials['email'], 'ip' => $request->ip()]);
+
             return back()->withErrors([
                 'email' => "Akun dikunci sementara karena terlalu banyak percobaan masuk yang salah. Silakan coba lagi dalam {$minutes} menit atau hubungi administrator.",
             ])->onlyInput('email');
@@ -64,6 +67,7 @@ class AuthController extends Controller
         $user = User::where('email', $credentials['email'])->first();
 
         if ($user && !$user->is_active) {
+            AuditLog::record('LOGIN_BLOCKED', 'User', $user->id, null, ['reason' => 'Account inactive']);
             return back()->withErrors([
                 'email' => 'Akun Anda dinonaktifkan oleh Administrator Sistem. Hubungi HR / IT Lead untuk aktivasi.',
             ])->onlyInput('email');
@@ -73,6 +77,8 @@ class AuthController extends Controller
         if (!$user || !Hash::check($credentials['password'], $user->password)) {
             RateLimiter::hit($throttleKey, 900); // Kunci selama 900 detik (15 menit)
             $remaining = RateLimiter::remaining($throttleKey, 5);
+
+            AuditLog::record('LOGIN_FAILED', 'User', $user?->id, null, ['email' => $credentials['email'], 'remaining' => $remaining]);
 
             $msg = $remaining > 0
                 ? "Email atau kata sandi tidak cocok. Sisa percobaan: {$remaining} kali sebelum akun dikunci."
@@ -138,6 +144,8 @@ class AuthController extends Controller
         Auth::login($user, $request->boolean('remember'));
         $request->session()->regenerate();
         session(['auth_monday_cycle' => now()->startOfWeek(\Carbon\Carbon::MONDAY)->toDateString()]);
+
+        AuditLog::record('LOGIN_SUCCESS', 'User', $user->id, null, ['auth_type' => 'STANDARD', 'email' => $user->email]);
 
         return redirect()->intended(route('dashboard'))
             ->with('success', 'Selamat datang kembali di Genie, ' . $user->name);
@@ -215,6 +223,8 @@ class AuthController extends Controller
         Session::forget('2fa');
         $request->session()->regenerate();
         session(['auth_monday_cycle' => now()->startOfWeek(\Carbon\Carbon::MONDAY)->toDateString()]);
+
+        AuditLog::record('LOGIN_SUCCESS', 'User', $user->id, null, ['auth_type' => '2FA', 'email' => $user->email]);
 
         return redirect()->intended(route('dashboard'))
             ->with('success', 'Verifikasi 2-Langkah berhasil. Selamat datang, ' . $user->name);
@@ -353,6 +363,7 @@ class AuthController extends Controller
         if ($user) {
             $user->password = Hash::make($password);
             $user->save();
+            AuditLog::record('PASSWORD_RESET', 'User', $user->id, null, ['email' => $email]);
         }
 
         Session::forget('reset_password_' . $email);

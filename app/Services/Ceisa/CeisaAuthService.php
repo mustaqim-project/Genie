@@ -40,7 +40,7 @@ class CeisaAuthService
         // Coba refresh token terlebih dahulu jika ada refresh token di cache
         $refreshTokenKey = 'ceisa_refresh_token_' . md5($this->username);
         $refreshToken = Cache::get($refreshTokenKey);
-        if ($refreshToken && !$this->mockMode) {
+        if ($refreshToken && !$this->isMockMode()) {
             $refreshed = $this->refreshToken($refreshToken);
             if ($refreshed) {
                 return $refreshed;
@@ -50,12 +50,17 @@ class CeisaAuthService
         return $this->requestNewToken();
     }
 
+    protected function isMockMode(): bool
+    {
+        return (bool) config('ceisa.api.mock_mode', $this->mockMode);
+    }
+
     /**
      * Request token baru via Login (/user/login) ke server otorisasi CEISA 4.0 DJBC
      */
     public function requestNewToken(): string
     {
-        if ($this->mockMode) {
+        if ($this->isMockMode()) {
             $mockToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mock_ceisa_token_for_' . $this->username . '_' . time();
             $cacheKey = 'ceisa_access_token_' . md5($this->username);
             Cache::put($cacheKey, $mockToken, $this->tokenTtl);
@@ -104,11 +109,10 @@ class CeisaAuthService
             }
 
             Log::error('CEISA Auth Failed: ' . $response->body());
-            throw new \Exception('Gagal mendapatkan token autentikasi dari CEISA 4.0: ' . $response->body());
+            throw new \Exception('Gagal mendapatkan token autentikasi dari CEISA 4.0 (HTTP ' . $response->status() . '): ' . $response->body());
         } catch (\Throwable $e) {
             Log::error('CEISA Auth Exception: ' . $e->getMessage());
-            // Fallback ke token simulasi jika gateway timeout pada masa pengujian
-            return 'fallback_token_' . time();
+            throw $e;
         }
     }
 

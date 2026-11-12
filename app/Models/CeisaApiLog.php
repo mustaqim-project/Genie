@@ -30,6 +30,9 @@ class CeisaApiLog extends Model
         'is_success' => 'boolean',
         'duration_ms' => 'integer',
         'status_code' => 'integer',
+        'request_header' => 'array',
+        'request_body' => 'array',
+        'response_body' => 'array',
     ];
 
     public function document()

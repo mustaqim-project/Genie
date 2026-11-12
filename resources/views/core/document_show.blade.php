@@ -191,14 +191,32 @@
                 </div>
             </div>
 
-            <div class="mt-4 pt-3 border-t border-black/[0.06] dark:border-white/[0.06]">
+            <div class="mt-4 pt-3 border-t border-black/[0.06] dark:border-white/[0.06] space-y-2">
                 @if($shipment->ceisaDocument && $shipment->ceisaDocument->status !== 'DRAFT')
                     <a href="{{ $shipment->ceisaDocument->jenis_dokumen === '20' ? route('bc20.show', $shipment->ceisaDocument->id) : route('bc30.show', $shipment->ceisaDocument->id) }}"
                        class="btn-apple-tinted w-full py-2.5 px-4 font-semibold text-xs flex items-center justify-center gap-2">
                         <span>Buka Draf Resmi BC {{ $shipment->ceisaDocument->jenis_dokumen }}</span>
                         <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
                     </a>
-                @else
+                @endif
+
+                @if((bool) config('ceisa.api.read_only', true))
+                    @if($shipment->ceisaDocument?->nomor_aju)
+                        @can('setting.manage')
+                        <form action="{{ route('config.sync-document') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="nomor_aju" value="{{ $shipment->ceisaDocument->nomor_aju }}">
+                            <button type="submit" class="btn-apple-filled w-full py-2.5 px-4 font-semibold text-xs flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700">
+                                <i data-lucide="download-cloud" class="w-3.5 h-3.5"></i>
+                                <span>Tarik Status Terbaru dari CEISA</span>
+                            </button>
+                        </form>
+                        @endcan
+                    @endif
+                    <div class="px-3 py-2 rounded-xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800/50 text-[11px] text-sky-800 dark:text-sky-300 font-medium text-center">
+                        🔒 Mode Tarik Data Saja (Read-Only) aktif — Upload ke CEISA dinonaktifkan
+                    </div>
+                @elseif(!$shipment->ceisaDocument || $shipment->ceisaDocument->status === 'DRAFT')
                     @can('document.submit')
                     <button type="button"
                             onclick="document.getElementById('modal-submit-ceisa').classList.remove('hidden')"
@@ -218,7 +236,7 @@
     </div>
 
     <!-- 3. TABS NAVIGASI WORKSPACE UTAMA -->
-    <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl border border-black/[0.06] dark:border-white/[0.08] shadow-xs overflow-hidden">
+    <div id="workspace-tabs" class="bg-white dark:bg-[#1C1C1E] rounded-2xl border border-black/[0.06] dark:border-white/[0.08] shadow-xs overflow-hidden scroll-mt-6">
         
         <!-- Tab Bar Buttons macOS Style -->
         <div class="border-b border-black/[0.06] dark:border-white/[0.06] bg-black/[0.02] dark:bg-white/[0.02] p-2 flex items-center gap-1.5 overflow-x-auto text-xs font-semibold">
@@ -654,6 +672,253 @@
                         <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
                     </a>
                 </div>
+            </div>
+
+            <!-- Respon Pabean (SPJM / SPPB / NPD / DNP / NHI) & Penggantian Segel -->
+            <div class="p-5 rounded-2xl bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] shadow-xs space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-black/[0.06] dark:border-white/[0.06] gap-2">
+                    <div>
+                        <h3 class="font-bold text-sm text-slate-900 dark:text-white">Respon Bea Cukai (SPJM / SPPB / NPD / DNP / NHI) &amp; Segel Kontainer</h3>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs mt-0.5">Catat status penjaluran, nomor SPJM/SPPB, dokumen NPD/DNP/SLIM, dan nomor segel baru setelah pemeriksaan.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-1.5">
+                        @foreach($shipment->customs_responses as $rKey => $rActive)
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase {{ $rActive ? 'bg-rose-500/15 text-rose-600 dark:text-rose-400' : 'bg-black/[0.04] dark:bg-white/[0.06] text-slate-400' }}">
+                                {{ strtoupper($rKey) }} {{ $rActive ? '✓' : '' }}
+                            </span>
+                        @endforeach
+                    </div>
+                </div>
+
+                <form action="{{ route('core.traffic.customs-responses', $shipment->id) }}" method="POST" enctype="multipart/form-data" class="space-y-3 text-xs">
+                    @csrf
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                        <div>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jalur Pabean</label>
+                            <select name="customs_channel" class="w-full px-3 py-1.5 rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E]">
+                                <option value="">-- Pilih Jalur --</option>
+                                <option value="HIJAU" {{ $shipment->customs_channel === 'HIJAU' ? 'selected' : '' }}>HIJAU (SPPB Langsung)</option>
+                                <option value="KUNING" {{ $shipment->customs_channel === 'KUNING' ? 'selected' : '' }}>KUNING (NPD / DNP)</option>
+                                <option value="MERAH" {{ $shipment->customs_channel === 'MERAH' ? 'selected' : '' }}>MERAH (SPJM Periksa Fisik)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tiket &amp; Tgl SPJM</label>
+                            <div class="flex gap-1.5">
+                                <input type="text" name="spjm_ticket" value="{{ $shipment->spjm_ticket }}" placeholder="Tiket SPJM" class="w-1/2 px-2.5 py-1.5 rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E]">
+                                <input type="date" name="spjm_received_at" value="{{ $shipment->spjm_received_at?->format('Y-m-d') }}" class="w-1/2 px-2 py-1.5 rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E]">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jadwal Behandle</label>
+                            <input type="date" name="inspection_scheduled_at" value="{{ $shipment->inspection_scheduled_at?->format('Y-m-d') }}" class="w-full px-2.5 py-1.5 rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E]">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Lokasi Behandle / TPS</label>
+                            <input type="text" name="tps_location" value="{{ $shipment->tps_location }}" placeholder="TPS Koja / JICT" class="w-full px-3 py-1.5 rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E]">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                        <div>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Segel Lama (Sebelum Bongkar)</label>
+                            <input type="text" name="old_seal_number" value="{{ $shipment->old_seal_number }}" placeholder="EMCU-019283" class="w-full px-3 py-1.5 rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E]">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Segel Baru (Setelah Diperiksa)</label>
+                            <input type="text" name="new_seal_number" value="{{ $shipment->new_seal_number }}" placeholder="BC-SEAL-8821" class="w-full px-3 py-1.5 rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E]">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Vendor Trucking</label>
+                            <input type="text" name="trucking_vendor_name" value="{{ $shipment->trucking_vendor_name }}" placeholder="Nama vendor truk" class="w-full px-3 py-1.5 rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E]">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Upload PDF Respon (SPJM/NPD/DNP)</label>
+                            <div class="flex gap-1.5">
+                                <select name="response_doc_type" class="w-24 px-2 py-1.5 rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E]">
+                                    <option value="SPJM">SPJM</option>
+                                    <option value="SPPB">SPPB</option>
+                                    <option value="NPD">NPD</option>
+                                    <option value="DNP">DNP</option>
+                                    <option value="NHI">NHI</option>
+                                    <option value="SLIM">SLIM</option>
+                                    <option value="BERITA_ACARA">BA</option>
+                                </select>
+                                <input type="file" name="response_doc_file" class="w-full text-[11px] file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-black/5">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+                        <div class="flex flex-wrap items-center gap-4">
+                            <label class="inline-flex items-center gap-1.5 font-semibold cursor-pointer">
+                                <input type="checkbox" name="spjm_received" value="1" {{ $shipment->spjm_received ? 'checked' : '' }}>
+                                <span>SPJM</span>
+                            </label>
+                            <label class="inline-flex items-center gap-1.5 font-semibold cursor-pointer">
+                                <input type="checkbox" name="sppb_received" value="1" {{ $shipment->sppb_received ? 'checked' : '' }}>
+                                <span>SPPB</span>
+                            </label>
+                            <label class="inline-flex items-center gap-1.5 font-semibold cursor-pointer">
+                                <input type="checkbox" name="npd_received" value="1" {{ $shipment->npd_received ? 'checked' : '' }}>
+                                <span>NPD</span>
+                            </label>
+                            <label class="inline-flex items-center gap-1.5 font-semibold cursor-pointer">
+                                <input type="checkbox" name="dnp_received" value="1" {{ $shipment->dnp_received ? 'checked' : '' }}>
+                                <span>DNP</span>
+                            </label>
+                            <label class="inline-flex items-center gap-1.5 font-semibold cursor-pointer">
+                                <input type="checkbox" name="nhi_received" value="1" {{ $shipment->nhi_received ? 'checked' : '' }}>
+                                <span>NHI</span>
+                            </label>
+                        </div>
+                        <button type="submit" class="btn-apple-filled !h-8 px-4 text-xs">Simpan Respon &amp; Segel</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Dokumentasi Foto Pemeriksaan Fisik (SPJM) / Stuffing (Ekspor) & Segel Kembali -->
+            @php
+                $isExportShip = $shipment->jenis_layanan === 'EKSPORT_BC30';
+                $photoStages = $isExportShip ? \App\Models\InspectionPhoto::EXPORT_STAGES : \App\Models\InspectionPhoto::IMPORT_STAGES;
+            @endphp
+            <div class="p-5 rounded-2xl bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] shadow-xs space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-black/[0.06] dark:border-white/[0.06] gap-2">
+                    <div>
+                        <h3 class="font-bold text-sm text-slate-900 dark:text-white">
+                            {{ $isExportShip ? 'Dokumentasi Foto Stuffing & Segel Ekspor' : 'Dokumentasi Foto Pembongkaran, Pengecekan Fisik (SPJM) & Segel Kembali' }}
+                        </h3>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs mt-0.5">Unggah bukti foto lapangan per tahapan hingga kontainer disegel kembali dan siap Gate Out.</p>
+                    </div>
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#007AFF]/10 text-[#007AFF]">
+                        {{ $shipment->inspectionPhotos->count() }} Foto Tersimpan
+                    </span>
+                </div>
+
+                <form action="{{ route('core.traffic.inspection-photos.store', $shipment->id) }}" method="POST" enctype="multipart/form-data" class="p-3.5 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06] space-y-3 text-xs">
+                    @csrf
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                        <div>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tahap Dokumentasi</label>
+                            <select name="stage" required class="w-full px-2.5 py-1.5 rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E]">
+                                @foreach($photoStages as $stKey => $stLabel)
+                                    <option value="{{ $stKey }}">{{ $stLabel }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. Segel Lama</label>
+                            <input type="text" name="old_seal_number" value="{{ $shipment->old_seal_number }}" class="w-full px-2.5 py-1.5 rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E]">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. Segel Baru (Jika Segel Kembali)</label>
+                            <input type="text" name="seal_number" value="{{ $shipment->new_seal_number }}" placeholder="BC-SEAL-XXXX" class="w-full px-2.5 py-1.5 rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E]">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Pilih Foto (Bisa Multi-Foto)</label>
+                            <input type="file" name="photos[]" multiple required accept=".jpg,.jpeg,.png,.webp,.pdf" class="w-full text-[11px] file:mr-2 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-[#007AFF]/10 file:text-[#007AFF]">
+                        </div>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <input type="text" name="caption" placeholder="Catatan lapangan: kondisi segel, petugas pemeriksa, temuan fisik..." class="flex-1 px-3 py-1.5 rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E]">
+                        <button type="submit" class="btn-apple-filled !h-8 px-4 text-xs shrink-0">
+                            <i data-lucide="camera" class="w-3.5 h-3.5"></i>
+                            <span>Upload Foto Pemeriksaan</span>
+                        </button>
+                    </div>
+                </form>
+
+                @if($shipment->inspectionPhotos->isNotEmpty())
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    @foreach($shipment->inspectionPhotos as $photo)
+                    <div class="p-3 rounded-xl border border-black/[0.06] dark:border-white/[0.08] bg-black/[0.015] dark:bg-white/[0.02] flex flex-col justify-between gap-2 text-xs">
+                        <div class="flex items-start justify-between gap-2">
+                            <div>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#007AFF]/10 text-[#007AFF]">
+                                    {{ $photo->stage_label }}
+                                </span>
+                                <div class="font-mono text-[10px] text-slate-500 mt-1">
+                                    {{ $photo->taken_at?->format('d/m/Y H:i') }} · {{ $photo->uploader?->name ?? 'Tim Lapangan' }}
+                                </div>
+                            </div>
+                            <form action="{{ route('core.traffic.inspection-photos.destroy', [$shipment->id, $photo->id]) }}" method="POST" onsubmit="return confirm('Hapus foto ini?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="p-1 text-rose-500 hover:bg-rose-500/10 rounded cursor-pointer" title="Hapus">
+                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </form>
+                        </div>
+                        @if(Str::endsWith(strtolower($photo->file_path), ['.jpg', '.jpeg', '.png', '.webp']))
+                        <a href="{{ $photo->url }}" target="_blank" class="block overflow-hidden rounded-lg border border-black/5 bg-black/5 h-36">
+                            <img src="{{ $photo->url }}" alt="{{ $photo->file_name }}" class="w-full h-full object-cover">
+                        </a>
+                        @else
+                        <a href="{{ $photo->url }}" target="_blank" class="px-3 py-2 rounded-lg bg-black/5 text-[#007AFF] font-semibold truncate">
+                            📄 {{ $photo->file_name }}
+                        </a>
+                        @endif
+                        <div class="text-[11px] text-slate-600 dark:text-slate-400">
+                            @if($photo->seal_number)
+                                <div class="font-mono font-bold text-emerald-600 dark:text-emerald-400">Segel: {{ $photo->seal_number }}</div>
+                            @endif
+                            <div>{{ $photo->caption ?: $photo->file_name }}</div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+                @endif
+            </div>
+
+            <!-- Rincian Biaya Operasional Pelabuhan (DO, Extend DO, BHDL, STG, TKC, LOLO, Trucking) -->
+            <div class="p-5 rounded-2xl bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] shadow-xs space-y-4">
+                <div class="flex items-center justify-between pb-3 border-b border-black/[0.06] dark:border-white/[0.06]">
+                    <div>
+                        <h3 class="font-bold text-sm text-slate-900 dark:text-white">Biaya Operasional Lapangan &amp; Pelabuhan</h3>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs mt-0.5">Rekap biaya DO, Extend DO 1/2/3, BHDL, Storage, TKC, LOLO, dan Trucking (sesuai format Tracking Dok).</p>
+                    </div>
+                    <strong class="font-mono text-sm text-slate-900 dark:text-white">
+                        Rp {{ number_format((float) $shipment->operationCosts->sum('amount'), 0, ',', '.') }}
+                    </strong>
+                </div>
+
+                <form action="{{ route('core.traffic.operation-costs.store', $shipment->id) }}" method="POST" class="grid grid-cols-1 sm:grid-cols-5 gap-2.5 text-xs">
+                    @csrf
+                    <select name="cost_category" required class="px-2.5 py-1.5 rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E]">
+                        @foreach(\App\Models\ShipmentOperationCost::CATEGORIES as $cKey => $cLabel)
+                            <option value="{{ $cKey }}">{{ $cLabel }}</option>
+                        @endforeach
+                    </select>
+                    <input type="text" name="vendor_name" placeholder="Nama Vendor / Pelayaran" class="px-2.5 py-1.5 rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E]">
+                    <input type="text" name="invoice_number" placeholder="No. Kwitansi / INV" class="px-2.5 py-1.5 rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E]">
+                    <input type="number" step="0.01" name="amount" required placeholder="Nominal (IDR)" class="px-2.5 py-1.5 rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E]">
+                    <button type="submit" class="btn-apple-filled !h-8 text-xs">+ Catat Biaya</button>
+                </form>
+
+                @if($shipment->operationCosts->isNotEmpty())
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="text-[10px] uppercase text-slate-400 border-b border-black/5">
+                            <tr>
+                                <th class="py-2">Kategori</th>
+                                <th class="py-2">Vendor</th>
+                                <th class="py-2">No. Invoice</th>
+                                <th class="py-2 text-right">Nominal</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-black/5">
+                            @foreach($shipment->operationCosts as $cost)
+                            <tr>
+                                <td class="py-2 font-semibold">{{ $cost->category_label }}</td>
+                                <td class="py-2">{{ $cost->vendor_name ?: '-' }}</td>
+                                <td class="py-2 font-mono">{{ $cost->invoice_number ?: '-' }}</td>
+                                <td class="py-2 text-right font-mono font-bold">IDR {{ number_format((float) $cost->amount, 0, ',', '.') }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                @endif
             </div>
 
         </div>

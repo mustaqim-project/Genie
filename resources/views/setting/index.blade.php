@@ -282,6 +282,56 @@
 
     <!-- TAB 3: GATEWAY & AUDIT LOGS -->
     <div x-show="activeTab === 'gateway'" class="space-y-6">
+        <!-- Tarik & Sinkronisasi Data CEISA 4.0 ke Sistem Genie -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 pb-4 border-b border-slate-100">
+                <div>
+                    <h2 class="text-base font-bold text-slate-900">Tarik &amp; Sinkronkan Data dari CEISA 4.0 ke Sistem Genie</h2>
+                    <p class="text-xs text-slate-500 mt-1">Tarik status terbaru, respon DJBC (SPPB/NPE/Billing), dan data PIB/PEB berdasarkan Nomor Aju ke database Genie, atau sinkronkan seluruh dokumen aktif sekaligus.</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 shrink-0">
+                    <form action="{{ route('config.sync-all-active') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs shadow-xs transition-all active:scale-95 flex items-center space-x-1.5 cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            <span>Tarik Dokumen Aktif</span>
+                        </button>
+                    </form>
+                    <form action="{{ route('config.sync-all') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-all active:scale-95 flex items-center space-x-1.5 cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            <span>Tarik Semua (Dokumen + Kurs + HS Code)</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <form action="{{ route('config.sync-document') }}" method="POST" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                @csrf
+                <div class="md:col-span-6">
+                    <label for="setting_sync_nomor_aju" class="block text-xs font-bold text-slate-700 mb-1.5">Nomor Aju (26 Digit) <span class="text-red-500">*</span></label>
+                    <input type="text" id="setting_sync_nomor_aju" name="nomor_aju" required maxlength="30" placeholder="Contoh: 00002001055520261112000001"
+                           class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#007AFF]/20 focus:border-[#007AFF] text-sm font-mono bg-white">
+                </div>
+                <div class="md:col-span-3 flex items-center pb-2.5">
+                    <label class="inline-flex items-center space-x-2 cursor-pointer">
+                        <input type="checkbox" name="auto_create_shipment" value="1" checked class="w-4 h-4 text-[#007AFF] rounded border-slate-300 focus:ring-[#007AFF]">
+                        <span class="text-xs font-medium text-slate-700">Buat/tautkan Shipment otomatis</span>
+                    </label>
+                </div>
+                <div class="md:col-span-3">
+                    <button type="submit" class="w-full px-4 py-2.5 rounded-xl bg-[#007AFF] hover:bg-[#0066D6] text-white font-bold text-xs shadow-xs transition-all active:scale-95 cursor-pointer">
+                        Tarik Data CEISA Sekarang
+                    </button>
+                </div>
+            </form>
+        </div>
+
         <!-- Gateway Configuration Form (Saved to Database, Independent from .env) -->
         <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
@@ -334,6 +384,19 @@
                             </div>
                         </label>
                     </div>
+
+                    <!-- Proteksi Read-Only / Tarik Data Saja -->
+                    <label class="mt-3 p-3.5 rounded-xl border border-sky-200 bg-sky-50/70 flex items-start space-x-3 cursor-pointer">
+                        <input type="checkbox" name="ceisa_read_only" value="1"
+                               {{ old('ceisa_read_only', ($settings['ceisa_read_only'] ?? config('ceisa.api.read_only', true))) ? 'checked' : '' }}
+                               class="mt-0.5 w-4 h-4 text-[#007AFF] rounded border-slate-300 focus:ring-[#007AFF]">
+                        <div class="text-xs">
+                            <span class="font-bold text-slate-900 block">🔒 Mode Tarik Data Saja (Read-Only — Jangan Kirim Data ke CEISA)</span>
+                            <span class="text-[11px] text-slate-600 block mt-0.5">
+                                Jika aktif, Genie memblokir seluruh pengiriman/submit dokumen (<code class="font-mono bg-white px-1 rounded">POST /document</code>) ke server CEISA dan hanya mengizinkan penarikan data (<code class="font-mono bg-white px-1 rounded">GET /status</code>, <code class="font-mono bg-white px-1 rounded">/kurs</code>, <code class="font-mono bg-white px-1 rounded">/tarif-hs</code>).
+                            </span>
+                        </div>
+                    </label>
                 </div>
 
                 <!-- 2. Kredensial Gateway Host to Host (H2H) -->
@@ -464,6 +527,21 @@
                         <h3 class="font-bold text-xs text-slate-900 uppercase tracking-wider">Integrasi Server & Webhook DJBC</h3>
                     </div>
 
+                    @php
+                        $webhookSecret = $settings['ceisa_webhook_secret'] ?? $config['api']['webhook_secret'] ?? '';
+                        $callbackBaseUrl = url('/api/v1/ceisa/webhook');
+                        $callbackFullUrl = !empty($webhookSecret) ? $callbackBaseUrl . '?token=' . urlencode($webhookSecret) : $callbackBaseUrl;
+                    @endphp
+
+                    <div>
+                        <label for="ceisa_webhook_secret" class="block text-xs font-bold text-slate-700 mb-1.5">Token Keamanan Callback Webhook (Opsional)</label>
+                        <input type="text" id="ceisa_webhook_secret" name="ceisa_webhook_secret"
+                               value="{{ old('ceisa_webhook_secret', $webhookSecret) }}"
+                               placeholder="Kosongkan jika tanpa token, atau isi secret key agar endpoint hanya menerima request valid"
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#007AFF]/20 focus:border-[#007AFF] text-sm font-mono bg-white">
+                        <p class="text-[11px] text-slate-500 mt-1">Jika diisi, sistem CEISA harus mengirimkan token ini via header <code class="font-mono bg-slate-100 px-1 rounded">X-CEISA-Webhook-Secret</code>, header <code class="font-mono bg-slate-100 px-1 rounded">X-Webhook-Token</code>, atau query parameter <code class="font-mono bg-slate-100 px-1 rounded">?token=...</code>.</p>
+                    </div>
+
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono">
                         <div class="p-3.5 rounded-xl bg-white border border-slate-200">
                             <span class="text-slate-400 block font-sans text-[11px] mb-1 font-semibold">IP Public Server (Untuk Form Whitelist DJBC):</span>
@@ -472,15 +550,15 @@
                         </div>
 
                         <div class="p-3.5 rounded-xl bg-white border border-slate-200" x-data="{ copied: false }">
-                            <span class="text-slate-400 block font-sans text-[11px] mb-1 font-semibold">Webhook URL Callback DJBC (Real-Time):</span>
+                            <span class="text-slate-400 block font-sans text-[11px] mb-1 font-semibold">Webhook URL Callback DJBC (Real-Time, POST JSON):</span>
                             <div class="flex items-center space-x-2">
-                                <span class="font-bold text-[#007AFF] text-xs truncate select-all">{{ url('/api/v1/ceisa/webhook') }}</span>
-                                <button type="button" @click="navigator.clipboard.writeText('{{ url('/api/v1/ceisa/webhook') }}'); copied = true; setTimeout(() => copied = false, 2000)" 
+                                <span class="font-bold text-[#007AFF] text-xs truncate select-all">{{ $callbackFullUrl }}</span>
+                                <button type="button" @click="navigator.clipboard.writeText('{{ $callbackFullUrl }}'); copied = true; setTimeout(() => copied = false, 2000)" 
                                         class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold font-sans cursor-pointer shrink-0">
                                     <span x-text="copied ? '✓ Tersalin' : 'Salin'">Salin</span>
                                 </button>
                             </div>
-                            <p class="text-[10px] font-sans text-slate-500 mt-1">Salin URL ini ke kolom <em>Webhook URL</em> pada portal Bea Cukai untuk menerima notifikasi SPPB/NPE instan.</p>
+                            <p class="text-[10px] font-sans text-slate-500 mt-1">Salin URL ini ke kolom <em>Webhook / Callback URL</em> pada portal CEISA 4.0 untuk menerima notifikasi status/SPPB/NPE otomatis.</p>
                         </div>
                     </div>
                 </div>

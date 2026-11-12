@@ -106,11 +106,28 @@
                                 <div class="text-[11px] text-black/45 dark:text-white/45">Tujuan: Gudang Pabrik</div>
                             </td>
                             <td class="py-3 px-4">
-                                @php $channel = $shp->customs_channel ?? 'HIJAU'; @endphp
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold font-mono
-                                    {{ $channel === 'HIJAU' ? 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158]' : ($channel === 'MERAH' ? 'bg-[#FF3B30]/15 text-[#C41E17] dark:text-[#FF453A]' : 'bg-[#FF9500]/15 text-[#B25E00] dark:text-[#FF9F0A]') }}">
-                                    JALUR {{ $channel }}
-                                </span>
+                                @php
+                                    $channel = $shp->customs_channel ?? 'HIJAU';
+                                    $photoCnt = $shp->inspectionPhotos->count();
+                                @endphp
+                                <div class="flex flex-wrap items-center gap-1">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold font-mono
+                                        {{ $channel === 'HIJAU' ? 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158]' : ($channel === 'MERAH' ? 'bg-[#FF3B30]/15 text-[#C41E17] dark:text-[#FF453A]' : 'bg-[#FF9500]/15 text-[#B25E00] dark:text-[#FF9F0A]') }}">
+                                        JALUR {{ $channel }}
+                                    </span>
+                                    @if($shp->spjm_received)
+                                        <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#FF3B30]/15 text-[#FF3B30]">SPJM</span>
+                                    @endif
+                                    @if($shp->npd_received)
+                                        <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#FF9500]/15 text-[#FF9500]">NPD</span>
+                                    @endif
+                                    @if($shp->dnp_received)
+                                        <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#FF9500]/15 text-[#FF9500]">DNP</span>
+                                    @endif
+                                </div>
+                                <div class="text-[10px] font-mono text-black/50 dark:text-white/50 mt-1">
+                                    {{ $photoCnt }} Foto {{ $shp->new_seal_number ? '· Segel: ' . $shp->new_seal_number : '' }}
+                                </div>
                             </td>
                             <td class="py-3 px-4">
                                 @if($shp->do_is_released)
@@ -132,6 +149,12 @@
                                 </span>
                             </td>
                             <td class="py-3 px-4 text-right space-x-1.5 whitespace-nowrap">
+                                <button type="button"
+                                        onclick="openPhotoInspectionModal('{{ $shp->id }}', '{{ $shp->shipment_number ?? $shp->project_no }}', '{{ $shp->nomor_kontainer }}', '{{ $shp->new_seal_number }}')"
+                                        class="btn-apple-gray !h-8 !px-2.5 !text-[11px] inline-flex items-center gap-1">
+                                    <i data-lucide="camera" class="w-3.5 h-3.5 text-[#007AFF]"></i>
+                                    <span>Foto SPJM/Segel</span>
+                                </button>
                                 @if($shp->status === 'GATE_OUT')
                                     <!-- Tombol Konfirmasi POD Modal Trigger -->
                                     <button type="button" 
@@ -268,5 +291,66 @@ function openPodModal(shipmentId, shipmentNumber) {
     modal.classList.remove('hidden');
     if (window.lucide) window.lucide.createIcons();
 }
+
+function openPhotoInspectionModal(shipmentId, shipmentNumber, containerNo, sealNo) {
+    const modal = document.getElementById('modal-inspection-photo');
+    document.getElementById('form-inspection-photo').action = `/core/traffic/${shipmentId}/inspection-photos`;
+    document.getElementById('ip-subtitle').textContent = shipmentNumber;
+    document.getElementById('ip-container').value = containerNo || '';
+    document.getElementById('ip-seal').value = sealNo || '';
+    modal.classList.remove('hidden');
+    if (window.lucide) window.lucide.createIcons();
+}
 </script>
+
+<!-- Modal Foto Pemeriksaan Fisik SPJM & Segel Kembali -->
+<div id="modal-inspection-photo" class="hidden fixed inset-0 z-[200] overflow-y-auto bg-black/60 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="app-modal-dialog app-modal-dialog-md rounded-t-[20px] sm:rounded-[20px] bg-white dark:bg-[#1C1C1E] border border-black/10 dark:border-white/10 shadow-2xl p-6 text-[13px]">
+        <div class="flex items-center justify-between pb-3 border-b border-black/5 dark:border-white/5 mb-4">
+            <div>
+                <h3 class="text-[16px] font-bold text-black dark:text-white">Upload Foto Pemeriksaan Fisik / Segel Kembali</h3>
+                <p id="ip-subtitle" class="text-[11px] font-mono text-black/50 dark:text-white/50"></p>
+            </div>
+            <button type="button" onclick="document.getElementById('modal-inspection-photo').classList.add('hidden')" class="p-1 rounded-[8px] text-black/40 hover:text-black cursor-pointer">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+        <form id="form-inspection-photo" method="POST" enctype="multipart/form-data" class="space-y-3.5">
+            @csrf
+            <div>
+                <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Tahapan Pemeriksaan</label>
+                <select name="stage" required class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-[13px]">
+                    @foreach(\App\Models\InspectionPhoto::IMPORT_STAGES as $k => $lbl)
+                        <option value="{{ $k }}">{{ $lbl }}</option>
+                    @endforeach
+                    @foreach(\App\Models\InspectionPhoto::EXPORT_STAGES as $k => $lbl)
+                        <option value="{{ $k }}">{{ $lbl }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Nomor Kontainer</label>
+                    <input type="text" name="container_no" id="ip-container" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-[13px]">
+                </div>
+                <div>
+                    <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Nomor Segel Baru</label>
+                    <input type="text" name="seal_number" id="ip-seal" placeholder="BC-SEAL-8821" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-[13px]">
+                </div>
+            </div>
+            <div>
+                <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Foto Lapangan (Bisa Multi-File)</label>
+                <input type="file" name="photos[]" multiple required accept=".jpg,.jpeg,.png,.webp,.pdf" class="w-full text-[12px]">
+            </div>
+            <div>
+                <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Catatan Lapangan</label>
+                <input type="text" name="caption" placeholder="Kondisi barang, pemeriksa DJBC, penyegelan ulang..." class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-[13px]">
+            </div>
+            <div class="pt-3 border-t border-black/5 flex justify-end gap-2">
+                <button type="button" onclick="document.getElementById('modal-inspection-photo').classList.add('hidden')" class="btn-apple-gray !h-9 text-[12px]">Batal</button>
+                <button type="submit" class="btn-apple-filled !h-9 text-[12px]">Simpan Foto Pemeriksaan</button>
+            </div>
+        </form>
+    </div>
+</div>
 @endsection

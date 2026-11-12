@@ -4,6 +4,35 @@
 
 @section('content')
 <div class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12">
+
+    <!-- 0. Header Proyek & 11 Pos Workflow Stepper -->
+    @if(isset($shipment))
+        @include('core.components.workflow_pos_stepper')
+
+        <!-- Alert Demurrage & Free Time Warning -->
+        @if($shipment->is_demurrage_warning)
+        <div class="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-900/50 text-rose-800 dark:text-rose-300 text-xs flex items-center justify-between gap-4 mb-6">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                    <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+                </div>
+                <div>
+                    <strong class="font-semibold block text-slate-900 dark:text-white">Peringatan Free Time Demurrage Pelabuhan</strong>
+                    <span class="text-rose-700 dark:text-rose-300">Sisa free time pelabuhan tinggal <strong class="font-semibold">{{ $shipment->days_left_free_time }} hari</strong> (Jatuh tempo: {{ $shipment->free_time_expired_at?->format('d/m/Y') }}). Segera selesaikan penebusan DO dan pengeluaran barang.</span>
+                </div>
+            </div>
+            <span class="px-2.5 py-1 rounded-lg bg-rose-200/80 dark:bg-rose-900/60 font-semibold text-[10px] uppercase font-mono tracking-wider shrink-0">
+                Perlu Perhatian
+            </span>
+        </div>
+        @endif
+
+        <!-- 1. Tim & PIC Project (Pembagian Tugas 11 Pos & Delegasi SLA) -->
+        <div id="pos-assignment">
+            @include('core.components.project_pic_assignment_card')
+        </div>
+    @endif
+
     <!-- Breadcrumb & Header Toolbar -->
     <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-5 sm:p-6 border border-black/[0.06] dark:border-white/[0.08] shadow-xs">
         <nav class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium mb-2" aria-label="Breadcrumb">
@@ -40,6 +69,61 @@
 
             <!-- Action Buttons Host-to-Host -->
             <div class="flex flex-wrap items-center gap-2">
+                @php
+                    $isBillingLocked = $bc30->isBillingLocked();
+                    $canEditDraft = auth()->user()->isSuperAdmin() || auth()->user()->hasAnyPermission(['document.edit', 'document.edit_after_ceisa']);
+                    $canEditAfterCeisa = auth()->user()->isSuperAdmin() || auth()->user()->hasPermission('document.edit_after_ceisa');
+                @endphp
+
+                @if($isBillingLocked)
+                    <!-- Indikator Terkunci & Read-Only saat Billing / NPE Terbit -->
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 text-xs font-semibold"
+                         title="Respon Resmi Kepabeanan (NPE/Billing) telah diterbitkan oleh DJBC. Dokumen terkunci permanen untuk menjaga integritas data fiskal. Data tetap dapat dilihat sepenuhnya (Read-Only).">
+                        <i data-lucide="lock" class="w-3.5 h-3.5 text-amber-600"></i>
+                        <span>Terkunci (Respon Terbit) &bull; Mode Lihat Saja</span>
+                    </div>
+
+                    @if($bc30->shipment)
+                        <a href="{{ route('core.document.show', $bc30->shipment->id) }}" 
+                           class="btn-apple-gray text-xs inline-flex items-center gap-1.5 px-3.5 py-2 !text-[#34C759] !border-[#34C759]/30 hover:!bg-[#34C759]/10"
+                           title="Buka rincian berkas, deteksi HS code, dan proses sebelumnya pada workspace shipment">
+                            <i data-lucide="eye" class="w-3.5 h-3.5 text-[#34C759]"></i>
+                            <span>Lihat Proses Sebelumnya (Pos 1 - 3)</span>
+                        </a>
+                    @endif
+                @else
+                    @if($bc30->status === 'DRAFT')
+                        @if($canEditDraft)
+                            <a href="{{ route('bc30.edit', $bc30->id) }}" 
+                               class="btn-apple-gray text-xs inline-flex items-center gap-1.5 px-3.5 py-2 !border-[#34C759]/30 !text-[#34C759] hover:!bg-[#34C759]/10">
+                                <i data-lucide="edit-3" class="w-3.5 h-3.5 text-[#34C759]"></i>
+                                <span>Edit Draft PEB</span>
+                            </a>
+                        @endif
+                    @else
+                        @if($canEditAfterCeisa)
+                            <a href="{{ route('bc30.edit', $bc30->id) }}" 
+                               class="btn-apple-gray text-xs inline-flex items-center gap-1.5 px-3.5 py-2 !border-amber-500/40 !text-amber-700 dark:!text-amber-400 hover:!bg-amber-500/10"
+                               title="Izin khusus: Revisi data setelah dokumen terkirim ke CEISA">
+                                <i data-lucide="edit-3" class="w-3.5 h-3.5 text-amber-600"></i>
+                                <span>Revisi Pasca-CEISA</span>
+                            </a>
+
+                            <form action="{{ route('bc30.reopen-draft', $bc30->id) }}" method="POST" class="inline"
+                                  onsubmit="return confirm('Apakah Anda yakin ingin membuka kembali dokumen ini ke status DRAFT untuk revisi ulang dan penyesuaian skema CEISA?');">
+                                @csrf
+                                <button type="submit" 
+                                        class="btn-apple-gray text-xs inline-flex items-center gap-1.5 px-3.5 py-2 hover:!text-indigo-600"
+                                        title="Kembalikan status dokumen ke DRAFT">
+                                    <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-indigo-600"></i>
+                                    <span>Buka Kembali ke Draft</span>
+                                </button>
+                            </form>
+                        @endif
+                    @endif
+                @endif
+
+
                 <form action="{{ route('bc30.check-schema', $bc30->id) }}" method="POST">
                     @csrf
                     <button type="submit" class="btn-apple-gray text-xs inline-flex items-center gap-1.5 px-3.5 py-2">
@@ -51,7 +135,7 @@
                 @if($bc30->status === 'DRAFT' || $bc30->status === 'REJECT')
                     <form action="{{ route('bc30.submit', $bc30->id) }}" method="POST">
                         @csrf
-                        <button type="submit" class="btn-apple-filled text-xs inline-flex items-center gap-1.5 px-4 py-2 cursor-pointer">
+                        <button type="submit" class="btn-apple-filled text-xs inline-flex items-center gap-1.5 px-4 py-2 cursor-pointer !bg-[#34C759] hover:!bg-[#2fb350]">
                             <i data-lucide="send" class="w-3.5 h-3.5"></i>
                             <span>Kirim ke CEISA 4.0</span>
                         </button>
@@ -91,38 +175,23 @@
             </div>
         @endif
 
-        <!-- Timeline Status Tracker Ekspor -->
-        <div class="mt-6 pt-5 border-t border-black/[0.06] dark:border-white/[0.06]">
-            <div class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Siklus Pemrosesan Ekspor (PEB)</div>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                <!-- 1. Draft -->
-                <div class="p-3.5 rounded-2xl border {{ in_array($bc30->status, ['DRAFT', 'SUBMITTED', 'PROSES', 'NPE']) ? 'bg-[#007AFF]/10 border-[#007AFF]/20 text-[#007AFF] font-semibold' : 'bg-black/[0.02] dark:bg-white/[0.02] border-black/[0.06] dark:border-white/[0.06] text-slate-400' }}">
-                    <div class="text-[10px] uppercase font-bold opacity-75">Tahap 1</div>
-                    <div class="mt-1 font-medium">1. Draft PEB</div>
-                </div>
-                <!-- 2. Terkirim -->
-                <div class="p-3.5 rounded-2xl border {{ in_array($bc30->status, ['SUBMITTED', 'PROSES', 'NPE']) ? 'bg-[#007AFF]/10 border-[#007AFF]/20 text-[#007AFF] font-semibold' : 'bg-black/[0.02] dark:bg-white/[0.02] border-black/[0.06] dark:border-white/[0.06] text-slate-400' }}">
-                    <div class="text-[10px] uppercase font-bold opacity-75">Tahap 2</div>
-                    <div class="mt-1 font-medium">2. Gateway CEISA 4.0</div>
-                </div>
-                <!-- 3. Nomor Pendaftaran -->
-                <div class="p-3.5 rounded-2xl border {{ in_array($bc30->status, ['PROSES', 'NPE']) || $bc30->nomor_daftar ? 'bg-[#007AFF]/10 border-[#007AFF]/20 text-[#007AFF] font-semibold' : 'bg-black/[0.02] dark:bg-white/[0.02] border-black/[0.06] dark:border-white/[0.06] text-slate-400' }}">
-                    <div class="text-[10px] uppercase font-bold opacity-75">Tahap 3</div>
-                    <div class="mt-1 font-medium">3. Nomor Pendaftaran</div>
-                    @if($bc30->nomor_daftar)
-                        <div class="font-mono text-[10px] font-bold text-[#007AFF] mt-0.5 tabular-nums">{{ $bc30->nomor_daftar }}</div>
-                    @endif
-                </div>
-                <!-- 4. NPE Final -->
-                <div class="p-3.5 rounded-2xl border {{ $bc30->status === 'NPE' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold' : 'bg-black/[0.02] dark:bg-white/[0.02] border-black/[0.06] dark:border-white/[0.06] text-slate-400' }}">
-                    <div class="text-[10px] uppercase font-bold opacity-75">Tahap 4</div>
-                    <div class="mt-1 font-medium">4. NPE (Izin Muat)</div>
-                    @if($bc30->nomor_sppb_npe)
-                        <div class="font-mono text-[10px] text-emerald-600 mt-0.5">{{ $bc30->nomor_sppb_npe }}</div>
-                    @endif
-                </div>
+        @if(isset($shipment))
+        <div class="mt-6 pt-5 border-t border-black/[0.06] dark:border-white/[0.06] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+                <span class="px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 text-xs font-bold font-mono">
+                    {{ $shipment->shipment_number ?? $shipment->project_no }}
+                </span>
+                <span class="text-xs text-slate-600 dark:text-slate-300">
+                    Pelacakan Alur 11 Pos Ekspor: <strong class="text-slate-900 dark:text-white">Tahap {{ $shipment->stage_index + 1 }} dari 11 Pos ({{ $shipment->stage_pipeline_current['title'] ?? 'Alur Berjalan' }})</strong>
+                </span>
             </div>
+            <a href="{{ route('core.document.show', $shipment->id) }}" 
+               class="btn-apple-filled text-xs inline-flex items-center gap-1.5 px-3.5 py-2">
+                <span>Buka Workspace 9 Berkas & DO</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </a>
         </div>
+        @endif
     </div>
 
     <!-- NPE Card if available -->

@@ -21,6 +21,8 @@ use App\Models\Shift;
 use App\Models\ShipmentPic;
 use App\Models\User;
 use App\Models\WorkLocation;
+use App\Services\Accounting\AccountingService;
+use App\Services\Hrm\TaxTerCalculatorService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -591,10 +593,25 @@ class HrmController extends Controller implements HasMiddleware
                 $allowanceCustoms = ($emp->team === 'DOCUMENT' || $emp->team === 'FIELD') ? 1500000 : 0;
                 $gross = $base + $allowanceMeal + $allowanceTransport + $allowanceCustoms;
 
-                $deductBpjsTk = round($base * 0.02); // 2% JHT
-                $deductBpjsKes = round($base * 0.01); // 1% BPJS Kes
+                // 1. Hitung Rincian BPJS Karyawan & BPJS Perusahaan (Plafon Kes Rp12jt, JP Rp11.086.300)
+                $bpjs = TaxTerCalculatorService::calculateBpjs($base);
+                $deductBpjsTk = $bpjs['employee']['jht'] + $bpjs['employee']['jp'];
+                $deductBpjsKes = $bpjs['employee']['kes'];
+                $totalEmployeeBpjs = $bpjs['employee']['total'];
 
-                // Cek cicilan kasbon aktif
+                // Premi perusahaan yang menjadi komponen bruto pajak
+                $companyPremiums = $bpjs['company']['kes'] + $bpjs['company']['jkk'] + $bpjs['company']['jkm'];
+
+                // 2. Hitung PPh 21 TER PMK 168/2023 (Kategori A, B, atau C)
+                $taxResult = TaxTerCalculatorService::calculatePph21(
+                    cashEarnings: $gross,
+                    companyPremiums: $companyPremiums,
+                    ptkp: $emp->tax_ptkp_status ?? 'TK/0',
+                    hasNpwp: !empty($emp->tax_id_npwp)
+                );
+                $deductPph21 = $taxResult['pph21'];
+
+                // 3. Cek cicilan kasbon aktif
                 $activeAdvance = CashAdvance::where('employee_id', $emp->id)->active()->first();
                 $deductKasbon = 0;
                 if ($activeAdvance && $activeAdvance->installments > 0) {
@@ -602,7 +619,7 @@ class HrmController extends Controller implements HasMiddleware
                     $deductKasbon = min($installmentValue, (float) $activeAdvance->balance);
                 }
 
-                $deductions = $deductBpjsTk + $deductBpjsKes + $deductKasbon;
+                $deductions = $totalEmployeeBpjs + $deductKasbon + $deductPph21;
                 $net = $gross - $deductions;
 
                 $slip = Payslip::create([
@@ -613,7 +630,7 @@ class HrmController extends Controller implements HasMiddleware
                     'deductions' => $deductions,
                 ]);
 
-                // Line items rincian
+                // Line items penghasilan
                 PayslipLine::create(['payslip_id' => $slip->id, 'label' => 'Gaji Pokok Pegawai', 'kind' => 'ALLOWANCE', 'amount' => $base]);
                 PayslipLine::create(['payslip_id' => $slip->id, 'label' => 'Uang Makan & Operasional Harian', 'kind' => 'ALLOWANCE', 'amount' => $allowanceMeal]);
                 PayslipLine::create(['payslip_id' => $slip->id, 'label' => 'Tunjangan Transportasi Pelabuhan', 'kind' => 'ALLOWANCE', 'amount' => $allowanceTransport]);
@@ -622,17 +639,36 @@ class HrmController extends Controller implements HasMiddleware
                     PayslipLine::create(['payslip_id' => $slip->id, 'label' => 'Insentif Sertifikasi Ahli PPJK & Behandle', 'kind' => 'ALLOWANCE', 'amount' => $allowanceCustoms]);
                 }
 
-                PayslipLine::create(['payslip_id' => $slip->id, 'label' => 'Potongan Iuran BPJS Ketenagakerjaan (2%)', 'kind' => 'DEDUCTION', 'amount' => $deductBpjsTk]);
-                PayslipLine::create(['payslip_id' => $slip->id, 'label' => 'Potongan Iuran BPJS Kesehatan (1%)', 'kind' => 'DEDUCTION', 'amount' => $deductBpjsKes]);
+                // Line items potongan resmi (Deductions)
+                PayslipLine::create(['payslip_id' => $slip->id, 'label' => 'Potongan Iuran JHT BPJS Ketenagakerjaan (2%)', 'kind' => 'DEDUCTION', 'amount' => $bpjs['employee']['jht']]);
+                PayslipLine::create(['payslip_id' => $slip->id, 'label' => 'Potongan Iuran JP BPJS Ketenagakerjaan (1%)', 'kind' => 'DEDUCTION', 'amount' => $bpjs['employee']['jp']]);
+                PayslipLine::create(['payslip_id' => $slip->id, 'label' => 'Potongan Iuran BPJS Kesehatan (1%)', 'kind' => 'DEDUCTION', 'amount' => $bpjs['employee']['kes']]);
+
+                if ($deductPph21 > 0) {
+                    PayslipLine::create([
+                        'payslip_id' => $slip->id,
+                        'label' => "Pajak Penghasilan PPh 21 (TER {$taxResult['category']} " . number_format($taxResult['rate_percent'], 2) . "%)",
+                        'kind' => 'DEDUCTION',
+                        'amount' => $deductPph21,
+                    ]);
+                }
 
                 if ($deductKasbon > 0) {
                     PayslipLine::create(['payslip_id' => $slip->id, 'label' => 'Potongan Cicilan Kasbon Pegawai', 'kind' => 'DEDUCTION', 'amount' => $deductKasbon]);
                 }
+
+                // Line item tanggungan BPJS perusahaan (untuk rekonsiliasi beban dan jurnal umum)
+                PayslipLine::create([
+                    'payslip_id' => $slip->id,
+                    'label' => 'Tanggungan BPJS Dibayar Perusahaan (JHT, JP, Kes, JKK, JKM)',
+                    'kind' => 'COMPANY_BPJS',
+                    'amount' => $bpjs['company']['total'],
+                ]);
             }
         });
 
         return redirect()->route('hrm.index', ['tab' => 'payroll'])
-            ->with('success', "Periode payroll {$period} berhasil digenerate dalam status DRAFT.");
+            ->with('success', "Periode payroll {$period} berhasil digenerate dengan kalkulasi TER PMK 168/2023 & BPJS 2026.");
     }
 
     /**
@@ -650,14 +686,14 @@ class HrmController extends Controller implements HasMiddleware
     }
 
     /**
-     * Pencairan Resmi Payroll (Disburse) & Potong Cicilan Kasbon.
+     * Pencairan Resmi Payroll (Disburse), Potong Kasbon & Terbitkan Jurnal Akuntansi Otomatis.
      */
     public function disbursePayrollRun(PayrollRun $payrollRun)
     {
         DB::transaction(function () use ($payrollRun) {
             $payrollRun->update(['status' => 'DISBURSED']);
 
-            // Potong saldo cicilan kasbon yang tercatat di payslip lines
+            // 1. Potong saldo cicilan kasbon yang tercatat di payslip lines
             foreach ($payrollRun->payslips as $slip) {
                 $kasbonLine = $slip->lines()->where('label', 'like', '%Kasbon%')->first();
                 if ($kasbonLine) {
@@ -667,10 +703,13 @@ class HrmController extends Controller implements HasMiddleware
                     }
                 }
             }
+
+            // 2. Terbitkan Jurnal Akuntansi Penggajian Lengkap (Debit Beban Gaji & BPJS, Kredit Kas/Bank & Hutang Pajak)
+            app(AccountingService::class)->recordPayrollDisbursement($payrollRun);
         });
 
         return redirect()->route('hrm.index', ['tab' => 'payroll'])
-            ->with('success', "Payroll periode {$payrollRun->period} berhasil dicairkan (DISBURSED).");
+            ->with('success', "Payroll periode {$payrollRun->period} berhasil dicairkan (DISBURSED) dan jurnal umum telah terbentuk secara otomatis.");
     }
 
     /**
@@ -1390,12 +1429,23 @@ class HrmController extends Controller implements HasMiddleware
 
                 $gross = $base + $meal + $transport + $customs + $overtime + $thr;
 
-                $deductBpjsTk = round($base * 0.02);
-                $deductBpjsKes = round($base * 0.01);
-                $deductKasbon = (float) ($data['deduct_kasbon'] ?? 0);
-                $deductPph21 = round($gross > 5000000 ? ($gross * 0.005) : 0); // TER Estimasi PPh 21
+                // 1. Hitung BPJS Karyawan dan Perusahaan
+                $bpjs = TaxTerCalculatorService::calculateBpjs($base);
+                $deductBpjsTk = $bpjs['employee']['jht'] + $bpjs['employee']['jp'];
+                $deductBpjsKes = $bpjs['employee']['kes'];
+                $companyPremiums = $bpjs['company']['kes'] + $bpjs['company']['jkk'] + $bpjs['company']['jkm'];
 
-                $deductions = $deductBpjsTk + $deductBpjsKes + $deductKasbon + $deductPph21;
+                // 2. Hitung PPh 21 TER PMK 168/2023
+                $taxResult = TaxTerCalculatorService::calculatePph21(
+                    cashEarnings: $gross,
+                    companyPremiums: $companyPremiums,
+                    ptkp: $emp->tax_ptkp_status ?? 'TK/0',
+                    hasNpwp: !empty($emp->tax_id_npwp)
+                );
+                $deductPph21 = $taxResult['pph21'];
+                $deductKasbon = (float) ($data['deduct_kasbon'] ?? 0);
+
+                $deductions = $bpjs['employee']['total'] + $deductKasbon + $deductPph21;
                 $net = $gross - $deductions;
 
                 $slip = Payslip::create([
@@ -1420,15 +1470,28 @@ class HrmController extends Controller implements HasMiddleware
                     PayslipLine::create(['payslip_id' => $slip->id, 'label' => 'Tunjangan Hari Raya (THR Keagamaan)', 'kind' => 'ALLOWANCE', 'amount' => $thr]);
                 }
 
-                PayslipLine::create(['payslip_id' => $slip->id, 'label' => 'Iuran BPJS Ketenagakerjaan (2% JHT)', 'kind' => 'DEDUCTION', 'amount' => $deductBpjsTk]);
-                PayslipLine::create(['payslip_id' => $slip->id, 'label' => 'Iuran BPJS Kesehatan (1%)', 'kind' => 'DEDUCTION', 'amount' => $deductBpjsKes]);
+                PayslipLine::create(['payslip_id' => $slip->id, 'label' => 'Iuran BPJS Ketenagakerjaan (2% JHT)', 'kind' => 'DEDUCTION', 'amount' => $bpjs['employee']['jht']]);
+                PayslipLine::create(['payslip_id' => $slip->id, 'label' => 'Iuran BPJS Ketenagakerjaan (1% JP)', 'kind' => 'DEDUCTION', 'amount' => $bpjs['employee']['jp']]);
+                PayslipLine::create(['payslip_id' => $slip->id, 'label' => 'Iuran BPJS Kesehatan (1%)', 'kind' => 'DEDUCTION', 'amount' => $bpjs['employee']['kes']]);
 
                 if ($deductPph21 > 0) {
-                    PayslipLine::create(['payslip_id' => $slip->id, 'label' => 'Pajak Penghasilan PPh 21 (TER 2024)', 'kind' => 'DEDUCTION', 'amount' => $deductPph21]);
+                    PayslipLine::create([
+                        'payslip_id' => $slip->id,
+                        'label' => "Pajak Penghasilan PPh 21 (TER {$taxResult['category']} " . number_format($taxResult['rate_percent'], 2) . "%)",
+                        'kind' => 'DEDUCTION',
+                        'amount' => $deductPph21,
+                    ]);
                 }
                 if ($deductKasbon > 0) {
                     PayslipLine::create(['payslip_id' => $slip->id, 'label' => 'Potongan Angsuran Kasbon', 'kind' => 'DEDUCTION', 'amount' => $deductKasbon]);
                 }
+
+                PayslipLine::create([
+                    'payslip_id' => $slip->id,
+                    'label' => 'Tanggungan BPJS Dibayar Perusahaan (JHT, JP, Kes, JKK, JKM)',
+                    'kind' => 'COMPANY_BPJS',
+                    'amount' => $bpjs['company']['total'],
+                ]);
             }
 
             return $run;

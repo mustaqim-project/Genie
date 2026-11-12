@@ -92,6 +92,9 @@ class SystemSetting extends Model
             if (isset($settings['ceisa_mock_mode'])) {
                 config(['ceisa.api.mock_mode' => filter_var($settings['ceisa_mock_mode'], FILTER_VALIDATE_BOOLEAN)]);
             }
+            if (isset($settings['ceisa_read_only'])) {
+                config(['ceisa.api.read_only' => filter_var($settings['ceisa_read_only'], FILTER_VALIDATE_BOOLEAN)]);
+            }
             if (isset($settings['ceisa_base_url'])) config(['ceisa.api.base_url' => $settings['ceisa_base_url']]);
             if (isset($settings['ceisa_auth_url'])) config(['ceisa.api.auth_url' => $settings['ceisa_auth_url']]);
             if (isset($settings['ceisa_refresh_token_url'])) config(['ceisa.api.refresh_token_url' => $settings['ceisa_refresh_token_url']]);
@@ -100,6 +103,7 @@ class SystemSetting extends Model
             if (isset($settings['ceisa_api_key'])) config(['ceisa.api.api_key' => $settings['ceisa_api_key']]);
             if (isset($settings['ceisa_application_id'])) config(['ceisa.api.application_id' => $settings['ceisa_application_id']]);
             if (isset($settings['ceisa_whatsapp_no'])) config(['ceisa.api.whatsapp_no' => $settings['ceisa_whatsapp_no']]);
+            if (isset($settings['ceisa_webhook_secret'])) config(['ceisa.api.webhook_secret' => $settings['ceisa_webhook_secret']]);
 
             // 3. Kebijakan Sesi Keamanan Mingguan
             if (isset($settings['session_lifetime_minutes'])) {

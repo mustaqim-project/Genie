@@ -179,23 +179,52 @@
                     </div>
                 </div>
 
-                <button type="button" 
-                        @click="scanAndExtractFiles()" 
-                        :disabled="scanning" 
-                        class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-[12px] bg-[#007AFF] hover:bg-[#0071E3] text-white text-[12px] font-semibold transition-all shadow-xs active:scale-[0.98] disabled:opacity-50 cursor-pointer shrink-0">
-                    <template x-if="scanning">
-                        <span class="inline-flex items-center gap-2">
-                            <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                            <span>Memindai & Mengekstrak...</span>
-                        </span>
-                    </template>
-                    <template x-if="!scanning">
-                        <span class="inline-flex items-center gap-2">
-                            <i data-lucide="sparkles" class="w-4 h-4"></i>
-                            <span>Pindai & Ekstrak Otomatis ke Formulir</span>
-                        </span>
-                    </template>
-                </button>
+                <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Model AI:</span>
+                        <select x-model="selectedModel" class="px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#1C1C1E] dark:text-white font-mono text-[11px] font-semibold focus:outline-none focus:ring-1 focus:ring-[#007AFF]">
+                            <optgroup label="OpenAI Codex Astra (Rekomendasi)">
+                                <option value="cx/gpt-6-astra" selected>cx/gpt-6-astra (Rekomendasi)</option>
+                                <option value="cx/gpt-6-astra-xhigh">cx/gpt-6-astra-xhigh</option>
+                            </optgroup>
+                            <optgroup label="OpenAI Codex Terra & Sol">
+                                <option value="cx/gpt-5.6-terra">cx/gpt-5.6-terra (Customs)</option>
+                                <option value="cx/gpt-5.6-sol">cx/gpt-5.6-sol</option>
+                                <option value="cx/gpt-5.6-sol-xhigh">cx/gpt-5.6-sol-xhigh</option>
+                                <option value="cx/gpt-5.6-luna">cx/gpt-5.6-luna</option>
+                            </optgroup>
+                            <optgroup label="OpenAI Codex 5.x">
+                                <option value="cx/gpt-5.5">cx/gpt-5.5</option>
+                                <option value="cx/gpt-5.5-xhigh">cx/gpt-5.5-xhigh</option>
+                                <option value="cx/gpt-5.4">cx/gpt-5.4</option>
+                            </optgroup>
+                            <optgroup label="Google Antigravity Gemini">
+                                <option value="ag/gemini-3.8-flash-high">ag/gemini-3.8-flash-high</option>
+                                <option value="ag/gemini-3.8-flash-medium">ag/gemini-3.8-flash-medium</option>
+                                <option value="ag/gemini-3.8-flash-low">ag/gemini-3.8-flash-low</option>
+                                <option value="ag/gemini-3.7-flash-high">ag/gemini-3.7-flash-high</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <button type="button" 
+                            @click="scanAndExtractFiles()" 
+                            :disabled="scanning" 
+                            class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-[12px] bg-[#007AFF] hover:bg-[#0071E3] text-white text-[12px] font-semibold transition-all shadow-xs active:scale-[0.98] disabled:opacity-50 cursor-pointer shrink-0">
+                        <template x-if="scanning">
+                            <span class="inline-flex items-center gap-2">
+                                <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                <span>Mencocokkan via OpenAI...</span>
+                            </span>
+                        </template>
+                        <template x-if="!scanning">
+                            <span class="inline-flex items-center gap-2">
+                                <i data-lucide="sparkles" class="w-4 h-4"></i>
+                                <span>Pindai & Ekstrak Otomatis ke Formulir</span>
+                            </span>
+                        </template>
+                    </button>
+                </div>
             </div>
 
             <!-- Banner Notifikasi Berhasil Ekstrak -->
@@ -452,34 +481,47 @@
         </div>
 
         <!-- 5. Rincian Barang Ekspor & Bea Keluar (BK) -->
+        @php
+            $itemList = $itemList ?? ($selectedShipment && $selectedShipment->items && $selectedShipment->items->isNotEmpty() ? $selectedShipment->items : [
+                (object)[
+                    'kode_hs' => '0901.11.10',
+                    'uraian_barang' => 'BIJI KOPI ARABIKA GAYO GRADE 1 (EXPORT QUALITY)',
+                    'merk' => 'GAYO HIGHLAND GRADE 1',
+                    'jumlah_kemasan' => 200,
+                    'jenis_kemasan' => 'BAG',
+                    'nilai_fob' => 48500.00,
+                    'tarif_bk' => 0.0,
+                ]
+            ]);
+        @endphp
         <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-6 border border-slate-200/80 dark:border-white/10 shadow-xs">
-            <div class="flex items-center space-x-2 text-slate-800 dark:text-white font-bold text-sm mb-4 pb-2 border-b border-slate-100 dark:border-white/10">
-                <span class="w-6 h-6 rounded-lg bg-indigo-100 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-400 flex items-center justify-center text-xs font-bold">5</span>
-                <span>Komoditas Barang Ekspor & Tarif Bea Keluar (BK)</span>
+            <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100 dark:border-white/10">
+                <div class="flex items-center space-x-2 text-slate-800 dark:text-white font-bold text-sm">
+                    <span class="w-6 h-6 rounded-lg bg-indigo-100 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-400 flex items-center justify-center text-xs font-bold">5</span>
+                    <span>Komoditas Barang Ekspor & Tarif Bea Keluar (BK)</span>
+                </div>
+                <span id="barang_count_badge_bc30" class="text-xs px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-400 font-bold font-mono">
+                    {{ is_countable($itemList) ? count($itemList) : 0 }} Barang
+                </span>
             </div>
 
-            @php
-                $itemList = $selectedShipment && $selectedShipment->items->isNotEmpty() ? $selectedShipment->items : [
-                    (object)[
-                        'kode_hs' => '0901.11.10',
-                        'uraian_barang' => 'INDONESIAN ARABICA COFFEE BEANS GRADE 1 SPECIALTY',
-                        'jumlah_kemasan' => 200,
-                        'jenis_kemasan' => 'BAG',
-                        'nilai_fob' => 48500.00,
-                        'tarif_bk' => 0.0,
-                    ]
-                ];
-            @endphp
-
-            @foreach($itemList as $idx => $item)
-                <div class="p-4 rounded-xl bg-slate-50 dark:bg-[#2C2C2E]/60 border border-slate-200 dark:border-white/10 mb-4">
+            <div id="barang_container_bc30">
+            @foreach($itemList ?? [] as $idx => $item)
+                <div class="p-4 rounded-xl bg-slate-50 dark:bg-[#2C2C2E]/60 border border-slate-200 dark:border-white/10 mb-4 transition-all hover:border-[#007AFF]/40">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300 font-mono">Barang #{{ $idx + 1 }}</span>
+                        <span class="px-2 py-0.5 rounded bg-sky-100 text-sky-800 text-[9px] font-bold font-mono">PEB EKSPOR</span>
+                    </div>
                     <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs mb-3">
                         <div>
-                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">HS Code Ekspor *</label>
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300">HS Code Ekspor *</label>
+                                <button type="button" onclick="quickAiHsLookupBc30(this, {{ $idx }})" class="text-[10px] text-[#007AFF] font-bold hover:underline cursor-pointer">✨ Cek AI</button>
+                            </div>
                             <input type="text" name="barang[{{ $idx }}][hs_code]" 
                                    value="{{ str_replace('.', '', $item->kode_hs ?? '09011110') }}" 
                                    onchange="lookupHsRow(this, {{ $idx }})"
-                                   class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white font-mono" required>
+                                   class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white font-mono font-bold" required>
                             <div id="hs_badge_{{ $idx }}" class="hidden mt-1 p-1.5 rounded-lg text-[10px]"></div>
                         </div>
                         <div class="sm:col-span-2">
@@ -490,7 +532,7 @@
                         </div>
                         <div>
                             <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Merek & Spesifikasi</label>
-                            <input type="text" name="barang[{{ $idx }}][merk]" value="GAYO HIGHLAND GRADE 1" class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white">
+                            <input type="text" name="barang[{{ $idx }}][merk]" value="{{ $item->merk ?? 'GAYO HIGHLAND GRADE 1' }}" class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white">
                         </div>
                     </div>
 
@@ -522,6 +564,7 @@
                     </div>
                 </div>
             @endforeach
+            </div>
         </div>
 
         <!-- 6. Kontainer Ekspor -->
@@ -629,11 +672,77 @@
         }
     }
 
+    async function quickAiHsLookupBc30(btn, idx) {
+        const uraianInput = document.querySelector(`input[name="barang[${idx}][uraian]"]`);
+        const hsInput = document.querySelector(`input[name="barang[${idx}][hs_code]"]`);
+        const badge = document.getElementById(`hs_badge_${idx}`);
+        const modelSelect = document.querySelector('select[x-model="selectedModel"]');
+        const selectedModel = modelSelect ? modelSelect.value : 'cx/gpt-6-astra';
+
+        const text = uraianInput?.value?.trim();
+        if (!text) {
+            alert('Silakan isi uraian barang ekspor terlebih dahulu untuk klasifikasi AI.');
+            uraianInput?.focus();
+            return;
+        }
+
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `<span class="inline-flex items-center gap-1"><svg class="animate-spin h-3 w-3 text-[#007AFF]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> AI Menganalisa...</span>`;
+
+        try {
+            const res = await fetch('{{ route('ai.classify-hs') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    text: text,
+                    direction: 'export',
+                    model: selectedModel
+                })
+            });
+            const data = await res.json();
+            if (data.status === 'success' && data.data) {
+                const item = data.data;
+                const cleanHs = (item.hs_code || '').replace(/[^0-9]/g, '');
+                if (hsInput && cleanHs) {
+                    hsInput.value = cleanHs;
+                }
+                const bkInput = document.querySelector(`input[name="barang[${idx}][tarif_bk]"]`);
+                if (bkInput && item.rates?.bk !== undefined) {
+                    bkInput.value = item.rates.bk;
+                }
+
+                if (badge) {
+                    badge.classList.remove('hidden');
+                    if (item.has_lartas) {
+                        badge.className = 'mt-1 p-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-[10px] font-medium';
+                        badge.innerHTML = `⚠️ <strong>Lartas Ekspor (${item.lartas_category || 'Wajib Izin'}):</strong> ${item.lartas_info || 'Perlu Rekomendasi/Eksportir Terdaftar'}`;
+                    } else {
+                        badge.className = 'mt-1 p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-[10px] font-medium';
+                        badge.innerHTML = `✓ Bebas Lartas Ekspor`;
+                    }
+                }
+            } else {
+                alert(data.message || 'Gagal mengklasifikasikan barang ekspor via AI.');
+            }
+        } catch (err) {
+            console.error('Error quick AI HS export lookup:', err);
+            alert('Terjadi kesalahan koneksi saat klasifikasi AI.');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', calculateFob);
 
     function bc30FormManager() {
         return {
             formMode: '{{ $selectedShipment ? "auto" : "auto" }}',
+            selectedModel: 'cx/gpt-6-astra',
             scanning: false,
             scanned: false,
             fileNames: { bl: '', invoice: '', pl: '', other: '' },
@@ -659,6 +768,7 @@
                 if (blInput?.files?.[0]) formData.append('bl_file', blInput.files[0]);
                 if (invInput?.files?.[0]) formData.append('invoice_file', invInput.files[0]);
                 if (plInput?.files?.[0]) formData.append('packing_list_file', plInput.files[0]);
+                formData.append('ai_model', this.selectedModel || 'cx/gpt-6-astra');
 
                 try {
                     const response = await fetch('{{ route('core.document.parse-documents') }}', {
@@ -733,20 +843,84 @@
                     if (el) el.value = parseFloat(d.total_netto).toFixed(2);
                 }
 
-                // Populate HS code / barang jika ada
+                // Populate seluruh HS code & item barang ekspor hasil ekstraksi AI
                 if (d.items && d.items.length > 0) {
-                    const firstItem = d.items[0];
-                    const hsEl = document.querySelector('[name="barang[0][hs_code]"]');
-                    const descEl = document.querySelector('[name="barang[0][uraian]"]');
-                    const qtyEl = document.querySelector('[name="barang[0][jumlah]"]');
-                    const fobEl = document.querySelector('[name="barang[0][fob]"]');
-                    if (hsEl && firstItem.hs_code) {
-                        hsEl.value = firstItem.hs_code.replace(/[^0-9]/g, '');
-                        lookupHsRow(hsEl, 0);
+                    const container = document.getElementById('barang_container_bc30');
+                    if (container) {
+                        container.innerHTML = '';
+                        d.items.forEach((item, idx) => {
+                            const cleanHs = (item.kode_hs || item.hs_code || '').replace(/[^0-9]/g, '');
+                            const desc = item.uraian_barang || item.description || item.uraian || 'KOMODITAS EKSPOR';
+                            const qty = item.jumlah_kemasan || item.qty || 1;
+                            const kemasan = item.jenis_kemasan || item.kemasan || 'BAG';
+                            const fob = parseFloat(item.nilai_fob || item.fob || item.cif_price || 0).toFixed(2);
+                            const bk = parseFloat(item.tarif_bk_persen ?? item.tarif_bk ?? 0.0).toFixed(1);
+
+                            const rowHtml = `
+                                <div class="p-4 rounded-xl bg-slate-50 dark:bg-[#2C2C2E]/60 border border-slate-200 dark:border-white/10 mb-4 transition-all hover:border-[#007AFF]/40">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300 font-mono">Barang #${idx + 1}</span>
+                                        <span class="px-2 py-0.5 rounded bg-sky-100 text-sky-800 text-[9px] font-bold font-mono">AI MATCHED (PEB)</span>
+                                    </div>
+                                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs mb-3">
+                                        <div>
+                                            <div class="flex items-center justify-between mb-1">
+                                                <label class="block font-semibold text-slate-700 dark:text-slate-300">HS Code Ekspor *</label>
+                                                <button type="button" onclick="quickAiHsLookupBc30(this, ${idx})" class="text-[10px] text-[#007AFF] font-bold hover:underline cursor-pointer">✨ Cek AI</button>
+                                            </div>
+                                            <input type="text" name="barang[${idx}][hs_code]" 
+                                                   value="${cleanHs}" 
+                                                   onchange="lookupHsRow(this, ${idx})"
+                                                   class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white font-mono font-bold" required>
+                                            <div id="hs_badge_${idx}" class="mt-1 p-1.5 rounded-lg text-[10px] ${item.has_lartas ? 'bg-amber-50 border border-amber-200 text-amber-800' : 'bg-emerald-50 border border-emerald-200 text-emerald-800'}">
+                                                ${item.has_lartas ? '⚠️ <strong>Lartas Ekspor:</strong> ' + (item.lartas_info || 'Wajib Izin Ekspor') : '✓ Bebas Lartas Ekspor'}
+                                            </div>
+                                        </div>
+                                        <div class="sm:col-span-2">
+                                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Uraian Komoditas Ekspor *</label>
+                                            <input type="text" name="barang[${idx}][uraian]" 
+                                                   value="${desc}" 
+                                                   class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white" required>
+                                        </div>
+                                        <div>
+                                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Merek & Spesifikasi</label>
+                                            <input type="text" name="barang[${idx}][merk]" value="${item.merk || 'STANDARD EXPORT'}" class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white">
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                                        <div>
+                                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jumlah Kemasan *</label>
+                                            <input type="number" name="barang[${idx}][jumlah]" 
+                                                   value="${qty}" 
+                                                   class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white font-mono tabular-nums" required>
+                                        </div>
+                                        <div>
+                                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jenis Kemasan *</label>
+                                            <input type="text" name="barang[${idx}][kemasan]" 
+                                                   value="${kemasan}" 
+                                                   class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white font-mono" required>
+                                        </div>
+                                        <div>
+                                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">FOB Valas *</label>
+                                            <input type="number" step="0.01" name="barang[${idx}][fob]" 
+                                                   value="${fob}" 
+                                                   class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white font-mono tabular-nums" required>
+                                        </div>
+                                        <div>
+                                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tarif Bea Keluar (BK) %</label>
+                                            <input type="number" step="0.1" name="barang[${idx}][tarif_bk]" 
+                                                   value="${bk}" 
+                                                   class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white font-mono tabular-nums">
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            container.insertAdjacentHTML('beforeend', rowHtml);
+                        });
+                        const badgeCount = document.getElementById('barang_count_badge_bc30');
+                        if (badgeCount) badgeCount.textContent = `${d.items.length} Barang`;
                     }
-                    if (descEl && firstItem.description) descEl.value = firstItem.description;
-                    if (qtyEl && firstItem.qty) qtyEl.value = firstItem.qty;
-                    if (fobEl && firstItem.cif_price) fobEl.value = parseFloat(firstItem.cif_price).toFixed(2);
                 }
 
                 if (typeof calculateFob === 'function') {

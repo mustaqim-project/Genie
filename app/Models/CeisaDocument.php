@@ -89,6 +89,11 @@ class CeisaDocument extends Model
         return $this->hasOne(Shipment::class, 'ceisa_document_id');
     }
 
+    public function ensureShipment(): Shipment
+    {
+        return app(\App\Services\Shipment\ShipmentWorkflowService::class)->ensureShipmentForCeisaDocument($this);
+    }
+
     public function getPayloadAttribute(): array
     {
         return $this->raw_payload ?? [];
@@ -121,4 +126,76 @@ class CeisaDocument extends Model
     {
         return $this->status_description ?? $this->status;
     }
+
+    /**
+     * Dapatkan analisis dan status lartas produk pada dokumen ini.
+     *
+     * @return array<string, mixed>
+     */
+    public function getLartasInfoAttribute(): array
+    {
+        $barang = $this->raw_payload['barang'] ?? [];
+        $totalBarang = count($barang);
+        $lartasBarang = [];
+        $nonLartasBarang = [];
+
+        $hsService = app(\App\Services\Ceisa\CeisaHsCodeService::class);
+
+        foreach ($barang as $b) {
+            $pos = preg_replace('/[^0-9]/', '', (string)($b['posTarif'] ?? ($b['hs_code'] ?? ($b['kode_hs'] ?? ''))));
+            $uraian = $b['uraian'] ?? ($b['uraian_barang'] ?? ($b['description'] ?? 'Barang'));
+
+            $hasLartas = !empty($b['has_lartas']);
+            $lartasDesc = $b['lartas'] ?? ($b['lartas_info'] ?? null);
+
+            if (!$hasLartas && !empty($pos)) {
+                $tariff = $hsService->getTariffAndLartas($pos);
+                if (!empty($tariff['has_lartas'])) {
+                    $hasLartas = true;
+                    $lartasDesc = $tariff['lartas'] ?? 'Wajib Perizinan K/L';
+                }
+            }
+
+            $itemData = [
+                'pos' => $pos,
+                'uraian' => $uraian,
+                'has_lartas' => $hasLartas,
+                'lartas' => $lartasDesc ?: 'Bebas Lartas',
+            ];
+
+            if ($hasLartas) {
+                $lartasBarang[] = $itemData;
+            } else {
+                $nonLartasBarang[] = $itemData;
+            }
+        }
+
+        return [
+            'has_lartas' => count($lartasBarang) > 0,
+            'total_products' => $totalBarang,
+            'lartas_count' => count($lartasBarang),
+            'non_lartas_count' => count($nonLartasBarang),
+            'lartas_items' => $lartasBarang,
+            'non_lartas_items' => $nonLartasBarang,
+            'primary_lartas' => count($lartasBarang) > 0 ? ($lartasBarang[0]['lartas'] ?? 'Wajib Perizinan K/L') : null,
+        ];
+    }
+
+    /**
+     * Cek apakah dokumen telah mencapai tahap Billing atau sesudahnya (Terkunci & Tidak Dapat Diedit).
+     * Dokumen yang telah terbit Billing MPN G3 atau SPPB/NPE terkunci secara fiskal & hukum di DJBC.
+     */
+    public function isBillingLocked(): bool
+    {
+        return in_array($this->status, ['BILLING', 'SPPB', 'NPE', 'JALUR_HIJAU', 'JALUR_KUNING', 'JALUR_MERAH'])
+            || !empty($this->kode_billing)
+            || !empty($this->nomor_sppb_npe)
+            || ($this->shipment && (
+                in_array($this->shipment->status_tahap, [
+                    'BILLING_ISSUED', 'BILLING_PAID', 'DO_PROCESSING', 'DO_RELEASED',
+                    'ARRIVED', 'TRAFFIC_HOLD', 'SPPB_RELEASED', 'GATE_OUT', 'DELIVERY', 'DELIVERED_POD', 'COMPLETED'
+                ]) || !empty($this->shipment->billing_code)
+            ));
+    }
 }
+

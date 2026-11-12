@@ -24,26 +24,65 @@ class CeisaClientService
     }
 
     /**
+     * Helper GET request ke CEISA 4.0
+     */
+    public function get(string $endpoint, array $query = [], ?string $nomorAju = null): array
+    {
+        if (!empty($query)) {
+            $separator = str_contains($endpoint, '?') ? '&' : '?';
+            $endpoint .= $separator . http_build_query($query);
+        }
+
+        return $this->send('GET', $endpoint, [], $nomorAju);
+    }
+
+    /**
+     * Helper POST request ke CEISA 4.0
+     */
+    public function post(string $endpoint, array $payload = [], ?string $nomorAju = null): array
+    {
+        return $this->send('POST', $endpoint, $payload, $nomorAju);
+    }
+
+    /**
      * Kirim request ke CEISA 4.0 DJBC
      */
     public function send(string $method, string $endpoint, array $payload = [], ?string $nomorAju = null): array
     {
+        $httpMethod = strtoupper($method);
         $url = $this->baseUrl . '/' . ltrim($endpoint, '/');
-        $token = $this->authService->getAccessToken();
         $startTime = microtime(true);
 
-        $headers = [
+        // Proteksi Mode Tarik Data Saja (Read-Only): blokir pengiriman / submit dokumen ke CEISA
+        if ($httpMethod !== 'GET' && (bool) config('ceisa.api.read_only', true)) {
+            $blockedResponse = [
+                'status_code' => 403,
+                'success' => false,
+                'message' => 'Mode Tarik Data Saja (Read-Only) aktif: pengiriman data ke CEISA diblokir.',
+                'data' => [
+                    'status' => 'blocked',
+                    'message' => 'Mode Tarik Data Saja (Read-Only) aktif: pengiriman data ke CEISA diblokir.',
+                ],
+            ];
+
+            $this->logRequest($nomorAju, $endpoint, $httpMethod, 403, ['Content-Type' => 'application/json'], $payload, $blockedResponse, 0, false);
+            return $blockedResponse;
+        }
+
+        $baseHeaders = [
             'Content-Type' => 'application/json',
-            'Authorization' => 'Bearer ' . $token,
-            'beacukai-api-key' => $this->apiKey,
+            'beacukai-api-key' => (string) config('ceisa.api.api_key', $this->apiKey),
         ];
 
-        if (!empty($this->applicationId)) {
-            $headers['Application-ID'] = $this->applicationId;
+        $appId = config('ceisa.api.application_id', $this->applicationId);
+        if (!empty($appId)) {
+            $baseHeaders['Application-ID'] = $appId;
         }
 
         // MODE MOCK / SIMULASI UNTUK PENGEMBANGAN LOKAL
-        if ($this->mockMode) {
+        if ((bool) config('ceisa.api.mock_mode', $this->mockMode)) {
+            $token = $this->authService->getAccessToken();
+            $headers = array_merge($baseHeaders, ['Authorization' => 'Bearer ' . $token]);
             $mockResponse = $this->generateMockResponse($endpoint, $payload, $nomorAju);
             $duration = (int) ((microtime(true) - $startTime) * 1000);
 
@@ -52,6 +91,9 @@ class CeisaClientService
         }
 
         try {
+            $token = $this->authService->getAccessToken();
+            $headers = array_merge($baseHeaders, ['Authorization' => 'Bearer ' . $token]);
+
             $request = Http::withHeaders($headers)
                 ->timeout(config('ceisa.api.timeout', 30));
 

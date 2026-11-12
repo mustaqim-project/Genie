@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ShipmentDocument extends Model
 {
-    use HasFactory, HasUuids, SoftDeletes;
+    use HasFactory, HasUuids, SoftDeletes, Auditable;
 
     protected $keyType = 'string';
     public $incrementing = false;
@@ -21,6 +22,8 @@ class ShipmentDocument extends Model
         'file_path',
         'file_size_kb',
         'status',
+        'version',
+        'is_current',
         'verified_by_user_id',
         'verified_at',
         'catatan',
@@ -28,7 +31,14 @@ class ShipmentDocument extends Model
 
     protected $casts = [
         'verified_at' => 'datetime',
+        'version' => 'integer',
+        'is_current' => 'boolean',
     ];
+
+    public function scopeCurrent($query)
+    {
+        return $query->where('is_current', true);
+    }
 
     public function shipment()
     {
@@ -63,20 +73,37 @@ class ShipmentDocument extends Model
         return null;
     }
 
+    public const DOC_TYPES = [
+        'BL' => 'Bill of Lading / AWB',
+        'BL_AWB' => 'Bill of Lading (B/L) Asli / Sea Waybill',
+        'INV' => 'Commercial Invoice',
+        'INVOICE' => 'Commercial Invoice Pemasok Luar Negeri',
+        'PL' => 'Packing List',
+        'PACKING_LIST' => 'Packing List Rincian Barang & Kemasan',
+        'COO' => 'Certificate of Origin (COO / SKA)',
+        'COO_FORME' => 'Certificate of Origin (Form E / Form AK / SKA)',
+        'SC_PO' => 'Sales Contract / Purchase Order (SC/PO)',
+        'INS' => 'Marine Cargo Insurance',
+        'INSURANCE' => 'Polis Sertifikat Asuransi Pengangkutan',
+        'BOOKING_RECEIPT' => 'Booking Confirmation / Shipping Instruction (Ekspor)',
+        'LARTAS' => 'Perizinan Lartas / LS / PI / SNI',
+        'PERIJINAN_LARTAS' => 'Persetujuan Impor / LS Surveyor / BPOM (Jika Lartas)',
+        'ETC' => 'Dokumen Pendukung Lainnya (ETC / COA / MSDS)',
+        'DO' => 'Delivery Order (DO) Pelayaran',
+        'DO_ORIGINAL' => 'Delivery Order (DO) Pelayaran Rilis Resmi',
+        'BUKTI_BAYAR_BILLING' => 'Bukti Penerimaan Negara (BPN) Billing MPN G3',
+        'SPJM' => 'Surat Pemberitahuan Jalur Merah (SPJM) & Tiket Behandle',
+        'SPPB' => 'Surat Persetujuan Pengeluaran Barang (SPPB)',
+        'NPD' => 'Nota Pemberitahuan Dokumen (NPD) Bea Cukai',
+        'DNP' => 'Daftar Nilai Pabean (DNP) Bea Cukai',
+        'NHI' => 'Nota Hasil Intelijen (NHI)',
+        'SLIM' => 'Dokumen Upload SLIM / Surat Tugas Pemeriksaan',
+        'BERITA_ACARA' => 'Berita Acara Pemeriksaan Fisik & Segel Bea Cukai',
+        'POD_SURAT_JALAN' => 'Bukti Pengantaran Gudang / Surat Jalan (POD)',
+    ];
+
     public function getTitleLabelAttribute(): string
     {
-        $labels = [
-            'INVOICE' => 'Commercial Invoice Pemasok Luar Negeri',
-            'PACKING_LIST' => 'Packing List Rincian Barang & Kemasan',
-            'BL_AWB' => 'Bill of Lading (B/L) Asli / Sea Waybill',
-            'COO_FORME' => 'Certificate of Origin (Form E / Form AK / SKA)',
-            'INSURANCE' => 'Polis Sertifikat Asuransi Pengangkutan',
-            'PERIJINAN_LARTAS' => 'Persetujuan Impor / LS Surveyor / BPOM (Jika Lartas)',
-            'DO_ORIGINAL' => 'Delivery Order (DO) Pelayaran Rilis Resmi',
-            'BUKTI_BAYAR_BILLING' => 'Bukti Penerimaan Negara (BPN) Billing MPN G3',
-            'POD_SURAT_JALAN' => 'Bukti Pengantaran Gudang / Surat Jalan (POD)',
-        ];
-
-        return $labels[$this->jenis_dokumen] ?? $this->jenis_dokumen;
+        return self::DOC_TYPES[$this->jenis_dokumen] ?? $this->jenis_dokumen;
     }
 }

@@ -47,30 +47,19 @@ class DocumentExtractionService
     /**
      * Ekstraksi cerdas dari seluruh dokumen yang diunggah (B/L, Invoice, Packing List, dll)
      */
-    public function extractFromDocuments(array $files, ?string $selectedClientId = null): array
+    public function extractFromDocuments(array $files, ?string $selectedClientId = null, ?string $aiModel = null, bool $useAi = false, ?string $preferredType = null): array
     {
         $this->ensurePdfParserAutoloaded();
-        $rawTextCombined = '';
-        $fileNames = [];
-
-        foreach ($files as $key => $file) {
-            if ($file instanceof UploadedFile) {
-                $origName = $file->getClientOriginalName();
-                $fileNames[] = $origName;
-                $extracted = $this->extractTextFromFile($file);
-                $rawTextCombined .= "\n--- FILE: {$origName} ({$key}) ---\n" . $extracted;
-            } elseif (is_string($file)) {
-                $fileNames[] = basename($file);
-                $extracted = '';
-                if (file_exists($file)) {
-                    $extracted = $this->extractTextFromFile($file);
-                }
-                $rawTextCombined .= "\n--- FILE: {$file} ---\n" . $extracted;
-            }
-        }
+        $expanded = $this->expandAndClassifyBundle($files);
+        $rawTextCombined = $expanded['combined_text'];
+        $fileNames = $expanded['file_names'];
+        $bundleFilesDetected = $expanded['bundle_files_detected'];
+        $hasImageOnlyFiles = $expanded['has_image_only'];
 
         // 1. Deteksi Jenis Layanan (Impor BC 2.0 atau Ekspor BC 3.0)
-        $isExport = $this->detectIsExport($rawTextCombined, $fileNames);
+        $isExport = $preferredType
+            ? (strtoupper($preferredType) === 'EXPORT')
+            : $this->detectIsExport($rawTextCombined, $fileNames);
         $jenisLayanan = $isExport ? 'EKSPORT_BC30' : 'IMPORT_BC20';
 
         // 2. Deteksi Vendor Pelayaran (Shipping Line) terlebih dahulu untuk petunjuk B/L & Kontainer
@@ -94,8 +83,9 @@ class DocumentExtractionService
         // 8. Deteksi Pelabuhan Muat & Bongkar
         $ports = $this->detectPorts($rawTextCombined, $isExport);
 
-        // 9. Deteksi Tanggal ETA / Keberangkatan
+        // 9. Deteksi Tanggal ETA & ETD
         $etaDate = $this->detectEtaDate($rawTextCombined, $invoiceInfo['date'] ?? null);
+        $bundleExtras = $this->extractBundleExtras($rawTextCombined, $fileNames, $etaDate);
 
         // 10. Deteksi Kontainer (Jumlah & Nomor)
         $containerData = $this->detectContainers($rawTextCombined, $fileNames, $shippingVendor);
@@ -107,20 +97,18 @@ class DocumentExtractionService
         $commercialData = $this->detectCommercialValues($rawTextCombined, $isExport);
 
         // 13. Deteksi Rincian Item Barang Kargo & Pos Tarif HS Code BTKI 2022
-        $cargoItems = $this->detectCargoItems($rawTextCombined, $jenisLayanan, $packageData, $commercialData);
+        $cargoItems = $this->detectCargoItems($rawTextCombined, $jenisLayanan, $packageData, $commercialData, $aiModel, $useAi);
 
         // Jika rincian item menghasilkan akumulasi bobot & kemasan yang lebih presisi, sesuaikan totals
         if (count($cargoItems) > 2) {
             $sumNetto = 0;
             $sumBruto = 0;
             $sumKemasan = 0;
-            $sumFob = 0;
 
             foreach ($cargoItems as $it) {
                 $sumNetto += (float) ($it['berat_netto'] ?? 0);
                 $sumBruto += (float) ($it['berat_bruto'] ?? 0);
                 $sumKemasan += (int) ($it['jumlah_kemasan'] ?? 0);
-                $sumFob += (float) ($it['nilai_fob'] ?? 0);
             }
 
             if ($packageData['total_kemasan'] <= 150 && $sumKemasan > $packageData['total_kemasan']) {
@@ -134,15 +122,48 @@ class DocumentExtractionService
             }
         }
 
-        return [
+        // 14. Optional AI Bundle Enrichment hanya jika user mengaktifkan mode AI
+        $aiUsed = false;
+        if ($useAi && class_exists(\App\Services\Ai\OpenAiCustomsService::class)) {
+            try {
+                /** @var \App\Services\Ai\OpenAiCustomsService $aiService */
+                $aiService = app(\App\Services\Ai\OpenAiCustomsService::class);
+                $aiBundle = $aiService->analyzeDocumentBundle($rawTextCombined, $aiModel, $isExport ? 'EXPORT' : 'IMPORT');
+                if (!empty($aiBundle['success']) && !empty($aiBundle['header'])) {
+                    $aiUsed = true;
+                    $h = $aiBundle['header'];
+                    $blNumber = (!empty($blNumber) && !str_starts_with((string) $blNumber, 'BL-')) ? $blNumber : ($h['bl_number'] ?? $blNumber);
+                    $invoiceInfo['number'] = $invoiceInfo['number'] ?? ($h['invoice_number'] ?? null);
+                    $invoiceInfo['date'] = $invoiceInfo['date'] ?? ($h['invoice_date'] ?? null);
+                    $vesselData['name'] = $vesselData['name'] ?? ($h['vessel_name'] ?? null);
+                    $vesselData['voyage'] = $vesselData['voyage'] ?? ($h['voyage_number'] ?? null);
+                    $ports['pol'] = $ports['pol'] ?? ($h['port_of_loading'] ?? null);
+                    $ports['pod'] = $ports['pod'] ?? ($h['port_of_discharge'] ?? null);
+                    if (!empty($h['nomor_kontainer']) && empty($containerData['numbers'])) {
+                        $containerData['numbers'] = (string) $h['nomor_kontainer'];
+                        $containerData['count'] = max(1, (int) ($h['total_kontainer'] ?? count(explode(',', $containerData['numbers']))));
+                    }
+                    $bundleExtras['commodity_summary'] = $bundleExtras['commodity_summary'] ?? ($h['commodity_summary'] ?? null);
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Optional AI bundle enrichment fallback to Rule Engine: ' . $e->getMessage());
+            }
+        }
+
+        $commoditySummary = $bundleExtras['commodity_summary']
+            ?: collect($cargoItems)->pluck('uraian_barang')->filter()->take(3)->implode(', ');
+
+        $extractionMode = $aiUsed ? 'AI_HYBRID' : 'RULE_ENGINE_NO_AI';
+
+        $result = [
             'client_id' => $client?->id ?? $selectedClientId,
-            'client_name' => $client?->name ?? 'PT. JINDI MATERIAL INDONESIA',
-            'client_npwp' => $client?->npwp ?? '75.296.714.1-041.000',
+            'client_name' => $client?->name ?? 'Belum Terdeteksi (Pilih Manual)',
+            'client_npwp' => $client?->npwp ?? null,
             'client_address' => $client?->address ?? null,
             'exporter_name' => $exporterData['name'],
             'exporter_address' => $exporterData['address'],
             'shipping_vendor_id' => $shippingVendor?->id,
-            'shipping_vendor_name' => $shippingVendor?->name ?? 'PT EVERGREEN SHIPPING AGENCY INDONESIA',
+            'shipping_vendor_name' => $shippingVendor?->name ?? 'Belum Terdeteksi',
             'type' => $isExport ? 'EXPORT' : 'IMPORT',
             'jenis_layanan' => $jenisLayanan,
             'bl_number' => $blNumber,
@@ -155,6 +176,7 @@ class DocumentExtractionService
             'port_of_discharge' => $ports['pod'],
             'place_of_delivery' => $ports['pod_delivery'] ?? null,
             'eta' => $etaDate->format('Y-m-d'),
+            'etd_date' => $bundleExtras['etd_date'],
             'free_time_days' => 7,
             'total_kontainer' => $containerData['count'],
             'nomor_kontainer' => $containerData['numbers'],
@@ -167,15 +189,31 @@ class DocumentExtractionService
             'total_fob' => $commercialData['fob'] ?? $commercialData['value'],
             'freight' => $commercialData['freight'] ?? 0.0,
             'ndbm_kurs' => $commercialData['kurs'],
-            'catatan' => "Data diekstrak dengan akurasi 99.8% oleh AI Document Scanner dari " . count($fileNames) . " berkas (" . implode(', ', $fileNames) . ").",
+            'commodity_summary' => Str::limit((string) $commoditySummary, 250, ''),
+            'coo_number' => $bundleExtras['coo_number'],
+            'sc_po_number' => $bundleExtras['sc_po_number'],
+            'extraction_mode' => $extractionMode,
+            'ai_used' => $aiUsed,
+            'has_image_only_files' => $hasImageOnlyFiles,
+            'catatan' => sprintf(
+                'Diekstrak via %s dari %d berkas (%s).',
+                $aiUsed ? 'AI + Rule Engine' : 'Rule Engine Offline (Tanpa AI)',
+                count($fileNames),
+                implode(', ', $fileNames)
+            ),
             'items' => $cargoItems,
+            'bundle_files_detected' => $bundleFilesDetected,
             'accuracy_scores' => [
-                'bl_accuracy' => 99,
-                'invoice_accuracy' => 99,
-                'packing_list_accuracy' => 98,
+                'bl_accuracy' => $blNumber ? 99 : 60,
+                'invoice_accuracy' => $invoiceInfo['number'] ? 99 : 65,
+                'packing_list_accuracy' => !empty($cargoItems) ? 98 : 65,
             ],
             'files_processed' => $fileNames,
         ];
+
+        $result['cross_validation'] = $this->runCrossValidation($result, $bundleFilesDetected);
+
+        return $result;
     }
 
     /**
@@ -784,9 +822,24 @@ class DocumentExtractionService
 
     /**
      * Deteksi Rincian Seluruh Item Barang Kargo & Pos Tarif HS Code BTKI 2022
+     * Secara default berjalan 100% tanpa AI (rule-based + BTKI database).
      */
-    public function detectCargoItems(string $text, string $jenisLayanan, array $packages, array $commercial): array
+    public function detectCargoItems(string $text, string $jenisLayanan, array $packages, array $commercial, ?string $aiModel = null, bool $useAi = false): array
     {
+        // 0. Hanya panggil AI Gateway jika user mengaktifkan mode AI secara eksplisit
+        if ($useAi) {
+            try {
+                /** @var \App\Services\Ai\OpenAiCustomsService $aiService */
+                $aiService = app(\App\Services\Ai\OpenAiCustomsService::class);
+                $aiMatch = $aiService->matchPackingList($text, $aiModel, $jenisLayanan);
+                if ($aiMatch['success'] && !empty($aiMatch['items'])) {
+                    return $aiMatch['items'];
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning("AI matchPackingList fallback to rule-based: " . $e->getMessage());
+            }
+        }
+
         $lines = explode("\n", $text);
         $invoiceItems = [];
         $packingItems = [];
@@ -899,7 +952,13 @@ class DocumentExtractionService
             return $detectedItems;
         }
 
-        // 4. Fallback jika dokumen berupa ringkasan komoditas
+        // 4. Parser tabel generik terstruktur (CSV/Excel/Tab-delimited/Pipe) tanpa AI
+        $genericRows = $this->parseGenericStructuredRows($lines, $jenisLayanan, $packages, $commercial);
+        if (!empty($genericRows)) {
+            return $genericRows;
+        }
+
+        // 5. Fallback jika dokumen berupa ringkasan komoditas
         return $this->getFallbackCargoItems($text, $jenisLayanan, $packages, $commercial);
     }
 
@@ -986,5 +1045,490 @@ class DocumentExtractionService
         ];
 
         return $detectedItems;
+    }
+
+    /**
+     * Parsing dan pencocokan Packing List dari UploadedFile, path berkas, atau teks mentah.
+     *
+     * @param \Illuminate\Http\UploadedFile|string $fileOrContent
+     * @param string $direction
+     * @param string|null $model
+     * @return array<string, mixed>
+     */
+    public function parsePackingListContent(UploadedFile|string $fileOrContent, string $direction = 'IMPORT_BC20', ?string $model = null): array
+    {
+        $this->ensurePdfParserAutoloaded();
+        $text = '';
+        if ($fileOrContent instanceof UploadedFile) {
+            $text = $this->extractTextFromFile($fileOrContent);
+        } elseif (is_string($fileOrContent)) {
+            if (file_exists($fileOrContent)) {
+                $text = $this->extractTextFromFile($fileOrContent);
+            } else {
+                $text = $fileOrContent;
+            }
+        }
+
+        return $this->parsePackingListText($text, $direction, $model);
+    }
+
+    /**
+     * Parsing teks mentah Packing List dan mencocokkan pos tarif HS Code BTKI 2022.
+     *
+     * @param string $rawText
+     * @param string $direction
+     * @param string|null $model
+     * @return array<string, mixed>
+     */
+    public function parsePackingListText(string $rawText, string $direction = 'IMPORT_BC20', ?string $model = null): array
+    {
+        if (empty(trim($rawText))) {
+            return [
+                'success' => false,
+                'message' => 'Konten teks packing list kosong.',
+            ];
+        }
+
+        /** @var \App\Services\Ai\OpenAiCustomsService $aiService */
+        $aiService = app(\App\Services\Ai\OpenAiCustomsService::class);
+        $result = $aiService->matchPackingList($rawText, $model, $direction);
+
+        if (!$result['success']) {
+            // Fallback ke rule-based internal jika gateway AI tidak terjangkau
+            return $this->getRuleBasedPackingListResult($rawText, $direction);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Fallback pencocokan Packing List berbasis aturan lokal jika gateway AI offline.
+     */
+    protected function getRuleBasedPackingListResult(string $text, string $direction): array
+    {
+        $packages = $this->detectPackagingAndWeights($text);
+        $commercial = $this->detectCommercialValues($text, $direction === 'EKSPORT_BC30');
+        $items = $this->getFallbackCargoItems($text, $direction, $packages, $commercial);
+
+        $hasLartas = false;
+        $reqDocs = [];
+        foreach ($items as $it) {
+            if (!empty($it['has_lartas'])) {
+                $hasLartas = true;
+            }
+            foreach ($it['required_documents'] ?? [] as $rd) {
+                $reqDocs[$rd['kode_dokumen']] = $rd;
+            }
+        }
+
+        $isExport = ($direction === 'EKSPORT_BC30');
+
+        return [
+            'success' => true,
+            'model_requested' => 'FALLBACK_RULES',
+            'model_used' => 'RULE_BASED_ENGINE',
+            'recommendation' => $isExport ? 'PEB' : 'PIB',
+            'declaration_name' => $isExport ? 'PEB (BC 3.0 EKSPOR)' : 'PIB (BC 2.0 IMPOR)',
+            'jenis_dokumen' => $isExport ? '30' : '20',
+            'detected_type' => $isExport ? 'EXPORT' : 'IMPORT',
+            'direction' => $direction,
+            'analysis_summary' => 'Klasifikasi pos tarif BTKI 2022 dihasilkan via Rule-Based Engine (Fallback Mode).',
+            'items_count' => count($items),
+            'items' => $items,
+            'totals' => [
+                'total_kemasan' => $packages['total_kemasan'],
+                'total_bruto' => $packages['total_bruto'],
+                'total_netto' => $packages['total_netto'],
+                'total_fob' => $commercial['value'],
+                'currency' => $commercial['currency'],
+            ],
+            'has_lartas' => $hasLartas,
+            'required_customs_documents' => array_values($reqDocs),
+        ];
+    }
+
+    /**
+     * Ekstrak & klasifikasi seluruh file bundle (mendukung multi-file & arsip ZIP)
+     * 100% deterministik tanpa AI.
+     *
+     * @return array{combined_text:string,file_names:array<int,string>,bundle_files_detected:array<int,array<string,mixed>>,has_image_only:bool}
+     */
+    protected function expandAndClassifyBundle(array $files): array
+    {
+        $combinedText = '';
+        $fileNames = [];
+        $bundleFilesDetected = [];
+        $hasImageOnly = false;
+        $tempDirs = [];
+
+        $flatFiles = [];
+        foreach ($files as $key => $item) {
+            if (is_array($item)) {
+                foreach ($item as $subIdx => $subFile) {
+                    $flatFiles[] = ['key' => $key . '_' . $subIdx, 'file' => $subFile];
+                }
+            } else {
+                $flatFiles[] = ['key' => (string) $key, 'file' => $item];
+            }
+        }
+
+        foreach ($flatFiles as $entry) {
+            $key = $entry['key'];
+            $file = $entry['file'];
+            $origName = $file instanceof UploadedFile ? $file->getClientOriginalName() : (is_string($file) ? basename($file) : 'document');
+            $ext = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
+
+            // Jika arsip ZIP, ekstrak sementara agar isi bundle dibaca otomatis
+            if ($ext === 'zip' && class_exists(\ZipArchive::class)) {
+                $zipPath = $file instanceof UploadedFile ? $file->getRealPath() : (string) $file;
+                if ($zipPath && file_exists($zipPath)) {
+                    $zip = new \ZipArchive();
+                    if ($zip->open($zipPath) === true) {
+                        $tmpDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'genie_bundle_' . uniqid('', true);
+                        @mkdir($tmpDir, 0755, true);
+                        $zip->extractTo($tmpDir);
+                        $zip->close();
+                        $tempDirs[] = $tmpDir;
+
+                        $it = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($tmpDir, \FilesystemIterator::SKIP_DOTS));
+                        foreach ($it as $extractedFile) {
+                            if ($extractedFile->isFile()) {
+                                $subName = $extractedFile->getFilename();
+                                $subExt = strtolower($extractedFile->getExtension());
+                                if (str_starts_with($subName, '.') || $subExt === 'zip') {
+                                    continue;
+                                }
+                                $text = $this->extractTextFromFile($extractedFile->getPathname());
+                                $classified = $this->classifyBundleFile($subName, $text, $key);
+                                $isImg = in_array($subExt, ['jpg', 'jpeg', 'png', 'webp', 'bmp'], true);
+                                if ($isImg) {
+                                    $hasImageOnly = true;
+                                }
+                                $fileNames[] = $subName;
+                                $combinedText .= "\n--- FILE: {$subName} ({$classified['doc_type']}) ---\n" . $text;
+                                $bundleFilesDetected[] = array_merge($classified, [
+                                    'filename' => $subName,
+                                    'extension' => $subExt,
+                                    'text_length' => strlen(trim($text)),
+                                    'is_image_only' => $isImg,
+                                    'from_zip' => $origName,
+                                ]);
+                            }
+                        }
+                        continue;
+                    }
+                }
+            }
+
+            $text = '';
+            if ($file instanceof UploadedFile) {
+                $text = $this->extractTextFromFile($file);
+            } elseif (is_string($file) && file_exists($file)) {
+                $text = $this->extractTextFromFile($file);
+            }
+
+            $classified = $this->classifyBundleFile($origName, $text, is_numeric($key) ? null : $key);
+            $isImg = in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'bmp'], true) || str_contains($text, 'OCR Image Parsing Active');
+            if ($isImg) {
+                $hasImageOnly = true;
+            }
+
+            $fileNames[] = $origName;
+            $combinedText .= "\n--- FILE: {$origName} ({$classified['doc_type']}) ---\n" . $text;
+            $bundleFilesDetected[] = array_merge($classified, [
+                'filename' => $origName,
+                'extension' => $ext,
+                'text_length' => strlen(trim($text)),
+                'is_image_only' => $isImg,
+                'from_zip' => null,
+            ]);
+        }
+
+        // Bersihkan folder temp ZIP
+        foreach ($tempDirs as $dir) {
+            if (is_dir($dir)) {
+                $filesIt = new \RecursiveIteratorIterator(
+                    new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
+                    \RecursiveIteratorIterator::CHILD_FIRST
+                );
+                foreach ($filesIt as $f) {
+                    $f->isDir() ? @rmdir($f->getRealPath()) : @unlink($f->getRealPath());
+                }
+                @rmdir($dir);
+            }
+        }
+
+        return [
+            'combined_text' => $combinedText,
+            'file_names' => $fileNames,
+            'bundle_files_detected' => $bundleFilesDetected,
+            'has_image_only' => $hasImageOnly,
+        ];
+    }
+
+    /**
+     * Klasifikasi jenis dokumen kepabeanan & pengiriman 100% deterministik tanpa AI.
+     *
+     * @return array{doc_type:string,doc_label:string,confidence:int}
+     */
+    public function classifyBundleFile(string $filename, string $text = '', ?string $slotHint = null): array
+    {
+        $labels = \App\Models\ShipmentDocument::DOC_TYPES;
+
+        if ($slotHint) {
+            $hintMap = [
+                'bl_file' => 'BL',
+                'invoice_file' => 'INV',
+                'packing_list_file' => 'PL',
+                'coo_file' => 'COO',
+                'sc_po_file' => 'SC_PO',
+                'insurance_file' => 'INS',
+                'booking_file' => 'BOOKING_RECEIPT',
+                'lartas_file' => 'LARTAS',
+                'do_file' => 'DO',
+            ];
+            if (isset($hintMap[$slotHint])) {
+                $code = $hintMap[$slotHint];
+                return ['doc_type' => $code, 'doc_label' => $labels[$code] ?? $code, 'confidence' => 100];
+            }
+        }
+
+        $fname = strtoupper($filename);
+        $sample = strtoupper(substr($text, 0, 5000));
+
+        $rules = [
+            'SPJM' => ['SPJM', 'JALUR MERAH', 'SURAT PEMBERITAHUAN JALUR MERAH'],
+            'SPPB' => ['SPPB', 'SURAT PERSETUJUAN PENGELUARAN BARANG'],
+            'NPD' => ['NPD', 'NOTA PERMINTAAN DOKUMEN'],
+            'DNP' => ['DNP', 'DEKLARASI NILAI PABEAN'],
+            'NHI' => ['NHI', 'NOTA HASIL INTELIJEN'],
+            'BERITA_ACARA' => ['BERITA ACARA', 'BA PEMERIKSAAN', 'SLIM'],
+            'DO' => ['DELIVERY ORDER', 'SURAT PENYERAHAN KONTAINER', '_DO_', ' DO ', 'DO.PDF'],
+            'BL' => ['BILL OF LADING', 'B/L', 'OCEAN BILL', 'MASTER BL', 'HOUSE BL', 'AIR WAYBILL', 'AWB', 'SHIPPER', 'CONSIGNEE'],
+            'INV' => ['COMMERCIAL INVOICE', 'PROFORMA INVOICE', 'INVOICE NO', 'INV NO', 'INVOICE', 'INV_'],
+            'PL' => ['PACKING LIST', 'WEIGHT LIST', 'PKL', 'P/L', 'NET WEIGHT', 'GROSS WEIGHT', 'CBM'],
+            'COO' => ['CERTIFICATE OF ORIGIN', 'FORM E', 'FORM D', 'FORM AK', 'FORM AI', 'SKA', 'COO'],
+            'SC_PO' => ['SALES CONTRACT', 'PURCHASE ORDER', 'PO NO', 'S/C', 'CONTRACT NO'],
+            'INS' => ['MARINE CARGO', 'INSURANCE POLICY', 'INSURANCE CERTIFICATE', 'POLIS ASURANSI', 'ASURANSI'],
+            'BOOKING_RECEIPT' => ['BOOKING CONFIRMATION', 'SHIPPING INSTRUCTION', 'BOOKING RECEIPT', 'NPE', 'NOTA PELAYANAN EKSPOR'],
+            'LARTAS' => ['LAPORAN SURVEYOR', 'PERSETUJUAN IMPOR', 'BPOM', 'KARANTINA', 'LARTAS', 'SNI'],
+        ];
+
+        $bestCode = 'ETC';
+        $bestScore = 0;
+
+        foreach ($rules as $code => $keywords) {
+            $score = 0;
+            foreach ($keywords as $idx => $kw) {
+                if (str_contains($fname, $kw)) {
+                    $score += ($idx === 0 ? 55 : 40);
+                }
+                if ($sample !== '' && str_contains($sample, $kw)) {
+                    $score += ($idx === 0 ? 35 : 20);
+                }
+            }
+            if ($score > $bestScore) {
+                $bestScore = $score;
+                $bestCode = $code;
+            }
+        }
+
+        // Khusus jika satu file merupakan gabungan INV + PL (sangat umum di impor China)
+        if ($bestCode === 'INV' && str_contains($sample, 'PACKING LIST') && str_contains($sample, 'NET WEIGHT')) {
+            $bestScore = min(99, max($bestScore, 90));
+        }
+
+        $confidence = $bestScore > 0 ? min(99, max(65, $bestScore)) : 50;
+
+        return [
+            'doc_type' => $bestCode,
+            'doc_label' => $labels[$bestCode] ?? $bestCode,
+            'confidence' => $confidence,
+        ];
+    }
+
+    /**
+     * Ekstraksi field tambahan bundle (ETD, COO, SC/PO, Ringkasan Komoditas).
+     */
+    protected function extractBundleExtras(string $text, array $fileNames, Carbon $etaDate): array
+    {
+        $etdDate = null;
+        if (preg_match('/\b(?:ETD|ON BOARD DATE|SHIPPED ON BOARD|DATE OF DEPARTURE)[:\s]*(\d{4}[-\/]\d{1,2}[-\/]\d{1,2}|\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4}|\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4})/i', $text, $m)) {
+            try {
+                $etdDate = Carbon::parse(str_replace('/', '-', trim($m[1])))->format('Y-m-d');
+            } catch (\Throwable $e) {
+                $etdDate = null;
+            }
+        }
+        if (!$etdDate) {
+            $etdDate = $etaDate->copy()->subDays(7)->format('Y-m-d');
+        }
+
+        $cooNumber = null;
+        if (preg_match('/(?:CERTIFICATE OF ORIGIN|FORM\s+[A-Z]{1,2}|COO)\s*(?:NO\.?|REF\.?|REFERENCE)?[:\s#]*([A-Z0-9\-\/]{6,25})/i', $text, $m)) {
+            $cooNumber = trim($m[1]);
+        }
+
+        $scPoNumber = null;
+        if (preg_match('/(?:SALES CONTRACT|PURCHASE ORDER|CONTRACT|P\/O|PO|S\/C)\s*(?:NO\.?|#)?[:\s]*([A-Z0-9\-\/]{4,25})/i', $text, $m)) {
+            $scPoNumber = trim($m[1]);
+        }
+
+        $commoditySummary = null;
+        if (preg_match('/(?:DESCRIPTION OF GOODS|COMMODITY|URAIAN BARANG)[:\s]*[\r\n]+\s*([^\r\n]{5,120})/i', $text, $m)) {
+            $commoditySummary = trim(preg_replace('/\s+/', ' ', $m[1]));
+        }
+
+        return [
+            'etd_date' => $etdDate,
+            'coo_number' => $cooNumber,
+            'sc_po_number' => $scPoNumber,
+            'commodity_summary' => $commoditySummary,
+        ];
+    }
+
+    /**
+     * Cross-validation deterministik antar dokumen sebelum draft PIB/PEB atau post CEISA.
+     *
+     * @return array{is_ready:bool,score:int,checks:array<int,array<string,string>>}
+     */
+    protected function runCrossValidation(array $extracted, array $bundleFiles): array
+    {
+        $checks = [];
+        $types = collect($bundleFiles)->pluck('doc_type')->unique()->values()->all();
+
+        $checks[] = [
+            'label' => 'Nomor B/L / AWB',
+            'status' => !empty($extracted['bl_number']) ? 'ok' : 'warn',
+            'detail' => !empty($extracted['bl_number']) ? $extracted['bl_number'] : 'Belum terbaca dari dokumen — periksa atau isi manual',
+        ];
+        $checks[] = [
+            'label' => 'Commercial Invoice & Nilai',
+            'status' => (!empty($extracted['invoice_number']) && ($extracted['total_cif'] ?? 0) > 0) ? 'ok' : 'warn',
+            'detail' => ($extracted['invoice_number'] ?? 'Tanpa No Invoice') . ' · ' . ($extracted['currency'] ?? 'USD') . ' ' . number_format((float) ($extracted['total_cif'] ?? 0), 2),
+        ];
+        $checks[] = [
+            'label' => 'Identitas Importir / Eksportir (NPWP)',
+            'status' => !empty($extracted['client_npwp']) ? 'ok' : 'warn',
+            'detail' => ($extracted['client_name'] ?? '-') . (!empty($extracted['client_npwp']) ? ' (NPWP ' . $extracted['client_npwp'] . ')' : ' — NPWP belum terisi'),
+        ];
+        $checks[] = [
+            'label' => 'Bobot Netto & Bruto',
+            'status' => (($extracted['total_bruto'] ?? 0) >= ($extracted['total_netto'] ?? 0) && ($extracted['total_bruto'] ?? 0) > 0) ? 'ok' : 'warn',
+            'detail' => 'Netto ' . number_format((float) ($extracted['total_netto'] ?? 0), 2) . ' KG / Bruto ' . number_format((float) ($extracted['total_bruto'] ?? 0), 2) . ' KG',
+        ];
+
+        $hasLartas = collect($extracted['items'] ?? [])->contains(fn ($it) => !empty($it['has_lartas']));
+        $checks[] = [
+            'label' => 'Klasifikasi HS & Lartas (' . count($extracted['items'] ?? []) . ' Item)',
+            'status' => !empty($extracted['items']) ? ($hasLartas ? 'warn' : 'ok') : 'warn',
+            'detail' => $hasLartas
+                ? 'Ada barang terindikasi Lartas — pastikan dokumen LS/PI/SNI dilampirkan'
+                : (count($extracted['items'] ?? []) . ' pos barang siap dipetakan ke draft CEISA'),
+        ];
+
+        $requiredMandatory = ($extracted['type'] ?? 'IMPORT') === 'EXPORT' ? ['INV', 'PL'] : ['BL', 'INV', 'PL'];
+        $missing = array_values(array_diff($requiredMandatory, $types));
+        $checks[] = [
+            'label' => 'Kelengkapan Bundle Minimal (' . implode(', ', $requiredMandatory) . ')',
+            'status' => empty($missing) ? 'ok' : 'warn',
+            'detail' => empty($missing) ? 'Lengkap terdeteksi (' . implode(', ', $types) . ')' : 'Belum terdeteksi: ' . implode(', ', $missing),
+        ];
+
+        $okCount = collect($checks)->where('status', 'ok')->count();
+        $score = (int) round(($okCount / max(1, count($checks))) * 100);
+
+        return [
+            'is_ready' => $okCount >= 4,
+            'score' => $score,
+            'checks' => $checks,
+        ];
+    }
+
+    /**
+     * Parser tabel item generik dari CSV, Excel (tab/comma separated), atau teks PDF multi-kolom tanpa AI.
+     *
+     * @return array<int,array<string,mixed>>
+     */
+    protected function parseGenericStructuredRows(array $lines, string $jenisLayanan, array $packages, array $commercial): array
+    {
+        $items = [];
+        $idx = 1;
+
+        foreach ($lines as $line) {
+            $trimmed = trim($line);
+            if ($trimmed === '' || preg_match('/^(?:NO\.?|ITEM|DESCRIPTION|URAIAN|TOTAL|SUBTOTAL|GRAND|---)/i', $trimmed)) {
+                continue;
+            }
+
+            // Deteksi pemisah CSV / Pipe / Tab
+            $cols = [];
+            if (substr_count($trimmed, "\t") >= 2) {
+                $cols = array_map('trim', explode("\t", $trimmed));
+            } elseif (substr_count($trimmed, '|') >= 2) {
+                $cols = array_map('trim', explode('|', $trimmed));
+            } elseif (substr_count($trimmed, ';') >= 2) {
+                $cols = array_map('trim', explode(';', $trimmed));
+            } elseif (substr_count($trimmed, ',') >= 2) {
+                $cols = array_map('trim', str_getcsv($trimmed));
+            }
+
+            if (count($cols) < 3) {
+                continue;
+            }
+
+            // Cari kolom uraian (string dengan huruf minimal 3 karakter yang bukan kode valuta saja)
+            $desc = null;
+            $numbers = [];
+            foreach ($cols as $col) {
+                $cleanNum = str_replace([',', '$', 'USD', 'CNY', 'IDR', 'KG', 'PCS', 'CTN', 'SET'], '', strtoupper($col));
+                if (is_numeric(trim($cleanNum)) && trim($cleanNum) !== '') {
+                    $numbers[] = (float) trim($cleanNum);
+                } elseif (!$desc && preg_match('/[A-Za-z]{3,}/', $col) && !preg_match('/^\d+$/', $col)) {
+                    $desc = trim($col);
+                }
+            }
+
+            if (!$desc || empty($numbers)) {
+                continue;
+            }
+
+            // Jika kolom pertama adalah nomor urut item dan ada >= 2 angka, angka pertama adalah nomor urut
+            if (is_numeric($cols[0]) && count($numbers) >= 2 && (int) $cols[0] === $idx) {
+                array_shift($numbers);
+            }
+
+            $qty = max(1, (int) round($numbers[0] ?? 1));
+            $fob = count($numbers) >= 2 ? (float) end($numbers) : round(($commercial['value'] ?? 1000) / max(1, count($lines)), 2);
+            $nw = count($numbers) >= 3 ? (float) $numbers[1] : round(max(1, ($packages['total_netto'] ?? 100) / 10), 2);
+            $gw = max($nw, count($numbers) >= 4 ? (float) $numbers[2] : round($nw * 1.05, 2));
+
+            $classified = $this->hsCodeService->classifyCommodity($desc, $jenisLayanan);
+            $items[] = [
+                'nomor_urut' => $idx++,
+                'uraian_barang' => strtoupper($desc),
+                'kode_hs' => $classified['code'],
+                'hs_confidence_score' => $classified['confidence_score'] ?? 0.90,
+                'hs_legal_basis' => $classified['legal'] ?? 'Rule Engine BTKI 2022',
+                'negara_asal' => ($jenisLayanan === 'EKSPORT_BC30') ? 'ID' : 'CN',
+                'jumlah_kemasan' => $qty,
+                'jenis_kemasan' => $classified['satuan'] ?? 'CTN',
+                'berat_netto' => $nw,
+                'berat_bruto' => $gw,
+                'nilai_fob' => $fob,
+                'tarif_bm_persen' => $classified['bm'] ?? 0.0,
+                'tarif_ppn_persen' => $classified['ppn'] ?? 11.0,
+                'tarif_pph_persen' => $classified['pph'] ?? 2.5,
+                'has_lartas' => $classified['has_lartas'] ?? false,
+                'lartas_info' => $classified['lartas'] ?? 'Non-Lartas',
+                'required_documents' => $classified['required_documents'] ?? [],
+            ];
+
+            if ($idx > 200) {
+                break;
+            }
+        }
+
+        return $items;
     }
 }

@@ -68,6 +68,13 @@ class AccountingService
             return $existing;
         }
 
+        // Cek apakah tanggal transaksi berada di periode akuntansi yang telah dikunci
+        if (\App\Models\AccountingPeriod::isDateLocked($entryDate)) {
+            throw new \DomainException(
+                "Posting Jurnal ditolak: Tanggal transaksi [{$entryDate}] berada pada periode buku akuntansi yang telah DIKUNCI / DITUTUP."
+            );
+        }
+
         $totalDebit = 0.0;
         $totalCredit = 0.0;
 
@@ -360,6 +367,13 @@ class AccountingService
             return $existing;
         }
 
+        // Cek apakah tanggal transaksi berada di periode akuntansi yang telah dikunci
+        if (\App\Models\AccountingPeriod::isDateLocked($entryDate)) {
+            throw new \DomainException(
+                "Posting Jurnal ditolak: Tanggal transaksi [{$entryDate}] berada pada periode buku akuntansi yang telah DIKUNCI / DITUTUP."
+            );
+        }
+
         $bcaInit = 450000000.00;
         $mandiriInit = 380000000.00;
         $kasInit = 20000000.00;
@@ -377,6 +391,83 @@ class AccountingService
             'CAPITAL-850M',
             '2026-01-01',
             'Saldo Awal Modal Disetor Pemilik & Likuiditas Rekening Kas/Bank',
+            $lines
+        );
+    }
+
+    /**
+     * AUTO-JOURNAL: Pencairan Penggajian (Payroll Disbursement)
+     * DR: Beban Gaji & Upah Karyawan (5-2100)
+     * DR: Beban BPJS Perusahaan (5-2110)
+     * CR: Hutang PPh Pasal 21 Karyawan (2-1800)
+     * CR: Hutang Biaya Akrual / BPJS (2-1300)
+     * CR: Piutang Talangan / Kasbon Karyawan (1-1300)
+     * CR: Bank BCA (1-1130)
+     */
+    public function recordPayrollDisbursement(\App\Models\PayrollRun $payrollRun): ?JournalEntry
+    {
+        $existing = JournalEntry::where('source_type', 'PAYROLL_RUN')
+            ->where('source_id', $payrollRun->id)
+            ->first();
+
+        if ($existing) {
+            return $existing;
+        }
+
+        // Cek apakah tanggal transaksi berada di periode akuntansi yang telah dikunci
+        if (\App\Models\AccountingPeriod::isDateLocked($entryDate)) {
+            throw new \DomainException(
+                "Posting Jurnal ditolak: Tanggal transaksi [{$entryDate}] berada pada periode buku akuntansi yang telah DIKUNCI / DITUTUP."
+            );
+        }
+
+        $payrollRun->load('payslips.lines');
+
+        $totalGross = (float) $payrollRun->payslips->sum('gross');
+        $totalNet = (float) $payrollRun->payslips->sum('net');
+
+        $totalPph21 = 0.0;
+        $totalBpjsKaryawan = 0.0;
+        $totalBpjsPerusahaan = 0.0;
+        $totalKasbon = 0.0;
+
+        foreach ($payrollRun->payslips as $slip) {
+            foreach ($slip->lines as $line) {
+                $labelLower = strtolower($line->label);
+                $amount = (float) $line->amount;
+
+                if (str_contains($labelLower, 'pph 21') || str_contains($labelLower, 'pajak penghasilan')) {
+                    $totalPph21 += $amount;
+                } elseif (str_contains($labelLower, 'kasbon')) {
+                    $totalKasbon += $amount;
+                } elseif ($line->kind === 'DEDUCTION' && (str_contains($labelLower, 'bpjs') || str_contains($labelLower, 'jht') || str_contains($labelLower, 'jp'))) {
+                    $totalBpjsKaryawan += $amount;
+                } elseif ($line->kind === 'COMPANY_BPJS') {
+                    $totalBpjsPerusahaan += $amount;
+                }
+            }
+        }
+
+        $totalBpjsCombined = $totalBpjsKaryawan + $totalBpjsPerusahaan;
+
+        $lines = [
+            // DEBIT
+            ['account_id' => self::getCoaId('5-2100'), 'debit' => $totalGross, 'credit' => 0],
+            ['account_id' => self::getCoaId('5-2110'), 'debit' => $totalBpjsPerusahaan, 'credit' => 0],
+            // KREDIT
+            ['account_id' => self::getCoaId('2-1800'), 'debit' => 0, 'credit' => $totalPph21],
+            ['account_id' => self::getCoaId('2-1300'), 'debit' => 0, 'credit' => $totalBpjsCombined],
+            ['account_id' => self::getCoaId('1-1300'), 'debit' => 0, 'credit' => $totalKasbon],
+            ['account_id' => self::getCoaId('1-1130'), 'debit' => 0, 'credit' => $totalNet],
+        ];
+
+        $entryDate = now()->format('Y-m-d');
+
+        return self::createBalancedEntry(
+            'PAYROLL_RUN',
+            $payrollRun->id,
+            $entryDate,
+            "Pencairan Gaji Pegawai & Iuran BPJS Periode {$payrollRun->period}",
             $lines
         );
     }

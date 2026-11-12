@@ -7,6 +7,7 @@ use App\Models\HsRegulation;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class CeisaBtkiTariffSyncService
 {
@@ -1445,6 +1446,7 @@ class CeisaBtkiTariffSyncService
      */
     public function syncFromBtkiRegistry(bool $force = false): array
     {
+        $csvResult = $this->importOfficialBtkiCsv();
         $registry = self::getBtkiMasterTariffRegistry();
         $inserted = 0;
         $updated = 0;
@@ -1512,7 +1514,9 @@ class CeisaBtkiTariffSyncService
             return [
                 'success' => true,
                 'total_registry' => count($registry),
-                'inserted' => $inserted,
+                'official_csv_parsed' => $csvResult['total_parsed'] ?? 0,
+                'official_csv_inserted' => $csvResult['inserted'] ?? 0,
+                'inserted' => $inserted + ($csvResult['inserted'] ?? 0),
                 'updated' => $updated,
                 'regulations_synced' => $regulationsCount,
                 'total_in_db' => HsCode::count(),
@@ -1525,6 +1529,131 @@ class CeisaBtkiTariffSyncService
                 'error' => $e->getMessage(),
             ];
         }
+    }
+
+    /**
+     * Impor dataset resmi seluruh Pos Tarif 8-digit BTKI 2022 Bea Cukai dari CSV.
+     * Hanya menyisipkan kode HS yang belum ada agar tarif BM & Lartas terkurasi tidak tertimpa.
+     */
+    public function importOfficialBtkiCsv(?string $csvPath = null): array
+    {
+        $path = $csvPath ?: database_path('data/btki_2022_official.csv');
+        if (!is_file($path) || !is_readable($path)) {
+            return [
+                'success' => false,
+                'total_parsed' => 0,
+                'inserted' => 0,
+                'skipped' => 0,
+                'error' => "File CSV BTKI 2022 resmi tidak ditemukan di {$path}",
+            ];
+        }
+
+        $handle = fopen($path, 'r');
+        if ($handle === false) {
+            return [
+                'success' => false,
+                'total_parsed' => 0,
+                'inserted' => 0,
+                'skipped' => 0,
+                'error' => "Gagal membuka file CSV BTKI 2022 resmi.",
+            ];
+        }
+
+        // Preload semua kode (dotted & clean) agar tidak bentrok dengan data terkurasi / CEISA
+        $existingMap = [];
+        foreach (HsCode::pluck('code') as $existingCode) {
+            $existingMap[$existingCode] = true;
+            $existingMap[str_replace(['.', ' ', '-'], '', $existingCode)] = true;
+        }
+
+        $now = Carbon::now();
+        $currentHeading = '';
+        $totalParsed = 0;
+        $inserted = 0;
+        $skipped = 0;
+        $batch = [];
+
+        while (($row = fgetcsv($handle)) !== false) {
+            $no = trim((string) ($row[1] ?? ''));
+            $code = trim((string) ($row[2] ?? ''));
+            $uraianIdRaw = trim((string) ($row[3] ?? ''));
+            $uraianEnRaw = trim((string) ($row[5] ?? ''));
+
+            // Catat konteks Pos 4-digit (misal: 01.01 - Kuda, keledai...)
+            if ($no === '' && preg_match('/^\d{2}\.\d{2}$/', $code) && $uraianIdRaw !== '') {
+                $cleanHeading = trim(preg_replace('/\s+/', ' ', $uraianIdRaw));
+                $currentHeading = "{$code} - {$cleanHeading}";
+                continue;
+            }
+
+            if (!is_numeric($no) || !preg_match('/^\d{4}\.\d{2}\.\d{2}$/', $code)) {
+                continue;
+            }
+
+            $totalParsed++;
+            $cleanCode = str_replace('.', '', $code);
+
+            if (isset($existingMap[$code]) || isset($existingMap[$cleanCode])) {
+                $skipped++;
+                continue;
+            }
+
+            $existingMap[$code] = true;
+            $existingMap[$cleanCode] = true;
+
+            $uraianId = trim(preg_replace('/\s+/', ' ', ltrim($uraianIdRaw, "- \t\n\r\0\x0B")));
+            if ($uraianId === '') {
+                $uraianId = trim(preg_replace('/\s+/', ' ', $uraianIdRaw));
+            }
+            $uraianEn = trim(preg_replace('/\s+/', ' ', ltrim($uraianEnRaw, "- \t\n\r\0\x0B")));
+
+            $description = $uraianId !== '' ? $uraianId : ($uraianEn !== '' ? $uraianEn : "Pos Tarif {$code}");
+            if ($uraianId !== '' && $uraianEn !== '' && strcasecmp($uraianId, $uraianEn) !== 0) {
+                $description .= " ({$uraianEn})";
+            }
+
+            $btkiContext = "BTKI 2022 Pos {$cleanCode}";
+            if ($currentHeading !== '') {
+                $btkiContext .= " | {$currentHeading}";
+            }
+
+            $batch[] = [
+                'id' => (string) Str::uuid(),
+                'code' => $code,
+                'description' => $description,
+                'duty_bm' => null,
+                'duty_ppn' => 11.00,
+                'duty_pph' => 2.50,
+                'duty_bk' => 0.00,
+                'satuan' => 'PCE',
+                'has_lartas' => false,
+                'lartas_desc' => null,
+                'source' => 'DJBC_BTKI_2022_OFFICIAL',
+                'btki' => $btkiContext,
+                'valid_from' => '2022-04-01',
+                'valid_to' => null,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+
+            if (count($batch) >= 500) {
+                $inserted += DB::table('hs_codes')->insertOrIgnore($batch);
+                $batch = [];
+            }
+        }
+
+        fclose($handle);
+
+        if (!empty($batch)) {
+            $inserted += DB::table('hs_codes')->insertOrIgnore($batch);
+        }
+
+        return [
+            'success' => true,
+            'total_parsed' => $totalParsed,
+            'inserted' => $inserted,
+            'skipped' => $skipped,
+        ];
     }
 
     /**

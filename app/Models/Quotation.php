@@ -27,9 +27,27 @@ class Quotation extends Model
         'ppn_idr',
         'total_idr',
         'status',
+        'discount_approval_status',
+        'approved_by_user_id',
+        'discount_notes',
         'syarat_ketentuan',
         'created_by_user_id',
     ];
+
+    public function lines()
+    {
+        return $this->hasMany(QuotationLine::class, 'quotation_id');
+    }
+
+    public function salesOrders()
+    {
+        return $this->hasMany(SalesOrder::class, 'quotation_id');
+    }
+
+    public function approver()
+    {
+        return $this->belongsTo(User::class, 'approved_by_user_id');
+    }
 
     protected $casts = [
         'tanggal' => 'date',

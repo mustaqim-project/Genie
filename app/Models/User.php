@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use App\Traits\HasRolesAndPermissions;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -13,7 +14,7 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, HasRolesAndPermissions, HasUuids, SoftDeletes;
+    use HasFactory, Notifiable, HasRolesAndPermissions, HasUuids, SoftDeletes, Auditable;
 
     protected $keyType = 'string';
     public $incrementing = false;

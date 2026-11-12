@@ -505,26 +505,24 @@ class StaffPortalController extends Controller
             'consent_agreed' => 'required',
         ]);
 
-        $photoUrl = null;
+        $photoPath = null;
         if (str_starts_with($validated['face_photo'], 'data:image')) {
             try {
                 $image = preg_replace('/^data:image\/\w+;base64,/', '', $validated['face_photo']);
                 $image = str_replace(' ', '+', $image);
                 $imageName = 'face_' . $employee->id . '_' . time() . '.jpg';
-                $destDir = public_path('uploads/faces');
-                if (!File::exists($destDir)) {
-                    File::makeDirectory($destDir, 0755, true);
-                }
-                File::put($destDir . '/' . $imageName, base64_decode($image));
-                $photoUrl = asset('uploads/faces/' . $imageName);
+                $privatePath = 'private/biometrics/' . $imageName;
+                
+                \Illuminate\Support\Facades\Storage::disk('local')->put($privatePath, base64_decode($image));
+                $photoPath = $privatePath;
             } catch (\Exception $e) {
-                $photoUrl = substr($validated['face_photo'], 0, 1000);
+                $photoPath = null;
             }
         }
 
         $employee->update([
             'face_data' => 'BIO_V2_' . sha1($validated['face_photo']),
-            'photo_url' => $photoUrl,
+            'photo_url' => $photoPath,
         ]);
 
         // Simpan rekaman persetujuan UU PDP

@@ -293,4 +293,232 @@ class AccountingController extends Controller implements HasMiddleware
 
         return response()->stream($callback, 200, $headers);
     }
+
+    /**
+     * Simpan Jurnal Manual Seimbang (Debit == Kredit)
+     */
+    public function storeManualEntry(Request $request)
+    {
+        $validated = $request->validate([
+            'entry_date' => 'required|date',
+            'memo' => 'required|string|max:500',
+            'lines' => 'required|array|min:2',
+            'lines.*.account_id' => 'required|uuid|exists:chart_of_accounts,id',
+            'lines.*.debit' => 'nullable|numeric|min:0',
+            'lines.*.credit' => 'nullable|numeric|min:0',
+        ]);
+
+        if (\App\Models\AccountingPeriod::isDateLocked($validated['entry_date'])) {
+            return back()->with('error', "Posting Jurnal ditolak: Tanggal [{$validated['entry_date']}] berada di periode akuntansi yang telah DITUTUP/DIKUNCI.");
+        }
+
+        $totalDebit = 0.0;
+        $totalCredit = 0.0;
+        foreach ($validated['lines'] as $line) {
+            $totalDebit += (float) ($line['debit'] ?? 0);
+            $totalCredit += (float) ($line['credit'] ?? 0);
+        }
+
+        if (abs($totalDebit - $totalCredit) > 0.05) {
+            return back()->with('error', "Jurnal tidak seimbang: Total Debit (Rp " . number_format($totalDebit, 2) . ") != Total Kredit (Rp " . number_format($totalCredit, 2) . ")");
+        }
+
+        $sourceId = (string) \Illuminate\Support\Str::uuid();
+        $entry = AccountingService::createBalancedEntry(
+            'MANUAL',
+            $sourceId,
+            $validated['entry_date'],
+            $validated['memo'],
+            $validated['lines'],
+            auth()->id()
+        );
+
+        \App\Models\AuditLog::record('CREATE_MANUAL_JOURNAL', 'JournalEntry', $entry->id, null, [
+            'entry_date' => $validated['entry_date'],
+            'memo' => $validated['memo'],
+            'total' => $totalDebit,
+        ]);
+
+        return back()->with('success', "Jurnal manual [{$entry->id}] berhasil diposting ke Buku Besar.");
+    }
+
+    /**
+     * Pembalikan Jurnal (Reverse Entry) Satu-Klik pada Periode Terbuka
+     */
+    public function reverseEntry(string $id, Request $request)
+    {
+        $original = JournalEntry::with('lines')->findOrFail($id);
+
+        $reverseDate = now()->format('Y-m-d');
+        if (\App\Models\AccountingPeriod::isDateLocked($reverseDate)) {
+            return back()->with('error', "Pembalikan jurnal ditolak: Hari ini berada pada periode buku yang dikunci.");
+        }
+
+        $alreadyReversed = JournalEntry::where('source_type', 'REVERSAL')
+            ->where('source_id', $original->id)
+            ->exists();
+
+        if ($alreadyReversed) {
+            return back()->with('error', "Jurnal ini sudah pernah dibalik sebelumnya.");
+        }
+
+        $reversalLines = [];
+        foreach ($original->lines as $line) {
+            $reversalLines[] = [
+                'account_id' => $line->account_id,
+                'debit' => (float) $line->credit,
+                'credit' => (float) $line->debit,
+            ];
+        }
+
+        $reversedEntry = AccountingService::createBalancedEntry(
+            'REVERSAL',
+            $original->id,
+            $reverseDate,
+            "Pembalikan Jurnal Pembalik dari #{$original->id}: {$original->memo}",
+            $reversalLines,
+            auth()->id()
+        );
+
+        \App\Models\AuditLog::record('REVERSE_JOURNAL', 'JournalEntry', $reversedEntry->id, ['original_id' => $original->id], [
+            'reversed_id' => $reversedEntry->id,
+        ]);
+
+        return back()->with('success', "Jurnal #{$original->id} berhasil dibalik dengan Jurnal Pembalik #{$reversedEntry->id}.");
+    }
+
+    /**
+     * Tutup Buku Periode Akuntansi (Closing Period to Laba Ditahan)
+     */
+    public function closePeriod(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:50',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'closing_notes' => 'nullable|string|max:500',
+        ]);
+
+        // Pastikan periode ini belum pernah ditutup
+        $existing = \App\Models\AccountingPeriod::where('start_date', $validated['start_date'])
+            ->where('end_date', $validated['end_date'])
+            ->where('is_closed', true)
+            ->first();
+
+        if ($existing) {
+            return back()->with('error', "Periode akuntansi untuk rentang tanggal ini sudah ditutup.");
+        }
+
+        $period = DB::transaction(function () use ($validated) {
+            $startDate = Carbon::parse($validated['start_date'])->startOfDay();
+            $endDate = Carbon::parse($validated['end_date'])->endOfDay();
+
+            // Hitung akumulasi pendapatan dan beban
+            $revenueLines = JournalLine::whereHas('account', fn($q) => $q->where('type', 'REVENUE'))
+                ->whereHas('entry', fn($q) => $q->whereBetween('entry_date', [$startDate, $endDate])->where('source_type', '!=', 'CLOSING_PERIOD'))
+                ->get();
+
+            $expenseLines = JournalLine::whereHas('account', fn($q) => $q->where('type', 'EXPENSE'))
+                ->whereHas('entry', fn($q) => $q->whereBetween('entry_date', [$startDate, $endDate])->where('source_type', '!=', 'CLOSING_PERIOD'))
+                ->get();
+
+            $totalRevenue = (float) $revenueLines->sum('credit') - (float) $revenueLines->sum('debit');
+            $totalExpense = (float) $expenseLines->sum('debit') - (float) $expenseLines->sum('credit');
+            $netIncome = $totalRevenue - $totalExpense;
+
+            $closingId = (string) \Illuminate\Support\Str::uuid();
+            $closingLines = [];
+
+            // Nol-kan seluruh akun Pendapatan (Debit Revenue)
+            $groupedRevenue = $revenueLines->groupBy('account_id');
+            foreach ($groupedRevenue as $accId => $lines) {
+                $bal = (float) $lines->sum('credit') - (float) $lines->sum('debit');
+                if ($bal > 0) {
+                    $closingLines[] = ['account_id' => $accId, 'debit' => $bal, 'credit' => 0];
+                }
+            }
+
+            // Nol-kan seluruh akun Beban (Kredit Expense)
+            $groupedExpense = $expenseLines->groupBy('account_id');
+            foreach ($groupedExpense as $accId => $lines) {
+                $bal = (float) $lines->sum('debit') - (float) $lines->sum('credit');
+                if ($bal > 0) {
+                    $closingLines[] = ['account_id' => $accId, 'debit' => 0, 'credit' => $bal];
+                }
+            }
+
+            // Pindahkan selisih Laba Bersih ke Laba Ditahan (3-2100)
+            $labaDitahanCoaId = AccountingService::getCoaId('3-2100');
+            if ($netIncome >= 0) {
+                $closingLines[] = ['account_id' => $labaDitahanCoaId, 'debit' => 0, 'credit' => $netIncome];
+            } else {
+                $closingLines[] = ['account_id' => $labaDitahanCoaId, 'debit' => abs($netIncome), 'credit' => 0];
+            }
+
+            if (!empty($closingLines)) {
+                AccountingService::createBalancedEntry(
+                    'CLOSING_PERIOD',
+                    $closingId,
+                    $endDate->format('Y-m-d'),
+                    "Jurnal Penutup Periode: {$validated['name']} ke Laba Ditahan",
+                    $closingLines,
+                    auth()->id()
+                );
+            }
+
+            return \App\Models\AccountingPeriod::create([
+                'name' => $validated['name'],
+                'start_date' => $validated['start_date'],
+                'end_date' => $validated['end_date'],
+                'is_closed' => true,
+                'closed_at' => now(),
+                'closed_by_id' => auth()->id(),
+                'closing_notes' => $validated['closing_notes'],
+            ]);
+        });
+
+        \App\Models\AuditLog::record('CLOSE_ACCOUNTING_PERIOD', 'AccountingPeriod', $period->id, null, [
+            'name' => $period->name,
+            'start_date' => $period->start_date,
+            'end_date' => $period->end_date,
+        ]);
+
+        return back()->with('success', "Periode akuntansi {$period->name} berhasil DITUTUP & DIKUNCI. Seluruh saldo pendapatan dan beban telah dipindahkan ke Laba Ditahan.");
+    }
+
+    /**
+     * Buka Kembali Periode Akuntansi yang Dikunci (Khusus Pimpinan / SuperAdmin)
+     */
+    public function reopenPeriod(string $id)
+    {
+        $user = auth()->user();
+        if (!$user->isSuperAdmin() && !$user->hasRole('R-OWN')) {
+            abort(403, 'Akses Ditolak: Hanya Pimpinan (R-OWN) yang memiliki wewenang membuka kembali periode akuntansi.');
+        }
+
+        $period = \App\Models\AccountingPeriod::findOrFail($id);
+
+        DB::transaction(function () use ($period) {
+            // Hapus jurnal penutup yang bersangkutan
+            $closingEntries = JournalEntry::where('source_type', 'CLOSING_PERIOD')
+                ->whereBetween('entry_date', [$period->start_date, $period->end_date])
+                ->get();
+
+            foreach ($closingEntries as $ce) {
+                $ce->lines()->delete();
+                $ce->delete();
+            }
+
+            $period->update([
+                'is_closed' => false,
+                'closed_at' => null,
+                'closed_by_id' => null,
+                'closing_notes' => ($period->closing_notes ? $period->closing_notes . " | " : "") . "Dibuka kembali oleh " . auth()->user()->name . " pada " . now()->format('d/m/Y H:i'),
+            ]);
+        });
+
+        \App\Models\AuditLog::record('REOPEN_ACCOUNTING_PERIOD', 'AccountingPeriod', $period->id, ['is_closed' => true], ['is_closed' => false]);
+
+        return back()->with('success', "Periode akuntansi {$period->name} berhasil DIBUKA KEMBALI. Transaksi kini dapat diposting ulang.");
+    }
 }

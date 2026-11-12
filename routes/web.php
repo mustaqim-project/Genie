@@ -60,6 +60,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/create', [BC20Controller::class, 'create'])->name('create');
         Route::post('/', [BC20Controller::class, 'store'])->name('store');
         Route::get('/{bc20}', [BC20Controller::class, 'show'])->name('show');
+        Route::get('/{bc20}/edit', [BC20Controller::class, 'edit'])->name('edit');
+        Route::put('/{bc20}', [BC20Controller::class, 'update'])->name('update');
+        Route::post('/{bc20}/reopen-draft', [BC20Controller::class, 'reopenDraft'])->name('reopen-draft');
         Route::post('/{bc20}/check-schema', [BC20Controller::class, 'checkSchema'])->name('check-schema');
         Route::post('/{bc20}/submit', [BC20Controller::class, 'submit'])->name('submit');
         Route::post('/{bc20}/check-status', [BC20Controller::class, 'checkStatus'])->name('check-status');
@@ -71,6 +74,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/create', [BC30Controller::class, 'create'])->name('create');
         Route::post('/', [BC30Controller::class, 'store'])->name('store');
         Route::get('/{bc30}', [BC30Controller::class, 'show'])->name('show');
+        Route::get('/{bc30}/edit', [BC30Controller::class, 'edit'])->name('edit');
+        Route::put('/{bc30}', [BC30Controller::class, 'update'])->name('update');
+        Route::post('/{bc30}/reopen-draft', [BC30Controller::class, 'reopenDraft'])->name('reopen-draft');
         Route::post('/{bc30}/check-schema', [BC30Controller::class, 'checkSchema'])->name('check-schema');
         Route::post('/{bc30}/submit', [BC30Controller::class, 'submit'])->name('submit');
         Route::post('/{bc30}/check-status', [BC30Controller::class, 'checkStatus'])->name('check-status');
@@ -212,11 +218,19 @@ Route::middleware('auth')->group(function () {
     Route::prefix('accounting')->name('accounting.')->group(function () {
         Route::get('/', [AccountingController::class, 'index'])->name('index');
         Route::get('/export-ledger', [AccountingController::class, 'exportLedger'])->name('export-ledger');
+        Route::post('/manual-entry', [AccountingController::class, 'storeManualEntry'])->name('manual-entry');
+        Route::post('/reverse/{id}', [AccountingController::class, 'reverseEntry'])->name('reverse');
+        Route::post('/close-period', [AccountingController::class, 'closePeriod'])->name('close-period');
+        Route::post('/reopen-period/{id}', [AccountingController::class, 'reopenPeriod'])->name('reopen-period');
     });
 
     // 7. AI Agent & MCP Integration Hub
     Route::prefix('ai')->name('ai.')->group(function () {
         Route::get('/', [AiAgentController::class, 'index'])->name('index');
+        Route::post('/match-packing-list', [AiAgentController::class, 'matchPackingList'])->name('match-packing-list');
+        Route::post('/classify-hs', [AiAgentController::class, 'classifyHs'])->name('classify-hs');
+        Route::post('/classify', [AiAgentController::class, 'classifyHs'])->name('classify');
+        Route::get('/models', [AiAgentController::class, 'models'])->name('models');
     });
     Route::get('/settings/integrations/mcp', [\App\Http\Controllers\McpIntegrationController::class, 'index'])->name('settings.mcp');
     Route::post('/settings/integrations/mcp/tokens', [\App\Http\Controllers\McpIntegrationController::class, 'storeToken'])->name('settings.mcp.tokens.store');
@@ -262,11 +276,27 @@ Route::middleware('auth')->group(function () {
         Route::post('/test-auth', [CeisaConfigController::class, 'testAuth'])->name('test-auth');
         Route::post('/sync-hs-codes', [CeisaConfigController::class, 'syncHsCodes'])->name('sync-hs-codes');
         Route::post('/test-hs', [CeisaConfigController::class, 'testHsCode'])->name('test-hs');
+        Route::post('/sync-document', [CeisaConfigController::class, 'syncDocument'])->name('sync-document');
+        Route::post('/import-document', [CeisaConfigController::class, 'importDocument'])->name('import-document');
+        Route::post('/sync-all-active', [CeisaConfigController::class, 'syncAllActive'])->name('sync-all-active');
+        Route::post('/sync-all', [CeisaConfigController::class, 'syncAllEverything'])->name('sync-all');
+        Route::post('/save-settings', [CeisaConfigController::class, 'saveApiSettings'])->name('save-settings');
     });
 
     // ==========================================
     // Core Bisnis End-to-End Workflow Routes
     // ==========================================
+    // F15 & F16: Import Massal Cerdas & Lompat Tahap Historis
+    Route::prefix('core/import')->name('core.import.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\BatchImportController::class, 'index'])->name('index');
+        Route::post('/store', [\App\Http\Controllers\BatchImportController::class, 'store'])->name('store');
+        Route::get('/batch/{id}', [\App\Http\Controllers\BatchImportController::class, 'show'])->name('show');
+        Route::get('/review/{docId}', [\App\Http\Controllers\BatchImportController::class, 'review'])->name('review');
+        Route::post('/fields/{fieldId}/update', [\App\Http\Controllers\BatchImportController::class, 'updateField'])->name('fields.update');
+        Route::post('/apply/{docId}', [\App\Http\Controllers\BatchImportController::class, 'applyToShipment'])->name('apply');
+        Route::post('/jump/{shipmentId}', [\App\Http\Controllers\BatchImportController::class, 'jumpStage'])->name('jump');
+    });
+
     // Tim Document Project Lifecycle (P01 - P19)
     Route::prefix('core/document')->name('core.document.')->group(function () {
         Route::get('/', [\App\Http\Controllers\ShipmentProjectController::class, 'index'])->name('index');
@@ -292,6 +322,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/{id}/generate-pib-peb', [\App\Http\Controllers\ShipmentProjectController::class, 'generatePibPeb'])->name('generate-pib-peb.post');
         Route::post('/{id}/submit-ceisa', [\App\Http\Controllers\ShipmentProjectController::class, 'generateAndSubmitCeisa'])->name('submit-ceisa');
         Route::post('/{id}/generate-portal', [\App\Http\Controllers\ClientPortalController::class, 'generateToken'])->name('generate-portal');
+        Route::post('/{id}/rollback-stage', [\App\Http\Controllers\ShipmentProjectController::class, 'rollbackStage'])->name('rollback-stage');
         
         // Penugasan & Workflow PIC Per Pos (11 Tahap)
         Route::post('/{id}/assign-auto-pic', [\App\Http\Controllers\ProjectTrackingController::class, 'assignAutoPic'])->name('assign-auto-pic');
@@ -300,9 +331,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/{id}/take-over-pic', [\App\Http\Controllers\ProjectTrackingController::class, 'takeOverPic'])->name('take-over-pic');
     });
 
-    // Integrated Project Tracking Cockpit (11 Tahap Workflow & Workload Matriks)
+    // Integrated Project Tracking Cockpit (11 Tahap Workflow & Workload Matriks + Excel Tracking Dok)
     Route::get('/core/tracking', [\App\Http\Controllers\ProjectTrackingController::class, 'index'])->name('core.tracking.index');
     Route::post('/core/tracking/auto-assign-all', [\App\Http\Controllers\ProjectTrackingController::class, 'autoAssignAll'])->name('core.tracking.auto-assign-all');
+    Route::post('/core/tracking/{id}/quick-update', [\App\Http\Controllers\ProjectTrackingController::class, 'quickUpdateTrackingDok'])->name('core.tracking.quick-update');
 
     // Tim DO Lifecycle & Shipping Line Automation
     Route::prefix('core/do')->name('core.do.')->group(function () {
@@ -311,10 +343,14 @@ Route::middleware('auth')->group(function () {
         Route::post('/{id}/release-do', [\App\Http\Controllers\DoWorkflowController::class, 'releaseDo'])->name('release-do');
     });
 
-    // Tim Traffic Lifecycle, Behandle & Gate Out
+    // Tim Traffic Lifecycle, Behandle, Foto Pemeriksaan & Resealing, & Gate Out
     Route::prefix('core/traffic')->name('core.traffic.')->group(function () {
         Route::get('/', [\App\Http\Controllers\TrafficWorkflowController::class, 'index'])->name('index');
         Route::post('/{id}/customs-status', [\App\Http\Controllers\TrafficWorkflowController::class, 'updateCustomsStatus'])->name('customs-status');
+        Route::post('/{id}/customs-responses', [\App\Http\Controllers\TrafficWorkflowController::class, 'updateCustomsResponses'])->name('customs-responses');
+        Route::post('/{id}/inspection-photos', [\App\Http\Controllers\TrafficWorkflowController::class, 'uploadInspectionPhotos'])->name('inspection-photos.store');
+        Route::delete('/{id}/inspection-photos/{photoId}', [\App\Http\Controllers\TrafficWorkflowController::class, 'deleteInspectionPhoto'])->name('inspection-photos.destroy');
+        Route::post('/{id}/operation-costs', [\App\Http\Controllers\TrafficWorkflowController::class, 'storeOperationCost'])->name('operation-costs.store');
         Route::post('/{id}/gate-out', [\App\Http\Controllers\TrafficWorkflowController::class, 'gateOut'])->name('gate-out');
         Route::post('/{id}/deliver-pod', [\App\Http\Controllers\TrafficWorkflowController::class, 'deliverPod'])->name('deliver-pod');
     });
@@ -355,8 +391,36 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [\App\Http\Controllers\QuotationController::class, 'index'])->name('index');
         Route::post('/store', [\App\Http\Controllers\QuotationController::class, 'store'])->name('store');
         Route::post('/{id}/status', [\App\Http\Controllers\QuotationController::class, 'updateStatus'])->name('status');
+        Route::post('/{id}/approve-discount', [\App\Http\Controllers\QuotationController::class, 'approveDiscount'])->name('approve-discount');
+        Route::post('/{id}/convert-to-so', [\App\Http\Controllers\QuotationController::class, 'convertToSalesOrder'])->name('convert-to-so');
         Route::post('/{id}/convert-to-project', [\App\Http\Controllers\QuotationController::class, 'convertToProject'])->name('convert-to-project');
     });
+
+    // ==========================================
+    // Sales Visits Lapangan (Geofencing 200m)
+    // ==========================================
+    Route::prefix('crm/sales-visits')->name('crm.sales-visits.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\SalesVisitController::class, 'index'])->name('index');
+        Route::post('/check-in', [\App\Http\Controllers\SalesVisitController::class, 'checkIn'])->name('check-in');
+        Route::post('/{id}/check-out', [\App\Http\Controllers\SalesVisitController::class, 'checkOut'])->name('check-out');
+    });
+
+    // ==========================================
+    // To-Do & Task Delegation Engine (F23)
+    // ==========================================
+    Route::prefix('todos')->name('todos.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\TodoController::class, 'index'])->name('index');
+        Route::post('/store', [\App\Http\Controllers\TodoController::class, 'store'])->name('store');
+        Route::post('/{id}/status', [\App\Http\Controllers\TodoController::class, 'updateStatus'])->name('status');
+        Route::post('/{id}/toggle-checklist', [\App\Http\Controllers\TodoController::class, 'toggleChecklist'])->name('toggle-checklist');
+        Route::post('/{id}/delegate', [\App\Http\Controllers\TodoController::class, 'delegate'])->name('delegate');
+    });
+
+    // ==========================================
+    // Media & Privasi Biometrik Aman (UU PDP)
+    // ==========================================
+    Route::get('/private/biometrics/{employeeId}', [\App\Http\Controllers\PrivateMediaController::class, 'showBiometric'])->name('private.biometric');
+    Route::get('/private/attendance/{attendanceLogId}', [\App\Http\Controllers\PrivateMediaController::class, 'showAttendancePhoto'])->name('private.attendance-photo');
 
     // ==========================================
     // Template PDF & Cetak Resmi Routes

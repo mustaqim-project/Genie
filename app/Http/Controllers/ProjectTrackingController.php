@@ -28,6 +28,8 @@ class ProjectTrackingController extends Controller
     public function index(Request $request)
     {
         $filter = $request->query('filter', 'all'); // 'all' atau 'me'
+        $direction = $request->query('direction', 'all'); // 'all' | 'IMPORT' | 'EXPORT'
+        $mode = $request->query('mode', 'tracking_dok'); // 'tracking_dok' | 'matrix'
         $search = $request->query('search');
         $authId = auth()->id();
 
@@ -35,14 +37,24 @@ class ProjectTrackingController extends Controller
             'client',
             'shippingVendor',
             'ceisaDocument',
+            'documents',
+            'inspectionPhotos',
             'pics.user.employee',
             'pics.backup.employee'
         ])->whereNull('closed_at');
+
+        if ($direction === 'IMPORT') {
+            $query->where('jenis_layanan', '!=', 'EKSPORT_BC30');
+        } elseif ($direction === 'EXPORT') {
+            $query->where('jenis_layanan', 'EKSPORT_BC30');
+        }
 
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('project_no', 'like', "%{$search}%")
                   ->orWhere('nomor_bl_awb', 'like', "%{$search}%")
+                  ->orWhere('spjm_ticket', 'like', "%{$search}%")
+                  ->orWhere('nomor_kontainer', 'like', "%{$search}%")
                   ->orWhereHas('client', fn($cq) => $cq->where('name', 'like', "%{$search}%"));
             });
         }
@@ -143,6 +155,8 @@ class ProjectTrackingController extends Controller
             'kpis',
             'workloads',
             'filter',
+            'direction',
+            'mode',
             'search'
         ));
     }
@@ -275,5 +289,88 @@ class ProjectTrackingController extends Controller
         ]);
 
         return back()->with('success', "Anda berhasil mengambil alih tugas PIC tahap {$request->process_code}.");
+    }
+
+    /**
+     * Inline Quick Update untuk kolom Tracking Dok (Excel View):
+     * - Toggle status SPJM / SPPB / NPD / DNP / NHI / Rekap Fisik
+     * - Update inline ODOO No, Trucking Vendor, SPJM/SPPB No & Tgl, Catatan
+     */
+    public function quickUpdateTrackingDok(string $id, Request $request)
+    {
+        $shipment = Shipment::findOrFail($id);
+
+        $validated = $request->validate([
+            'action' => 'nullable|in:toggle_flag,update_fields',
+            'field' => 'nullable|string|in:spjm,sppb,npd,dnp,nhi,odoo_synced,rekap_fisik',
+            'customs_channel' => 'nullable|in:HIJAU,KUNING,MERAH',
+            'spjm_ticket' => 'nullable|string|max:100',
+            'spjm_received_at' => 'nullable|date',
+            'inspection_scheduled_at' => 'nullable|date',
+            'old_seal_number' => 'nullable|string|max:100',
+            'new_seal_number' => 'nullable|string|max:100',
+            'trucking_vendor_name' => 'nullable|string|max:150',
+            'tps_location' => 'nullable|string|max:150',
+            'delivery_date' => 'nullable|date',
+            'odoo_synced' => 'nullable|boolean',
+            'physical_doc_archived' => 'nullable|boolean',
+        ]);
+
+        if (($validated['action'] ?? null) === 'toggle_flag' && !empty($validated['field'])) {
+            $flag = $validated['field'];
+            if ($flag === 'spjm') {
+                $newVal = !$shipment->spjm_received;
+                $shipment->update([
+                    'spjm_received' => $newVal,
+                    'customs_channel' => $newVal ? 'MERAH' : $shipment->customs_channel,
+                    'spjm_received_at' => $newVal ? ($shipment->spjm_received_at ?? now()) : null,
+                ]);
+            } elseif ($flag === 'sppb') {
+                $shipment->update(['sppb_received' => !$shipment->sppb_received]);
+            } elseif ($flag === 'npd') {
+                $shipment->update(['npd_received' => !$shipment->npd_received]);
+            } elseif ($flag === 'dnp') {
+                $shipment->update(['dnp_received' => !$shipment->dnp_received]);
+            } elseif ($flag === 'nhi') {
+                $shipment->update(['nhi_received' => !$shipment->nhi_received]);
+            } elseif ($flag === 'odoo_synced') {
+                $shipment->update(['odoo_synced' => !$shipment->odoo_synced]);
+            } elseif ($flag === 'rekap_fisik') {
+                $shipment->update(['physical_doc_archived' => !$shipment->physical_doc_archived]);
+            }
+        } else {
+            $updatable = collect($validated)->only([
+                'customs_channel', 'spjm_ticket', 'spjm_received_at', 'inspection_scheduled_at',
+                'old_seal_number', 'new_seal_number', 'trucking_vendor_name', 'tps_location',
+                'delivery_date',
+            ])->toArray();
+
+            if ($request->has('odoo_synced')) {
+                $updatable['odoo_synced'] = $request->boolean('odoo_synced');
+            }
+            if ($request->has('physical_doc_archived')) {
+                $updatable['physical_doc_archived'] = $request->boolean('physical_doc_archived');
+            }
+            if (!empty($updatable['spjm_received_at']) || !empty($updatable['spjm_ticket'])) {
+                $updatable['spjm_received'] = true;
+                $updatable['customs_channel'] = $updatable['customs_channel'] ?? 'MERAH';
+            }
+
+            $shipment->update($updatable);
+        }
+
+        $fresh = $shipment->fresh();
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'status' => 'success',
+                'shipment_id' => $fresh->id,
+                'customs_responses' => $fresh->customs_responses,
+                'customs_channel' => $fresh->customs_channel,
+                'odoo_synced' => (bool) $fresh->odoo_synced,
+                'physical_doc_archived' => (bool) $fresh->physical_doc_archived,
+            ]);
+        }
+
+        return back()->with('success', "Tracking Dok {$shipment->project_no} berhasil diperbarui.");
     }
 }
