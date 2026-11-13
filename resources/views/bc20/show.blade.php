@@ -5,35 +5,25 @@
 @section('content')
 <div class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12">
 
-    <!-- 0. Header Proyek & 11 Pos Workflow Stepper -->
-    @if(isset($shipment))
-        @include('core.components.workflow_pos_stepper')
-
-        <!-- Alert Demurrage & Free Time Warning -->
-        @if($shipment->is_demurrage_warning)
-        <div class="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-900/50 text-rose-800 dark:text-rose-300 text-xs flex items-center justify-between gap-4 mb-6">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
-                    <i data-lucide="alert-triangle" class="w-4 h-4"></i>
-                </div>
-                <div>
-                    <strong class="font-semibold block text-slate-900 dark:text-white">Peringatan Free Time Demurrage Pelabuhan</strong>
-                    <span class="text-rose-700 dark:text-rose-300">Sisa free time pelabuhan tinggal <strong class="font-semibold">{{ $shipment->days_left_free_time }} hari</strong> (Jatuh tempo: {{ $shipment->free_time_expired_at?->format('d/m/Y') }}). Segera selesaikan penebusan DO dan pengeluaran barang.</span>
-                </div>
+    <!-- Alert Demurrage & Free Time Warning (Jika Ada Pada Proyek Pengapalan) -->
+    @if(isset($shipment) && $shipment->is_demurrage_warning)
+    <div class="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-900/50 text-rose-800 dark:text-rose-300 text-xs flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                <i data-lucide="alert-triangle" class="w-4 h-4"></i>
             </div>
-            <span class="px-2.5 py-1 rounded-lg bg-rose-200/80 dark:bg-rose-900/60 font-semibold text-[10px] uppercase font-mono tracking-wider shrink-0">
-                Perlu Perhatian
-            </span>
+            <div>
+                <strong class="font-semibold block text-slate-900 dark:text-white">Peringatan Free Time Demurrage Pelabuhan</strong>
+                <span class="text-rose-700 dark:text-rose-300">Sisa free time pelabuhan tinggal <strong class="font-semibold">{{ $shipment->days_left_free_time }} hari</strong> (Jatuh tempo: {{ $shipment->free_time_expired_at?->format('d/m/Y') }}). Segera selesaikan penebusan DO dan pengeluaran barang.</span>
+            </div>
         </div>
-        @endif
-
-        <!-- 1. Tim & PIC Project (Pembagian Tugas 11 Pos & Delegasi SLA) -->
-        <div id="pos-assignment">
-            @include('core.components.project_pic_assignment_card')
-        </div>
+        <span class="px-2.5 py-1 rounded-lg bg-rose-200/80 dark:bg-rose-900/60 font-semibold text-[10px] uppercase font-mono tracking-wider shrink-0">
+            Perlu Perhatian
+        </span>
+    </div>
     @endif
 
-    <!-- Breadcrumb & Header Toolbar -->
+    <!-- 1. Breadcrumb & Header Toolbar Tunggal (Harmonis dengan Create & Edit) -->
     <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-5 sm:p-6 border border-black/[0.06] dark:border-white/[0.08] shadow-xs">
         <nav class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium mb-2" aria-label="Breadcrumb">
             <a href="{{ route('dashboard') }}" class="hover:text-[#007AFF] transition-colors flex items-center gap-1">
@@ -60,6 +50,12 @@
                             Jalur {{ $bc20->jalur }}
                         </span>
                     @endif
+                    @if(isset($shipment))
+                        <a href="{{ route('core.document.show', $shipment->id) }}" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-mono font-semibold bg-sky-50 dark:bg-sky-950/40 text-[#007AFF] border border-sky-200/80 hover:underline" title="Buka Workspace Proyek Pengapalan">
+                            <i data-lucide="package" class="w-3 h-3"></i>
+                            <span>Proyek: {{ $shipment->shipment_number ?? $shipment->project_no }}</span>
+                        </a>
+                    @endif
                 </div>
                 <h1 class="text-2xl font-bold font-mono text-slate-900 dark:text-white tracking-tight">{{ $bc20->nomor_aju }}</h1>
                 <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
@@ -69,6 +65,16 @@
 
             <!-- Action Buttons Host-to-Host -->
             <div class="flex flex-wrap items-center gap-2">
+                <!-- Tautan Terpadu ke Cockpit Tracking Dokumen (11 Pos Operasional) -->
+                <a href="{{ route('core.tracking.index', ['mode' => 'tracking_dok', 'search' => $shipment?->project_no ?? $bc20->nomor_aju]) }}"
+                   target="_blank"
+                   class="btn-apple-gray text-xs inline-flex items-center gap-1.5 px-3.5 py-2 !text-[#007AFF] !border-sky-300 dark:!border-sky-800 bg-sky-50 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 shadow-xs"
+                   title="Buka Cockpit Tracking Dokumen (11 Pos Operasional)">
+                    <i data-lucide="compass" class="w-3.5 h-3.5"></i>
+                    <span>Tracking Dok</span>
+                    <span class="px-1.5 py-0.2 rounded text-[10px] bg-[#007AFF]/15 text-[#007AFF] font-bold font-mono">11 Pos</span>
+                </a>
+
                 @php
                     $isBillingLocked = $bc20->isBillingLocked();
                     $canEditDraft = auth()->user()->isSuperAdmin() || auth()->user()->hasAnyPermission(['document.edit', 'document.edit_after_ceisa']);
@@ -205,6 +211,23 @@
         </div>
         @endif
     </div>
+
+    <!-- Skema Alur Waterfall Pabean & Tracking Dokumen Terpadu (Sinergi Create-Edit-Detail) -->
+    @php
+        $waterfallStage = 4;
+        if ($bc20->is_schema_valid && $bc20->status === 'DRAFT') {
+            $waterfallStage = 5;
+        } elseif ($bc20->kode_billing || in_array($bc20->status, ['SUBMITTED', 'REJECT', 'SIAP_KIRIM'], true)) {
+            $waterfallStage = 6;
+        } elseif (in_array($bc20->status, ['SPPB', 'SPJM', 'GATE_OUT', 'SELESAI'], true)) {
+            $waterfallStage = 7;
+        }
+    @endphp
+    @include('bc20.components.waterfall_stepper', [
+        'activeStage' => $waterfallStage,
+        'bc20' => $bc20,
+        'shipment' => $shipment ?? null,
+    ])
 
     <!-- Billing & SPPB Cards if available -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">

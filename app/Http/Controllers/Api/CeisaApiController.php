@@ -220,6 +220,97 @@ class CeisaApiController extends Controller
     }
 
     /**
+     * Endpoint API: Rekomendasi Cerdas HS Code BTKI 2022 (Single / Batch Item)
+     */
+    public function recommendHs(Request $request): JsonResponse
+    {
+        $direction = $request->input('direction', 'IMPORT');
+        $limit = (int) $request->input('limit', 5);
+
+        // Jika request batch items
+        if ($request->has('items') && is_array($request->input('items'))) {
+            $items = $request->input('items');
+            $recommendations = $this->hsCodeService->recommendForMultipleItems($items, $direction);
+
+            return response()->json([
+                'success' => true,
+                'mode' => 'batch',
+                'count' => count($recommendations),
+                'data' => $recommendations,
+            ]);
+        }
+
+        // Single query
+        $query = $request->input('keyword') ?? $request->input('uraian') ?? $request->input('text') ?? $request->input('q') ?? '';
+        if (empty(trim($query))) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Parameter kata kunci/uraian barang tidak boleh kosong.',
+                'candidates' => [],
+            ], 422);
+        }
+
+        $candidates = $this->hsCodeService->recommendHsCandidates($query, $direction, $limit);
+
+        return response()->json([
+            'success' => true,
+            'mode' => 'single',
+            'query' => $query,
+            'count' => count($candidates),
+            'top_recommendation' => $candidates[0] ?? null,
+            'candidates' => $candidates,
+        ]);
+    }
+
+    /**
+     * Endpoint Autocomplete / Live Search Database BTKI 2022
+     */
+    public function searchHs(Request $request): JsonResponse
+    {
+        $q = trim((string) ($request->input('q') ?? $request->input('keyword') ?? ''));
+        if (strlen($q) < 2) {
+            return response()->json(['success' => true, 'count' => 0, 'data' => []]);
+        }
+
+        $cleanQ = str_replace(['.', ' ', '-'], '', $q);
+
+        try {
+            $results = \App\Models\HsCode::query()
+                ->where('code', 'like', "%{$q}%")
+                ->orWhereRaw("REPLACE(REPLACE(REPLACE(code, '.', ''), ' ', ''), '-', '') LIKE ?", ["%{$cleanQ}%"])
+                ->orWhere('description', 'like', "%{$q}%")
+                ->limit(15)
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'code' => $item->code,
+                        'clean_code' => str_replace(['.', ' ', '-'], '', $item->code),
+                        'description' => $item->description,
+                        'duty_bm' => (float) ($item->duty_bm ?? 0),
+                        'duty_ppn' => (float) ($item->duty_ppn ?? 11),
+                        'duty_pph' => (float) ($item->duty_pph ?? 2.5),
+                        'duty_bk' => (float) ($item->duty_bk ?? 0),
+                        'satuan' => $item->satuan ?? 'PCE',
+                        'has_lartas' => (bool) $item->has_lartas,
+                        'lartas_desc' => $item->lartas_desc ?? ($item->has_lartas ? 'LARTAS' : 'NON LARTAS'),
+                    ];
+                });
+
+            return response()->json([
+                'success' => true,
+                'count' => count($results),
+                'data' => $results,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mencari pos tarif: ' . $e->getMessage(),
+                'data' => [],
+            ], 500);
+        }
+    }
+
+    /**
      * Endpoint: Sinkronisasi Master Pos Tarif BTKI 2022 dari Bea Cukai ke Database
      */
     public function syncHsCodes(\App\Services\Ceisa\CeisaBtkiTariffSyncService $syncService): JsonResponse

@@ -1,6 +1,6 @@
 # Progress — Milestone 1 (Foundation, Containers & Workflow Separation)
 
-Last visited: 2026-11-12T16:54:00Z
+Last visited: 2026-11-12T18:15:00Z
 
 ## Iteration Status
 Current iteration: 1 / 32
@@ -10,13 +10,13 @@ Current iteration: 1 / 32
 - [x] Read ORIGINAL_REQUEST.md, PROJECT.md, and survey reports
 - [x] Defined SCOPE.md and interface specifications
 - [x] Initialized GATE_STATUS.md
-- [x] Spawned 3 Explorers in parallel:
-  - `explorer_containers` (`dc112edc-967c-4bde-9ddc-98f77d5a0001`): COMPLETE (report delivered in `explorer_containers/handoff.md`)
-  - `explorer_statemachine` (`2ef89a23-009a-4c84-8774-59cab6ba7dee`): COMPLETE (report delivered in `explorer_statemachine/handoff.md`)
-  - `explorer_crossval` (`dba204b5-d2fe-4f7f-a5ba-9b35cd82cb41`): RUNNING (tracing validation integration in controllers, last step 16:53:01Z)
-- [ ] Awaiting `explorer_crossval` handoff report
-- [ ] Synthesize explorer findings into unified implementation blueprint
-- [ ] Spawn Worker for implementation (Migration, Models, State Machines, Cross-Document Engine, Tests)
+- [x] Spawned and completed 3 Explorers in parallel:
+  - `explorer_containers`: COMPLETE (handoff in `explorer_containers/handoff.md`)
+  - `explorer_statemachine`: COMPLETE (handoff in `explorer_statemachine/handoff.md`)
+  - `explorer_crossval`: COMPLETE (handoff in `explorer_crossval/handoff.md`)
+- [x] Synthesized explorer findings into unified implementation blueprint
+- [!] `worker_m1` encountered RESOURCE_EXHAUSTED 429 quota at 17:52:18Z; 14m49s cooldown elapsed.
+- [/] Spawning replacement `worker_m1_2` for implementation (Migration, Models, State Machines, Cross-Document Engine, Tests)
 - [ ] Spawn 2 Reviewers independently
 - [ ] Spawn 2 Challengers for stress-testing
 - [ ] Spawn Forensic Auditor

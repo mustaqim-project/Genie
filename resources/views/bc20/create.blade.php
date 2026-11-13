@@ -18,11 +18,28 @@
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Pemberitahuan Impor Barang untuk Dipakai (Host-to-Host CEISA 4.0 DJBC)</p>
         </div>
         <div class="flex items-center space-x-2">
+            <!-- Tautan Terpadu ke Cockpit Tracking Dokumen (11 Pos Operasional) -->
+            <a href="{{ route('core.tracking.index', ['mode' => 'tracking_dok']) }}"
+               target="_blank"
+               class="px-3.5 py-1.5 rounded-xl border border-sky-200 dark:border-sky-800 bg-sky-50 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 text-[#007AFF] text-xs font-semibold inline-flex items-center gap-1.5 transition-colors shadow-xs"
+               title="Buka Cockpit Tracking Dokumen (11 Pos Operasional)">
+                <i data-lucide="compass" class="w-3.5 h-3.5"></i>
+                <span>Tracking Dok</span>
+                <span class="px-1.5 py-0.2 rounded text-[10px] bg-[#007AFF]/15 text-[#007AFF] font-bold font-mono">11 Pos</span>
+            </a>
+
             <span class="text-xs font-mono tabular-nums bg-slate-100 dark:bg-white/10 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300">
                 Aju ID: {{ $defaultNomorAju }}
             </span>
         </div>
     </div>
+
+    <!-- Skema Alur Waterfall Pabean & Tracking Dokumen Terpadu (Sinergi Create-Edit-Detail) -->
+    @include('bc20.components.waterfall_stepper', [
+        'activeStage' => 1,
+        'bc20' => null,
+        'shipment' => $selectedShipment ?? null,
+    ])
 
     <!-- Mode Switcher Tabs (Apple Segmented Pill - Dual Workflow: Otomatis & Manual) -->
     <div class="inline-flex w-full p-1 rounded-[12px] bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 mb-6 font-semibold text-[13px]">

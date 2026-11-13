@@ -606,7 +606,7 @@ class ShipmentProjectController extends Controller
         return response()->file($fullPath, [
             'Content-Type' => $mime,
             'Content-Disposition' => 'inline; filename="' . addslashes($doc->nama_file ?? 'dokumen.pdf') . '"',
-            'X-Frame-Options' => 'SAMEORIGIN',
+            'Content-Security-Policy' => "frame-ancestors 'self' http://localhost:* http://127.0.0.1:* http://*.test:*",
             'Cache-Control' => 'private, max-age=300',
         ]);
     }

@@ -856,6 +856,281 @@ class CeisaHsCodeService
     }
 
     /**
+     * Rekomendasi Cerdas Kandidat Pos Tarif HS Code BTKI 2022 untuk Barang (Multi-Candidate & Confidence Ranking)
+     *
+     * @param string $text Deskripsi produk komersial dari Invoice / Packing List
+     * @param string|null $direction Arah pabean: 'IMPORT' atau 'EXPORT'
+     * @param int $limit Maksimal jumlah kandidat rekomendasi (default 5)
+     * @return array Daftar kandidat pos tarif berperingkat lengkap dengan BM/PPN/PPh, Lartas, dan Rationale
+     */
+    public function recommendHsCandidates(string $text, ?string $direction = 'IMPORT', int $limit = 5): array
+    {
+        $raw = trim($text);
+        if (empty($raw)) {
+            return [];
+        }
+
+        $upper = strtoupper($raw);
+        $candidates = [];
+        $seenCodes = [];
+
+        // 1. Cek keberadaan kode HS eksplisit dalam teks (contoh: "HS CODE: 38244000" atau "3824.40.00")
+        if (preg_match('/(?:HS|POS|TARIF|CODE)?[:\s\-]*([0-9]{4}\.[0-9]{2}\.[0-9]{2}|[0-9]{8})/i', $upper, $matches)) {
+            $matchedCode = str_replace(['.', ' ', '-'], '', $matches[1]);
+            $tariff = $this->getTariffAndLartas($matchedCode);
+            if (!empty($tariff['code'])) {
+                $candidates[] = [
+                    'hs_code' => $tariff['code'],
+                    'clean_code' => $tariff['clean_code'],
+                    'description' => $tariff['desc'],
+                    'confidence_score' => 0.99,
+                    'confidence_percent' => 99,
+                    'confidence_label' => 'Sangat Direkomendasikan (99%)',
+                    'bm' => (float) ($tariff['bm'] ?? 0),
+                    'ppn' => (float) ($tariff['ppn'] ?? 11),
+                    'pph' => (float) ($tariff['pph'] ?? 2.5),
+                    'bk' => (float) ($tariff['bk'] ?? 0),
+                    'satuan' => $tariff['satuan'] ?? 'PCE',
+                    'is_lartas' => !empty($tariff['has_lartas']),
+                    'lartas_badge' => !empty($tariff['has_lartas']) ? 'LARTAS' : 'NON LARTAS',
+                    'lartas_desc' => $tariff['lartas'] ?? 'Bebas perizinan tata niaga impor (Non-Lartas)',
+                    'legal' => $tariff['legal'] ?? "BTKI 2022 Pos {$tariff['code']}",
+                    'rationale' => 'Ditemukan kode pos tarif resmi eksplisit pada uraian barang dokumen.',
+                    'source' => 'EXPLICIT_DOCUMENT_HS',
+                ];
+                $seenCodes[$tariff['clean_code']] = true;
+            }
+        }
+
+        // 2. Knowledge Engine: Aturan Industri Cerdas Spesifik Komoditas Utama
+        $industryRules = [
+            // Polycarboxylate Ether & Aditif Kimia Beton / Semen
+            [
+                'pattern' => '/\b(PCE|POLYCARBOXYLATE|EARLY\s*STRENGTH|WATER\s*REDUCING|CONCRETE\s*ADMIXTURE|ADITIF\s*BETON|SUPERPLASTICIZER)\b/',
+                'primary' => '38244000',
+                'alternatives' => ['38245000', '39072990', '38241000'],
+                'rationale' => 'PCE (Polycarboxylate Ether) adalah polimer aditif khusus kimia untuk percepatan pengerasan (early strength) atau pengurangan air (water reducing) pada semen, mortar dan beton.',
+            ],
+            // Hydraulic Breaker & Suku Cadangnya
+            [
+                'pattern' => '/\b(BREAKER|HYDRAULIC\s*BREAKER|CHISEL|PIN\s*ROD|SIDE\s*BOLT|THROUGH\s*BOLT)\b/',
+                'primary' => preg_match('/\b(CHISEL|PIN|BOLT|BUSHING|VALVE|SEAL|SPAREPART)\b/', $upper) ? '84314990' : '84122100',
+                'alternatives' => ['84314990', '84122100', '82079000', '84314120'],
+                'rationale' => 'Klasifikasi suku cadang perkakas hidrolik pemecah batu / konstruksi (Bab 84 pos 84.31 atau unit hidrolik pos 84.12).',
+            ],
+            // Hand Pallet & Stacker
+            [
+                'pattern' => '/\b(PALLET|STACKER|HAND\s*PALLET)\b/',
+                'primary' => preg_match('/\b(SPAREPART|CYLINDER|CASTER|WHEEL|SEAL)\b/', $upper) ? '84312090' : '84279000',
+                'alternatives' => ['84279000', '84312090', '87168010'],
+                'rationale' => 'Truk angkat palet manual atau suku cadang peralatan penanganan material gudang (Bab 84 pos 84.27 / 84.31).',
+            ],
+            // Waterproofing Membrane
+            [
+                'pattern' => '/\b(WATERPROOFING|MEMBRANE|SBS|BITUMEN|ASPHALT)\b/',
+                'primary' => '68071000',
+                'alternatives' => ['68079000', '27150000', '39199099'],
+                'rationale' => 'Membran kedap air berbasis aspal atau bitumen dalam bentuk gulungan untuk konstruksi bangunan (pos 68.07).',
+            ],
+            // Ban Kendaraan (Tire)
+            [
+                'pattern' => '/\b(TIRE|TYRE|BAN\s*LUAR|BAN\s*MOBIL|BAN\s*TRUK)\b/',
+                'primary' => preg_match('/\b(TRUCK|BUS|TRUK)\b/', $upper) ? '40112000' : '40111000',
+                'alternatives' => ['40112000', '40111000', '40114000', '40121100'],
+                'rationale' => 'Ban pneumatik baru dari karet untuk kendaraan bermotor (Bab 40 pos 40.11). Wajib verifikasi persetujuan Lartas SNI/Kemendag.',
+            ],
+            // Komputer Jinjing / Laptop
+            [
+                'pattern' => '/\b(LAPTOP|NOTEBOOK|KOMPUTER|COMPUTER)\b/',
+                'primary' => '84713020',
+                'alternatives' => ['84713090', '84714110', '84715010'],
+                'rationale' => 'Mesin pengolah data otomatis portabel (laptop/notebook) dengan berat tidak lebih dari 10 kg (pos 84.71).',
+            ],
+            // Panel Surya / Solar Cell
+            [
+                'pattern' => '/\b(SOLAR|PHOTOVOLTAIC|PANEL\s*SURYA)\b/',
+                'primary' => '85414300',
+                'alternatives' => ['85414200', '85044090'],
+                'rationale' => 'Sel fotovoltaik dirakit dalam modul atau dibuat menjadi panel surya (pos 85.41).',
+            ],
+        ];
+
+        foreach ($industryRules as $rule) {
+            if (preg_match($rule['pattern'], $upper)) {
+                $checkCodes = array_unique(array_merge([$rule['primary']], $rule['alternatives']));
+                $rankScore = 0.98;
+                foreach ($checkCodes as $cCode) {
+                    $clean = str_replace(['.', ' ', '-'], '', $cCode);
+                    if (!isset($seenCodes[$clean])) {
+                        $tariff = $this->getTariffAndLartas($clean);
+                        if (!empty($tariff['code'])) {
+                            $candidates[] = [
+                                'hs_code' => $tariff['code'],
+                                'clean_code' => $tariff['clean_code'],
+                                'description' => $tariff['desc'],
+                                'confidence_score' => $rankScore,
+                                'confidence_percent' => (int) round($rankScore * 100),
+                                'confidence_label' => ($rankScore >= 0.95 ? 'Sangat Direkomendasikan (' . round($rankScore * 100) . '%)' : 'Alternatif Relevan (' . round($rankScore * 100) . '%)'),
+                                'bm' => (float) ($tariff['bm'] ?? 0),
+                                'ppn' => (float) ($tariff['ppn'] ?? 11),
+                                'pph' => (float) ($tariff['pph'] ?? 2.5),
+                                'bk' => (float) ($tariff['bk'] ?? 0),
+                                'satuan' => $tariff['satuan'] ?? 'PCE',
+                                'is_lartas' => !empty($tariff['has_lartas']),
+                                'lartas_badge' => !empty($tariff['has_lartas']) ? 'LARTAS' : 'NON LARTAS',
+                                'lartas_desc' => $tariff['lartas'] ?? 'Bebas perizinan tata niaga impor (Non-Lartas)',
+                                'legal' => $tariff['legal'] ?? "BTKI 2022 Pos {$tariff['code']}",
+                                'rationale' => $rule['rationale'],
+                                'source' => 'AI_INDUSTRY_HEURISTIC',
+                            ];
+                            $seenCodes[$clean] = true;
+                            $rankScore -= 0.08;
+                        }
+                    }
+                }
+            }
+        }
+
+        // 3. Pencocokan Semantik Berbasis Database BTKI 2022 (Pencarian Kata Kunci Multibahasa)
+        $stopwords = ['AND', 'FOR', 'THE', 'WITH', 'TYPE', 'PCS', 'SET', 'MADE', 'CHINA', 'IDN', 'NET', 'GROSS', 'WEIGHT', 'KG', 'MTS', 'GRADE', 'SIZE', 'MODEL', 'BRAND'];
+        $words = array_filter(
+            explode(' ', preg_replace('/[^A-Z0-9\s]/', ' ', $upper)),
+            fn($w) => strlen($w) >= 3 && !in_array($w, $stopwords, true)
+        );
+
+        // Kamus padanan istilah komersial Inggris -> Indonesia untuk pencocokan BTKI
+        $translations = [
+            'ADDITIVE' => 'ADITIF',
+            'ADDITIVES' => 'ADITIF',
+            'CEMENT' => 'SEMEN',
+            'CONCRETE' => 'BETON',
+            'MORTAR' => 'MORTAR',
+            'CHEMICAL' => 'KIMIA',
+            'STEEL' => 'BAJA',
+            'IRON' => 'BESI',
+            'PIPE' => 'PIPA',
+            'VALVE' => 'KATUP',
+            'PUMP' => 'POMPA',
+            'ENGINE' => 'MOTOR',
+            'MOTOR' => 'MOTOR',
+            'TIRE' => 'BAN',
+            'RUBBER' => 'KARET',
+            'PLASTIC' => 'PLASTIK',
+            'PAPER' => 'KERTAS',
+            'CLOTH' => 'KAIN',
+            'COTTON' => 'KAPAS',
+            'SHIRT' => 'KEMEJA',
+            'WOOD' => 'KAYU',
+        ];
+
+        $searchTerms = [];
+        foreach ($words as $w) {
+            $searchTerms[] = $w;
+            if (isset($translations[$w])) {
+                $searchTerms[] = $translations[$w];
+            }
+        }
+        $searchTerms = array_unique($searchTerms);
+
+        if (!empty($searchTerms) && count($candidates) < $limit) {
+            try {
+                $dbMatches = HsCode::query()
+                    ->where(function ($q) use ($searchTerms) {
+                        foreach ($searchTerms as $term) {
+                            $q->orWhere('description', 'like', "%{$term}%")
+                              ->orWhere('code', 'like', "%{$term}%");
+                        }
+                    })
+                    ->limit(10)
+                    ->get();
+
+                foreach ($dbMatches as $row) {
+                    $clean = str_replace(['.', ' ', '-'], '', $row->code);
+                    if (!isset($seenCodes[$clean])) {
+                        $tariff = $this->getTariffAndLartas($clean);
+                        $candidates[] = [
+                            'hs_code' => $tariff['code'],
+                            'clean_code' => $tariff['clean_code'],
+                            'description' => $tariff['desc'],
+                            'confidence_score' => 0.88,
+                            'confidence_percent' => 88,
+                            'confidence_label' => 'Kecocokan BTKI (88%)',
+                            'bm' => (float) ($tariff['bm'] ?? 0),
+                            'ppn' => (float) ($tariff['ppn'] ?? 11),
+                            'pph' => (float) ($tariff['pph'] ?? 2.5),
+                            'bk' => (float) ($tariff['bk'] ?? 0),
+                            'satuan' => $tariff['satuan'] ?? 'PCE',
+                            'is_lartas' => !empty($tariff['has_lartas']),
+                            'lartas_badge' => !empty($tariff['has_lartas']) ? 'LARTAS' : 'NON LARTAS',
+                            'lartas_desc' => $tariff['lartas'] ?? 'Bebas perizinan tata niaga impor (Non-Lartas)',
+                            'legal' => $tariff['legal'] ?? "BTKI 2022 Pos {$tariff['code']}",
+                            'rationale' => "Pencocokan kata kunci uraian barang dengan pos tarif resmi BTKI 2022.",
+                            'source' => 'BTKI_2022_DATABASE',
+                        ];
+                        $seenCodes[$clean] = true;
+                    }
+                }
+            } catch (\Throwable $e) {
+                Log::warning("Gagal query HsCode rekomendasi: " . $e->getMessage());
+            }
+        }
+
+        // 4. Fallback jika belum ada kandidat
+        if (empty($candidates)) {
+            $fallbackCode = ($direction === 'EXPORT' || $direction === 'EKSPORT_BC30') ? '15111000' : '84522900';
+            $tariff = $this->getTariffAndLartas($fallbackCode);
+            $candidates[] = [
+                'hs_code' => $tariff['code'],
+                'clean_code' => $tariff['clean_code'],
+                'description' => $tariff['desc'],
+                'confidence_score' => 0.70,
+                'confidence_percent' => 70,
+                'confidence_label' => 'Estimasi Standar (70%)',
+                'bm' => (float) ($tariff['bm'] ?? 0),
+                'ppn' => (float) ($tariff['ppn'] ?? 11),
+                'pph' => (float) ($tariff['pph'] ?? 2.5),
+                'bk' => (float) ($tariff['bk'] ?? 0),
+                'satuan' => $tariff['satuan'] ?? 'PCE',
+                'is_lartas' => !empty($tariff['has_lartas']),
+                'lartas_badge' => !empty($tariff['has_lartas']) ? 'LARTAS' : 'NON LARTAS',
+                'lartas_desc' => $tariff['lartas'] ?? 'Bebas perizinan tata niaga impor (Non-Lartas)',
+                'legal' => $tariff['legal'] ?? "BTKI 2022 Pos {$tariff['code']}",
+                'rationale' => 'Estimasi default kategori barang umum.',
+                'source' => 'DEFAULT_FALLBACK',
+            ];
+        }
+
+        // Urutkan berdasarkan confidence_score tertinggi dan batasi sesuai limit
+        usort($candidates, fn($a, $b) => $b['confidence_score'] <=> $a['confidence_score']);
+
+        return array_slice($candidates, 0, $limit);
+    }
+
+    /**
+     * Rekomendasi HS Code Cerdas untuk Sekumpulan Item Barang (Batch Recommendation)
+     */
+    public function recommendForMultipleItems(array $items, ?string $direction = 'IMPORT'): array
+    {
+        $results = [];
+        foreach ($items as $idx => $item) {
+            $text = is_array($item)
+                ? ($item['uraian'] ?? ($item['uraianBarang'] ?? ($item['description'] ?? '')))
+                : (string) $item;
+
+            $candidates = $this->recommendHsCandidates($text, $direction, 4);
+            $results[] = [
+                'index' => $idx,
+                'item_text' => $text,
+                'recommended_hs' => $candidates[0]['hs_code'] ?? null,
+                'top_candidate' => $candidates[0] ?? null,
+                'candidates' => $candidates,
+            ];
+        }
+
+        return $results;
+    }
+
+    /**
      * Klasifikasi Cerdas Komoditas Barang ke Pos Tarif HS Code BTKI 2022 (AI / NLP Engine)
      */
     public function classifyCommodity(string $text, ?string $direction = null): array

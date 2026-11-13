@@ -86,9 +86,12 @@ Route::middleware('auth')->group(function () {
         Route::post('/{bc30}/fetch-response', [BC30Controller::class, 'fetchResponse'])->name('fetch-response');
     });
 
-    // Kurs Kepabeanan & Tarif HS Code Real-Time
+    // Kurs Kepabeanan & Tarif HS Code Real-Time serta Rekomendasi Cerdas BTKI
     Route::get('/ceisa/kurs/{valuta}', [CeisaApiController::class, 'getKurs'])->name('ceisa.kurs');
     Route::get('/ceisa/tarif-hs/{hsCode}', [CeisaApiController::class, 'getTarifHs'])->name('ceisa.tarif-hs');
+    Route::get('/ceisa/hs-search', [CeisaApiController::class, 'searchHs'])->name('ceisa.hs-search');
+    Route::match(['get', 'post'], '/ceisa/hs-recommend', [CeisaApiController::class, 'recommendHs'])->name('ceisa.hs-recommend');
+    Route::match(['get', 'post'], '/bc-20/recommend-hs', [CeisaApiController::class, 'recommendHs'])->name('bc20.recommend-hs');
 
     // 2. Core Bisnis - Tim DO & Tim Traffic (Unified Redirects to Active Workflows)
     Route::prefix('do')->name('do.')->group(function () {

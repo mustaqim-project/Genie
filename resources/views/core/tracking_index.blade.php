@@ -296,6 +296,23 @@
                                 {{ $ceisa?->nomor_daftar ? 'Nopen ' . $ceisa->nomor_daftar : '-' }}
                                 {{ $ceisa?->tanggal_daftar ? ' (' . \Carbon\Carbon::parse($ceisa->tanggal_daftar)->format('d/m') . ')' : '' }}
                             </div>
+                            @if($ceisa)
+                                @if($ceisa->jenis_dokumen === '20')
+                                    <a href="{{ route('bc20.edit', $ceisa->id) }}"
+                                       class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-[6px] text-[10px] font-bold bg-[#007AFF]/10 text-[#007AFF] hover:bg-[#007AFF] hover:text-white transition-colors"
+                                       title="Buka Form Edit BC 2.0 (PIB Impor)">
+                                        <i data-lucide="edit-3" class="w-2.5 h-2.5"></i>
+                                        <span>Edit BC 2.0</span>
+                                    </a>
+                                @else
+                                    <a href="{{ route('bc30.show', $ceisa->id) }}"
+                                       class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-[6px] text-[10px] font-bold bg-[#AF52DE]/10 text-[#AF52DE] hover:bg-[#AF52DE] hover:text-white transition-colors"
+                                       title="Buka Dokumen BC 3.0 (PEB Ekspor)">
+                                        <i data-lucide="file-text" class="w-2.5 h-2.5"></i>
+                                        <span>BC 3.0</span>
+                                    </a>
+                                @endif
+                            @endif
                         </td>
                         <td class="py-2.5 px-2.5">
                             <div class="flex flex-wrap items-center justify-center gap-1">
@@ -364,6 +381,14 @@
                                     'delivery_date' => $s->delivery_date?->format('Y-m-d'),
                                 ];
                             @endphp
+                            @if($ceisa && $ceisa->jenis_dokumen === '20')
+                            <a href="{{ route('bc20.edit', $ceisa->id) }}"
+                               class="inline-flex items-center gap-1 px-2 py-1 rounded-[7px] text-[10px] font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white transition-colors mr-1"
+                               title="Buka Form Wizard BC 2.0">
+                                <i data-lucide="file-edit" class="w-3 h-3"></i>
+                                <span>BC 2.0</span>
+                            </a>
+                            @endif
                             <button type="button"
                                     data-tracking='@json($editPayload)'
                                     onclick="openTrackingEditModal(this)"

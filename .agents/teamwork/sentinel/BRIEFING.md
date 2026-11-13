@@ -18,8 +18,8 @@ Supervise execution of End-to-End Export-Import Document Tracking, Bundle Intell
 - Full test suite passing (`php artisan test`) with no regressions
 
 ## Active Orchestrator
-- Active orchestrator: b0ddf190-c06b-41f0-99dc-4f1c82097b30
-- Orchestrator state folder: c:\laragon\www\GENIE\.agents\teamwork\orchestrator
+- Active orchestrator: d9b510cf-069b-458a-9dec-0a4ce6346ba2
+- Orchestrator state folder: c:\laragon\www\GENIE\.agents\teamwork\orchestrator_gen2
 
 ## User Context
 - **Last user request**: Approved task prompt received

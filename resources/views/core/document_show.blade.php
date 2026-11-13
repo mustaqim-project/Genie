@@ -1765,7 +1765,9 @@
                 <img :src="previewUrl" :alt="previewTitle" class="max-w-full max-h-full rounded-xl shadow-md object-contain">
             </template>
             <template x-if="!previewIsImage && previewUrl">
-                <iframe :src="previewUrl" class="w-full h-full rounded-xl border-0 bg-white"></iframe>
+                <object :data="previewUrl + '#toolbar=1'" type="application/pdf" class="w-full h-full rounded-xl border-0 bg-white">
+                    <iframe :src="previewUrl" class="w-full h-full rounded-xl border-0 bg-white"></iframe>
+                </object>
             </template>
         </div>
     </div>

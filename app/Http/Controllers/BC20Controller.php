@@ -608,8 +608,8 @@ class BC20Controller extends Controller implements HasMiddleware
             'ext' => strtoupper($ext ?: 'PDF'),
             'is_image' => in_array($ext, ['png', 'jpg', 'jpeg', 'webp', 'gif'], true),
             'is_previewable' => $previewable,
-            'preview_url' => route('core.document.preview-doc', [$shipment->id, $doc->id]),
-            'download_url' => route('core.document.download-doc', [$shipment->id, $doc->id]),
+            'preview_url' => route('core.document.preview-doc', [$shipment->id, $doc->id], false),
+            'download_url' => route('core.document.download-doc', [$shipment->id, $doc->id], false),
             'status' => $doc->status,
         ];
     }
