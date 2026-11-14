@@ -42,7 +42,7 @@
                     <th class="px-3 py-2.5 text-center">eCOO Status</th>
                     <th class="px-3 py-2.5">Nomor</th>
                     <th class="px-3 py-2.5">Tanggal</th>
-                    <th class="px-3 py-2.5 text-center">Aksi</th>
+                    <th class="px-3 py-2.5 text-center sticky right-0 z-20 bg-slate-50 dark:bg-[#1C1C1E] border-l border-black/[0.06] dark:border-white/[0.08] shadow-[-6px_0_12px_rgba(0,0,0,0.06)]">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-black/[0.05] dark:divide-white/[0.06]">
@@ -84,7 +84,7 @@
                                 <div class="font-mono text-slate-700 dark:text-slate-300 tabular-nums" x-text="doc.tanggalDokumen || '-'"></div>
                             </div>
                         </td>
-                        <td class="px-3 py-3" @click.stop>
+                        <td class="px-3 py-3 whitespace-nowrap sticky right-0 z-10 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-xs border-l border-black/[0.06] dark:border-white/[0.08] shadow-[-6px_0_12px_rgba(0,0,0,0.06)]" @click.stop>
                             <div class="flex items-center justify-center gap-1">
                                 <button type="button"
                                         @click="previewDocumentRow(doc)"

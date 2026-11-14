@@ -130,7 +130,7 @@
                     <th class="px-3 py-2.5 text-center">PPN</th>
                     <th class="px-3 py-2.5 text-center">PPH</th>
                     <th class="px-3 py-2.5 text-center">BM</th>
-                    <th class="px-3 py-2.5 text-center">Action</th>
+                    <th class="px-3 py-2.5 text-center sticky right-0 z-20 bg-slate-50 dark:bg-[#1C1C1E] border-l border-black/[0.06] dark:border-white/[0.08] shadow-[-6px_0_12px_rgba(0,0,0,0.06)]">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-black/[0.05] dark:divide-white/[0.06]">
@@ -198,7 +198,7 @@
                                 <div class="text-[9px] text-slate-400 mt-0.5 font-mono">Data INSW</div>
                             </div>
                         </td>
-                        <td class="px-3 py-3 text-center">
+                        <td class="px-3 py-3 text-center whitespace-nowrap sticky right-0 z-10 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-xs border-l border-black/[0.06] dark:border-white/[0.08] shadow-[-6px_0_12px_rgba(0,0,0,0.06)]">
                             <div class="flex items-center justify-center gap-1">
                                 <button type="button" @click="openEditBarangModal(item._origIdx)" title="Edit barang" class="p-1.5 rounded-lg text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/10 cursor-pointer">
                                     <i data-lucide="pencil" class="w-3.5 h-3.5"></i>

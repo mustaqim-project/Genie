@@ -32,49 +32,65 @@
             </p>
         </div>
 
-        <!-- Action Buttons Toolbar -->
-        <div class="flex items-center gap-2 w-full lg:w-auto shrink-0 flex-wrap">
+        <!-- Action Buttons Toolbar (Icon-Only Apple HIG Compact Group) -->
+        <div class="flex items-center gap-1.5 w-full lg:w-auto shrink-0 flex-wrap justify-end">
             @can('setting.manage')
-            <form action="{{ route('config.sync-all') }}" method="POST" class="inline">
+            <!-- Sync Semua CEISA Global -->
+            <form action="{{ route('core.document.sync-all-ceisa') }}" method="POST" class="inline">
                 @csrf
                 <button type="submit"
-                        class="btn-apple-gray text-[12px] font-semibold !text-emerald-700 dark:!text-emerald-400 hover:!bg-emerald-500/10 flex items-center gap-1.5"
-                        title="Tarik seluruh status terbaru dokumen BC 2.0 & BC 3.0 dari CEISA 4.0">
-                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-emerald-600"></i>
-                    <span>Sync Semua CEISA</span>
+                        class="w-9 h-9 rounded-xl border border-emerald-300 dark:border-emerald-800 bg-emerald-50/80 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-400 inline-flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+                        title="Tarik seluruh status terbaru dokumen BC 2.0 & BC 3.0 dari CEISA 4.0"
+                        aria-label="Sync Semua CEISA Global">
+                    <i data-lucide="refresh-cw" class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></i>
                 </button>
             </form>
+
+            <!-- Tarik Data CEISA (By No Aju / No Daftar) -->
             <button type="button"
                     onclick="document.getElementById('modal-sync-ceisa').classList.remove('hidden')"
-                    class="btn-apple-gray text-[12px] font-semibold !text-emerald-700 dark:!text-emerald-400 hover:!bg-emerald-500/10 flex items-center gap-1.5">
-                <i data-lucide="download-cloud" class="w-3.5 h-3.5 text-emerald-600"></i>
-                <span>Tarik Data CEISA</span>
+                    class="w-9 h-9 rounded-xl border border-emerald-300 dark:border-emerald-800 bg-emerald-50/80 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-400 inline-flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+                    title="Tarik Data Dokumen dari CEISA 4.0"
+                    aria-label="Tarik Data CEISA">
+                <i data-lucide="download-cloud" class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></i>
             </button>
             @endcan
 
+            <!-- Deteksi HS Code & Lartas AI Modal -->
             <button type="button"
                     @click="aiModalOpen = true"
-                    class="btn-apple-gray text-[12px] font-semibold !text-[#007AFF] hover:!bg-[#007AFF]/10 flex items-center gap-1.5">
-                <i data-lucide="sparkles" class="w-3.5 h-3.5 text-[#007AFF]"></i>
-                <span>✨ Deteksi HS Code &amp; Lartas AI</span>
+                    class="w-9 h-9 rounded-xl border border-sky-300 dark:border-sky-800 bg-sky-50/80 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 text-[#007AFF] inline-flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+                    title="Deteksi HS Code &amp; Skrining Lartas AI"
+                    aria-label="Deteksi HS Code & Lartas AI">
+                <i data-lucide="sparkles" class="w-4 h-4 text-[#007AFF]"></i>
             </button>
 
             @can('document.create')
+            <!-- Buat BC 2.0 (PIB) -->
             <a href="{{ route('bc20.create') }}"
-               class="btn-apple-gray text-[12px] font-semibold !text-[#007AFF] !border-[#007AFF]/25 hover:!bg-[#007AFF]/10 flex items-center gap-1.5">
-                <i data-lucide="arrow-down-left" class="w-3.5 h-3.5"></i>
-                <span>Buat BC 2.0 (PIB)</span>
+               class="w-9 h-9 rounded-xl border border-[#007AFF]/25 hover:bg-[#007AFF]/10 text-[#007AFF] inline-flex items-center justify-center transition-colors shadow-2xs relative cursor-pointer"
+               title="Buat Pengajuan Impor BC 2.0 (PIB)"
+               aria-label="Buat BC 2.0 PIB">
+                <i data-lucide="arrow-down-left" class="w-4 h-4"></i>
+                <span class="absolute -top-1 -right-1 px-1 py-0.2 rounded text-[8px] font-mono font-bold bg-[#007AFF] text-white leading-none">2.0</span>
             </a>
+
+            <!-- Buat BC 3.0 (PEB) -->
             <a href="{{ route('bc30.create') }}"
-               class="btn-apple-gray text-[12px] font-semibold !text-indigo-600 dark:!text-indigo-400 !border-indigo-500/25 hover:!bg-indigo-500/10 flex items-center gap-1.5">
-                <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
-                <span>Buat BC 3.0 (PEB)</span>
+               class="w-9 h-9 rounded-xl border border-indigo-500/25 hover:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 inline-flex items-center justify-center transition-colors shadow-2xs relative cursor-pointer"
+               title="Buat Pengajuan Ekspor BC 3.0 (PEB)"
+               aria-label="Buat BC 3.0 PEB">
+                <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+                <span class="absolute -top-1 -right-1 px-1 py-0.2 rounded text-[8px] font-mono font-bold bg-indigo-600 text-white leading-none">3.0</span>
             </a>
+
+            <!-- Buka Proyek Baru -->
             <button type="button"
                     onclick="document.getElementById('modal-create-project').classList.remove('hidden')"
-                    class="btn-apple-filled w-full sm:w-auto text-[12px]">
-                <i data-lucide="plus" class="w-4 h-4"></i>
-                <span>Buka Proyek Baru</span>
+                    class="btn-apple-filled !w-9 !h-9 !p-0 inline-flex items-center justify-center rounded-xl shadow-xs cursor-pointer"
+                    title="Buka Proyek Baru (P01)"
+                    aria-label="Buka Proyek Baru">
+                <i data-lucide="plus" class="w-4.5 h-4.5"></i>
             </button>
             @endcan
         </div>
@@ -281,7 +297,7 @@
                         <th class="py-3 px-4 text-right">Valuasi (CIF / FOB)</th>
                         <th class="py-3 px-4 text-center">Status CEISA &amp; Siklus</th>
                         <th class="py-3 px-4">Billing MPN / SPPB / NPE</th>
-                        <th class="py-3 px-4 text-right">Aksi</th>
+                        <th class="py-3 px-4 text-center sticky right-0 z-20 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-md border-l border-black/5 dark:border-white/10 shadow-[-6px_0_12px_rgba(0,0,0,0.06)]">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-black/5 dark:divide-white/5">
@@ -518,49 +534,55 @@
                                 @endif
                             </td>
 
-                            <!-- 8. Aksi Gabungan (BC 2.0 / BC 3.0 / Proyek) -->
-                            <td class="py-3.5 px-4 text-right space-x-1 whitespace-nowrap">
+                            <!-- 8. Aksi Gabungan (Freeze Sticky Right Column & Icon-Only Group) -->
+                            <td class="py-3.5 px-3 text-center space-x-1 whitespace-nowrap sticky right-0 z-10 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-md border-l border-black/5 dark:border-white/10 shadow-[-6px_0_12px_rgba(0,0,0,0.06)]">
                                 @if($ceisaDetailRoute)
                                     <a href="{{ $ceisaDetailRoute }}"
-                                       class="btn-apple-gray !h-8 !px-2.5 !text-[11px] font-semibold {{ $isExport ? '!text-indigo-600 dark:!text-indigo-400 !border-indigo-500/30 hover:!bg-indigo-500/10' : '!text-[#007AFF] !border-[#007AFF]/30 hover:!bg-[#007AFF]/10' }}"
-                                       title="Buka pelacakan alur 11 Pos dan detail pabean {{ $isExport ? 'BC 3.0' : 'BC 2.0' }}">
-                                        <i data-lucide="milestone" class="w-3.5 h-3.5"></i>
-                                        <span>11 Pos</span>
+                                       class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-sky-300 dark:border-sky-800 bg-sky-50/80 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 {{ $isExport ? 'text-indigo-600 dark:text-indigo-400' : 'text-[#007AFF]' }} transition-colors"
+                                       title="Buka pelacakan alur 11 Pos dan detail pabean {{ $isExport ? 'BC 3.0' : 'BC 2.0' }}"
+                                       aria-label="Pelacakan 11 Pos">
+                                        <i data-lucide="compass" class="w-4 h-4"></i>
                                     </a>
                                 @endif
 
                                 @if($canEditCeisa && $ceisaEditRoute)
                                     <a href="{{ $ceisaEditRoute }}"
-                                       class="btn-apple-gray !h-8 !px-2.5 !text-[11px] font-semibold !text-amber-700 dark:!text-amber-400 !border-amber-500/30 hover:!bg-amber-500/10"
-                                       title="Buka Editor / Wizard {{ $isExport ? 'BC 3.0 PEB' : 'BC 2.0 PIB' }}">
-                                        <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-                                        <span>Edit</span>
+                                       class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-amber-300 dark:border-amber-800 bg-amber-50/80 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-400 transition-colors"
+                                       title="Buka Editor / Wizard {{ $isExport ? 'BC 3.0 PEB' : 'BC 2.0 PIB' }}"
+                                       aria-label="Edit Dokumen">
+                                        <i data-lucide="edit-3" class="w-4 h-4"></i>
                                     </a>
                                 @endif
 
                                 <a href="{{ $shp ? route('core.document.show', $shp->id) : route('core.document.show', $ceisa->id) }}"
-                                   class="btn-apple-tinted !h-8 !px-2.5 !text-[11px]">
-                                    <span>Detail</span>
-                                    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                                   class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-slate-200 dark:border-white/15 bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 transition-colors"
+                                   title="Buka Detail Proyek"
+                                   aria-label="Detail Proyek">
+                                    <i data-lucide="eye" class="w-4 h-4"></i>
                                 </a>
 
                                 @if($shp)
                                     <button type="button"
                                             onclick="openPortalModal('{{ $shp->id }}', '{{ $shp->project_no }}', '{{ addslashes($shp->client->name ?? '-') }}', '{{ $shp->portal_token ? route('portal.track', $shp->portal_token) : '' }}', '{{ $shp->portal_status }}', '{{ $shp->portal_expires_at ? $shp->portal_expires_at->format('d/m/Y H:i') : '' }}', '{{ $shp->portal_duration_days ?? 7 }}', '{{ $shp->client->pic_phone ?? ($shp->client->phone ?? '') }}', '{{ $shp->nomor_bl_awb ?? '' }}')"
-                                            class="btn-apple-gray !h-8 !px-2 !text-[11px] {{ $shp->isPortalActive() ? '!text-[#007AFF] !border-[#007AFF]/30' : '!text-black/50' }}"
-                                            title="Bagikan Tautan Portal Klien">
-                                        <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+                                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-slate-200 dark:border-white/15 hover:bg-slate-100 dark:hover:bg-white/10 {{ $shp->isPortalActive() ? '!text-[#007AFF] !border-[#007AFF]/30 bg-[#007AFF]/5' : 'text-slate-500' }} transition-colors cursor-pointer"
+                                            title="Bagikan Tautan Portal Klien"
+                                            aria-label="Bagikan Portal">
+                                        <i data-lucide="share-2" class="w-4 h-4"></i>
                                     </button>
 
                                     @if($isExport)
                                         <a href="{{ route('pdf.peb', $shp->id) }}" target="_blank"
-                                           class="btn-apple-gray !h-8 !px-2 !text-[11px]" title="Cetak PEB BC 3.0">
-                                            <span>PEB</span>
+                                           class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-slate-200 dark:border-white/15 bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 transition-colors"
+                                           title="Cetak PEB BC 3.0 (PDF)"
+                                           aria-label="Cetak PEB">
+                                            <i data-lucide="printer" class="w-4 h-4"></i>
                                         </a>
                                     @else
                                         <a href="{{ route('pdf.pib', $shp->id) }}" target="_blank"
-                                           class="btn-apple-gray !h-8 !px-2 !text-[11px]" title="Cetak PIB BC 2.0">
-                                            <span>PIB</span>
+                                           class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-slate-200 dark:border-white/15 bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 transition-colors"
+                                           title="Cetak PIB BC 2.0 (PDF)"
+                                           aria-label="Cetak PIB">
+                                            <i data-lucide="printer" class="w-4 h-4"></i>
                                         </a>
                                     @endif
                                 @endif
@@ -569,7 +591,7 @@
                                     @php
                                         $destroyAction = $shp
                                             ? route('core.document.destroy', $shp->id)
-                                            : ($isExport ? route('bc30.destroy', $ceisa->id) : route('bc20.destroy', $ceisa->id));
+                                             : ($isExport ? route('bc30.destroy', $ceisa->id) : route('bc20.destroy', $ceisa->id));
                                         $destroyLabel = $shp ? $shp->project_no : ($ceisa?->nomor_aju ?? 'Draft');
                                     @endphp
                                     <form action="{{ $destroyAction }}" method="POST" class="inline"
@@ -577,9 +599,10 @@
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit"
-                                                class="btn-apple-gray !h-8 !px-2 !text-[11px] !text-rose-600 dark:!text-rose-400 !border-rose-300/60 hover:!bg-rose-500/10 cursor-pointer"
-                                                title="Hapus Draft & Aset Dokumen">
-                                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                                class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-rose-300 dark:border-rose-900 bg-rose-50/80 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 transition-colors cursor-pointer"
+                                                title="Hapus Draft Dokumen"
+                                                aria-label="Hapus Draft">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
                                         </button>
                                     </form>
                                 @endif
@@ -606,197 +629,7 @@
 
 <!-- Modal Form Buat Proyek Baru (P01) dengan Auto-Deteksi Dokumen AI -->
 <div id="modal-create-project" class="hidden fixed inset-0 z-[200] overflow-y-auto bg-black/60 backdrop-blur-md flex items-center justify-center p-4"
-     x-data="{
-        tab: 'ai',
-        useAi: false,
-        afterAction: 'fill_bc_form',
-        scanning: false,
-        scanned: false,
-        showDetails: false,
-        showSpecialDocs: false,
-        bundleFileNames: [],
-        detectedBundleFiles: [],
-        crossValidation: null,
-        fileNames: { bl: '', invoice: '', pl: '', coo: '', insurance: '', lartas: '' },
-        detected: {
-            client_id: '',
-            client_name: '',
-            client_npwp: '',
-            exporter_name: '',
-            shipping_vendor_id: '',
-            shipping_vendor_name: '',
-            type: '',
-            bl_number: '',
-            invoice_number: '',
-            vessel_name: '',
-            voyage_number: '',
-            port_of_loading: '',
-            port_of_discharge: '',
-            eta: '',
-            etd_date: '',
-            commodity_summary: '',
-            extraction_mode: 'RULE_ENGINE_NO_AI',
-            total_kontainer: 1,
-            nomor_kontainer: '',
-            total_kemasan: 0,
-            jenis_kemasan: '',
-            total_bruto: 0,
-            total_netto: 0,
-            currency: 'USD',
-            total_cif: 0,
-            total_fob: 0,
-            freight: 0,
-            ndbm_kurs: 15850,
-            items: []
-        },
-        handleBundleFiles(event) {
-            const files = event.target.files;
-            this.bundleFileNames = files ? Array.from(files).map(f => f.name) : [];
-            if (this.bundleFileNames.length > 0 && ['IMPORT', 'EXPORT'].includes(this.detected.type)) {
-                this.scanFiles();
-            }
-        },
-        updateFileName(type, event) {
-            const files = event.target.files;
-            if (files && files[0]) {
-                this.fileNames[type] = files[0].name;
-                if ((this.fileNames.bl || this.fileNames.invoice || this.fileNames.pl || this.bundleFileNames.length > 0) && !this.scanned && ['IMPORT', 'EXPORT'].includes(this.detected.type)) {
-                    this.scanFiles();
-                }
-            }
-        },
-        async scanFiles() {
-            if (!['IMPORT', 'EXPORT'].includes(this.detected.type)) {
-                alert('Wajib memilih Tipe Kepabeanan terlebih dahulu: Impor (BC 2.0) atau Ekspor (BC 3.0).');
-                return;
-            }
-            const bundleInput = document.getElementById('input-bundle-files');
-            const blInput = document.getElementById('input-bl-file');
-            const invInput = document.getElementById('input-inv-file');
-            const plInput = document.getElementById('input-pl-file');
-            const cooInput = document.getElementById('input-coo-file');
-            const insInput = document.getElementById('input-insurance-file');
-            const lartasInput = document.getElementById('input-lartas-file');
-
-            const hasBundle = bundleInput?.files?.length > 0;
-            const hasSingle = blInput?.files?.length || invInput?.files?.length || plInput?.files?.length || cooInput?.files?.length || insInput?.files?.length || lartasInput?.files?.length;
-
-            if (!hasBundle && !hasSingle) {
-                alert('Silakan pilih minimal 1 berkas (Bundle Multi-File/ZIP, B/L, Commercial Invoice, atau Packing List) untuk dipindai.');
-                return;
-            }
-
-            this.scanning = true;
-            const formData = new FormData();
-            if (hasBundle) {
-                Array.from(bundleInput.files).forEach(f => formData.append('bundle_files[]', f));
-            }
-            if (blInput?.files?.[0]) formData.append('bl_file', blInput.files[0]);
-            if (invInput?.files?.[0]) formData.append('invoice_file', invInput.files[0]);
-            if (plInput?.files?.[0]) formData.append('packing_list_file', plInput.files[0]);
-            if (cooInput?.files?.[0]) formData.append('coo_file', cooInput.files[0]);
-            if (insInput?.files?.[0]) formData.append('insurance_file', insInput.files[0]);
-            if (lartasInput?.files?.[0]) formData.append('lartas_file', lartasInput.files[0]);
-
-            formData.append('use_ai', this.useAi ? '1' : '0');
-            const chosenType = this.detected.type;
-            formData.append('type', chosenType);
-
-            const clientSelect = document.getElementById('smart-client-select');
-            if (clientSelect?.value) formData.append('client_id', clientSelect.value);
-
-            try {
-                const response = await fetch('{{ route('core.document.parse-documents') }}', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: formData
-                });
-                const res = await response.json();
-                if (response.ok && res.status === 'success' && res.data) {
-                    this.scanned = true;
-                    this.detected = { ...this.detected, ...res.data, type: chosenType };
-                    this.detectedBundleFiles = res.data.bundle_files_detected || [];
-                    this.crossValidation = res.data.cross_validation || null;
-
-                    if (clientSelect && res.data.client_id) {
-                        let opt = clientSelect.querySelector(`option[value='${res.data.client_id}']`);
-                        if (!opt) {
-                            opt = document.createElement('option');
-                            opt.value = res.data.client_id;
-                            opt.textContent = `${res.data.client_name} (NPWP: ${res.data.client_npwp || '-'})`;
-                            clientSelect.appendChild(opt);
-                        }
-                        clientSelect.value = res.data.client_id;
-                    }
-                } else {
-                    alert(res.message || 'Gagal memindai dokumen.');
-                }
-            } catch (err) {
-                console.error(err);
-                alert('Terjadi kesalahan koneksi saat memindai dokumen.');
-            } finally {
-                this.scanning = false;
-            }
-        },
-        showQuickClientModal: false,
-        quickClient: { name: '', npwp: '', pic_name: '', phone: '' },
-        quickClientLoading: false,
-        quickClientError: '',
-        openQuickClient() {
-            this.quickClient = { name: '', npwp: '', pic_name: '', phone: '' };
-            this.quickClientError = '';
-            this.showQuickClientModal = true;
-        },
-        async submitQuickClient() {
-            if (!this.quickClient.name) {
-                this.quickClientError = 'Nama perusahaan / importir wajib diisi.';
-                return;
-            }
-            this.quickClientLoading = true;
-            this.quickClientError = '';
-            try {
-                const response = await fetch('{{ route('crm.clients.store') }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify(this.quickClient)
-                });
-                const res = await response.json();
-                if (res.status === 'success' && res.data) {
-                    const c = res.data;
-                    const smartSelect = document.getElementById('smart-client-select');
-                    if (smartSelect) {
-                        const opt = document.createElement('option');
-                        opt.value = c.id;
-                        opt.textContent = `${c.name} (NPWP: ${c.npwp || '-'})`;
-                        smartSelect.appendChild(opt);
-                        smartSelect.value = c.id;
-                    }
-                    const manualSelect = document.getElementById('manual-client-select');
-                    if (manualSelect) {
-                        const opt = document.createElement('option');
-                        opt.value = c.id;
-                        opt.textContent = `${c.name} (NPWP: ${c.npwp || '-'})`;
-                        manualSelect.appendChild(opt);
-                        manualSelect.value = c.id;
-                    }
-                    this.detected.client_id = c.id;
-                    this.showQuickClientModal = false;
-                } else {
-                    this.quickClientError = res.message || 'Gagal menyimpan klien.';
-                }
-            } catch (err) {
-                this.quickClientError = 'Terjadi kesalahan sistem saat menyimpan data klien.';
-            } finally {
-                this.quickClientLoading = false;
-            }
-        }
-     }">
+     x-data="createProjectModalManager()">
     <div class="app-modal-dialog app-modal-dialog-xl rounded-[20px] bg-white dark:bg-[#1C1C1E] border border-black/10 dark:border-white/10 shadow-2xl p-6 text-[13px]">
         
         <!-- Header Modal & Tab Navigasi -->
@@ -1911,4 +1744,200 @@
         </div>
     </div>
     @endcan
+
+    <script>
+    function createProjectModalManager() {
+        return {
+            tab: 'ai',
+            useAi: false,
+            afterAction: 'fill_bc_form',
+            scanning: false,
+            scanned: false,
+            showDetails: false,
+            showSpecialDocs: false,
+            bundleFileNames: [],
+            detectedBundleFiles: [],
+            crossValidation: null,
+            fileNames: { bl: '', invoice: '', pl: '', coo: '', insurance: '', lartas: '' },
+            detected: {
+                client_id: '',
+                client_name: '',
+                client_npwp: '',
+                exporter_name: '',
+                shipping_vendor_id: '',
+                shipping_vendor_name: '',
+                type: '',
+                bl_number: '',
+                invoice_number: '',
+                vessel_name: '',
+                voyage_number: '',
+                port_of_loading: '',
+                port_of_discharge: '',
+                eta: '',
+                etd_date: '',
+                commodity_summary: '',
+                extraction_mode: 'RULE_ENGINE_NO_AI',
+                total_kontainer: 1,
+                nomor_kontainer: '',
+                total_kemasan: 0,
+                jenis_kemasan: '',
+                total_bruto: 0,
+                total_netto: 0,
+                currency: 'USD',
+                total_cif: 0,
+                total_fob: 0,
+                freight: 0,
+                ndbm_kurs: 15850,
+                items: []
+            },
+            handleBundleFiles(event) {
+                const files = event.target.files;
+                this.bundleFileNames = files ? Array.from(files).map(f => f.name) : [];
+                if (this.bundleFileNames.length > 0 && ['IMPORT', 'EXPORT'].includes(this.detected.type)) {
+                    this.scanFiles();
+                }
+            },
+            updateFileName(type, event) {
+                const files = event.target.files;
+                if (files && files[0]) {
+                    this.fileNames[type] = files[0].name;
+                    if ((this.fileNames.bl || this.fileNames.invoice || this.fileNames.pl || this.bundleFileNames.length > 0) && !this.scanned && ['IMPORT', 'EXPORT'].includes(this.detected.type)) {
+                        this.scanFiles();
+                    }
+                }
+            },
+            async scanFiles() {
+                if (!['IMPORT', 'EXPORT'].includes(this.detected.type)) {
+                    alert('Wajib memilih Tipe Kepabeanan terlebih dahulu: Impor (BC 2.0) atau Ekspor (BC 3.0).');
+                    return;
+                }
+                const bundleInput = document.getElementById('input-bundle-files');
+                const blInput = document.getElementById('input-bl-file');
+                const invInput = document.getElementById('input-inv-file');
+                const plInput = document.getElementById('input-pl-file');
+                const cooInput = document.getElementById('input-coo-file');
+                const insInput = document.getElementById('input-insurance-file');
+                const lartasInput = document.getElementById('input-lartas-file');
+
+                const hasBundle = bundleInput?.files?.length > 0;
+                const hasSingle = blInput?.files?.length || invInput?.files?.length || plInput?.files?.length || cooInput?.files?.length || insInput?.files?.length || lartasInput?.files?.length;
+
+                if (!hasBundle && !hasSingle) {
+                    alert('Silakan pilih minimal 1 berkas (Bundle Multi-File/ZIP, B/L, Commercial Invoice, atau Packing List) untuk dipindai.');
+                    return;
+                }
+
+                this.scanning = true;
+                const formData = new FormData();
+                if (hasBundle) {
+                    Array.from(bundleInput.files).forEach(f => formData.append('bundle_files[]', f));
+                }
+                if (blInput?.files?.[0]) formData.append('bl_file', blInput.files[0]);
+                if (invInput?.files?.[0]) formData.append('invoice_file', invInput.files[0]);
+                if (plInput?.files?.[0]) formData.append('packing_list_file', plInput.files[0]);
+                if (cooInput?.files?.[0]) formData.append('coo_file', cooInput.files[0]);
+                if (insInput?.files?.[0]) formData.append('insurance_file', insInput.files[0]);
+                if (lartasInput?.files?.[0]) formData.append('lartas_file', lartasInput.files[0]);
+
+                formData.append('use_ai', this.useAi ? '1' : '0');
+                const chosenType = this.detected.type;
+                formData.append('type', chosenType);
+
+                const clientSelect = document.getElementById('smart-client-select');
+                if (clientSelect?.value) formData.append('client_id', clientSelect.value);
+
+                try {
+                    const response = await fetch('{{ route('core.document.parse-documents') }}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: formData
+                    });
+                    const res = await response.json();
+                    if (response.ok && res.status === 'success' && res.data) {
+                        this.scanned = true;
+                        this.detected = { ...this.detected, ...res.data, type: chosenType };
+                        this.detectedBundleFiles = res.data.bundle_files_detected || [];
+                        this.crossValidation = res.data.cross_validation || null;
+
+                        if (clientSelect && res.data.client_id) {
+                            let opt = clientSelect.querySelector(`option[value='${res.data.client_id}']`);
+                            if (!opt) {
+                                opt = document.createElement('option');
+                                opt.value = res.data.client_id;
+                                opt.textContent = `${res.data.client_name} (NPWP: ${res.data.client_npwp || '-'})`;
+                                clientSelect.appendChild(opt);
+                            }
+                            clientSelect.value = res.data.client_id;
+                        }
+                    } else {
+                        alert(res.message || 'Gagal memindai dokumen.');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Terjadi kesalahan koneksi saat memindai dokumen.');
+                } finally {
+                    this.scanning = false;
+                }
+            },
+            showQuickClientModal: false,
+            quickClient: { name: '', npwp: '', pic_name: '', phone: '' },
+            quickClientLoading: false,
+            quickClientError: '',
+            openQuickClient() {
+                this.quickClient = { name: '', npwp: '', pic_name: '', phone: '' };
+                this.quickClientError = '';
+                this.showQuickClientModal = true;
+            },
+            async submitQuickClient() {
+                if (!this.quickClient.name) {
+                    this.quickClientError = 'Nama perusahaan / importir wajib diisi.';
+                    return;
+                }
+                this.quickClientLoading = true;
+                this.quickClientError = '';
+                try {
+                    const response = await fetch('{{ route('crm.clients.store') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify(this.quickClient)
+                    });
+                    const res = await response.json();
+                    if (res.status === 'success' && res.data) {
+                        const c = res.data;
+                        const smartSelect = document.getElementById('smart-client-select');
+                        if (smartSelect) {
+                            const opt = document.createElement('option');
+                            opt.value = c.id;
+                            opt.textContent = `${c.name} (NPWP: ${c.npwp || '-'})`;
+                            smartSelect.appendChild(opt);
+                            smartSelect.value = c.id;
+                        }
+                        const manualSelect = document.getElementById('manual-client-select');
+                        if (manualSelect) {
+                            const opt = document.createElement('option');
+                            opt.value = c.id;
+                            opt.textContent = `${c.name} (NPWP: ${c.npwp || '-'})`;
+                            manualSelect.appendChild(opt);
+                            manualSelect.value = c.id;
+                        }
+                        this.detected.client_id = c.id;
+                        this.showQuickClientModal = false;
+                    } else {
+                        this.quickClientError = res.message || 'Gagal menyimpan klien.';
+                    }
+                } catch (err) {
+                    this.quickClientError = 'Terjadi kesalahan sistem saat menyimpan data klien.';
+                } finally {
+                    this.quickClientLoading = false;
+                }
+            }
+        };
+    }
+    </script>
 @endsection

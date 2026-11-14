@@ -64,15 +64,15 @@
             </h1>
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Manajemen pengajuan PIB CEISA 4.0 DJBC, status penjaluran (Merah/Kuning/Hijau), dan perizinan Lartas impor.</p>
         </div>
-        <div class="flex flex-wrap items-center gap-2">
+        <div class="flex items-center gap-1.5 flex-wrap justify-end">
             @can('setting.manage')
-            <form action="{{ route('config.sync-all') }}" method="POST">
+            <form action="{{ route('config.sync-all') }}" method="POST" class="inline">
                 @csrf
                 <button type="submit"
-                        class="px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs inline-flex items-center gap-2 shadow-xs transition-all active:scale-[0.98] cursor-pointer"
-                        title="Tarik data terbaru dari CEISA 4.0 (tanpa mengirim dokumen ke CEISA)">
-                    <i data-lucide="download-cloud" class="w-4 h-4"></i>
-                    <span>Tarik Data CEISA</span>
+                        class="w-9 h-9 rounded-xl border border-emerald-300 dark:border-emerald-800 bg-emerald-50/80 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-400 inline-flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+                        title="Tarik data terbaru dari CEISA 4.0 (tanpa mengirim dokumen ke CEISA)"
+                        aria-label="Tarik Data CEISA">
+                    <i data-lucide="download-cloud" class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></i>
                 </button>
             </form>
             @endcan
@@ -80,16 +80,18 @@
             <!-- Tombol Trigger AI HS & Lartas Detector -->
             <button type="button" 
                     @click="aiModalOpen = true"
-                    class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 via-sky-600 to-indigo-600 hover:from-indigo-700 hover:to-sky-700 text-white font-bold text-xs inline-flex items-center gap-2 shadow-xs transition-all active:scale-[0.98] cursor-pointer">
-                <span class="text-sm">✨</span>
-                <span>Deteksi HS Code & Lartas AI</span>
+                    class="w-9 h-9 rounded-xl border border-sky-300 dark:border-sky-800 bg-sky-50/80 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 text-[#007AFF] inline-flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+                    title="Deteksi HS Code &amp; Skrining Lartas AI"
+                    aria-label="Deteksi HS Code & Lartas AI">
+                <i data-lucide="sparkles" class="w-4 h-4 text-[#007AFF]"></i>
             </button>
 
             @can('document.create')
             <a href="{{ route('bc20.create') }}" 
-               class="btn-apple-filled px-4 py-2.5 text-xs inline-flex items-center gap-2">
-                <i data-lucide="plus" class="w-4 h-4"></i>
-                <span>Buat Pengajuan BC 2.0 Baru</span>
+               class="btn-apple-filled !w-9 !h-9 !p-0 inline-flex items-center justify-center rounded-xl shadow-xs cursor-pointer"
+               title="Buat Pengajuan BC 2.0 (PIB) Baru"
+               aria-label="Buat Pengajuan BC 2.0 Baru">
+                <i data-lucide="plus" class="w-4.5 h-4.5"></i>
             </a>
             @endcan
         </div>
@@ -268,7 +270,7 @@
                         </th>
                         <th class="py-3.5 px-4 text-center">Status CEISA</th>
                         <th class="py-3.5 px-4">Billing MPN G3</th>
-                        <th class="py-3.5 px-4 text-right">Aksi</th>
+                        <th class="py-3.5 px-4 text-center sticky right-0 z-20 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-md border-l border-black/[0.06] dark:border-white/[0.06] shadow-[-6px_0_12px_rgba(0,0,0,0.06)]">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-black/[0.04] dark:divide-white/[0.04]">
@@ -334,24 +336,34 @@
                                     <span class="text-slate-400 dark:text-slate-500 text-[11px]">-</span>
                                 @endif
                             </td>
-                            <td class="py-3.5 px-4 text-right">
-                                <div class="flex items-center justify-end gap-1.5">
+                            <td class="py-3.5 px-3 text-center whitespace-nowrap sticky right-0 z-10 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-md border-l border-black/[0.06] dark:border-white/[0.06] shadow-[-6px_0_12px_rgba(0,0,0,0.06)]">
+                                <div class="flex items-center justify-center gap-1">
                                     <a href="{{ route('bc20.show', $doc->id) }}" 
-                                       class="btn-apple-gray text-[11px] px-3 py-1.5 inline-flex items-center gap-1 font-semibold !text-[#007AFF] !border-[#007AFF]/30 hover:!bg-[#007AFF]/10"
-                                       title="Buka pelacakan alur 11 Pos dan detail pabean">
-                                        <i data-lucide="milestone" class="w-3 h-3 text-[#007AFF]"></i>
-                                        <span>Tracking 11 Pos</span>
-                                        <i data-lucide="chevron-right" class="w-3 h-3"></i>
+                                       class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-sky-300 dark:border-sky-800 bg-sky-50/80 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 text-[#007AFF] transition-colors"
+                                       title="Buka pelacakan alur 11 Pos dan detail pabean"
+                                       aria-label="Tracking 11 Pos">
+                                        <i data-lucide="compass" class="w-4 h-4"></i>
                                     </a>
+
+                                    @if($doc->isEditable() && (auth()->user()->isSuperAdmin() || auth()->user()->hasAnyPermission(['document.edit', 'document.edit_after_ceisa'])))
+                                        <a href="{{ route('bc20.edit', $doc->id) }}" 
+                                           class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-amber-300 dark:border-amber-800 bg-amber-50/80 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-400 transition-colors"
+                                           title="Buka Wizard &amp; Editor BC 2.0 (PIB)"
+                                           aria-label="Edit BC 2.0">
+                                            <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                        </a>
+                                    @endif
+
                                     @if($doc->isDraftDeletable() && (auth()->user()->isSuperAdmin() || auth()->user()->hasAnyPermission(['document.create', 'document.edit', 'document.delete'])))
                                         <form action="{{ route('bc20.destroy', $doc->id) }}" method="POST" class="inline"
                                               onsubmit="return confirm('Hapus draft BC 2.0 ({{ $doc->nomor_aju }}) beserta aset file dokumen terkait?');">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"
-                                                    class="btn-apple-gray text-[11px] px-2.5 py-1.5 inline-flex items-center !text-rose-600 dark:!text-rose-400 !border-rose-300/60 hover:!bg-rose-500/10 cursor-pointer"
-                                                    title="Hapus Draft BC 2.0 & Aset Berkas">
-                                                <i data-lucide="trash-2" class="w-3 h-3"></i>
+                                                    class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-rose-300 dark:border-rose-900 bg-rose-50/80 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 transition-colors cursor-pointer"
+                                                    title="Hapus Draft BC 2.0 & Aset Berkas"
+                                                    aria-label="Hapus Draft">
+                                                <i data-lucide="trash-2" class="w-4 h-4"></i>
                                             </button>
                                         </form>
                                     @endif

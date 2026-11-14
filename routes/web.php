@@ -64,6 +64,7 @@ Route::middleware('auth')->group(function () {
         Route::put('/{bc20}', [BC20Controller::class, 'update'])->name('update');
         Route::delete('/{bc20}', [BC20Controller::class, 'destroy'])->name('destroy');
         Route::post('/{bc20}/upload-document', [BC20Controller::class, 'uploadWizardDocument'])->name('upload-document');
+        Route::post('/{bc20}/resync-extraction', [BC20Controller::class, 'resyncExtraction'])->name('resync-extraction');
         Route::post('/{bc20}/reopen-draft', [BC20Controller::class, 'reopenDraft'])->name('reopen-draft');
         Route::post('/{bc20}/check-schema', [BC20Controller::class, 'checkSchema'])->name('check-schema');
         Route::post('/{bc20}/submit', [BC20Controller::class, 'submit'])->name('submit');

@@ -26,11 +26,11 @@
             </div>
         </div>
 
-        <div class="flex flex-wrap items-center gap-2">
+        <div class="flex items-center gap-1.5">
             <!-- Toast / Save Status -->
             <template x-if="saveToast.message">
                 <div :class="saveToast.type === 'error' ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'"
-                     class="px-3 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5">
+                     class="px-2.5 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5">
                     <span x-text="saveToast.message"></span>
                 </div>
             </template>
@@ -38,24 +38,45 @@
             <!-- Tautan Terpadu ke Cockpit Tracking Dokumen (11 Pos Operasional) -->
             <a href="{{ route('core.tracking.index', ['mode' => 'tracking_dok', 'search' => $shipment?->project_no ?? $bc20->nomor_aju]) }}"
                target="_blank"
-               class="px-3.5 py-2 rounded-xl border border-sky-200 dark:border-sky-800 bg-sky-50/80 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 text-[#007AFF] text-xs font-semibold inline-flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
-               title="Buka Cockpit Tracking Dokumen (11 Pos Operasional)">
-                <i data-lucide="compass" class="w-3.5 h-3.5"></i>
-                <span>Cockpit Tracking Dok</span>
-                <span class="px-1.5 py-0.2 rounded text-[10px] bg-[#007AFF]/15 text-[#007AFF] font-bold font-mono">11 Pos</span>
+               class="w-9 h-9 rounded-xl border border-sky-200 dark:border-sky-800 bg-sky-50/80 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 text-[#007AFF] inline-flex items-center justify-center transition-colors cursor-pointer shadow-2xs"
+               title="Cockpit Tracking Dokumen (11 Pos Operasional)"
+               aria-label="Cockpit Tracking Dokumen (11 Pos Operasional)">
+                <i data-lucide="compass" class="w-4 h-4"></i>
             </a>
 
-            <button type="button" @click="saveDraftAjax()" :disabled="saving"
-                    class="btn-apple-gray text-xs px-3.5 py-2 inline-flex items-center gap-1.5 cursor-pointer">
-                <i data-lucide="save" class="w-3.5 h-3.5 text-[#007AFF]"></i>
-                <span x-text="saving ? 'Menyimpan...' : 'Simpan Draft'"></span>
+            <!-- Tombol Cerdas: Sinkron Ulang dari Berkas PDF / Dokumen Fisik -->
+            <button type="button" @click="resyncFromDocuments()" :disabled="resyncing"
+                    class="w-9 h-9 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50/80 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 inline-flex items-center justify-center transition-colors cursor-pointer shadow-2xs"
+                    title="Sinkron Ulang dari Berkas PDF / Dokumen Fisik"
+                    aria-label="Sinkron Ulang dari Berkas PDF / Dokumen Fisik">
+                <template x-if="!resyncing">
+                    <i data-lucide="sparkles" class="w-4 h-4 text-indigo-500"></i>
+                </template>
+                <template x-if="resyncing">
+                    <div class="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                </template>
             </button>
 
+            <!-- Tombol Simpan Draft -->
+            <button type="button" @click="saveDraftAjax()" :disabled="saving"
+                    class="w-9 h-9 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 inline-flex items-center justify-center transition-colors cursor-pointer shadow-2xs"
+                    title="Simpan Draft"
+                    aria-label="Simpan Draft">
+                <template x-if="!saving">
+                    <i data-lucide="save" class="w-4 h-4 text-[#007AFF]"></i>
+                </template>
+                <template x-if="saving">
+                    <div class="w-4 h-4 border-2 border-[#007AFF] border-t-transparent rounded-full animate-spin"></div>
+                </template>
+            </button>
+
+            <!-- Tombol Toggle Preview PDF / Dokumen Fisik -->
             <button type="button" @click="togglePreview()"
                     :class="showPreview ? 'bg-[#007AFF]/10 text-[#007AFF] border-[#007AFF]/30' : 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-white/10 dark:text-slate-200 dark:border-white/15'"
-                    class="px-3.5 py-2 rounded-xl border text-xs font-semibold inline-flex items-center gap-1.5 transition-colors cursor-pointer">
-                <i data-lucide="panel-left" class="w-3.5 h-3.5"></i>
-                <span x-text="showPreview ? 'Tutup Preview PDF' : 'Buka Preview PDF (' + previewFiles.length + ')'"></span>
+                    class="w-9 h-9 rounded-xl border inline-flex items-center justify-center transition-colors cursor-pointer shadow-2xs"
+                    :title="showPreview ? 'Tutup Panel Preview Berkas' : 'Buka Panel Preview Berkas (' + previewFiles.length + ')'"
+                    :aria-label="showPreview ? 'Tutup Panel Preview Berkas' : 'Buka Panel Preview Berkas'">
+                <i data-lucide="panel-left" class="w-4 h-4"></i>
             </button>
         </div>
     </div>
@@ -377,17 +398,15 @@
 </div>
 
 @push('scripts')
-<script src="{{ asset('vendor/pdfjs/pdf.min.js') }}"></script>
 <script>
-    if (window.pdfjsLib) {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = "{{ asset('vendor/pdfjs/pdf.worker.min.js') }}";
-    }
-</script>
-<script>
-function bc20WizardManager() {
+window.bc20WizardManager = function bc20WizardManager() {
     const initialWizard = @json($wizardState);
     const initialFiles = @json($previewFiles);
     const docLabels = @json($refOptions['kode_dokumen']);
+
+    // Non-reactive raw PDF.js instances (bypasses Alpine's ES Proxy wrapping to avoid private member #d errors)
+    let rawPdfDoc = null;
+    let currentRenderTask = null;
 
     return {
         activeStep: 1,
@@ -408,6 +427,7 @@ function bc20WizardManager() {
         activePreviewIndex: 0,
         previewZoom: 100,
         saving: false,
+        resyncing: false,
         saveToast: { type: 'success', message: '' },
 
         // PDF.js Canvas Viewer State
@@ -421,6 +441,12 @@ function bc20WizardManager() {
         pdfMode: 'canvas', // 'canvas' (PDF.js) or 'native' (browser embed)
         pdfError: null,
         pdfLoading: false,
+
+        getRawPdfDoc() {
+            if (rawPdfDoc) return rawPdfDoc;
+            if (window.__currentPdfDoc) return window.__currentPdfDoc;
+            return null;
+        },
 
         // Dokumen modal state
         docModalOpen: false,
@@ -523,6 +549,12 @@ function bc20WizardManager() {
             this.pdfPageNum = 1;
             this.pdfTotalPages = 0;
 
+            if (currentRenderTask) {
+                try { currentRenderTask.cancel(); } catch (e) {}
+                currentRenderTask = null;
+            }
+            rawPdfDoc = null;
+
             if (typeof pdfjsLib === 'undefined') {
                 console.warn('PDF.js library belum siap, beralih ke mode native embed.');
                 this.pdfMode = 'native';
@@ -536,7 +568,9 @@ function bc20WizardManager() {
             });
 
             loadingTask.promise.then(pdf => {
-                this.pdfDoc = pdf;
+                rawPdfDoc = pdf; // Keep raw instance outside Alpine Proxy!
+                window.__currentPdfDoc = pdf;
+                this.pdfDoc = true;
                 this.pdfTotalPages = pdf.numPages;
                 this.pdfLoading = false;
                 this.$nextTick(() => {
@@ -551,9 +585,19 @@ function bc20WizardManager() {
         },
 
         renderPdfPage(num) {
-            if (!this.pdfDoc) return;
+            const doc = this.getRawPdfDoc();
+            if (!doc) {
+                this.pdfRendering = false;
+                return;
+            }
+
+            if (currentRenderTask) {
+                try { currentRenderTask.cancel(); } catch (e) {}
+                currentRenderTask = null;
+            }
+
             this.pdfRendering = true;
-            this.pdfDoc.getPage(num).then(page => {
+            doc.getPage(num).then(page => {
                 const canvas = document.getElementById('pdfCanvasViewer');
                 if (!canvas) {
                     this.pdfRendering = false;
@@ -574,18 +618,26 @@ function bc20WizardManager() {
                     canvasContext: ctx,
                     viewport: viewport
                 };
-                const renderTask = page.render(renderContext);
-                renderTask.promise.then(() => {
+                currentRenderTask = page.render(renderContext);
+                currentRenderTask.promise.then(() => {
                     this.pdfRendering = false;
+                    currentRenderTask = null;
                     if (this.pdfPagePending !== null) {
                         this.renderPdfPage(this.pdfPagePending);
                         this.pdfPagePending = null;
                     }
                 }).catch(e => {
                     this.pdfRendering = false;
+                    currentRenderTask = null;
+                    if (e && e.name !== 'RenderingCancelledException') {
+                        console.warn('PDF render error:', e);
+                    }
                 });
             }).catch(e => {
                 this.pdfRendering = false;
+                currentRenderTask = null;
+                console.warn('PDF getPage error, switching to native embed:', e);
+                this.pdfMode = 'native';
             });
         },
 
@@ -604,7 +656,7 @@ function bc20WizardManager() {
         },
 
         nextPdfPage() {
-            if (!this.pdfDoc || this.pdfPageNum >= this.pdfTotalPages) return;
+            if (!this.getRawPdfDoc() || this.pdfPageNum >= this.pdfTotalPages) return;
             this.pdfPageNum++;
             this.queueRenderPage(this.pdfPageNum);
         },
@@ -627,6 +679,159 @@ function bc20WizardManager() {
                 });
             }
             this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
+        async resyncFromDocuments() {
+            if (this.resyncing) return;
+            if (!confirm('Apakah Anda ingin membaca ulang seluruh berkas fisik PDF/gambar yang tersimpan dan menyinkronkan data form wizard PIB ini?')) {
+                return;
+            }
+
+            this.resyncing = true;
+            try {
+                const res = await fetch('{{ route("bc20.resync-extraction", $bc20->id) }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await res.json();
+                if (!res.ok || !data.success) {
+                    throw new Error(data.message || 'Gagal membaca berkas dokumen.');
+                }
+
+                const s = data.sync_data;
+                if (!s) throw new Error('Data ekstraksi kosong.');
+
+                // 1. Sinkron Entitas
+                if (s.entitas) {
+                    if (s.entitas.supplier_nama) this.w.entitas.supplier_nama = s.entitas.supplier_nama;
+                    if (s.entitas.supplier_negara) this.w.entitas.supplier_negara = s.entitas.supplier_negara;
+                    if (s.entitas.supplier_alamat) this.w.entitas.supplier_alamat = s.entitas.supplier_alamat;
+                    if (s.entitas.seller_nama) this.w.entitas.seller_nama = s.entitas.seller_nama;
+                    if (s.entitas.seller_negara) this.w.entitas.seller_negara = s.entitas.seller_negara;
+                    if (s.entitas.seller_alamat) this.w.entitas.seller_alamat = s.entitas.seller_alamat;
+                    if (s.entitas.importir_nama && (!this.w.entitas.importir_nama || this.w.entitas.importir_nama === 'PT. DANWIN UTAMA TEKNIK')) {
+                        this.w.entitas.importir_nama = s.entitas.importir_nama;
+                    }
+                    if (s.entitas.importir_npwp && !this.w.entitas.importir_npwp) {
+                        this.w.entitas.importir_npwp = s.entitas.importir_npwp;
+                    }
+                }
+
+                // 2. Sinkron Pengangkut
+                if (s.pengangkut) {
+                    if (s.pengangkut.nama_sarana_pengangkut) this.w.pengangkut.nama_sarana_pengangkut = s.pengangkut.nama_sarana_pengangkut;
+                    if (s.pengangkut.nomor_voyage) this.w.pengangkut.nomor_voyage = s.pengangkut.nomor_voyage;
+                    if (s.pengangkut.pelabuhan_muat) this.w.pengangkut.pelabuhan_muat = s.pengangkut.pelabuhan_muat;
+                    if (s.pengangkut.pelabuhan_bongkar) this.w.pengangkut.pelabuhan_bongkar = s.pengangkut.pelabuhan_bongkar;
+                    if (s.pengangkut.perkiraan_tanggal_tiba) this.w.pengangkut.perkiraan_tanggal_tiba = s.pengangkut.perkiraan_tanggal_tiba;
+                }
+
+                // 3. Sinkron Transaksi & Nilai
+                if (s.transaksi) {
+                    if (s.transaksi.kode_valuta) this.w.transaksi.kode_valuta = s.transaksi.kode_valuta;
+                    if (s.transaksi.harga_barang > 0) this.w.transaksi.harga_barang = s.transaksi.harga_barang;
+                    if (s.transaksi.freight > 0) this.w.transaksi.freight = s.transaksi.freight;
+                    if (s.transaksi.asuransi > 0) this.w.transaksi.nilai_asuransi = s.transaksi.asuransi;
+                    if (s.transaksi.berat_bruto > 0) this.w.transaksi.berat_kotor = s.transaksi.berat_bruto;
+                    if (s.transaksi.berat_bersih > 0) this.w.transaksi.berat_bersih = s.transaksi.berat_bersih;
+                }
+
+                // 4. Sinkron Nomor Dokumen (BL & Invoice)
+                if (s.dokumen_nomor) {
+                    if (s.dokumen_nomor.invoice) {
+                        const invDoc = this.w.dokumen.find(d => d.kodeDokumen === '380');
+                        if (invDoc) {
+                            invDoc.nomorDokumen = s.dokumen_nomor.invoice;
+                            if (s.dokumen_nomor.tgl_invoice) invDoc.tanggalDokumen = s.dokumen_nomor.tgl_invoice;
+                        }
+                    }
+                    if (s.dokumen_nomor.bl) {
+                        const blDoc = this.w.dokumen.find(d => d.kodeDokumen === '705' || d.kodeDokumen === '740');
+                        if (blDoc) {
+                            blDoc.nomorDokumen = s.dokumen_nomor.bl;
+                            if (s.dokumen_nomor.tgl_bl) blDoc.tanggalDokumen = s.dokumen_nomor.tgl_bl;
+                        }
+                    }
+                }
+
+                // 5. Sinkron Kontainer
+                if (s.kontainer && s.kontainer.nomor_kontainer) {
+                    const rawNums = s.kontainer.nomor_kontainer.split(/[\s,;\n]+/).filter(Boolean);
+                    if (rawNums.length > 0) {
+                        if (this.w.kontainer.length === 1 && !this.w.kontainer[0].nomorKontainer) {
+                            this.w.kontainer[0].nomorKontainer = rawNums[0];
+                            for (let k = 1; k < rawNums.length; k++) {
+                                this.w.kontainer.push({
+                                    seriKontainer: k + 1,
+                                    nomorKontainer: rawNums[k],
+                                    kodeUkuranKontainer: '40',
+                                    kodeJenisKontainer: '8',
+                                    kodeTipeKontainer: '1'
+                                });
+                            }
+                        }
+                    }
+                }
+
+                // 6. Sinkron Kemasan
+                if (s.kemasan && s.kemasan.total_kemasan > 0) {
+                    if (this.w.kemasan.length > 0) {
+                        this.w.kemasan[0].jumlahKemasan = s.kemasan.total_kemasan;
+                        if (s.kemasan.jenis_kemasan) {
+                            this.w.kemasan[0].kodeJenisKemasan = s.kemasan.jenis_kemasan;
+                        }
+                    }
+                }
+
+                // 7. Sinkron Barang jika ada item baru
+                if (Array.isArray(s.items) && s.items.length > 0) {
+                    if (this.w.barang.length === 1 && (!this.w.barang[0].uraian || this.w.barang[0].uraian === 'Barang Impor Umum' || !this.w.barang[0].fob)) {
+                        this.w.barang = [];
+                    }
+                    if (this.w.barang.length === 0) {
+                        s.items.forEach((it, idx) => {
+                            this.w.barang.push({
+                                seri: idx + 1,
+                                group: 1,
+                                hs_code: it.pos_tarif || '84713020',
+                                pernyataan_lartas: it.has_lartas ? 'LARTAS' : 'NON',
+                                uraian: it.uraian_barang || 'Item Barang',
+                                merk: it.merk || 'TANPA MEREK',
+                                tipe: it.tipe || 'TANPA TIPE',
+                                spesifikasi: it.spesifikasi || '-',
+                                negara_asal: s.entitas?.supplier_negara || 'CN',
+                                jumlah: it.jumlah_satuan || 1,
+                                satuan: it.kode_satuan || 'PCE',
+                                jumlah_kemasan: it.jumlah_kemasan || 1,
+                                kemasan: it.jenis_kemasan || 'CT',
+                                netto: it.berat_netto || 0,
+                                bruto: it.berat_bruto || 0,
+                                fob: it.nilai_barang || 0,
+                                tarif_bm: 0,
+                                tarif_ppn: 11,
+                                tarif_pph: 2.5,
+                                kode_fasilitas_bm: '1',
+                                kode_fasilitas_ppn: '1',
+                                kode_fasilitas_pph: '1',
+                                barang_dokumen: [],
+                                hs_info: it.pos_tarif_desc || ''
+                            });
+                        });
+                    }
+                }
+
+                this.recalculatePungutan(false);
+                this.showToast('✨ ' + data.message);
+                if (window.lucide) window.lucide.createIcons();
+            } catch (err) {
+                this.showToast(err.message || 'Gagal membaca berkas dokumen.', 'error');
+            } finally {
+                this.resyncing = false;
+            }
         },
 
         previewDocumentRow(doc) {
@@ -1222,7 +1427,25 @@ function bc20WizardManager() {
             return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(num || 0);
         }
     };
+};
+
+// Daftarkan komponen ke Alpine.js baik sebelum maupun sesudah event alpine:init
+document.addEventListener('alpine:init', () => {
+    if (window.Alpine && typeof window.Alpine.data === 'function') {
+        window.Alpine.data('bc20WizardManager', window.bc20WizardManager);
+    }
+});
+if (window.Alpine && typeof window.Alpine.data === 'function') {
+    window.Alpine.data('bc20WizardManager', window.bc20WizardManager);
 }
+</script>
+
+<!-- PDF.js Engine di-load setelah bc20WizardManager siap untuk mencegah race condition -->
+<script src="{{ asset('vendor/pdfjs/pdf.min.js') }}"></script>
+<script>
+    if (window.pdfjsLib) {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = "{{ asset('vendor/pdfjs/pdf.worker.min.js') }}";
+    }
 </script>
 @endpush
 @endsection

@@ -24,7 +24,7 @@ class BC20Controller extends Controller implements HasMiddleware
             new Middleware('permission:document.view', only: ['index', 'show']),
             new Middleware('permission:document.create', only: ['create', 'store']),
             new Middleware('permission:document.create|document.edit', only: ['destroy']),
-            new Middleware('permission:document.edit|document.edit_after_ceisa', only: ['edit', 'update', 'uploadWizardDocument']),
+            new Middleware('permission:document.edit|document.edit_after_ceisa', only: ['edit', 'update', 'uploadWizardDocument', 'resyncExtraction']),
             new Middleware('permission:document.edit_after_ceisa', only: ['reopenDraft']),
             new Middleware('permission:ceisa.submit', only: ['submit', 'checkSchema', 'checkStatus', 'fetchResponse']),
         ];
@@ -565,6 +565,110 @@ class BC20Controller extends Controller implements HasMiddleware
                 'linkedSeri' => '',
             ],
         ]);
+    }
+
+    /**
+     * Baca ulang seluruh berkas PDF/dokumen fisik tersimpan dan ekstrak data kepabeanan untuk form wizard BC 2.0
+     */
+    public function resyncExtraction(CeisaDocument $bc20, Request $request, \App\Services\Shipment\DocumentExtractionService $extractionService)
+    {
+        if ($redirect = $this->guardEditable($bc20)) {
+            return response()->json(['success' => false, 'message' => 'Dokumen terkunci atau tidak dapat diedit.'], 403);
+        }
+
+        $shipment = $bc20->shipment ?? $this->workflowService->ensureShipmentForCeisaDocument($bc20);
+        $docs = $shipment->documents
+            ->filter(fn($d) => !empty($d->file_path) && Storage::disk('public')->exists($d->file_path))
+            ->values();
+
+        if ($docs->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Belum ada berkas fisik dokumen (PDF/Gambar) yang tersimpan pada shipment ini.',
+            ], 422);
+        }
+
+        $filePaths = [];
+        foreach ($docs as $d) {
+            $filePaths[] = Storage::disk('public')->path($d->file_path);
+        }
+
+        try {
+            $extracted = $extractionService->extractFromDocuments(
+                $filePaths,
+                $shipment->client_id,
+                null,
+                false,
+                'IMPORT'
+            );
+
+            // Susun data sinkronisasi untuk Wizard BC 2.0 (9 Tahap)
+            $syncData = [
+                'entitas' => [
+                    'supplier_nama' => $extracted['supplier_nama'] ?? null,
+                    'supplier_negara' => $extracted['supplier_negara'] ?? null,
+                    'supplier_alamat' => $extracted['supplier_alamat'] ?? null,
+                    'seller_nama' => $extracted['supplier_nama'] ?? null,
+                    'seller_negara' => $extracted['supplier_negara'] ?? null,
+                    'seller_alamat' => $extracted['supplier_alamat'] ?? null,
+                    'importir_nama' => $extracted['client_name'] ?? null,
+                    'importir_npwp' => $extracted['client_npwp'] ?? null,
+                ],
+                'pengangkut' => [
+                    'nama_sarana_pengangkut' => $extracted['nama_kapal'] ?? null,
+                    'nomor_voyage' => $extracted['nomor_voyage'] ?? null,
+                    'cara_pengangkutan' => $extracted['cara_pengangkutan'] ?? '1',
+                    'pelabuhan_muat' => $extracted['pelabuhan_muat'] ?? null,
+                    'pelabuhan_bongkar' => $extracted['pelabuhan_bongkar'] ?? null,
+                    'perkiraan_tanggal_tiba' => $extracted['eta'] ?? null,
+                ],
+                'transaksi' => [
+                    'kode_valuta' => $extracted['kode_valuta'] ?? 'USD',
+                    'harga_barang' => (float) ($extracted['total_nilai_barang'] ?? 0),
+                    'freight' => (float) ($extracted['nilai_freight'] ?? 0),
+                    'asuransi' => (float) ($extracted['nilai_asuransi'] ?? 0),
+                    'berat_bruto' => (float) ($extracted['berat_bruto'] ?? 0),
+                    'berat_bersih' => (float) ($extracted['berat_netto'] ?? 0),
+                ],
+                'kemasan' => [
+                    'total_kemasan' => (int) ($extracted['total_kemasan'] ?? 0),
+                    'jenis_kemasan' => $extracted['jenis_kemasan'] ?? 'CT',
+                ],
+                'kontainer' => [
+                    'total_kontainer' => (int) ($extracted['total_kontainer'] ?? 0),
+                    'nomor_kontainer' => $extracted['nomor_kontainer'] ?? '',
+                ],
+                'dokumen_nomor' => [
+                    'bl' => $extracted['nomor_bl_awb'] ?? null,
+                    'tgl_bl' => $extracted['tgl_bl_awb'] ?? null,
+                    'invoice' => $extracted['nomor_invoice'] ?? null,
+                    'tgl_invoice' => $extracted['tgl_invoice'] ?? null,
+                ],
+                'items' => $extracted['items'] ?? [],
+            ];
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Berhasil membaca ulang ' . count($filePaths) . ' berkas fisik PDF/dokumen dan mengekstrak data kepabeanan.',
+                'files_count' => count($filePaths),
+                'sync_data' => $syncData,
+                'summary' => [
+                    'supplier' => $extracted['supplier_nama'] ?? '-',
+                    'bl' => $extracted['nomor_bl_awb'] ?? '-',
+                    'invoice' => $extracted['nomor_invoice'] ?? '-',
+                    'vessel' => ($extracted['nama_kapal'] ?? '') . ' ' . ($extracted['nomor_voyage'] ?? ''),
+                    'fob' => ($extracted['kode_valuta'] ?? 'USD') . ' ' . number_format((float) ($extracted['total_nilai_barang'] ?? 0), 2),
+                    'bruto' => number_format((float) ($extracted['berat_bruto'] ?? 0), 2) . ' KGM',
+                    'containers' => $extracted['nomor_kontainer'] ?? '-',
+                    'items_count' => count($extracted['items'] ?? []),
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal membaca berkas: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**

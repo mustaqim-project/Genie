@@ -21,7 +21,7 @@
                         <th class="px-3 py-2.5 w-24">Jumlah</th>
                         <th class="px-3 py-2.5">Jenis</th>
                         <th class="px-3 py-2.5">Merek</th>
-                        <th class="px-3 py-2.5 text-center w-24">Aksi</th>
+                        <th class="px-3 py-2.5 text-center w-24 sticky right-0 z-20 bg-slate-50 dark:bg-[#1C1C1E] border-l border-black/[0.06] dark:border-white/[0.08] shadow-[-6px_0_12px_rgba(0,0,0,0.06)]">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-black/[0.05] dark:divide-white/[0.06]">
@@ -41,7 +41,7 @@
                             <td class="px-3 py-2.5">
                                 <input type="text" x-model="k.merkKemasan" class="w-full px-2 py-1 rounded-lg border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] dark:text-white">
                             </td>
-                            <td class="px-3 py-2.5 text-center">
+                            <td class="px-3 py-2.5 text-center whitespace-nowrap sticky right-0 z-10 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-xs border-l border-black/[0.06] dark:border-white/[0.08] shadow-[-6px_0_12px_rgba(0,0,0,0.06)]">
                                 <div class="flex items-center justify-center gap-1">
                                     <button type="button" @click="duplicateKemasan(kIdx)" title="Duplikat" class="p-1.5 rounded-lg text-[#007AFF] hover:bg-[#007AFF]/10 cursor-pointer">
                                         <i data-lucide="copy" class="w-3.5 h-3.5"></i>
@@ -81,7 +81,7 @@
                         <th class="px-3 py-2.5 w-20">Ukuran</th>
                         <th class="px-3 py-2.5 w-24">Jenis</th>
                         <th class="px-3 py-2.5">Tipe</th>
-                        <th class="px-3 py-2.5 text-center w-20">Aksi</th>
+                        <th class="px-3 py-2.5 text-center w-20 sticky right-0 z-20 bg-slate-50 dark:bg-[#1C1C1E] border-l border-black/[0.06] dark:border-white/[0.08] shadow-[-6px_0_12px_rgba(0,0,0,0.06)]">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-black/[0.05] dark:divide-white/[0.06]">
@@ -112,7 +112,7 @@
                                     @endforeach
                                 </select>
                             </td>
-                            <td class="px-3 py-2.5 text-center">
+                            <td class="px-3 py-2.5 text-center whitespace-nowrap sticky right-0 z-10 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-xs border-l border-black/[0.06] dark:border-white/[0.08] shadow-[-6px_0_12px_rgba(0,0,0,0.06)]">
                                 <div class="flex items-center justify-center gap-1">
                                     <button type="button" @click="duplicateKontainer(cIdx)" title="Duplikat" class="p-1.5 rounded-lg text-[#007AFF] hover:bg-[#007AFF]/10 cursor-pointer">
                                         <i data-lucide="copy" class="w-3.5 h-3.5"></i>

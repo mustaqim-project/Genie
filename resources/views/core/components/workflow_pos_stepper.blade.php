@@ -7,6 +7,68 @@
     $taxes = $shipment->estimated_taxes ?? [];
 @endphp
 
+<!-- Global Helper Functions for Stepper & Workspace Interaction -->
+<script>
+window.navigateToWorkflowStage = function(posIndex) {
+    let tab = 'docs';
+    if (posIndex === 0) tab = 'docs';
+    else if (posIndex === 1) tab = 'items';
+    else if (posIndex === 2 || posIndex === 3) tab = 'ceisa';
+    else tab = 'ops';
+
+    // Dispatch global custom event for reactive Alpine listeners
+    window.dispatchEvent(new CustomEvent('switch-workspace-tab', { detail: tab }));
+
+    // Direct Alpine instance update on workspace-tabs
+    const tabsEl = document.getElementById('workspace-tabs');
+    if (tabsEl) {
+        if (window.Alpine) {
+            try {
+                Alpine.$data(tabsEl).activeTab = tab;
+            } catch (e) {}
+        }
+        if (tabsEl._x_dataStack && tabsEl._x_dataStack[0]) {
+            tabsEl._x_dataStack[0].activeTab = tab;
+        }
+        tabsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+        const altTarget = document.getElementById('pos-assignment');
+        if (altTarget) altTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+};
+
+window.openViewPreviousProcessModal = function() {
+    document.getElementById('modal-view-previous-process')?.classList.remove('hidden');
+};
+
+window.selectTabAndCloseModal = function(tabName) {
+    window.dispatchEvent(new CustomEvent('switch-workspace-tab', { detail: tabName }));
+
+    const tabsEl = document.getElementById('workspace-tabs');
+    if (tabsEl) {
+        if (window.Alpine) {
+            try {
+                Alpine.$data(tabsEl).activeTab = tabName;
+            } catch (e) {}
+        }
+        if (tabsEl._x_dataStack && tabsEl._x_dataStack[0]) {
+            tabsEl._x_dataStack[0].activeTab = tabName;
+        }
+        tabsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    document.getElementById('modal-view-previous-process')?.classList.add('hidden');
+};
+
+window.openRollbackModalForStage = function(stageCode) {
+    const modal = document.getElementById('modal-rollback-stage');
+    const select = document.getElementById('rollback_target_stage');
+    if (modal && select) {
+        select.value = stageCode;
+        modal.classList.remove('hidden');
+    }
+};
+</script>
+
 <div class="space-y-4 mb-6">
     <!-- Top Action & Navigation Row -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -83,96 +145,106 @@
             </p>
         </div>
 
-        <!-- Quick Top Action Buttons -->
-        <div class="flex flex-wrap items-center gap-2">
-            <!-- Tombol Lihat Proses Sebelumnya: Selalu dapat diakses kapan saja -->
+        <!-- Quick Top Action Buttons (Icon-Only Apple HIG Compact Group) -->
+        <div class="flex items-center gap-1.5 flex-wrap justify-end">
+            <!-- Tombol Lihat Proses Sebelumnya -->
             <button type="button" 
                     onclick="openViewPreviousProcessModal()"
-                    class="btn-apple-gray text-xs px-3 py-1.5 inline-flex items-center gap-1.5 !text-[#007AFF] !border-[#007AFF]/30 hover:!bg-[#007AFF]/10 cursor-pointer shadow-2xs font-semibold"
-                    title="Lihat rincian riwayat dan seluruh proses sebelumnya dari Pos 1 hingga Pos berjalan">
-                <i data-lucide="eye" class="w-3.5 h-3.5 text-[#007AFF]"></i>
-                <span>Lihat Proses Sebelumnya</span>
+                    class="w-9 h-9 rounded-xl border border-sky-300 dark:border-sky-800 bg-sky-50/80 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 text-[#007AFF] inline-flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+                    title="Lihat rincian riwayat dan seluruh proses sebelumnya dari Pos 1 hingga Pos berjalan"
+                    aria-label="Lihat Proses Sebelumnya">
+                <i data-lucide="eye" class="w-4 h-4 text-[#007AFF]"></i>
             </button>
 
+            <!-- Matriks Tracing 11 Pos -->
             <a href="{{ route('core.tracking.index') }}" 
-               class="btn-apple-gray text-xs px-3 py-1.5 inline-flex items-center gap-1.5"
-               title="Buka Matriks Tracing 11 Pos & Workload Tim">
-                <i data-lucide="milestone" class="w-3.5 h-3.5 text-slate-500"></i>
-                <span>Matriks Tracing</span>
+               class="w-9 h-9 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 inline-flex items-center justify-center transition-colors shadow-2xs"
+               title="Buka Matriks Tracing 11 Pos & Workload Tim"
+               aria-label="Matriks Tracing">
+                <i data-lucide="milestone" class="w-4 h-4 text-slate-500"></i>
             </a>
 
+            <!-- Cetak PIB / PEB -->
             @if($shipment->type === 'EXPORT')
                 <a href="{{ route('pdf.peb', $shipment->id) }}" target="_blank"
-                   class="btn-apple-gray text-xs inline-flex items-center gap-1.5 px-3 py-1.5">
-                    <i data-lucide="printer" class="w-3.5 h-3.5 text-slate-500"></i>
-                    <span>Cetak PEB</span>
+                   class="w-9 h-9 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 inline-flex items-center justify-center transition-colors shadow-2xs"
+                   title="Cetak PEB BC 3.0 (PDF)"
+                   aria-label="Cetak PEB">
+                    <i data-lucide="printer" class="w-4 h-4 text-slate-500"></i>
                 </a>
             @else
                 <a href="{{ route('pdf.pib', $shipment->id) }}" target="_blank"
-                   class="btn-apple-gray text-xs inline-flex items-center gap-1.5 px-3 py-1.5">
-                    <i data-lucide="printer" class="w-3.5 h-3.5 text-slate-500"></i>
-                    <span>Cetak PIB</span>
+                   class="w-9 h-9 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 inline-flex items-center justify-center transition-colors shadow-2xs"
+                   title="Cetak PIB BC 2.0 (PDF)"
+                   aria-label="Cetak PIB">
+                    <i data-lucide="printer" class="w-4 h-4 text-slate-500"></i>
                 </a>
             @endif
 
+            <!-- Cetak Billing MPN -->
             @if($shipment->ceisaDocument?->kode_billing || $shipment->billing_code)
                 <a href="{{ route('pdf.billing', $shipment->id) }}" target="_blank"
-                   class="btn-apple-tinted text-xs inline-flex items-center gap-1.5 px-3 py-1.5">
-                    <i data-lucide="receipt" class="w-3.5 h-3.5"></i>
-                    <span>Billing MPN</span>
+                   class="w-9 h-9 rounded-xl border border-purple-300 dark:border-purple-800 bg-purple-50/80 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/60 text-purple-700 dark:text-purple-400 inline-flex items-center justify-center transition-colors shadow-2xs"
+                   title="Cetak Billing MPN G3 (PDF)"
+                   aria-label="Cetak Billing">
+                    <i data-lucide="receipt" class="w-4 h-4"></i>
                 </a>
             @endif
 
+            <!-- Cetak Surat Permohonan DO -->
             <a href="{{ route('pdf.do-request', $shipment->id) }}" target="_blank"
-               class="btn-apple-gray text-xs inline-flex items-center gap-1.5 px-3 py-1.5" 
-               title="Surat Permohonan Rilis DO ke Pelayaran">
-                <i data-lucide="ship" class="w-3.5 h-3.5 text-amber-600"></i>
-                <span>Surat DO</span>
+               class="w-9 h-9 rounded-xl border border-amber-300 dark:border-amber-800 bg-amber-50/80 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-400 inline-flex items-center justify-center transition-colors shadow-2xs" 
+               title="Surat Permohonan Rilis DO ke Pelayaran"
+               aria-label="Surat DO">
+                <i data-lucide="ship" class="w-4 h-4 text-amber-600"></i>
             </a>
 
             <!-- Portal Pelacakan Klien & Timer Button -->
             <button type="button" 
                     onclick="openPortalModalShow()"
-                    class="btn-apple-gray text-xs inline-flex items-center gap-1.5 px-3 py-1.5 {{ $shipment->isPortalActive() ? '!text-[#007AFF] !border-[#007AFF]/30' : '' }}"
-                    title="Bagikan Tautan Pelacakan Portal Klien & Atur Timer">
-                <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
-                <span>Portal Klien</span>
+                    class="w-9 h-9 rounded-xl border inline-flex items-center justify-center transition-colors shadow-2xs cursor-pointer relative {{ $shipment->isPortalActive() ? 'border-[#007AFF]/40 bg-[#007AFF]/10 text-[#007AFF]' : 'border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10' }}"
+                    title="Bagikan Tautan Pelacakan Portal Klien & Atur Timer"
+                    aria-label="Portal Klien">
+                <i data-lucide="share-2" class="w-4 h-4"></i>
                 @if($shipment->isPortalActive())
-                    <span class="w-1.5 h-1.5 rounded-full bg-[#34C759]"></span>
+                    <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#34C759]"></span>
                 @endif
             </button>
 
             <!-- Tombol Buka Pos / Rollback (Hanya jika belum billing) -->
             @if($canRollback && $currentIdx > 0)
                 @if($isBillingLocked)
-                    <div class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 text-xs font-semibold cursor-help"
-                         title="Billing MPN G3 telah terbit di DJBC. Dokumen pabean terkunci dan tidak dapat diedit atau di-rollback, namun seluruh data proses sebelumnya tetap dapat Anda lihat via tombol 'Lihat Proses Sebelumnya'.">
-                        <i data-lucide="lock" class="w-3.5 h-3.5 text-amber-600"></i>
-                        <span>Terkunci (Billing Terbit)</span>
+                    <div class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 inline-flex items-center justify-center cursor-help"
+                         title="Billing MPN G3 telah terbit di DJBC. Dokumen pabean terkunci (Read-Only).">
+                        <i data-lucide="lock" class="w-4 h-4 text-amber-600"></i>
                     </div>
                 @else
                     <button type="button" 
                             onclick="document.getElementById('modal-rollback-stage')?.classList.remove('hidden')"
-                            class="btn-apple-gray text-xs px-3 py-1.5 inline-flex items-center gap-1.5 !text-amber-700 dark:!text-amber-400 !border-amber-400/40 hover:!bg-amber-500/10 cursor-pointer shadow-2xs font-semibold"
-                            title="Buka atau kembalikan proses ke pos sebelumnya untuk perbaikan data">
-                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-amber-600"></i>
-                        <span>Buka Pos Sebelumnya</span>
+                            class="w-9 h-9 rounded-xl border border-amber-400/40 bg-amber-50/80 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-400 inline-flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+                            title="Buka atau kembalikan proses ke pos sebelumnya untuk perbaikan data"
+                            aria-label="Rollback Pos">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4 text-amber-600"></i>
                     </button>
                 @endif
             @endif
 
+            <!-- Ubah Info Proyek -->
             <button type="button" onclick="document.getElementById('modal-edit-project')?.classList.remove('hidden')" 
-                    class="btn-apple-gray text-xs px-3 py-1.5">
-                Ubah
+                    class="w-9 h-9 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 inline-flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+                    title="Ubah Rincian Proyek"
+                    aria-label="Ubah Proyek">
+                <i data-lucide="pencil" class="w-4 h-4 text-slate-600 dark:text-slate-300"></i>
             </button>
 
+            <!-- Sinkron dari Berkas Fisik -->
             <form action="{{ route('core.document.sync-from-docs', $shipment->id) }}" method="POST" class="inline">
                 @csrf
                 <button type="submit" 
-                        class="btn-apple-gray text-xs px-3 py-1.5 inline-flex items-center gap-1"
-                        title="Pindai ulang seluruh berkas terlampir dan perbarui data proyek secara otomatis">
-                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-                    <span>Sinkron</span>
+                        class="w-9 h-9 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50/80 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 inline-flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+                        title="Pindai ulang seluruh berkas terlampir dan perbarui data proyek secara otomatis"
+                        aria-label="Sinkron Berkas">
+                    <i data-lucide="refresh-cw" class="w-4 h-4"></i>
                 </button>
             </form>
 
@@ -182,10 +254,10 @@
                     @csrf
                     @method('DELETE')
                     <button type="submit"
-                            class="btn-apple-gray text-xs px-3 py-1.5 inline-flex items-center gap-1.5 !text-rose-600 dark:!text-rose-400 !border-rose-300/60 hover:!bg-rose-500/10 cursor-pointer font-semibold"
-                            title="Hapus Draft Proyek & Aset File Dokumen">
-                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                        <span>Hapus Draft</span>
+                            class="w-9 h-9 rounded-xl border border-rose-300 dark:border-rose-900 bg-rose-50/80 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 inline-flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+                            title="Hapus Draft Proyek &amp; Aset File Dokumen"
+                            aria-label="Hapus Draft Proyek">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
                     </button>
                 </form>
             @endif
@@ -562,57 +634,4 @@
         </form>
     </div>
 </div>
-
-<script>
-function openRollbackModalForStage(stageCode) {
-    const modal = document.getElementById('modal-rollback-stage');
-    const select = document.getElementById('rollback_target_stage');
-    if (modal && select) {
-        select.value = stageCode;
-        modal.classList.remove('hidden');
-    }
-}
-</script>
 @endif
-
-<script>
-function navigateToWorkflowStage(posIndex) {
-    let tab = 'docs';
-    if (posIndex === 0) tab = 'docs';
-    else if (posIndex === 1) tab = 'items';
-    else if (posIndex === 2 || posIndex === 3) tab = 'ceisa';
-    else tab = 'ops';
-
-    // Switch Alpine activeTab
-    const container = document.querySelector('[x-data]');
-    if (container && window.Alpine) {
-        Alpine.$data(container).activeTab = tab;
-    } else if (container && container._x_dataStack) {
-        container._x_dataStack[0].activeTab = tab;
-    }
-
-    // Smooth scroll to workspace tabs
-    const target = document.getElementById('workspace-tabs') || document.getElementById('pos-assignment');
-    if (target) {
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-}
-
-function openViewPreviousProcessModal() {
-    document.getElementById('modal-view-previous-process')?.classList.remove('hidden');
-}
-
-function selectTabAndCloseModal(tabName) {
-    const container = document.querySelector('[x-data]');
-    if (container && window.Alpine) {
-        Alpine.$data(container).activeTab = tabName;
-    } else if (container && container._x_dataStack) {
-        container._x_dataStack[0].activeTab = tabName;
-    }
-    document.getElementById('modal-view-previous-process')?.classList.add('hidden');
-    const target = document.getElementById('workspace-tabs');
-    if (target) {
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-}
-</script>

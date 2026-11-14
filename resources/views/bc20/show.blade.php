@@ -63,16 +63,15 @@
                 </p>
             </div>
 
-            <!-- Action Buttons Host-to-Host -->
-            <div class="flex flex-wrap items-center gap-2">
+            <!-- Action Buttons Host-to-Host (Apple HIG Icon-Only Group) -->
+            <div class="flex items-center gap-1.5 flex-wrap justify-end">
                 <!-- Tautan Terpadu ke Cockpit Tracking Dokumen (11 Pos Operasional) -->
                 <a href="{{ route('core.tracking.index', ['mode' => 'tracking_dok', 'search' => $shipment?->project_no ?? $bc20->nomor_aju]) }}"
                    target="_blank"
-                   class="btn-apple-gray text-xs inline-flex items-center gap-1.5 px-3.5 py-2 !text-[#007AFF] !border-sky-300 dark:!border-sky-800 bg-sky-50 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 shadow-xs"
-                   title="Buka Cockpit Tracking Dokumen (11 Pos Operasional)">
-                    <i data-lucide="compass" class="w-3.5 h-3.5"></i>
-                    <span>Tracking Dok</span>
-                    <span class="px-1.5 py-0.2 rounded text-[10px] bg-[#007AFF]/15 text-[#007AFF] font-bold font-mono">11 Pos</span>
+                   class="w-9 h-9 rounded-xl border border-sky-300 dark:border-sky-800 bg-sky-50/80 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 text-[#007AFF] inline-flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+                   title="Buka Cockpit Tracking Dokumen (11 Pos Operasional)"
+                   aria-label="Tracking 11 Pos">
+                    <i data-lucide="compass" class="w-4 h-4"></i>
                 </a>
 
                 @php
@@ -83,27 +82,27 @@
 
                 @if($isBillingLocked)
                     <!-- Indikator Terkunci & Read-Only saat Billing Terbit -->
-                    <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 text-xs font-semibold"
-                         title="Kode Billing Kepabeanan telah diterbitkan oleh DJBC. Dokumen terkunci permanen untuk menjaga integritas data fiskal. Data tetap dapat dilihat sepenuhnya (Read-Only).">
-                        <i data-lucide="lock" class="w-3.5 h-3.5 text-amber-600"></i>
-                        <span>Terkunci (Billing Terbit) &bull; Mode Lihat Saja</span>
+                    <div class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 inline-flex items-center justify-center"
+                         title="Kode Billing Kepabeanan telah diterbitkan oleh DJBC. Dokumen terkunci permanen (Read-Only).">
+                        <i data-lucide="lock" class="w-4 h-4 text-amber-600"></i>
                     </div>
 
                     @if($bc20->shipment)
                         <a href="{{ route('core.document.show', $bc20->shipment->id) }}" 
-                           class="btn-apple-gray text-xs inline-flex items-center gap-1.5 px-3.5 py-2 !text-[#007AFF] !border-[#007AFF]/30 hover:!bg-[#007AFF]/10"
-                           title="Buka rincian berkas, deteksi HS code, dan proses sebelumnya pada workspace shipment">
-                            <i data-lucide="eye" class="w-3.5 h-3.5 text-[#007AFF]"></i>
-                            <span>Lihat Proses Sebelumnya (Pos 1 - 3)</span>
+                           class="w-9 h-9 rounded-xl border border-slate-200 dark:border-white/15 bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 inline-flex items-center justify-center transition-colors shadow-2xs"
+                           title="Lihat Proses Sebelumnya (Pos 1 - 3)"
+                           aria-label="Proses Sebelumnya">
+                            <i data-lucide="folder" class="w-4 h-4 text-[#007AFF]"></i>
                         </a>
                     @endif
                 @else
                     @if($bc20->status === 'DRAFT')
                         @if($canEditDraft)
                             <a href="{{ route('bc20.edit', $bc20->id) }}" 
-                               class="btn-apple-filled text-xs inline-flex items-center gap-1.5 px-3.5 py-2">
-                                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-                                <span>Edit Tahapan PIB (9 Tahap &amp; Preview)</span>
+                               class="btn-apple-filled !w-9 !h-9 !p-0 inline-flex items-center justify-center rounded-xl shadow-xs cursor-pointer"
+                               title="Edit Tahapan PIB (9 Tahap &amp; Preview)"
+                               aria-label="Edit PIB">
+                                <i data-lucide="edit-3" class="w-4 h-4"></i>
                             </a>
                         @endif
                         @if($bc20->isDraftDeletable() && (auth()->user()->isSuperAdmin() || auth()->user()->hasAnyPermission(['document.create', 'document.edit', 'document.delete'])))
@@ -112,67 +111,79 @@
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit"
-                                        class="btn-apple-gray text-xs inline-flex items-center gap-1.5 px-3.5 py-2 !text-rose-600 dark:!text-rose-400 !border-rose-300/60 hover:!bg-rose-500/10 cursor-pointer">
-                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                                    <span>Hapus Draft &amp; Berkas</span>
+                                        class="w-9 h-9 rounded-xl border border-rose-300 dark:border-rose-900 bg-rose-50/80 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 inline-flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+                                        title="Hapus Draft &amp; Berkas"
+                                        aria-label="Hapus Draft">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
                                 </button>
                             </form>
                         @endif
                     @else
                         @if($canEditAfterCeisa)
                             <a href="{{ route('bc20.edit', $bc20->id) }}" 
-                               class="btn-apple-gray text-xs inline-flex items-center gap-1.5 px-3.5 py-2 !border-amber-500/40 !text-amber-700 dark:!text-amber-400 hover:!bg-amber-500/10"
-                               title="Izin khusus: Revisi data setelah dokumen terkirim ke CEISA">
-                                <i data-lucide="edit-3" class="w-3.5 h-3.5 text-amber-600"></i>
-                                <span>Revisi Pasca-CEISA</span>
+                               class="w-9 h-9 rounded-xl border border-amber-300 dark:border-amber-800 bg-amber-50/80 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-400 inline-flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+                               title="Revisi Data Pasca-CEISA"
+                               aria-label="Revisi Pasca-CEISA">
+                                <i data-lucide="edit-3" class="w-4 h-4 text-amber-600"></i>
                             </a>
 
                             <form action="{{ route('bc20.reopen-draft', $bc20->id) }}" method="POST" class="inline"
                                   onsubmit="return confirm('Apakah Anda yakin ingin membuka kembali dokumen ini ke status DRAFT untuk revisi ulang dan penyesuaian skema CEISA?');">
                                 @csrf
                                 <button type="submit" 
-                                        class="btn-apple-gray text-xs inline-flex items-center gap-1.5 px-3.5 py-2 hover:!text-indigo-600"
-                                        title="Kembalikan status dokumen ke DRAFT">
-                                    <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-indigo-600"></i>
-                                    <span>Buka Kembali ke Draft</span>
+                                        class="w-9 h-9 rounded-xl border border-indigo-300 dark:border-indigo-800 bg-indigo-50/80 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 inline-flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+                                        title="Kembalikan status dokumen ke DRAFT"
+                                        aria-label="Buka Kembali ke Draft">
+                                    <i data-lucide="rotate-ccw" class="w-4 h-4 text-indigo-600"></i>
                                 </button>
                             </form>
                         @endif
                     @endif
                 @endif
 
-
-                <form action="{{ route('bc20.check-schema', $bc20->id) }}" method="POST">
+                <!-- Validasi Skema -->
+                <form action="{{ route('bc20.check-schema', $bc20->id) }}" method="POST" class="inline">
                     @csrf
-                    <button type="submit" class="btn-apple-gray text-xs inline-flex items-center gap-1.5 px-3.5 py-2">
-                        <i data-lucide="check-square" class="w-3.5 h-3.5 text-purple-600"></i>
-                        <span>Validasi Skema</span>
+                    <button type="submit"
+                            class="w-9 h-9 rounded-xl border border-purple-300 dark:border-purple-800 bg-purple-50/80 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/60 text-purple-700 dark:text-purple-400 inline-flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+                            title="Validasi Skema Dokumen CEISA 4.0"
+                            aria-label="Validasi Skema">
+                        <i data-lucide="check-square" class="w-4 h-4 text-purple-600 dark:text-purple-400"></i>
                     </button>
                 </form>
 
+                <!-- Kirim ke CEISA -->
                 @if($bc20->status === 'DRAFT' || $bc20->status === 'REJECT')
-                    <form action="{{ route('bc20.submit', $bc20->id) }}" method="POST">
+                    <form action="{{ route('bc20.submit', $bc20->id) }}" method="POST" class="inline">
                         @csrf
-                        <button type="submit" class="btn-apple-filled text-xs inline-flex items-center gap-1.5 px-4 py-2 cursor-pointer">
-                            <i data-lucide="send" class="w-3.5 h-3.5"></i>
-                            <span>Kirim ke CEISA 4.0</span>
+                        <button type="submit"
+                                class="btn-apple-filled !w-9 !h-9 !p-0 inline-flex items-center justify-center rounded-xl shadow-xs cursor-pointer"
+                                title="Kirim Dokumen ke CEISA 4.0"
+                                aria-label="Kirim ke CEISA">
+                            <i data-lucide="send" class="w-4 h-4"></i>
                         </button>
                     </form>
                 @endif
 
-                <form action="{{ route('bc20.check-status', $bc20->id) }}" method="POST">
+                <!-- Cek Status -->
+                <form action="{{ route('bc20.check-status', $bc20->id) }}" method="POST" class="inline">
                     @csrf
-                    <button type="submit" class="btn-apple-gray text-xs inline-flex items-center gap-1.5 px-3.5 py-2">
-                        <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-slate-500"></i>
-                        <span>Cek Status</span>
+                    <button type="submit"
+                            class="w-9 h-9 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 inline-flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+                            title="Cek Status Dokumen dari CEISA 4.0"
+                            aria-label="Cek Status">
+                        <i data-lucide="refresh-cw" class="w-4 h-4 text-slate-500"></i>
                     </button>
                 </form>
 
-                <form action="{{ route('bc20.fetch-response', $bc20->id) }}" method="POST">
+                <!-- Tarik Respon -->
+                <form action="{{ route('bc20.fetch-response', $bc20->id) }}" method="POST" class="inline">
                     @csrf
-                    <button type="submit" class="btn-apple-tinted text-xs inline-flex items-center gap-1.5 px-3.5 py-2">
-                        <i data-lucide="download" class="w-3.5 h-3.5"></i>
-                        <span>Tarik Respon (SPPB/Billing)</span>
+                    <button type="submit"
+                            class="w-9 h-9 rounded-xl border border-sky-300 dark:border-sky-800 bg-sky-50/80 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 text-[#007AFF] inline-flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+                            title="Tarik Respon Kepabeanan (SPPB / Billing)"
+                            aria-label="Tarik Respon">
+                        <i data-lucide="download" class="w-4 h-4 text-[#007AFF]"></i>
                     </button>
                 </form>
             </div>

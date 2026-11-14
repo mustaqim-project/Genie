@@ -11,12 +11,14 @@
          previewTitle: '',
          previewIsImage: false,
          openDocPreview(url, title, isImg) {
-             this.previewUrl = url;
-             this.previewTitle = title;
+             this.previewUrl = url || '';
+             this.previewTitle = title || '';
              this.previewIsImage = !!isImg;
              this.previewModalOpen = true;
          }
-     }">
+     }"
+     x-on:switch-workspace-tab.window="activeTab = $event.detail"
+     x-on:open-doc-preview.window="openDocPreview($event.detail.url, $event.detail.title, $event.detail.isImg)">
 
     <!-- 0. Header Proyek & 11 Pos Workflow Stepper (Persis Gambar Acuan) -->
     @include('core.components.workflow_pos_stepper')
@@ -255,7 +257,10 @@
     </div>
 
     <!-- 3. TABS NAVIGASI WORKSPACE UTAMA -->
-    <div id="workspace-tabs" class="bg-white dark:bg-[#1C1C1E] rounded-2xl border border-black/[0.06] dark:border-white/[0.08] shadow-xs overflow-hidden scroll-mt-6">
+    <div id="workspace-tabs" 
+         x-data="{ activeTab: 'docs' }"
+         x-on:switch-workspace-tab.window="activeTab = $event.detail"
+         class="bg-white dark:bg-[#1C1C1E] rounded-2xl border border-black/[0.06] dark:border-white/[0.08] shadow-xs overflow-hidden scroll-mt-6">
         
         <!-- Tab Bar Buttons macOS Style -->
         <div class="border-b border-black/[0.06] dark:border-white/[0.06] bg-black/[0.02] dark:bg-white/[0.02] p-2 flex items-center gap-1.5 overflow-x-auto text-xs font-semibold">
@@ -1743,8 +1748,27 @@
 </div>
 
 <!-- Inline Document Preview Modal -->
-<div x-show="previewModalOpen" x-cloak class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div @click.away="previewModalOpen = false" class="bg-white dark:bg-[#1C1C1E] rounded-3xl border border-black/10 dark:border-white/15 shadow-2xl max-w-5xl w-full h-[85vh] flex flex-col overflow-hidden">
+<div id="inline-document-preview-modal"
+     x-data="{
+         previewModalOpen: false,
+         previewTitle: '',
+         previewUrl: '',
+         previewIsImage: false,
+         open(url, title, isImg) {
+             this.previewUrl = url || '';
+             this.previewTitle = title || '';
+             this.previewIsImage = !!isImg;
+             this.previewModalOpen = true;
+         },
+         close() {
+             this.previewModalOpen = false;
+         }
+     }"
+     x-on:open-doc-preview.window="open($event.detail.url, $event.detail.title, $event.detail.isImg)"
+     x-show="previewModalOpen" 
+     x-cloak 
+     class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div @click.away="close()" class="bg-white dark:bg-[#1C1C1E] rounded-3xl border border-black/10 dark:border-white/15 shadow-2xl max-w-5xl w-full h-[85vh] flex flex-col overflow-hidden">
         <div class="px-5 py-3.5 bg-slate-50 dark:bg-white/[0.04] border-b border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between gap-3">
             <div class="flex items-center gap-2 min-w-0">
                 <i data-lucide="file-text" class="w-4 h-4 text-[#007AFF] shrink-0"></i>
@@ -1755,7 +1779,7 @@
                     <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
                     <span>Buka Penuh</span>
                 </a>
-                <button type="button" @click="previewModalOpen = false" class="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-white/10 text-xs font-semibold cursor-pointer">
+                <button type="button" @click="close()" class="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-white/10 text-xs font-semibold cursor-pointer">
                     Tutup
                 </button>
             </div>
@@ -1772,4 +1796,12 @@
         </div>
     </div>
 </div>
+
+<script>
+window.openDocPreview = function(url, title, isImg) {
+    window.dispatchEvent(new CustomEvent('open-doc-preview', {
+        detail: { url: url, title: title, isImg: !!isImg }
+    }));
+};
+</script>
 @endsection
