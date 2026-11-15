@@ -328,8 +328,37 @@ class AccountingService
         float $amount,
         ?CashBankAccount $account = null,
         ?string $paidDate = null,
-        ?string $userId = null
+        ?string $userId = null,
+        bool $bypassEscrowCheck = false
     ): ?JournalEntry {
+        // Gerbang Verifikasi Dana Talangan Masuk (Pre-Funding Escrow Gate - FIX-18)
+        if (!$bypassEscrowCheck) {
+            $isEscrowCleared = false;
+
+            // 1. Cek apakah ada invoice talangan untuk shipment ini yang sudah berstatus PAID
+            $paidInvoice = $shipment->invoices()
+                ->where('status', 'PAID')
+                ->where('talangan_pabean_idr', '>=', $amount)
+                ->first();
+
+            if ($paidInvoice) {
+                $isEscrowCleared = true;
+            }
+
+            // 2. Otorisasi Direksi (R-OWN / R-ADM) sebagai bypass kebijakan kredit
+            $hasExecutiveApproval = auth()->check() && (
+                auth()->user()->hasRole('R-OWN') ||
+                auth()->user()->hasRole('R-ADM') ||
+                auth()->user()->can('setting.manage')
+            );
+
+            if (!$isEscrowCleared && !$hasExecutiveApproval) {
+                throw new \DomainException(
+                    "Pembayaran Billing MPN G3 Ditolak [Escrow Gate]: Dana talangan pabean klien belum berstatus FUNDS_CLEARED (Lunas). Diperlukan pelunasan invoice talangan klien terlebih dahulu atau otorisasi persetujuan khusus Direksi (R-OWN)."
+                );
+            }
+        }
+
         $piutangTalanganCoaId = self::getCoaId('1-1300');
         $mandiriCoaId = self::getCoaId('1-1120');
 
@@ -367,6 +396,8 @@ class AccountingService
             return $existing;
         }
 
+        $entryDate = '2026-01-01';
+
         // Cek apakah tanggal transaksi berada di periode akuntansi yang telah dikunci
         if (\App\Models\AccountingPeriod::isDateLocked($entryDate)) {
             throw new \DomainException(
@@ -374,10 +405,18 @@ class AccountingService
             );
         }
 
-        $bcaInit = 450000000.00;
-        $mandiriInit = 380000000.00;
-        $kasInit = 20000000.00;
-        $totalCapital = $bcaInit + $mandiriInit + $kasInit; // Rp 850.000.000
+        $config = \App\Models\SystemSetting::get('accounting_initial_balance_config', [
+            'bca_balance' => 450000000.00,
+            'mandiri_balance' => 380000000.00,
+            'kas_kecil_balance' => 20000000.00,
+            'description' => 'Saldo Awal Modal Disetor Pemilik & Likuiditas Rekening Kas/Bank',
+        ]);
+
+        $bcaInit = (float) ($config['bca_balance'] ?? 450000000.00);
+        $mandiriInit = (float) ($config['mandiri_balance'] ?? 380000000.00);
+        $kasInit = (float) ($config['kas_kecil_balance'] ?? 20000000.00);
+        $totalCapital = $bcaInit + $mandiriInit + $kasInit;
+        $memo = $config['description'] ?? 'Saldo Awal Modal Disetor Pemilik & Likuiditas Rekening Kas/Bank';
 
         $lines = [
             ['account_id' => self::getCoaId('1-1110'), 'debit' => $kasInit, 'credit' => 0],
@@ -388,9 +427,9 @@ class AccountingService
 
         return self::createBalancedEntry(
             'OPENING_BALANCE',
-            'CAPITAL-850M',
-            '2026-01-01',
-            'Saldo Awal Modal Disetor Pemilik & Likuiditas Rekening Kas/Bank',
+            'CAPITAL-INIT',
+            $entryDate,
+            $memo,
             $lines
         );
     }
@@ -413,6 +452,8 @@ class AccountingService
         if ($existing) {
             return $existing;
         }
+
+        $entryDate = now()->format('Y-m-d');
 
         // Cek apakah tanggal transaksi berada di periode akuntansi yang telah dikunci
         if (\App\Models\AccountingPeriod::isDateLocked($entryDate)) {

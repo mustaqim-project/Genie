@@ -19,12 +19,12 @@
     <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-5 sm:p-6 border border-black/[0.06] dark:border-white/[0.08] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <nav class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium mb-1.5" aria-label="Breadcrumb">
-                <a href="{{ route('dashboard') }}" class="hover:text-[#007AFF] transition-colors flex items-center gap-1">
+                <a href="{{ route('dashboard') }}" class="hover:text-[#0284c7] transition-colors flex items-center gap-1">
                     <i data-lucide="home" class="w-3.5 h-3.5"></i>
                     <span>Dashboard</span>
                 </a>
                 <i data-lucide="chevron-right" class="w-3 h-3 text-slate-300 dark:text-slate-600"></i>
-                <a href="{{ route('finance.index') }}" class="hover:text-[#007AFF] transition-colors">Finance</a>
+                <a href="{{ route('finance.index') }}" class="hover:text-[#0284c7] transition-colors">Finance</a>
                 <i data-lucide="chevron-right" class="w-3 h-3 text-slate-300 dark:text-slate-600"></i>
                 <span class="text-slate-800 dark:text-white font-semibold">Invoice Klien (P19)</span>
             </nav>
@@ -49,8 +49,8 @@
     <!-- Apple HIG Bento Grid KPI Summary -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <!-- KPI 1: Total Invoice -->
-        <div class="p-5 rounded-2xl bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] shadow-xs flex items-center gap-3.5 hover:border-[#007AFF]/30 transition-all">
-            <div class="w-10 h-10 rounded-xl bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center shrink-0">
+        <div class="p-5 rounded-2xl bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] shadow-xs flex items-center gap-3.5 hover:border-[#0284c7]/30 transition-all">
+            <div class="w-10 h-10 rounded-xl bg-[#0284c7]/10 text-[#0284c7] flex items-center justify-center shrink-0">
                 <i data-lucide="file-text" class="w-5 h-5"></i>
             </div>
             <div class="min-w-0 flex-1">
@@ -108,11 +108,11 @@
                        name="search" 
                        value="{{ request('search') }}" 
                        placeholder="Cari Nomor Invoice, Nama Klien / Importir, No Project..." 
-                       class="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#007AFF]">
+                       class="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0284c7]">
             </div>
 
             <div class="sm:col-span-3">
-                <select name="status" class="w-full px-3 py-2 text-xs rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-[#007AFF]">
+                <select name="status" class="w-full px-3 py-2 text-xs rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-[#0284c7]">
                     <option value="">-- Semua Status Pembayaran --</option>
                     <option value="UNPAID" {{ request('status') === 'UNPAID' ? 'selected' : '' }}>MENUNGGU PEMBAYARAN</option>
                     <option value="PAID" {{ request('status') === 'PAID' ? 'selected' : '' }}>LUNAS (PAID)</option>
@@ -170,7 +170,7 @@
                     @forelse($invoices as $inv)
                         <tr class="hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
                             <td class="py-3.5 px-4 font-mono" data-sort-value="{{ $inv->invoice_number ?? $inv->invoice_no }}">
-                                <a href="{{ route('finance.invoices.show', $inv->id) }}" class="font-bold text-[#007AFF] hover:underline block">
+                                <a href="{{ route('finance.invoices.show', $inv->id) }}" class="font-bold text-[#0284c7] hover:underline block">
                                     {{ $inv->invoice_number ?? $inv->invoice_no }}
                                 </a>
                                 <div class="text-[10px] text-slate-400 dark:text-slate-500 font-sans mt-0.5 tabular-nums">{{ $inv->invoice_date ? $inv->invoice_date->format('d/m/Y') : '-' }}</div>
@@ -288,7 +288,7 @@
                 
                 <div>
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Pilih Klien / Importir <span class="text-rose-500">*</span></label>
-                    <select name="client_id" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                    <select name="client_id" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
                         <option value="">-- Pilih Importir / Klien --</option>
                         @foreach($clients as $c)
                             <option value="{{ $c->id }}">{{ $c->name }} (NPWP: {{ $c->npwp ?? '-' }})</option>
@@ -298,7 +298,7 @@
 
                 <div>
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Hubungkan ke Shipment / Project (Opsional)</label>
-                    <select name="shipment_id" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                    <select name="shipment_id" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
                         <option value="">-- Tanpa Relasi Shipment (Invoice Standalone) --</option>
                         @foreach($shipments as $s)
                             <option value="{{ $s->id }}">{{ $s->project_no ?? $s->shipment_number }} — B/L: {{ $s->nomor_bl_awb ?? $s->bl_number ?? '-' }}</option>
@@ -309,11 +309,11 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Terbit <span class="text-rose-500">*</span></label>
-                        <input type="date" name="tanggal" required value="{{ now()->format('Y-m-d') }}" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                        <input type="date" name="tanggal" required value="{{ now()->format('Y-m-d') }}" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jatuh Tempo (Due Date) <span class="text-rose-500">*</span></label>
-                        <input type="date" name="jatuh_tempo" required value="{{ now()->addDays(14)->format('Y-m-d') }}" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                        <input type="date" name="jatuh_tempo" required value="{{ now()->addDays(14)->format('Y-m-d') }}" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
                     </div>
                 </div>
 
@@ -322,19 +322,19 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label class="block text-slate-600 dark:text-slate-400 mb-1">Talangan Pabean (Bea & Pajak Impor)</label>
-                            <input type="number" step="any" name="talangan_pabean_idr" x-model.number="talangan" placeholder="0" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF] font-mono">
+                            <input type="number" step="any" name="talangan_pabean_idr" x-model.number="talangan" placeholder="0" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#0284c7] font-mono">
                         </div>
                         <div>
                             <label class="block text-slate-600 dark:text-slate-400 mb-1">Biaya Pelayaran (THC / DO / Depo)</label>
-                            <input type="number" step="any" name="biaya_pelayaran_idr" x-model.number="pelayaran" placeholder="0" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF] font-mono">
+                            <input type="number" step="any" name="biaya_pelayaran_idr" x-model.number="pelayaran" placeholder="0" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#0284c7] font-mono">
                         </div>
                         <div>
                             <label class="block text-slate-600 dark:text-slate-400 mb-1">Jasa Pengurusan PPJK / Forwarding</label>
-                            <input type="number" step="any" name="jasa_ppjk_idr" x-model.number="ppjk" placeholder="1500000" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF] font-mono">
+                            <input type="number" step="any" name="jasa_ppjk_idr" x-model.number="ppjk" placeholder="1500000" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#0284c7] font-mono">
                         </div>
                         <div>
                             <label class="block text-slate-600 dark:text-slate-400 mb-1">Biaya Trucking / Transportasi Darat</label>
-                            <input type="number" step="any" name="biaya_trucking_idr" x-model.number="trucking" placeholder="2500000" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF] font-mono">
+                            <input type="number" step="any" name="biaya_trucking_idr" x-model.number="trucking" placeholder="2500000" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#0284c7] font-mono">
                         </div>
                     </div>
                 </div>
@@ -354,13 +354,13 @@
                     </div>
                     <div class="pt-1.5 border-t border-slate-200 dark:border-white/10 flex items-center justify-between text-xs font-bold">
                         <span class="font-sans text-slate-900 dark:text-white">Total Tagihan Invoice (AR):</span>
-                        <span class="text-base text-[#007AFF]" x-text="'Rp ' + total.toLocaleString('id-ID')"></span>
+                        <span class="text-base text-[#0284c7]" x-text="'Rp ' + total.toLocaleString('id-ID')"></span>
                     </div>
                 </div>
 
                 <div>
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Catatan / Instruksi Pembayaran</label>
-                    <textarea name="catatan" rows="2" placeholder="Contoh: Harap transfer ke Rekening BCA PT Agung Trans..." class="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF] focus:outline-none"></textarea>
+                    <textarea name="catatan" rows="2" placeholder="Contoh: Harap transfer ke Rekening BCA PT Agung Trans..." class="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#0284c7] focus:outline-none"></textarea>
                 </div>
 
                 <div class="pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-end space-x-2">

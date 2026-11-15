@@ -19,6 +19,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // 0. SYSTEM SETTINGS SEEDER (ZERO HARDCODING PARAMETERIZATION)
+        $this->call(SystemSettingSeeder::class);
+
         // 1. SEED 12 ROLES SESUAI PRD
         $rolesData = [
             ['code' => 'R-ADM', 'name' => 'Admin Sistem', 'description' => 'Master data, hak akses, konfigurasi SLA dan integrasi'],

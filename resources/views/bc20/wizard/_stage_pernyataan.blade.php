@@ -3,7 +3,7 @@
         <h3 class="font-bold text-base text-slate-900 dark:text-white">Pernyataan</h3>
         <button type="button" @click="syncPernyataan()"
                 class="px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] hover:bg-slate-50 text-slate-700 dark:text-slate-200 font-semibold inline-flex items-center gap-1.5 cursor-pointer">
-            <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-[#007AFF]"></i>
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-[#0284c7]"></i>
             <span>Sync Pernyataan</span>
         </button>
     </div>

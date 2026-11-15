@@ -46,6 +46,7 @@ class Employee extends Model
         return [
             'start_date' => 'date',
             'base_salary' => 'decimal:2',
+            'face_data' => 'encrypted',
         ];
     }
 
@@ -201,6 +202,22 @@ class Employee extends Model
     public function getFormattedSalaryAttribute(): string
     {
         return 'Rp ' . number_format((float) ($this->base_salary ?? 0), 0, ',', '.');
+    }
+
+    /**
+     * Accessor virtual salary_base untuk kepatuhan kontrak FSD §3.3.
+     */
+    public function getSalaryBaseAttribute(): ?float
+    {
+        return $this->base_salary !== null ? (float) $this->base_salary : null;
+    }
+
+    /**
+     * Mutator virtual salary_base untuk kepatuhan kontrak FSD §3.3.
+     */
+    public function setSalaryBaseAttribute($value): void
+    {
+        $this->attributes['base_salary'] = $value;
     }
 
     public function getInitialsAttribute(): string

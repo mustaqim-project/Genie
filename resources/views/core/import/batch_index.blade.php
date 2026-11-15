@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Import Massal & Ekstraksi Dokumen (F15)')
+@section('title', 'Import Massal & Ekstraksi Dokumen Pabean')
 
 @section('content')
 <div class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12">
@@ -10,14 +10,14 @@
         <div>
             <div class="flex items-center gap-2.5">
                 <h1 class="text-[20px] sm:text-[22px] font-bold text-black dark:text-white tracking-tight">
-                    Import Massal & Ekstraksi Otomatis (F15)
+                    Import Massal & Ekstraksi Otomatis
                 </h1>
                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#34C759]/10 text-[#34C759]">
-                    Genie Core v2.0
+                    Genie Core
                 </span>
             </div>
             <p class="text-[13px] text-black/50 dark:text-white/50 mt-1 leading-snug">
-                Unggah ratusan berkas ekspor/impor sekaligus (PDF, Gambar, ZIP, Folder), ekstraksi otomatis OCR & pos tarif, serta lompat tahap pabean historis (F16).
+                Unggah ratusan berkas ekspor/impor sekaligus (PDF, Gambar, ZIP, Folder), ekstraksi otomatis OCR & pos tarif, serta integrasi alur tahap pabean historis.
             </p>
         </div>
 
@@ -38,7 +38,7 @@
         </div>
         <div class="rounded-[16px] bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/10 p-4 shadow-sm">
             <span class="text-[12px] font-semibold text-black/45 dark:text-white/45">Total Berkas Dipindai</span>
-            <p class="text-[24px] font-bold text-[#007AFF] mt-1">{{ number_format($stats['total_files_processed']) }}</p>
+            <p class="text-[24px] font-bold text-[#0284c7] mt-1">{{ number_format($stats['total_files_processed']) }}</p>
             <span class="text-[11px] text-black/40 dark:text-white/40">Invoice, BL, PL, PIB, dll</span>
         </div>
         <div class="rounded-[16px] bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/10 p-4 shadow-sm">
@@ -66,7 +66,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                     <label class="block text-[12px] font-semibold text-black/70 dark:text-white/70 mb-1">Tipe Kepabeanan <span class="text-rose-500">*</span></label>
-                    <select name="type" required class="w-full rounded-[10px] bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/15 px-3 py-2 text-[13px] text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[#007AFF]">
+                    <select name="type" required class="w-full rounded-[10px] bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/15 px-3 py-2 text-[13px] text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0284c7]">
                         <option value="" {{ old('type') ? '' : 'selected' }}>-- Wajib Pilih: Impor atau Ekspor --</option>
                         <option value="IMPORT" {{ old('type') === 'IMPORT' ? 'selected' : '' }}>IMPOR (BC 2.0 / PIB)</option>
                         <option value="EXPORT" {{ old('type') === 'EXPORT' ? 'selected' : '' }}>EKSPOR (BC 3.0 / PEB)</option>
@@ -78,7 +78,7 @@
 
                 <div>
                     <label class="block text-[12px] font-semibold text-black/70 dark:text-white/70 mb-1">Pilih Klien Importir/Eksportir (Opsional)</label>
-                    <select name="client_id" class="w-full rounded-[10px] bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/15 px-3 py-2 text-[13px] text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[#007AFF]">
+                    <select name="client_id" class="w-full rounded-[10px] bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/15 px-3 py-2 text-[13px] text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0284c7]">
                         <option value="">-- Pilih Klien --</option>
                         @foreach($clients as $c)
                             <option value="{{ $c->id }}" {{ old('client_id') == $c->id ? 'selected' : '' }}>{{ $c->name }} (NPWP: {{ $c->npwp }})</option>
@@ -88,21 +88,21 @@
 
                 <div>
                     <label class="block text-[12px] font-semibold text-black/70 dark:text-white/70 mb-1">Catatan Batch / Keterangan Arsip</label>
-                    <input type="text" name="notes" value="{{ old('notes') }}" placeholder="Contoh: Arsip Pengapalan Q3 2026 atau Proyek Khusus" class="w-full rounded-[10px] bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/15 px-3 py-2 text-[13px] text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[#007AFF]">
+                    <input type="text" name="notes" value="{{ old('notes') }}" placeholder="Contoh: Arsip Pengapalan Q3 2026 atau Proyek Khusus" class="w-full rounded-[10px] bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/15 px-3 py-2 text-[13px] text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0284c7]">
                 </div>
             </div>
 
             <!-- Drag & Drop Zone -->
-            <div class="border-2 border-dashed border-black/15 dark:border-white/15 hover:border-[#007AFF] rounded-[16px] p-8 text-center transition bg-black/[0.02] dark:bg-white/[0.02] flex flex-col items-center justify-center cursor-pointer" onclick="document.getElementById('batchFileInput').click()">
-                <svg class="w-12 h-12 text-[#007AFF] mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z"/></svg>
+            <div class="border-2 border-dashed border-black/15 dark:border-white/15 hover:border-[#0284c7] rounded-[16px] p-8 text-center transition bg-black/[0.02] dark:bg-white/[0.02] flex flex-col items-center justify-center cursor-pointer" onclick="document.getElementById('batchFileInput').click()">
+                <svg class="w-12 h-12 text-[#0284c7] mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z"/></svg>
                 <p class="text-[14px] font-semibold text-black dark:text-white">Klik untuk memilih berkas atau seret berkas ke sini</p>
                 <p class="text-[12px] text-black/45 dark:text-white/45 mt-1">Mendukung banyak file PDF, gambar, scan, folder, atau berkas ZIP (Maksimal 50 MB per berkas)</p>
                 <input type="file" id="batchFileInput" name="files[]" multiple required class="hidden" onchange="document.getElementById('selectedFilesCount').innerText = this.files.length + ' berkas terpilih siap diunggah.'">
-                <span id="selectedFilesCount" class="text-[12px] font-medium text-[#007AFF] mt-2"></span>
+                <span id="selectedFilesCount" class="text-[12px] font-medium text-[#0284c7] mt-2"></span>
             </div>
 
             <div class="flex justify-end">
-                <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-[12px] text-[13px] font-semibold bg-[#007AFF] hover:bg-[#0066CC] text-white shadow-sm transition">
+                <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-[12px] text-[13px] font-semibold bg-[#0284c7] hover:bg-[#0066CC] text-white shadow-sm transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
                     Mulai Ekstraksi Batch Cerdas
                 </button>
@@ -133,14 +133,14 @@
                 <tbody class="divide-y divide-black/5 dark:divide-white/10">
                     @forelse($batches as $b)
                     <tr class="hover:bg-black/[0.01] dark:hover:bg-white/[0.01] transition">
-                        <td class="px-6 py-4 font-mono font-semibold text-[#007AFF]">
+                        <td class="px-6 py-4 font-mono font-semibold text-[#0284c7]">
                             <a href="{{ route('core.import.show', $b->id) }}">{{ $b->batch_no }}</a>
                         </td>
                         <td class="px-6 py-4">
                             @if($b->type === 'EXPORT')
                                 <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#AF52DE]/15 text-[#AF52DE]">EKSPOR (BC 3.0)</span>
                             @elseif($b->type === 'IMPORT')
-                                <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#007AFF]/15 text-[#007AFF]">IMPOR (BC 2.0)</span>
+                                <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#0284c7]/15 text-[#0284c7]">IMPOR (BC 2.0)</span>
                             @else
                                 <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-black/10 dark:bg-white/10 text-black/60 dark:text-white/60">-</span>
                             @endif
@@ -162,13 +162,13 @@
                             @elseif($b->status === 'DRAFT')
                                 <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#FF9500]/15 text-[#FF9500]">Draft</span>
                             @elseif($b->status === 'PROCESSING')
-                                <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#007AFF]/10 text-[#007AFF]">Memproses</span>
+                                <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#0284c7]/10 text-[#0284c7]">Memproses</span>
                             @else
                                 <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#FF3B30]/10 text-[#FF3B30]">{{ $b->status }}</span>
                             @endif
                         </td>
                         <td class="px-6 py-4 text-right whitespace-nowrap space-x-1">
-                            <a href="{{ route('core.import.show', $b->id) }}" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-[8px] text-[12px] font-semibold bg-[#007AFF]/10 hover:bg-[#007AFF]/20 text-[#007AFF] transition">
+                            <a href="{{ route('core.import.show', $b->id) }}" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-[8px] text-[12px] font-semibold bg-[#0284c7]/10 hover:bg-[#0284c7]/20 text-[#0284c7] transition">
                                 Buka Batch
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
                             </a>

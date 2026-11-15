@@ -6,10 +6,22 @@ use App\Models\ClientInvoice;
 use App\Models\VendorBill;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Gate;
 
-class TaxController extends Controller
+class TaxController extends Controller implements HasMiddleware
 {
+    /**
+     * Daftarkan middleware proteksi RBAC level Controller
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:finance.view|accounting.view', only: ['index', 'show']),
+            new Middleware('permission:finance.manage|accounting.manage', except: ['index', 'show']),
+        ];
+    }
     /**
      * Dashboard Perpajakan Logistik & PPJK (PPN 1.1% PMK 71/2022 & PPh 23)
      * Hak Akses: finance.view

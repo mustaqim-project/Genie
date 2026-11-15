@@ -199,6 +199,14 @@ class CeisaDocument extends Model
     }
 
     /**
+     * Cek apakah dokumen CEISA masih dapat diedit.
+     */
+    public function isEditable(): bool
+    {
+        return in_array($this->status, ['DRAFT', 'REJECTED', 'PENDING']);
+    }
+
+    /**
      * Cek apakah dokumen CEISA masih berstatus DRAFT/REJECT dan aman dihapus.
      */
     public function isDraftDeletable(): bool

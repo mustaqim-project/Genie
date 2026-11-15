@@ -15,7 +15,7 @@
         <div class="mb-6 p-5 rounded-2xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800/60 text-sky-900 dark:text-sky-200 text-xs shadow-xs animate-fade-in">
             <div class="flex items-center justify-between pb-3 mb-3 border-b border-sky-200/60 dark:border-sky-800/40">
                 <div class="flex items-center space-x-2">
-                    <span class="px-2.5 py-1 rounded-lg bg-[#007AFF] text-white font-mono font-bold text-xs">{{ $res['code'] ?? $res['clean_code'] }}</span>
+                    <span class="px-2.5 py-1 rounded-lg bg-[#0284c7] text-white font-mono font-bold text-xs">{{ $res['code'] ?? $res['clean_code'] }}</span>
                     <span class="font-bold text-sm">{{ $res['desc'] ?? 'Hasil Pemeriksaan HS Code' }}</span>
                 </div>
                 <span class="text-[11px] px-2 py-0.5 rounded-full font-bold {{ ($res['has_lartas'] ?? false) ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700' : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700' }}">
@@ -41,7 +41,7 @@
                 </div>
                 <div class="bg-white/80 dark:bg-[#1C1C1E] p-2.5 rounded-xl border border-sky-100 dark:border-white/10">
                     <span class="text-slate-400 dark:text-slate-500 block text-[10px] uppercase font-bold">Satuan Pabean</span>
-                    <span class="text-sm font-bold text-[#007AFF] font-mono">{{ $res['satuan'] ?? 'PCE' }}</span>
+                    <span class="text-sm font-bold text-[#0284c7] font-mono">{{ $res['satuan'] ?? 'PCE' }}</span>
                 </div>
             </div>
             @if(!empty($res['required_documents']))
@@ -81,7 +81,7 @@
             <form action="{{ route('config.sync-all-active') }}" method="POST">
                 @csrf
                 <button type="submit" class="btn-apple-gray" title="Tarik pembaruan status pabean seluruh dokumen aktif yang belum SPPB/NPE">
-                    <i data-lucide="download-cloud" class="w-4 h-4 text-[#007AFF]"></i>
+                    <i data-lucide="download-cloud" class="w-4 h-4 text-[#0284c7]"></i>
                     <span>Tarik Status Dokumen Aktif</span>
                 </button>
             </form>
@@ -111,7 +111,7 @@
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 pb-3 border-b border-slate-100 dark:border-white/10">
             <div>
                 <div class="flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-[#007AFF] animate-ping"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-[#0284c7] animate-ping"></span>
                     <h2 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                         Tarik & Sinkronkan Data dari CEISA 4.0 ke Sistem Genie
                     </h2>
@@ -121,7 +121,7 @@
                 </p>
             </div>
             <div class="text-right">
-                <span class="text-[11px] px-2.5 py-1 rounded-full font-semibold bg-sky-50 dark:bg-sky-950/50 text-[#007AFF] border border-sky-200 dark:border-sky-800">
+                <span class="text-[11px] px-2.5 py-1 rounded-full font-semibold bg-sky-50 dark:bg-sky-950/50 text-[#0284c7] border border-sky-200 dark:border-sky-800">
                     Auto-Generate Proyek Pengapalan Aktif
                 </span>
             </div>
@@ -136,7 +136,7 @@
                     </label>
                     <div class="relative">
                         <input type="text" name="nomor_aju" required placeholder="Contoh: 040300-012345-20261112-000001 atau 04030001234520261112000001"
-                               class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-300 dark:border-white/15 bg-slate-50/50 dark:bg-[#2C2C2E]/60 text-slate-900 dark:text-white font-mono text-xs focus:ring-2 focus:ring-[#007AFF] focus:border-[#007AFF]">
+                               class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-300 dark:border-white/15 bg-slate-50/50 dark:bg-[#2C2C2E]/60 text-slate-900 dark:text-white font-mono text-xs focus:ring-2 focus:ring-[#0284c7] focus:border-[#0284c7]">
                         <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
                     </div>
                 </div>
@@ -150,7 +150,7 @@
             </div>
 
             <div class="flex items-center gap-2 pt-1 text-xs text-slate-500 dark:text-slate-400">
-                <input type="checkbox" name="auto_create_shipment" id="auto_create_shipment" value="1" checked class="rounded border-slate-300 text-[#007AFF] focus:ring-[#007AFF]">
+                <input type="checkbox" name="auto_create_shipment" id="auto_create_shipment" value="1" checked class="rounded border-slate-300 text-[#0284c7] focus:ring-[#0284c7]">
                 <label for="auto_create_shipment" class="cursor-pointer">
                     Buka otomatis Proyek Pengapalan (Shipment) di Genie jika dokumen belum terdaftar di sistem.
                 </label>
@@ -163,7 +163,7 @@
         <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-white/10 shadow-xs">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Total Pos Tarif di Database</span>
-                <span class="p-2 rounded-xl bg-sky-50 dark:bg-sky-950/50 text-[#007AFF]">
+                <span class="p-2 rounded-xl bg-sky-50 dark:bg-sky-950/50 text-[#0284c7]">
                     <i data-lucide="database" class="w-4 h-4"></i>
                 </span>
             </div>
@@ -216,7 +216,7 @@
             </div>
             <form action="{{ route('config.test-hs') }}" method="POST" class="flex items-center space-x-2">
                 @csrf
-                <input type="text" name="test_hs" placeholder="Contoh: 8431.49.90 / 84713020" required class="px-3.5 py-2 rounded-xl border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white text-xs font-mono focus:ring-2 focus:ring-[#007AFF] focus:outline-none w-56">
+                <input type="text" name="test_hs" placeholder="Contoh: 8431.49.90 / 84713020" required class="px-3.5 py-2 rounded-xl border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white text-xs font-mono focus:ring-2 focus:ring-[#0284c7] focus:outline-none w-56">
                 <button type="submit" class="btn-apple-filled !py-2">
                     Cek Tarif & Lartas
                 </button>
@@ -227,10 +227,10 @@
         <form method="GET" action="{{ route('config.index') }}" class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
             <div class="flex-1 w-full sm:w-auto relative">
                 <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
-                <input type="text" name="search_hs" value="{{ $searchHs }}" placeholder="Cari Pos Tarif, Nama Barang, Bab, atau Deskripsi..." class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 dark:border-white/15 text-xs focus:ring-2 focus:ring-[#007AFF] focus:outline-none bg-slate-50/50 dark:bg-[#2C2C2E] dark:text-white">
+                <input type="text" name="search_hs" value="{{ $searchHs }}" placeholder="Cari Pos Tarif, Nama Barang, Bab, atau Deskripsi..." class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 dark:border-white/15 text-xs focus:ring-2 focus:ring-[#0284c7] focus:outline-none bg-slate-50/50 dark:bg-[#2C2C2E] dark:text-white">
             </div>
             <div class="flex items-center space-x-2 w-full sm:w-auto">
-                <select name="lartas_filter" onchange="this.form.submit()" class="px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 text-xs text-slate-700 dark:text-slate-300 bg-white dark:bg-[#2C2C2E] focus:outline-none focus:ring-2 focus:ring-[#007AFF]">
+                <select name="lartas_filter" onchange="this.form.submit()" class="px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 text-xs text-slate-700 dark:text-slate-300 bg-white dark:bg-[#2C2C2E] focus:outline-none focus:ring-2 focus:ring-[#0284c7]">
                     <option value="">Semua Status Lartas</option>
                     <option value="lartas" {{ $lartasFilter === 'lartas' ? 'selected' : '' }}>Hanya Lartas</option>
                     <option value="non_lartas" {{ $lartasFilter === 'non_lartas' ? 'selected' : '' }}>Hanya Bebas Lartas</option>
@@ -359,7 +359,7 @@
                     </div>
                     <div>
                         <span class="text-slate-400 dark:text-slate-500 block font-medium">ID Unik Perusahaan (Nomor Aju)</span>
-                        <span class="font-mono font-bold text-[#007AFF]">{{ $config['company']['id_perusahaan'] }}</span>
+                        <span class="font-mono font-bold text-[#0284c7]">{{ $config['company']['id_perusahaan'] }}</span>
                     </div>
                     <div>
                         <span class="text-slate-400 dark:text-slate-500 block font-medium">Kantor Pabean Default</span>
@@ -403,11 +403,11 @@
                     <div class="pt-2 border-t border-slate-100 dark:border-white/10">
                         <span class="text-slate-400 dark:text-slate-500 block font-medium font-sans">Webhook URL Callback DJBC (Didaftarkan ke CEISA)</span>
                         <div class="flex items-center space-x-2 mt-1" x-data="{ copied: false }">
-                            <span class="text-[#007AFF] font-bold select-all break-all text-[11px] bg-sky-50 dark:bg-sky-950/40 p-2 rounded-lg border border-sky-200 dark:border-sky-800/50 flex-1">
+                            <span class="text-[#0284c7] font-bold select-all break-all text-[11px] bg-sky-50 dark:bg-sky-950/40 p-2 rounded-lg border border-sky-200 dark:border-sky-800/50 flex-1">
                                 {{ $callbackFullUrl }}
                             </span>
                             <button type="button" @click="navigator.clipboard.writeText('{{ $callbackFullUrl }}'); copied = true; setTimeout(() => copied = false, 2000)" 
-                                    class="px-2.5 py-1.5 rounded-lg bg-sky-100 dark:bg-sky-900/40 hover:bg-sky-200 text-[#007AFF] text-[11px] font-bold font-sans cursor-pointer shrink-0 transition">
+                                    class="px-2.5 py-1.5 rounded-lg bg-sky-100 dark:bg-sky-900/40 hover:bg-sky-200 text-[#0284c7] text-[11px] font-bold font-sans cursor-pointer shrink-0 transition">
                                 <span x-text="copied ? '✓ Tersalin' : 'Salin URL'">Salin URL</span>
                             </button>
                         </div>
@@ -438,7 +438,7 @@
                 <!-- Endpoint 1: Tarif HS -->
                 <div class="p-3 rounded-xl bg-slate-50 dark:bg-[#2C2C2E]/60 border border-slate-200 dark:border-white/10">
                     <div class="flex items-center space-x-2 mb-1.5">
-                        <span class="px-2 py-0.5 rounded bg-sky-100 dark:bg-sky-950/50 text-[#007AFF] font-bold text-[10px]">GET</span>
+                        <span class="px-2 py-0.5 rounded bg-sky-100 dark:bg-sky-950/50 text-[#0284c7] font-bold text-[10px]">GET</span>
                         <span class="font-bold text-slate-800 dark:text-white">/api/v1/ceisa/tarif-hs/{hsCode}</span>
                     </div>
                     <p class="text-slate-500 dark:text-slate-400 font-sans text-[11px]">Dapatkan rincian tarif Bea Masuk, PPN 11%, PPh 2.5%, Satuan, dan regulasi Lartas berdasarkan kode pos tarif 8-digit.</p>
@@ -465,7 +465,7 @@
                 <!-- Endpoint 3: Status & Respon -->
                 <div class="p-3 rounded-xl bg-slate-50 dark:bg-[#2C2C2E]/60 border border-slate-200 dark:border-white/10">
                     <div class="flex items-center space-x-2 mb-1.5">
-                        <span class="px-2 py-0.5 rounded bg-sky-100 dark:bg-sky-950/50 text-[#007AFF] font-bold text-[10px]">GET</span>
+                        <span class="px-2 py-0.5 rounded bg-sky-100 dark:bg-sky-950/50 text-[#0284c7] font-bold text-[10px]">GET</span>
                         <span class="font-bold text-slate-800 dark:text-white">/api/v1/ceisa/dokumen/{nomorAju}/status</span>
                     </div>
                     <p class="text-slate-500 dark:text-slate-400 font-sans text-[11px]">Tarik status terkini dan respon resmi (Billing MPN G3 / SPPB / NPE) berdasarkan Nomor Aju.</p>
@@ -580,7 +580,7 @@
                 <label class="mt-3 p-3 rounded-xl border border-sky-200 dark:border-sky-800/50 bg-sky-50/70 dark:bg-sky-950/30 flex items-start space-x-3 cursor-pointer text-xs">
                     <input type="checkbox" name="ceisa_read_only" value="1"
                            {{ old('ceisa_read_only', $config['api']['read_only'] ?? true) ? 'checked' : '' }}
-                           class="mt-0.5 w-4 h-4 text-[#007AFF] rounded border-slate-300 focus:ring-[#007AFF]">
+                           class="mt-0.5 w-4 h-4 text-[#0284c7] rounded border-slate-300 focus:ring-[#0284c7]">
                     <div>
                         <span class="font-bold text-slate-900 dark:text-white block">Mode Tarik Data Saja (Read-Only — Jangan Kirim ke CEISA)</span>
                         <span class="text-[11px] text-slate-500 dark:text-slate-400 block mt-0.5">Memblokir pengiriman dokumen (POST /document) dan hanya mengizinkan tarik data (GET) dari CEISA.</span>

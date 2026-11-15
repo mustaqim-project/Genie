@@ -10,10 +10,23 @@ use App\Models\VendorBill;
 use App\Models\VendorPayment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Gate;
 
-class VendorBillController extends Controller
+class VendorBillController extends Controller implements HasMiddleware
 {
+    /**
+     * Daftarkan middleware proteksi RBAC level Controller
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:finance.view|finance.bill', only: ['index', 'show']),
+            new Middleware('permission:finance.ap_approve|finance.manage', only: ['approve']),
+            new Middleware('permission:finance.manage|finance.bill', except: ['index', 'show', 'approve']),
+        ];
+    }
     /**
      * Ambang Batas Otorisasi Pimpinan (limitAP prototipe: Rp 10.000.000)
      */

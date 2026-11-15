@@ -65,6 +65,14 @@
             </svg>
             <span>Kebijakan Sesi (Reset Senin)</span>
         </button>
+
+        <button type="button" @click="activeTab = 'parameters'" :class="activeTab === 'parameters' ? 'border-sky-600 text-sky-700 font-bold' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-4 py-3 border-b-2 text-xs transition-colors whitespace-nowrap flex items-center space-x-2">
+            <svg class="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span>Parameter Sistem (Zero Hardcoding)</span>
+        </button>
     </div>
 
     <!-- TAB 1: MANAJEMEN PENGGUNA -->
@@ -316,16 +324,16 @@
                 <div class="md:col-span-6">
                     <label for="setting_sync_nomor_aju" class="block text-xs font-bold text-slate-700 mb-1.5">Nomor Aju (26 Digit) <span class="text-red-500">*</span></label>
                     <input type="text" id="setting_sync_nomor_aju" name="nomor_aju" required maxlength="30" placeholder="Contoh: 00002001055520261112000001"
-                           class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#007AFF]/20 focus:border-[#007AFF] text-sm font-mono bg-white">
+                           class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#0284c7]/20 focus:border-[#0284c7] text-sm font-mono bg-white">
                 </div>
                 <div class="md:col-span-3 flex items-center pb-2.5">
                     <label class="inline-flex items-center space-x-2 cursor-pointer">
-                        <input type="checkbox" name="auto_create_shipment" value="1" checked class="w-4 h-4 text-[#007AFF] rounded border-slate-300 focus:ring-[#007AFF]">
+                        <input type="checkbox" name="auto_create_shipment" value="1" checked class="w-4 h-4 text-[#0284c7] rounded border-slate-300 focus:ring-[#0284c7]">
                         <span class="text-xs font-medium text-slate-700">Buat/tautkan Shipment otomatis</span>
                     </label>
                 </div>
                 <div class="md:col-span-3">
-                    <button type="submit" class="w-full px-4 py-2.5 rounded-xl bg-[#007AFF] hover:bg-[#0066D6] text-white font-bold text-xs shadow-xs transition-all active:scale-95 cursor-pointer">
+                    <button type="submit" class="w-full px-4 py-2.5 rounded-xl bg-[#0284c7] hover:bg-[#0066D6] text-white font-bold text-xs shadow-xs transition-all active:scale-95 cursor-pointer">
                         Tarik Data CEISA Sekarang
                     </button>
                 </div>
@@ -389,7 +397,7 @@
                     <label class="mt-3 p-3.5 rounded-xl border border-sky-200 bg-sky-50/70 flex items-start space-x-3 cursor-pointer">
                         <input type="checkbox" name="ceisa_read_only" value="1"
                                {{ old('ceisa_read_only', ($settings['ceisa_read_only'] ?? config('ceisa.api.read_only', true))) ? 'checked' : '' }}
-                               class="mt-0.5 w-4 h-4 text-[#007AFF] rounded border-slate-300 focus:ring-[#007AFF]">
+                               class="mt-0.5 w-4 h-4 text-[#0284c7] rounded border-slate-300 focus:ring-[#0284c7]">
                         <div class="text-xs">
                             <span class="font-bold text-slate-900 block">🔒 Mode Tarik Data Saja (Read-Only — Jangan Kirim Data ke CEISA)</span>
                             <span class="text-[11px] text-slate-600 block mt-0.5">
@@ -402,28 +410,28 @@
                 <!-- 2. Kredensial Gateway Host to Host (H2H) -->
                 <div class="p-5 rounded-2xl border border-slate-200 bg-white space-y-4">
                     <div class="flex items-center space-x-2 border-b border-slate-100 pb-2">
-                        <span class="w-6 h-6 rounded-lg bg-sky-100 text-[#007AFF] flex items-center justify-center text-xs font-bold">1</span>
+                        <span class="w-6 h-6 rounded-lg bg-sky-100 text-[#0284c7] flex items-center justify-center text-xs font-bold">1</span>
                         <h3 class="font-bold text-xs text-slate-900 uppercase tracking-wider">Kredensial Gateway Host to Host (H2H)</h3>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-mono">
                         <div>
-                            <label class="block font-sans font-semibold text-slate-700 mb-1">API Key Header (<code class="text-[#007AFF]">beacukai-api-key</code>) *</label>
+                            <label class="block font-sans font-semibold text-slate-700 mb-1">API Key Header (<code class="text-[#0284c7]">beacukai-api-key</code>) *</label>
                             <input type="text" name="ceisa_api_key" 
                                    value="{{ old('ceisa_api_key', $settings['ceisa_api_key'] ?? config('ceisa.api.api_key')) }}" 
-                                   class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold text-slate-800 focus:ring-2 focus:ring-[#007AFF]" required>
+                                   class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold text-slate-800 focus:ring-2 focus:ring-[#0284c7]" required>
                         </div>
                         <div>
                             <label class="block font-sans font-semibold text-slate-700 mb-1">Application ID *</label>
                             <input type="text" name="ceisa_application_id" 
                                    value="{{ old('ceisa_application_id', $settings['ceisa_application_id'] ?? config('ceisa.api.application_id')) }}" 
-                                   class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold text-slate-800 focus:ring-2 focus:ring-[#007AFF]" required>
+                                   class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold text-slate-800 focus:ring-2 focus:ring-[#0284c7]" required>
                         </div>
                         <div>
                             <label class="block font-sans font-semibold text-slate-700 mb-1">Nomor WhatsApp Notifikasi DJBC</label>
                             <input type="text" name="ceisa_whatsapp_no" 
                                    value="{{ old('ceisa_whatsapp_no', $settings['ceisa_whatsapp_no'] ?? config('ceisa.api.whatsapp_no')) }}" 
-                                   class="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-800 focus:ring-2 focus:ring-[#007AFF]">
+                                   class="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-800 focus:ring-2 focus:ring-[#0284c7]">
                         </div>
                     </div>
 
@@ -432,14 +440,14 @@
                             <label class="block font-sans font-semibold text-slate-700 mb-1">Username Akun API DJBC *</label>
                             <input type="text" name="ceisa_username" 
                                    value="{{ old('ceisa_username', $settings['ceisa_username'] ?? config('ceisa.api.username')) }}" 
-                                   class="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-800 focus:ring-2 focus:ring-[#007AFF]" required>
+                                   class="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-800 focus:ring-2 focus:ring-[#0284c7]" required>
                         </div>
                         <div>
                             <label class="block font-sans font-semibold text-slate-700 mb-1">Password Akun API DJBC *</label>
                             <input type="password" name="ceisa_password" 
                                    value="{{ old('ceisa_password', $settings['ceisa_password'] ?? config('ceisa.api.password')) }}" 
                                    placeholder="Masukkan password akun DJBC"
-                                   class="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-800 focus:ring-2 focus:ring-[#007AFF]">
+                                   class="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-800 focus:ring-2 focus:ring-[#0284c7]">
                         </div>
                     </div>
 
@@ -448,19 +456,19 @@
                             <label class="block font-sans font-semibold text-slate-700 mb-1">Base URL Gateway DJBC *</label>
                             <input type="url" name="ceisa_base_url" 
                                    value="{{ old('ceisa_base_url', $settings['ceisa_base_url'] ?? config('ceisa.api.base_url')) }}" 
-                                   class="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-800 focus:ring-2 focus:ring-[#007AFF]" required>
+                                   class="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-800 focus:ring-2 focus:ring-[#0284c7]" required>
                         </div>
                         <div>
                             <label class="block font-sans font-semibold text-slate-700 mb-1">Auth URL Login (OAuth) *</label>
                             <input type="url" name="ceisa_auth_url" 
                                    value="{{ old('ceisa_auth_url', $settings['ceisa_auth_url'] ?? config('ceisa.api.auth_url')) }}" 
-                                   class="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-800 focus:ring-2 focus:ring-[#007AFF]" required>
+                                   class="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-800 focus:ring-2 focus:ring-[#0284c7]" required>
                         </div>
                         <div>
                             <label class="block font-sans font-semibold text-slate-700 mb-1">Refresh Token URL</label>
                             <input type="url" name="ceisa_refresh_token_url" 
                                    value="{{ old('ceisa_refresh_token_url', $settings['ceisa_refresh_token_url'] ?? config('ceisa.api.refresh_token_url')) }}" 
-                                   class="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-800 focus:ring-2 focus:ring-[#007AFF]">
+                                   class="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-800 focus:ring-2 focus:ring-[#0284c7]">
                         </div>
                     </div>
                 </div>
@@ -477,26 +485,26 @@
                             <label class="block font-sans font-semibold text-slate-700 mb-1">Nama Perusahaan (Sesuai NIB) *</label>
                             <input type="text" name="company_name" 
                                    value="{{ old('company_name', $settings['company_name'] ?? config('ceisa.company.name')) }}" 
-                                   class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold text-slate-800 font-sans focus:ring-2 focus:ring-[#007AFF]" required>
+                                   class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold text-slate-800 font-sans focus:ring-2 focus:ring-[#0284c7]" required>
                         </div>
                         <div>
                             <label class="block font-sans font-semibold text-slate-700 mb-1">NIB (Nomor Induk Berusaha) *</label>
                             <input type="text" name="company_nib" 
                                    value="{{ old('company_nib', $settings['company_nib'] ?? config('ceisa.company.nib')) }}" 
-                                   class="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-800 focus:ring-2 focus:ring-[#007AFF]" required>
+                                   class="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-800 focus:ring-2 focus:ring-[#0284c7]" required>
                         </div>
                         <div>
                             <label class="block font-sans font-semibold text-slate-700 mb-1">NPWP 15/16 Digit *</label>
                             <input type="text" name="company_npwp" 
                                    value="{{ old('company_npwp', $settings['company_npwp'] ?? config('ceisa.company.npwp')) }}" 
-                                   class="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-800 focus:ring-2 focus:ring-[#007AFF]" required>
+                                   class="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-800 focus:ring-2 focus:ring-[#0284c7]" required>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-mono pt-2">
                         <div>
                             <label class="block font-sans font-semibold text-slate-700 mb-1">Kantor Pabean Default *</label>
-                            <select name="company_kode_kantor" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-sans font-semibold text-slate-800 focus:ring-2 focus:ring-[#007AFF]">
+                            <select name="company_kode_kantor" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-sans font-semibold text-slate-800 focus:ring-2 focus:ring-[#0284c7]">
                                 @foreach($kantorList as $code => $name)
                                     <option value="{{ $code }}" {{ (old('company_kode_kantor', $settings['company_kode_kantor'] ?? config('ceisa.company.default_kode_kantor')) === $code) ? 'selected' : '' }}>
                                         {{ $code }} - {{ $name }}
@@ -509,13 +517,13 @@
                             <input type="text" name="company_id_perusahaan" 
                                    value="{{ old('company_id_perusahaan', $settings['company_id_perusahaan'] ?? config('ceisa.company.id_perusahaan')) }}" 
                                    maxlength="6"
-                                   class="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-800 focus:ring-2 focus:ring-[#007AFF]" required>
+                                   class="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-800 focus:ring-2 focus:ring-[#0284c7]" required>
                         </div>
                         <div>
                             <label class="block font-sans font-semibold text-slate-700 mb-1">Alamat Kantor / Domisili *</label>
                             <input type="text" name="company_address" 
                                    value="{{ old('company_address', $settings['company_address'] ?? config('ceisa.company.address')) }}" 
-                                   class="w-full px-3 py-2 rounded-xl border border-slate-300 font-sans text-slate-800 focus:ring-2 focus:ring-[#007AFF]" required>
+                                   class="w-full px-3 py-2 rounded-xl border border-slate-300 font-sans text-slate-800 focus:ring-2 focus:ring-[#0284c7]" required>
                         </div>
                     </div>
                 </div>
@@ -538,7 +546,7 @@
                         <input type="text" id="ceisa_webhook_secret" name="ceisa_webhook_secret"
                                value="{{ old('ceisa_webhook_secret', $webhookSecret) }}"
                                placeholder="Kosongkan jika tanpa token, atau isi secret key agar endpoint hanya menerima request valid"
-                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#007AFF]/20 focus:border-[#007AFF] text-sm font-mono bg-white">
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#0284c7]/20 focus:border-[#0284c7] text-sm font-mono bg-white">
                         <p class="text-[11px] text-slate-500 mt-1">Jika diisi, sistem CEISA harus mengirimkan token ini via header <code class="font-mono bg-slate-100 px-1 rounded">X-CEISA-Webhook-Secret</code>, header <code class="font-mono bg-slate-100 px-1 rounded">X-Webhook-Token</code>, atau query parameter <code class="font-mono bg-slate-100 px-1 rounded">?token=...</code>.</p>
                     </div>
 
@@ -552,7 +560,7 @@
                         <div class="p-3.5 rounded-xl bg-white border border-slate-200" x-data="{ copied: false }">
                             <span class="text-slate-400 block font-sans text-[11px] mb-1 font-semibold">Webhook URL Callback DJBC (Real-Time, POST JSON):</span>
                             <div class="flex items-center space-x-2">
-                                <span class="font-bold text-[#007AFF] text-xs truncate select-all">{{ $callbackFullUrl }}</span>
+                                <span class="font-bold text-[#0284c7] text-xs truncate select-all">{{ $callbackFullUrl }}</span>
                                 <button type="button" @click="navigator.clipboard.writeText('{{ $callbackFullUrl }}'); copied = true; setTimeout(() => copied = false, 2000)" 
                                         class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold font-sans cursor-pointer shrink-0">
                                     <span x-text="copied ? '✓ Tersalin' : 'Salin'">Salin</span>
@@ -1141,6 +1149,78 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- TAB 7: PARAMETER SISTEM TERPUSAT (ZERO HARDCODING) -->
+    <div x-show="activeTab === 'parameters'" class="space-y-6" x-cloak>
+        <div class="bg-gradient-to-r from-slate-900 via-sky-950 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+            <div class="relative z-10 max-w-2xl">
+                <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-sky-500/20 border border-sky-400/30 text-sky-300 text-xs font-semibold mb-3">
+                    <span class="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
+                    <span>Arsitektur Bebas Hardcode (Zero Hardcoding Compliance)</span>
+                </div>
+                <h3 class="text-xl sm:text-2xl font-bold tracking-tight text-white mb-2">Parameterisasi Basis Data Terpusat</h3>
+                <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                    Seluruh nilai mock gateway CEISA 4.0, ambang batas demurrage, neraca saldo akuntansi, lapisan pajak PPh 21 Pasal 17, dan identitas perusahaan tersimpan terpusat di tabel <code class="bg-slate-800 px-1.5 py-0.5 rounded text-sky-300 font-mono text-xs">system_settings</code>. Nilai dapat disunting secara real-time tanpa menyentuh kode program.
+                </p>
+            </div>
+        </div>
+
+        @php
+            $rawSettings = \App\Models\SystemSetting::all()->groupBy('group');
+        @endphp
+
+        <div class="space-y-6">
+            @forelse($rawSettings as $groupName => $groupItems)
+                <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
+                        <div class="flex items-center space-x-2">
+                            <span class="px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-sky-50 text-sky-700 border border-sky-200">
+                                Grup: {{ strtoupper($groupName) }}
+                            </span>
+                            <span class="text-xs text-slate-400">({{ $groupItems->count() }} Parameter)</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        @foreach($groupItems as $item)
+                            @php
+                                $decoded = json_decode($item->value, true);
+                                $isJson = json_last_error() === JSON_ERROR_NONE && (is_array($decoded) || is_object($decoded));
+                            @endphp
+                            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 hover:border-sky-300 transition-colors">
+                                <form action="{{ route('setting.parameters.update') }}" method="POST" class="space-y-3">
+                                    @csrf
+                                    <input type="hidden" name="group" value="{{ $item->group }}">
+                                    <input type="hidden" name="key" value="{{ $item->key }}">
+
+                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                        <div>
+                                            <span class="font-mono text-xs font-bold text-slate-800">{{ $item->key }}</span>
+                                            <p class="text-xs text-slate-500 mt-0.5">{{ $item->description ?? 'Tidak ada deskripsi' }}</p>
+                                        </div>
+                                        <button type="submit" class="self-start sm:self-auto px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 transition-colors shadow-xs">
+                                            Simpan Perubahan
+                                        </button>
+                                    </div>
+
+                                    <div>
+                                        <textarea name="value" rows="{{ $isJson ? 6 : 2 }}" class="w-full text-xs font-mono rounded-xl border-slate-300 focus:border-sky-500 focus:ring-sky-500 bg-white p-3 shadow-inner">{{ $isJson ? json_encode($decoded, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) : $item->value }}</textarea>
+                                        @if($isJson)
+                                            <p class="text-[10px] text-slate-400 mt-1">Format JSON terstruktur. Pastikan sintaks JSON valid saat menyimpan.</p>
+                                        @endif
+                                    </div>
+                                </form>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @empty
+                <div class="p-8 text-center text-slate-400 bg-white rounded-3xl border border-slate-200 text-xs">
+                    Belum ada parameter yang terdaftar di basis data.
+                </div>
+            @endforelse
         </div>
     </div>
 </div>

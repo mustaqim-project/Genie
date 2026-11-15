@@ -11,14 +11,14 @@
                    x-model="btkiSearchInput"
                    @input.debounce.300ms="onBtkiSearchInput()"
                    placeholder="Search by description, HS code, brand... (press Enter to search)"
-                   class="w-full pl-9 pr-14 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] dark:text-white text-xs placeholder:text-slate-400 focus:ring-2 focus:ring-[#007AFF]/20 focus:border-[#007AFF]">
+                   class="w-full pl-9 pr-14 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] dark:text-white text-xs placeholder:text-slate-400 focus:ring-2 focus:ring-[#0284c7]/20 focus:border-[#0284c7]">
             <div class="absolute right-3 top-2.5 flex items-center gap-1.5">
                 <button type="button" x-show="btkiSearchInput" @click="btkiSearchInput = ''; btkiSearchOpen = false"
                         class="p-1 rounded-full text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer" title="Hapus pencarian">
                     <i data-lucide="x" class="w-3.5 h-3.5"></i>
                 </button>
                 <template x-if="btkiSearchLoading">
-                    <div class="w-4 h-4 border-2 border-[#007AFF] border-t-transparent rounded-full animate-spin"></div>
+                    <div class="w-4 h-4 border-2 border-[#0284c7] border-t-transparent rounded-full animate-spin"></div>
                 </template>
             </div>
         </div>
@@ -51,14 +51,14 @@
              class="absolute left-0 right-0 top-full mt-1 z-30 bg-white dark:bg-[#1C1C1E] rounded-2xl border border-black/10 dark:border-white/15 shadow-2xl max-h-72 overflow-y-auto divide-y divide-black/5 dark:divide-white/5">
             <div class="p-2.5 bg-slate-50 dark:bg-white/[0.04] text-[10px] font-bold text-slate-500 uppercase tracking-wider flex justify-between items-center">
                 <span>Hasil Pencarian Database BTKI 2022</span>
-                <span class="text-[#007AFF]" x-text="btkiSearchResults.length + ' Pos Ditemukan'"></span>
+                <span class="text-[#0284c7]" x-text="btkiSearchResults.length + ' Pos Ditemukan'"></span>
             </div>
             <template x-for="item in btkiSearchResults" :key="item.code">
                 <div @click="selectBtkiSearchItem(item)"
                      class="p-3 hover:bg-slate-50 dark:hover:bg-white/[0.04] cursor-pointer flex items-start justify-between gap-3 text-xs transition-colors">
                     <div class="min-w-0">
                         <div class="flex items-center gap-2">
-                            <span class="font-mono font-bold text-[#007AFF]" x-text="item.code"></span>
+                            <span class="font-mono font-bold text-[#0284c7]" x-text="item.code"></span>
                             <span class="px-1.5 py-0.2 rounded text-[9px] font-bold"
                                   :class="item.has_lartas ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'"
                                   x-text="item.has_lartas ? 'LARTAS' : 'NON LARTAS'"></span>
@@ -77,7 +77,7 @@
     <!-- Toolbar -->
     <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-black/[0.06] dark:border-white/[0.06]">
         <div class="flex flex-wrap items-center gap-2">
-            <span class="px-2.5 py-1 rounded-lg bg-[#007AFF] text-white font-bold font-mono" x-text="'TOTAL: ' + w.barang.length"></span>
+            <span class="px-2.5 py-1 rounded-lg bg-[#0284c7] text-white font-bold font-mono" x-text="'TOTAL: ' + w.barang.length"></span>
             <div class="relative">
                 <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5"></i>
                 <input type="text" x-model="barangSearch" placeholder="Cari berdasarkan uraian atau HS code..."
@@ -99,7 +99,7 @@
             </button>
 
             <button type="button" @click="openNewBarangModal()"
-                    class="px-3 py-1.5 rounded-xl bg-[#007AFF] hover:bg-[#0066D6] text-white font-semibold inline-flex items-center gap-1.5 cursor-pointer shadow-xs">
+                    class="px-3 py-1.5 rounded-xl bg-[#0284c7] hover:bg-[#0066D6] text-white font-semibold inline-flex items-center gap-1.5 cursor-pointer shadow-xs">
                 <i data-lucide="plus" class="w-3.5 h-3.5"></i>
                 <span>Tambah Barang</span>
             </button>
@@ -140,7 +140,7 @@
                             <span class="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/10 font-mono font-bold" x-text="item.seri"></span>
                         </td>
                         <td class="px-3 py-3 text-center">
-                            <span class="px-2 py-0.5 rounded-md bg-sky-50 dark:bg-sky-950/50 text-[#007AFF] font-mono font-bold" x-text="item.group || 1"></span>
+                            <span class="px-2 py-0.5 rounded-md bg-sky-50 dark:bg-sky-950/50 text-[#0284c7] font-mono font-bold" x-text="item.group || 1"></span>
                         </td>
                         <td class="px-3 py-3 font-mono font-bold text-slate-800 dark:text-white">
                             <div class="flex items-center gap-1.5">
@@ -183,14 +183,14 @@
                         <td class="px-3 py-3 text-center">
                             <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/10 text-[10px] font-bold text-slate-700 dark:text-slate-200">
                                 <span x-text="item.barang_dokumen ? item.barang_dokumen.length : 1"></span>
-                                <i data-lucide="info" class="w-2.5 h-2.5 text-[#007AFF]"></i>
+                                <i data-lucide="info" class="w-2.5 h-2.5 text-[#0284c7]"></i>
                             </span>
                         </td>
                         <td class="px-3 py-3 text-center">
-                            <span class="px-2 py-0.5 rounded-md bg-sky-50 dark:bg-sky-950/50 text-[#007AFF] font-mono font-bold text-[10px]" x-text="(item.tarif_ppn ?? 11) + '%'"></span>
+                            <span class="px-2 py-0.5 rounded-md bg-sky-50 dark:bg-sky-950/50 text-[#0284c7] font-mono font-bold text-[10px]" x-text="(item.tarif_ppn ?? 11) + '%'"></span>
                         </td>
                         <td class="px-3 py-3 text-center">
-                            <span class="px-2 py-0.5 rounded-md bg-sky-50 dark:bg-sky-950/50 text-[#007AFF] font-mono font-bold text-[10px]" x-text="(item.tarif_pph ?? 2.5) + '%'"></span>
+                            <span class="px-2 py-0.5 rounded-md bg-sky-50 dark:bg-sky-950/50 text-[#0284c7] font-mono font-bold text-[10px]" x-text="(item.tarif_pph ?? 2.5) + '%'"></span>
                         </td>
                         <td class="px-3 py-3 text-center">
                             <div>
@@ -206,7 +206,7 @@
                                 <button type="button" @click="openHsRecommendationModal(item._origIdx)" title="Rekomendasikan HS Code Cerdas" class="p-1.5 rounded-lg text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/40 cursor-pointer">
                                     <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
                                 </button>
-                                <button type="button" @click="duplicateBarang(item._origIdx)" title="Duplikat barang" class="p-1.5 rounded-lg text-[#007AFF] hover:bg-[#007AFF]/10 cursor-pointer">
+                                <button type="button" @click="duplicateBarang(item._origIdx)" title="Duplikat barang" class="p-1.5 rounded-lg text-[#0284c7] hover:bg-[#0284c7]/10 cursor-pointer">
                                     <i data-lucide="copy" class="w-3.5 h-3.5"></i>
                                 </button>
                                 <button type="button" @click="removeBarang(item._origIdx)" x-show="w.barang.length > 1" title="Hapus barang" class="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 cursor-pointer">
@@ -249,7 +249,7 @@
                            placeholder="Ketik nama produk atau istilah teknis..."
                            class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] dark:text-white text-xs font-semibold uppercase">
                     <button type="button" @click="fetchHsRecommendations()" :disabled="recommendLoading"
-                            class="px-3.5 py-2 rounded-xl bg-[#007AFF] hover:bg-[#0066D6] text-white font-semibold text-xs shrink-0 cursor-pointer inline-flex items-center gap-1.5">
+                            class="px-3.5 py-2 rounded-xl bg-[#0284c7] hover:bg-[#0066D6] text-white font-semibold text-xs shrink-0 cursor-pointer inline-flex items-center gap-1.5">
                         <i data-lucide="search" class="w-3.5 h-3.5"></i>
                         <span>Cari Ulang</span>
                     </button>
@@ -292,7 +292,7 @@
                         <!-- Rationale & Legal Basis -->
                         <div class="mt-2 text-[11px] text-slate-600 dark:text-slate-300 bg-white/70 dark:bg-black/20 p-2.5 rounded-xl border border-black/[0.04] dark:border-white/[0.04]">
                             <div class="font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-1">
-                                <i data-lucide="info" class="w-3 h-3 text-[#007AFF]"></i>
+                                <i data-lucide="info" class="w-3 h-3 text-[#0284c7]"></i>
                                 <span>Dasar Pertimbangan:</span>
                             </div>
                             <p class="mt-0.5" x-text="cand.rationale"></p>
@@ -307,11 +307,11 @@
                             </div>
                             <div class="p-1.5 rounded-lg bg-slate-100 dark:bg-white/[0.04]">
                                 <div class="text-slate-500">PPN</div>
-                                <div class="font-bold text-[#007AFF]" x-text="(cand.ppn || 11) + '%'"></div>
+                                <div class="font-bold text-[#0284c7]" x-text="(cand.ppn || 11) + '%'"></div>
                             </div>
                             <div class="p-1.5 rounded-lg bg-slate-100 dark:bg-white/[0.04]">
                                 <div class="text-slate-500">PPh Pasal 22</div>
-                                <div class="font-bold text-[#007AFF]" x-text="(cand.pph || 2.5) + '%'"></div>
+                                <div class="font-bold text-[#0284c7]" x-text="(cand.pph || 2.5) + '%'"></div>
                             </div>
                             <div class="p-1.5 rounded-lg bg-slate-100 dark:bg-white/[0.04]">
                                 <div class="text-slate-500">Bea Keluar (BK)</div>
@@ -359,7 +359,7 @@
                             <span>AI</span>
                         </button>
                     </div>
-                    <p x-show="barangForm.hs_info" class="text-[10px] text-[#007AFF] mt-1 line-clamp-1" x-text="barangForm.hs_info"></p>
+                    <p x-show="barangForm.hs_info" class="text-[10px] text-[#0284c7] mt-1 line-clamp-1" x-text="barangForm.hs_info"></p>
                 </div>
                 <div class="sm:col-span-2">
                     <label class="block font-semibold text-slate-600 dark:text-slate-300 mb-1">Uraian Barang *</label>

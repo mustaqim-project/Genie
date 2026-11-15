@@ -9,7 +9,7 @@
     <header class="rounded-[16px] backdrop-blur-md bg-white/75 dark:bg-[#1C1C1E]/75 border border-black/5 dark:border-white/10 px-4 sm:px-6 py-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 shadow-sm">
         <div>
             <nav class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium mb-1" aria-label="Breadcrumb">
-                <a href="{{ route('dashboard') }}" class="hover:text-[#007AFF] transition-colors flex items-center gap-1">
+                <a href="{{ route('dashboard') }}" class="hover:text-[#0284c7] transition-colors flex items-center gap-1">
                     <i data-lucide="home" class="w-3.5 h-3.5"></i>
                     <span>Dashboard</span>
                 </a>
@@ -20,7 +20,7 @@
                 <h1 class="text-[20px] sm:text-[22px] font-bold text-black dark:text-white tracking-tight">
                     Tim Document &amp; Dokumen Pabean
                 </h1>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#007AFF]/10 text-[#007AFF]">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#0284c7]/10 text-[#0284c7]">
                     BC 2.0 (PIB) + BC 3.0 (PEB)
                 </span>
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/50">
@@ -36,7 +36,7 @@
         <div class="flex items-center gap-1.5 w-full lg:w-auto shrink-0 flex-wrap justify-end">
             @can('setting.manage')
             <!-- Sync Semua CEISA Global -->
-            <form action="{{ route('core.document.sync-all-ceisa') }}" method="POST" class="inline">
+            <form action="{{ route('config.sync-all') }}" method="POST" class="inline">
                 @csrf
                 <button type="submit"
                         class="w-9 h-9 rounded-xl border border-emerald-300 dark:border-emerald-800 bg-emerald-50/80 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-400 inline-flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
@@ -59,20 +59,20 @@
             <!-- Deteksi HS Code & Lartas AI Modal -->
             <button type="button"
                     @click="aiModalOpen = true"
-                    class="w-9 h-9 rounded-xl border border-sky-300 dark:border-sky-800 bg-sky-50/80 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 text-[#007AFF] inline-flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+                    class="w-9 h-9 rounded-xl border border-sky-300 dark:border-sky-800 bg-sky-50/80 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 text-[#0284c7] inline-flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
                     title="Deteksi HS Code &amp; Skrining Lartas AI"
                     aria-label="Deteksi HS Code & Lartas AI">
-                <i data-lucide="sparkles" class="w-4 h-4 text-[#007AFF]"></i>
+                <i data-lucide="sparkles" class="w-4 h-4 text-[#0284c7]"></i>
             </button>
 
             @can('document.create')
             <!-- Buat BC 2.0 (PIB) -->
             <a href="{{ route('bc20.create') }}"
-               class="w-9 h-9 rounded-xl border border-[#007AFF]/25 hover:bg-[#007AFF]/10 text-[#007AFF] inline-flex items-center justify-center transition-colors shadow-2xs relative cursor-pointer"
+               class="w-9 h-9 rounded-xl border border-[#0284c7]/25 hover:bg-[#0284c7]/10 text-[#0284c7] inline-flex items-center justify-center transition-colors shadow-2xs relative cursor-pointer"
                title="Buat Pengajuan Impor BC 2.0 (PIB)"
                aria-label="Buat BC 2.0 PIB">
                 <i data-lucide="arrow-down-left" class="w-4 h-4"></i>
-                <span class="absolute -top-1 -right-1 px-1 py-0.2 rounded text-[8px] font-mono font-bold bg-[#007AFF] text-white leading-none">2.0</span>
+                <span class="absolute -top-1 -right-1 px-1 py-0.2 rounded text-[8px] font-mono font-bold bg-[#0284c7] text-white leading-none">2.0</span>
             </a>
 
             <!-- Buat BC 3.0 (PEB) -->
@@ -102,7 +102,7 @@
         <div class="rounded-[16px] bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/5 p-4 flex flex-col justify-between shadow-sm">
             <div class="flex items-center justify-between">
                 <span class="text-[11px] uppercase tracking-wider font-semibold text-black/45 dark:text-white/45">Total BC 2.0 + BC 3.0</span>
-                <div class="w-8 h-8 rounded-[10px] bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center">
+                <div class="w-8 h-8 rounded-[10px] bg-[#0284c7]/10 text-[#0284c7] flex items-center justify-center">
                     <i data-lucide="layers" class="w-4 h-4"></i>
                 </div>
             </div>
@@ -194,11 +194,11 @@
                 <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-black/40 dark:text-white/40"></i>
                 <input type="text" name="search" value="{{ request('search') }}"
                        placeholder="Cari No. Aju, Nopen, No. Proyek, B/L, Kantor, Mitra LN, Importir/Eksportir..."
-                       class="w-full pl-9 pr-3.5 py-2 rounded-[10px] bg-black/[0.03] dark:bg-white/[0.06] border border-black/10 dark:border-white/10 text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF] focus:ring-2 focus:ring-[#007AFF]/20 transition-all placeholder:text-black/40 dark:placeholder:text-white/40">
+                       class="w-full pl-9 pr-3.5 py-2 rounded-[10px] bg-black/[0.03] dark:bg-white/[0.06] border border-black/10 dark:border-white/10 text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7] focus:ring-2 focus:ring-[#0284c7]/20 transition-all placeholder:text-black/40 dark:placeholder:text-white/40">
             </div>
 
             <div class="sm:col-span-2">
-                <select name="type" class="w-full px-3 py-2 rounded-[10px] bg-black/[0.03] dark:bg-white/[0.06] border border-black/10 dark:border-white/10 text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF] focus:ring-2 focus:ring-[#007AFF]/20 transition-all">
+                <select name="type" class="w-full px-3 py-2 rounded-[10px] bg-black/[0.03] dark:bg-white/[0.06] border border-black/10 dark:border-white/10 text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7] focus:ring-2 focus:ring-[#0284c7]/20 transition-all">
                     <option value="">Semua (BC 2.0 + BC 3.0)</option>
                     <option value="IMPORT" {{ request('type') === 'IMPORT' ? 'selected' : '' }}>Impor — BC 2.0 (PIB)</option>
                     <option value="EXPORT" {{ request('type') === 'EXPORT' ? 'selected' : '' }}>Ekspor — BC 3.0 (PEB)</option>
@@ -206,7 +206,7 @@
             </div>
 
             <div class="sm:col-span-2">
-                <select name="status" class="w-full px-3 py-2 rounded-[10px] bg-black/[0.03] dark:bg-white/[0.06] border border-black/10 dark:border-white/10 text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF] focus:ring-2 focus:ring-[#007AFF]/20 transition-all">
+                <select name="status" class="w-full px-3 py-2 rounded-[10px] bg-black/[0.03] dark:bg-white/[0.06] border border-black/10 dark:border-white/10 text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7] focus:ring-2 focus:ring-[#0284c7]/20 transition-all">
                     <option value="">Semua Status</option>
                     <optgroup label="Status CEISA 4.0">
                         <option value="DRAFT" {{ request('status') === 'DRAFT' ? 'selected' : '' }}>DRAFT (Pengisian Awal)</option>
@@ -230,7 +230,7 @@
             </div>
 
             <div class="sm:col-span-2">
-                <select name="lartas" class="w-full px-3 py-2 rounded-[10px] bg-black/[0.03] dark:bg-white/[0.06] border border-black/10 dark:border-white/10 text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF] focus:ring-2 focus:ring-[#007AFF]/20 transition-all font-medium">
+                <select name="lartas" class="w-full px-3 py-2 rounded-[10px] bg-black/[0.03] dark:bg-white/[0.06] border border-black/10 dark:border-white/10 text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7] focus:ring-2 focus:ring-[#0284c7]/20 transition-all font-medium">
                     <option value="">Semua Status Lartas</option>
                     <option value="yes" {{ request('lartas') === 'yes' ? 'selected' : '' }}>⚠️ Wajib Izin Lartas ({{ $stats['lartas_shipments'] ?? 0 }})</option>
                     <option value="no" {{ request('lartas') === 'no' ? 'selected' : '' }}>✓ Bebas Lartas ({{ $stats['non_lartas_shipments'] ?? 0 }})</option>
@@ -238,7 +238,7 @@
             </div>
 
             <div class="sm:col-span-2 flex items-center space-x-2">
-                <button type="submit" class="btn-apple-gray w-full !h-9 text-[12px] font-semibold hover:!bg-[#007AFF]/10 hover:!text-[#007AFF]">
+                <button type="submit" class="btn-apple-gray w-full !h-9 text-[12px] font-semibold hover:!bg-[#0284c7]/10 hover:!text-[#0284c7]">
                     <i data-lucide="filter" class="w-3.5 h-3.5"></i>
                     <span>Terapkan</span>
                 </button>
@@ -252,11 +252,11 @@
         <div class="flex items-center gap-2 pt-2 border-t border-black/5 dark:border-white/5 text-[12px] overflow-x-auto pb-1">
             <span class="text-black/45 dark:text-white/45 font-medium shrink-0">Filter Cepat:</span>
             <a href="{{ route('core.document.index', array_merge(request()->except('type', 'lartas', 'page'))) }}"
-               class="px-3 py-1 rounded-full border transition-all shrink-0 {{ !request()->filled('type') && !request()->filled('lartas') ? 'bg-[#007AFF] text-white border-transparent font-medium shadow-sm' : 'bg-black/[0.03] dark:bg-white/[0.05] border-black/5 dark:border-white/10 text-black/70 dark:text-white/70 hover:bg-black/[0.06]' }}">
+               class="px-3 py-1 rounded-full border transition-all shrink-0 {{ !request()->filled('type') && !request()->filled('lartas') ? 'bg-[#0284c7] text-white border-transparent font-medium shadow-sm' : 'bg-black/[0.03] dark:bg-white/[0.05] border-black/5 dark:border-white/10 text-black/70 dark:text-white/70 hover:bg-black/[0.06]' }}">
                 Semua ({{ $stats['total'] ?? 0 }})
             </a>
             <a href="{{ route('core.document.index', array_merge(request()->except('page'), ['type' => 'IMPORT'])) }}"
-               class="px-3 py-1 rounded-full border transition-all shrink-0 {{ request('type') === 'IMPORT' ? 'bg-[#007AFF] text-white border-transparent font-semibold shadow-sm' : 'bg-sky-500/10 border-sky-500/20 text-[#007AFF] hover:bg-sky-500/20' }}">
+               class="px-3 py-1 rounded-full border transition-all shrink-0 {{ request('type') === 'IMPORT' ? 'bg-[#0284c7] text-white border-transparent font-semibold shadow-sm' : 'bg-sky-500/10 border-sky-500/20 text-[#0284c7] hover:bg-sky-500/20' }}">
                 BC 2.0 Impor / PIB ({{ $stats['bc20_total'] ?? 0 }})
             </a>
             <a href="{{ route('core.document.index', array_merge(request()->except('page'), ['type' => 'EXPORT'])) }}"
@@ -306,8 +306,8 @@
                             'DOC_COLLECTING' => ['label' => 'Kumpul Berkas', 'class' => 'bg-black/[0.05] text-black/70 dark:bg-white/[0.08] dark:text-white/70'],
                             'DOC_READY' => ['label' => 'Berkas Lengkap', 'class' => 'bg-[#5856D6]/12 text-[#5856D6] dark:text-[#5E5CE6]'],
                             'HS_DETECTED' => ['label' => 'HS Terdeteksi', 'class' => 'bg-[#5856D6]/12 text-[#5856D6] dark:text-[#5E5CE6]'],
-                            'DRAFT_REVIEW' => ['label' => 'Review SPV', 'class' => 'bg-[#007AFF]/12 text-[#007AFF]'],
-                            'CEISA_SUBMITTED' => ['label' => 'Terkirim CEISA', 'class' => 'bg-[#007AFF]/12 text-[#007AFF]'],
+                            'DRAFT_REVIEW' => ['label' => 'Review SPV', 'class' => 'bg-[#0284c7]/12 text-[#0284c7]'],
+                            'CEISA_SUBMITTED' => ['label' => 'Terkirim CEISA', 'class' => 'bg-[#0284c7]/12 text-[#0284c7]'],
                             'BILLING_ISSUED' => ['label' => 'Billing Terbit', 'class' => 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158] font-bold'],
                             'DO_PROCESSING' => ['label' => 'Proses DO', 'class' => 'bg-[#FF9500]/15 text-[#B25E00] dark:text-[#FF9F0A]'],
                             'DO_RELEASED' => ['label' => 'DO Rilis', 'class' => 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158] font-bold'],
@@ -344,11 +344,11 @@
                             <!-- 1. Jenis, No Aju & Proyek -->
                             <td class="py-3.5 px-4 font-mono">
                                 <div class="flex items-center gap-1.5 flex-wrap">
-                                    <span class="inline-block px-2 py-0.5 rounded-[6px] text-[10px] font-bold {{ $isExport ? 'bg-indigo-500/12 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20' : 'bg-[#007AFF]/12 text-[#007AFF] border border-[#007AFF]/20' }}">
+                                    <span class="inline-block px-2 py-0.5 rounded-[6px] text-[10px] font-bold {{ $isExport ? 'bg-indigo-500/12 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20' : 'bg-[#0284c7]/12 text-[#0284c7] border border-[#0284c7]/20' }}">
                                         {{ $isExport ? 'BC 3.0 EKSPOR' : 'BC 2.0 IMPOR' }}
                                     </span>
                                     @if($shp)
-                                        <a href="{{ route('core.document.show', $shp->id) }}" class="font-bold text-[#007AFF] hover:underline text-[12px]">
+                                        <a href="{{ route('core.document.show', $shp->id) }}" class="font-bold text-[#0284c7] hover:underline text-[12px]">
                                             {{ $shp->shipment_number ?? $shp->project_no }}
                                         </a>
                                     @endif
@@ -356,7 +356,7 @@
 
                                 @if($ceisa)
                                     <div class="mt-1">
-                                        <a href="{{ $ceisaDetailRoute }}" class="text-[11px] font-bold text-slate-900 dark:text-white hover:text-[#007AFF] hover:underline">
+                                        <a href="{{ $ceisaDetailRoute }}" class="text-[11px] font-bold text-slate-900 dark:text-white hover:text-[#0284c7] hover:underline">
                                             {{ $ceisa->nomor_aju }}
                                         </a>
                                     </div>
@@ -455,7 +455,7 @@
                                     <div class="mt-2 pt-1.5 border-t border-black/5 dark:border-white/5">
                                         <div class="flex items-center space-x-2">
                                             <div class="w-14 bg-black/[0.06] dark:bg-white/[0.08] rounded-full h-1.5 overflow-hidden">
-                                                <div class="h-1.5 rounded-full {{ $percent >= 100 ? 'bg-[#34C759]' : ($percent >= 50 ? 'bg-[#007AFF]' : 'bg-[#FF9500]') }}"
+                                                <div class="h-1.5 rounded-full {{ $percent >= 100 ? 'bg-[#34C759]' : ($percent >= 50 ? 'bg-[#0284c7]' : 'bg-[#FF9500]') }}"
                                                      style="width: {{ $percent }}%"></div>
                                             </div>
                                             <span class="font-mono font-bold text-[10px] tabular-nums {{ $percent >= 100 ? 'text-[#248A3D] dark:text-[#30D158]' : 'text-black/70 dark:text-white/70' }}">{{ $percent }}%</span>
@@ -467,7 +467,7 @@
 
                             <!-- 5. Valuasi Pabean (CIF untuk BC 2.0 / FOB untuk BC 3.0) -->
                             <td class="py-3.5 px-4 text-right font-mono">
-                                <span class="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold uppercase mb-0.5 {{ $isExport ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-sky-500/10 text-[#007AFF]' }}">
+                                <span class="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold uppercase mb-0.5 {{ $isExport ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-sky-500/10 text-[#0284c7]' }}">
                                     {{ $entry->valuation_label }}
                                 </span>
                                 <div class="font-bold text-slate-900 dark:text-white text-[12px] tabular-nums">
@@ -538,7 +538,7 @@
                             <td class="py-3.5 px-3 text-center space-x-1 whitespace-nowrap sticky right-0 z-10 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-md border-l border-black/5 dark:border-white/10 shadow-[-6px_0_12px_rgba(0,0,0,0.06)]">
                                 @if($ceisaDetailRoute)
                                     <a href="{{ $ceisaDetailRoute }}"
-                                       class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-sky-300 dark:border-sky-800 bg-sky-50/80 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 {{ $isExport ? 'text-indigo-600 dark:text-indigo-400' : 'text-[#007AFF]' }} transition-colors"
+                                       class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-sky-300 dark:border-sky-800 bg-sky-50/80 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 {{ $isExport ? 'text-indigo-600 dark:text-indigo-400' : 'text-[#0284c7]' }} transition-colors"
                                        title="Buka pelacakan alur 11 Pos dan detail pabean {{ $isExport ? 'BC 3.0' : 'BC 2.0' }}"
                                        aria-label="Pelacakan 11 Pos">
                                         <i data-lucide="compass" class="w-4 h-4"></i>
@@ -564,7 +564,7 @@
                                 @if($shp)
                                     <button type="button"
                                             onclick="openPortalModal('{{ $shp->id }}', '{{ $shp->project_no }}', '{{ addslashes($shp->client->name ?? '-') }}', '{{ $shp->portal_token ? route('portal.track', $shp->portal_token) : '' }}', '{{ $shp->portal_status }}', '{{ $shp->portal_expires_at ? $shp->portal_expires_at->format('d/m/Y H:i') : '' }}', '{{ $shp->portal_duration_days ?? 7 }}', '{{ $shp->client->pic_phone ?? ($shp->client->phone ?? '') }}', '{{ $shp->nomor_bl_awb ?? '' }}')"
-                                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-slate-200 dark:border-white/15 hover:bg-slate-100 dark:hover:bg-white/10 {{ $shp->isPortalActive() ? '!text-[#007AFF] !border-[#007AFF]/30 bg-[#007AFF]/5' : 'text-slate-500' }} transition-colors cursor-pointer"
+                                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-slate-200 dark:border-white/15 hover:bg-slate-100 dark:hover:bg-white/10 {{ $shp->isPortalActive() ? '!text-[#0284c7] !border-[#0284c7]/30 bg-[#0284c7]/5' : 'text-slate-500' }} transition-colors cursor-pointer"
                                             title="Bagikan Tautan Portal Klien"
                                             aria-label="Bagikan Portal">
                                         <i data-lucide="share-2" class="w-4 h-4"></i>
@@ -651,7 +651,7 @@
                     @click="tab = 'ai'" 
                     :class="tab === 'ai' ? 'bg-white dark:bg-[#2C2C2E] text-black dark:text-white shadow-xs font-bold' : 'text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white'"
                     class="flex-1 py-1.5 px-3 rounded-[8px] transition-all flex items-center justify-center space-x-2 cursor-pointer">
-                <i data-lucide="sparkles" class="w-3.5 h-3.5 text-[#007AFF]"></i>
+                <i data-lucide="sparkles" class="w-3.5 h-3.5 text-[#0284c7]"></i>
                 <span>Unggah Berkas & Ekstraksi Otomatis</span>
                 <span class="px-1.5 py-0.2 bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158] font-bold text-[9px] rounded-full">Praktis</span>
             </button>
@@ -674,16 +674,16 @@
             <div x-show="tab === 'ai'" class="space-y-4">
 
                 <!-- Pilih Klien & Jenis Layanan -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#007AFF]/5 dark:bg-[#007AFF]/10 p-3.5 rounded-[14px] border border-[#007AFF]/20">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#0284c7]/5 dark:bg-[#0284c7]/10 p-3.5 rounded-[14px] border border-[#0284c7]/20">
                     <div>
                         <div class="flex items-center justify-between mb-1">
                             <label class="block font-semibold text-black dark:text-white text-[12px]">Klien / Pemilik Barang (Importir/Eksportir)</label>
-                            <button type="button" @click="openQuickClient()" class="text-[11px] font-semibold text-[#007AFF] hover:underline flex items-center gap-0.5 cursor-pointer">
+                            <button type="button" @click="openQuickClient()" class="text-[11px] font-semibold text-[#0284c7] hover:underline flex items-center gap-0.5 cursor-pointer">
                                 <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
                                 <span>+ Klien Baru</span>
                             </button>
                         </div>
-                        <select name="client_id" id="smart-client-select" x-model="detected.client_id" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                        <select name="client_id" id="smart-client-select" x-model="detected.client_id" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]">
                             <option value="">-- Auto-Deteksi dari Dokumen atau Pilih --</option>
                             @foreach($clients as $c)
                                 <option value="{{ $c->id }}">{{ $c->name }} (NPWP: {{ $c->npwp ?? '-' }})</option>
@@ -694,7 +694,7 @@
                         <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Tipe Kepabeanan <span class="text-rose-500">*</span></label>
                         <select name="type" x-model="detected.type" :required="tab === 'ai'"
                                 @change="if (['IMPORT','EXPORT'].includes(detected.type) && !scanned && !scanning && (bundleFileNames.length > 0 || fileNames.bl || fileNames.invoice || fileNames.pl)) { scanFiles(); }"
-                                class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                                class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]">
                             <option value="">-- Wajib Pilih: Impor atau Ekspor --</option>
                             <option value="IMPORT">IMPOR (BC 2.0 / PIB)</option>
                             <option value="EXPORT">EKSPOR (BC 3.0 / PEB)</option>
@@ -703,10 +703,10 @@
                 </div>
 
                 <!-- DROPZONE BUNDLE DOKUMEN (MULTI-FILE / ZIP SEKALI UPLOAD) -->
-                <div class="p-3.5 rounded-[14px] border-2 border-dashed border-[#007AFF]/40 hover:border-[#007AFF] bg-gradient-to-r from-[#007AFF]/5 via-[#5856D6]/5 to-transparent transition-colors">
+                <div class="p-3.5 rounded-[14px] border-2 border-dashed border-[#0284c7]/40 hover:border-[#0284c7] bg-gradient-to-r from-[#0284c7]/5 via-[#5856D6]/5 to-transparent transition-colors">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div class="flex items-start gap-2.5">
-                            <div class="w-9 h-9 rounded-[10px] bg-[#007AFF]/15 text-[#007AFF] flex items-center justify-center shrink-0">
+                            <div class="w-9 h-9 rounded-[10px] bg-[#0284c7]/15 text-[#0284c7] flex items-center justify-center shrink-0">
                                 <i data-lucide="layers" class="w-4 h-4"></i>
                             </div>
                             <div>
@@ -739,7 +739,7 @@
                                     <span x-show="bf.is_image_only" class="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-600 font-semibold shrink-0">Scan/Img</span>
                                 </div>
                                 <select :name="'bundle_classifications[' + bf.filename + ']'" x-model="bf.doc_type"
-                                        class="px-2 py-0.5 rounded-[6px] border border-black/10 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.06] text-[10px] font-bold text-[#007AFF] shrink-0">
+                                        class="px-2 py-0.5 rounded-[6px] border border-black/10 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.06] text-[10px] font-bold text-[#0284c7] shrink-0">
                                     <option value="BL">BL / AWB</option>
                                     <option value="INV">Commercial Invoice</option>
                                     <option value="PL">Packing List</option>
@@ -758,21 +758,21 @@
                 <!-- 3 Dropzone Upload Dokumen Utama (Opsional Per Slot) -->
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <!-- 1. Bill of Lading (B/L) -->
-                    <div class="p-3 rounded-[14px] border-2 border-dashed border-[#007AFF]/30 hover:border-[#007AFF] bg-[#007AFF]/5 transition-colors flex flex-col justify-between">
+                    <div class="p-3 rounded-[14px] border-2 border-dashed border-[#0284c7]/30 hover:border-[#0284c7] bg-[#0284c7]/5 transition-colors flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between mb-1.5">
                                 <span class="font-semibold text-black dark:text-white flex items-center space-x-1.5">
-                                    <i data-lucide="ship" class="w-4 h-4 text-[#007AFF]"></i>
+                                    <i data-lucide="ship" class="w-4 h-4 text-[#0284c7]"></i>
                                     <span>Bill of Lading (B/L)</span>
                                 </span>
-                                <span class="text-[9px] px-1.5 py-0.5 rounded-[4px] bg-[#007AFF]/15 text-[#007AFF] font-bold">Wajib</span>
+                                <span class="text-[9px] px-1.5 py-0.5 rounded-[4px] bg-[#0284c7]/15 text-[#0284c7] font-bold">Wajib</span>
                             </div>
                             <p class="text-[11px] text-black/50 dark:text-white/50 mb-2">Diekstrak: No. BL, Kapal, Pelayaran, Kontainer, Bobot.</p>
                         </div>
                         <div>
                             <input type="file" id="input-bl-file" name="bl_file" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx" class="hidden" @change="updateFileName('bl', $event)">
                             <button type="button" onclick="document.getElementById('input-bl-file').click()" 
-                                    class="w-full py-1.5 px-2.5 rounded-[8px] border border-[#007AFF]/30 bg-white dark:bg-[#2C2C2E] text-[#007AFF] font-semibold text-[11px] truncate flex items-center justify-center space-x-1.5 cursor-pointer">
+                                    class="w-full py-1.5 px-2.5 rounded-[8px] border border-[#0284c7]/30 bg-white dark:bg-[#2C2C2E] text-[#0284c7] font-semibold text-[11px] truncate flex items-center justify-center space-x-1.5 cursor-pointer">
                                 <span x-text="fileNames.bl ? '✓ ' + fileNames.bl : '📂 Pilih File B/L'"></span>
                             </button>
                         </div>
@@ -824,7 +824,7 @@
                 <!-- Collapsible Dokumen Khusus & Perizinan Tambahan -->
                 <div class="mt-0.5">
                     <button type="button" @click="showSpecialDocs = !showSpecialDocs" 
-                            class="inline-flex items-center space-x-1.5 text-[12px] font-semibold text-[#007AFF] hover:underline transition-colors cursor-pointer">
+                            class="inline-flex items-center space-x-1.5 text-[12px] font-semibold text-[#0284c7] hover:underline transition-colors cursor-pointer">
                         <i :data-lucide="showSpecialDocs ? 'chevron-down' : 'chevron-right'" class="w-3.5 h-3.5"></i>
                         <span>Dokumen Pendukung Khusus & Perizinan Lartas (COO Form E, Polis Asuransi, Izin K/L) - Opsional</span>
                     </button>
@@ -885,14 +885,14 @@
                 <!-- Tombol Pemicu Ekstraksi (Mode Tanpa AI Default + Opsi AI) -->
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-[14px] bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5">
                     <div class="flex items-center space-x-2.5">
-                        <div class="w-8 h-8 rounded-[8px] bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center shrink-0">
+                        <div class="w-8 h-8 rounded-[8px] bg-[#0284c7]/10 text-[#0284c7] flex items-center justify-center shrink-0">
                             <i data-lucide="cpu" class="w-4 h-4"></i>
                         </div>
                         <div>
                             <div class="font-semibold text-black dark:text-white text-[13px] flex items-center gap-2">
                                 <span>Document Parser &amp; BTKI Classifier</span>
                                 <label class="inline-flex items-center gap-1.5 text-[11px] font-medium px-2 py-0.5 rounded-full bg-black/[0.04] dark:bg-white/[0.08] cursor-pointer">
-                                    <input type="checkbox" x-model="useAi" class="rounded border-black/20 text-[#007AFF]">
+                                    <input type="checkbox" x-model="useAi" class="rounded border-black/20 text-[#0284c7]">
                                     <span x-text="useAi ? 'Mode AI Aktif' : 'Tanpa AI (Rule Engine + DB BTKI)'"></span>
                                 </label>
                             </div>
@@ -1082,7 +1082,7 @@
                                             <td class="p-2 text-right font-mono tabular-nums" x-text="Number(item.berat_bruto).toLocaleString()"></td>
                                             <td class="p-2 text-right font-mono font-bold text-[#248A3D] dark:text-[#30D158] tabular-nums" x-text="Number(item.nilai_fob).toLocaleString()"></td>
                                             <td class="p-2 text-center">
-                                                <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#007AFF]/10 text-[#007AFF] font-bold" x-text="(item.tarif_bm_persen || 0) + '%'"></span>
+                                                <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#0284c7]/10 text-[#0284c7] font-bold" x-text="(item.tarif_bm_persen || 0) + '%'"></span>
                                             </td>
                                         </tr>
                                     </template>
@@ -1103,12 +1103,12 @@
                     <div>
                         <div class="flex items-center justify-between mb-1">
                             <label class="block font-semibold text-black dark:text-white text-[12px]">Pilih Klien / Pemilik Barang</label>
-                            <button type="button" @click="openQuickClient()" class="text-[11px] font-semibold text-[#007AFF] hover:underline flex items-center gap-0.5 cursor-pointer">
+                            <button type="button" @click="openQuickClient()" class="text-[11px] font-semibold text-[#0284c7] hover:underline flex items-center gap-0.5 cursor-pointer">
                                 <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
                                 <span>+ Klien Baru</span>
                             </button>
                         </div>
-                        <select name="client_id_manual" id="manual-client-select" x-model="detected.client_id" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                        <select name="client_id_manual" id="manual-client-select" x-model="detected.client_id" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]">
                             <option value="">-- Pilih Importir / Eksportir --</option>
                             @foreach($clients as $c)
                                 <option value="{{ $c->id }}">{{ $c->name }} (NPWP: {{ $c->npwp ?? '-' }})</option>
@@ -1117,7 +1117,7 @@
                     </div>
                     <div>
                         <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Tipe Kepabeanan <span class="text-rose-500">*</span></label>
-                        <select name="type_manual" x-model="detected.type" :required="tab === 'manual'" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                        <select name="type_manual" x-model="detected.type" :required="tab === 'manual'" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]">
                             <option value="">-- Wajib Pilih: Impor atau Ekspor --</option>
                             <option value="IMPORT">IMPOR (BC 2.0 / PIB)</option>
                             <option value="EXPORT">EKSPOR (BC 3.0 / PEB)</option>
@@ -1128,7 +1128,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div class="sm:col-span-2">
                         <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Vendor Pihak Pelayaran (Shipping Line)</label>
-                        <select name="shipping_vendor_id_manual" x-model="detected.shipping_vendor_id" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                        <select name="shipping_vendor_id_manual" x-model="detected.shipping_vendor_id" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]">
                             <option value="">-- Pilih Pelayaran --</option>
                             @foreach($vendors as $v)
                                 <option value="{{ $v->id }}">{{ $v->name }} (PIC: {{ $v->pic_name ?? 'Import Desk' }})</option>
@@ -1137,33 +1137,33 @@
                     </div>
                     <div>
                         <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Nomor B/L atau AWB</label>
-                        <input type="text" x-model="detected.bl_number" placeholder="Contoh: WHLU-9281928" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                        <input type="text" x-model="detected.bl_number" placeholder="Contoh: WHLU-9281928" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
                         <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Nama Kapal (Vessel)</label>
-                        <input type="text" x-model="detected.vessel_name" placeholder="MV WAN HAI 315" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                        <input type="text" x-model="detected.vessel_name" placeholder="MV WAN HAI 315" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]">
                     </div>
                     <div>
                         <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Voyage Number</label>
-                        <input type="text" x-model="detected.voyage_number" placeholder="V.042N" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                        <input type="text" x-model="detected.voyage_number" placeholder="V.042N" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]">
                     </div>
                     <div>
                         <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Estimasi Tiba (ETA)</label>
-                        <input type="date" x-model="detected.eta" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                        <input type="date" x-model="detected.eta" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Pelabuhan Muat (POL)</label>
-                        <input type="text" x-model="detected.port_of_loading" placeholder="CNSHA (Shanghai Port)" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                        <input type="text" x-model="detected.port_of_loading" placeholder="CNSHA (Shanghai Port)" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]">
                     </div>
                     <div>
                         <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Pelabuhan Bongkar (POD)</label>
-                        <input type="text" x-model="detected.port_of_discharge" value="IDTPP (Tanjung Priok, Jakarta)" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                        <input type="text" x-model="detected.port_of_discharge" value="IDTPP (Tanjung Priok, Jakarta)" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]">
                     </div>
                 </div>
 
@@ -1217,7 +1217,7 @@
 
             <div>
                 <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Catatan Proyek & Instruksi Khusus (Opsional)</label>
-                <textarea name="catatan" rows="2" placeholder="Catatan perlakuan dokumen khusus, instruksi jalur hijau, atau persyaratan lartas surveyor..." class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]"></textarea>
+                <textarea name="catatan" rows="2" placeholder="Catatan perlakuan dokumen khusus, instruksi jalur hijau, atau persyaratan lartas surveyor..." class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]"></textarea>
             </div>
 
             <!-- Aksi Lanjutan Otomatis (Wajib Draft untuk Ditinjau) -->
@@ -1233,8 +1233,8 @@
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
                     <label class="flex items-center gap-2 p-2.5 rounded-[10px] border cursor-pointer transition-colors"
-                           :class="afterAction === 'project' ? 'border-[#007AFF] bg-[#007AFF]/10 text-[#007AFF] font-semibold' : 'border-black/10 dark:border-white/10 text-black/70 dark:text-white/70'">
-                        <input type="radio" x-model="afterAction" value="project" class="text-[#007AFF]">
+                           :class="afterAction === 'project' ? 'border-[#0284c7] bg-[#0284c7]/10 text-[#0284c7] font-semibold' : 'border-black/10 dark:border-white/10 text-black/70 dark:text-white/70'">
+                        <input type="radio" x-model="afterAction" value="project" class="text-[#0284c7]">
                         <span>Simpan sebagai Draft Proyek &amp; Tracking</span>
                     </label>
                     <label class="flex items-center gap-2 p-2.5 rounded-[10px] border cursor-pointer transition-colors"
@@ -1266,7 +1266,7 @@
             <div class="relative bg-white dark:bg-[#1C1C1E] rounded-2xl border border-black/10 dark:border-white/10 shadow-2xl max-w-md w-full p-5 text-xs animate-in fade-in zoom-in-95 duration-150">
                 <div class="flex items-center justify-between pb-3 border-b border-black/5 dark:border-white/5 mb-3">
                     <div class="flex items-center space-x-2">
-                        <div class="w-8 h-8 rounded-lg bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center">
+                        <div class="w-8 h-8 rounded-lg bg-[#0284c7]/10 text-[#0284c7] flex items-center justify-center">
                             <i data-lucide="user-plus" class="w-4 h-4"></i>
                         </div>
                         <div>
@@ -1284,23 +1284,23 @@
                 <div class="space-y-3">
                     <div>
                         <label class="block font-semibold text-black dark:text-white mb-1 text-[11px]">Nama Perusahaan / Importir <span class="text-rose-500">*</span></label>
-                        <input type="text" x-model="quickClient.name" placeholder="PT. JINDI MATERIAL INDONESIA" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white focus:outline-none focus:border-[#007AFF]">
+                        <input type="text" x-model="quickClient.name" placeholder="PT. JINDI MATERIAL INDONESIA" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white focus:outline-none focus:border-[#0284c7]">
                     </div>
 
                     <div class="grid grid-cols-2 gap-2">
                         <div>
                             <label class="block font-semibold text-black dark:text-white mb-1 text-[11px]">NPWP (16 Digit)</label>
-                            <input type="text" x-model="quickClient.npwp" placeholder="75.296.714.1-041.000" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white font-mono focus:outline-none focus:border-[#007AFF]">
+                            <input type="text" x-model="quickClient.npwp" placeholder="75.296.714.1-041.000" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white font-mono focus:outline-none focus:border-[#0284c7]">
                         </div>
                         <div>
                             <label class="block font-semibold text-black dark:text-white mb-1 text-[11px]">Nama PIC</label>
-                            <input type="text" x-model="quickClient.pic_name" placeholder="Bpk. Hendra" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white focus:outline-none focus:border-[#007AFF]">
+                            <input type="text" x-model="quickClient.pic_name" placeholder="Bpk. Hendra" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white focus:outline-none focus:border-[#0284c7]">
                         </div>
                     </div>
 
                     <div>
                         <label class="block font-semibold text-black dark:text-white mb-1 text-[11px]">No. WhatsApp / HP</label>
-                        <input type="text" x-model="quickClient.phone" placeholder="081290008888" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white focus:outline-none focus:border-[#007AFF]">
+                        <input type="text" x-model="quickClient.phone" placeholder="081290008888" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white focus:outline-none focus:border-[#0284c7]">
                     </div>
 
                     <div class="pt-2 border-t border-black/5 dark:border-white/5 flex items-center justify-end space-x-2">
@@ -1321,7 +1321,7 @@
     <div class="max-w-lg w-full bg-white dark:bg-[#1C1C1E] rounded-[20px] border border-black/10 dark:border-white/10 shadow-2xl p-6 space-y-4 animate-in fade-in zoom-in duration-150">
         <div class="flex items-center justify-between pb-3 border-b border-black/5 dark:border-white/5">
             <div class="flex items-center space-x-2.5">
-                <div class="w-9 h-9 rounded-[10px] bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center">
+                <div class="w-9 h-9 rounded-[10px] bg-[#0284c7]/10 text-[#0284c7] flex items-center justify-center">
                     <i data-lucide="share-2" class="w-4 h-4"></i>
                 </div>
                 <div>
@@ -1378,7 +1378,7 @@
         <!-- Form Generate Token Baru & Atur Durasi Timer -->
         <div class="border-t border-black/5 dark:border-white/5 pt-3.5 space-y-2">
             <div class="text-[12px] font-bold text-black dark:text-white flex items-center gap-1.5">
-                <i data-lucide="clock" class="w-3.5 h-3.5 text-[#007AFF]"></i>
+                <i data-lucide="clock" class="w-3.5 h-3.5 text-[#0284c7]"></i>
                 <span>Atur Timer Kedaluwarsa & Terbitkan Link Baru</span>
             </div>
             <p class="text-[11px] text-black/50 dark:text-white/50">Pilih durasi masa aktif baru. Tautan lama otomatis kedaluwarsa digantikan tautan ini:</p>
@@ -1393,7 +1393,7 @@
                         <option value="14">14 Hari (2 Minggu)</option>
                         <option value="30">30 Hari (1 Bulan)</option>
                     </select>
-                    <button type="submit" class="btn-apple-gray !h-9 !px-3 text-[12px] font-semibold hover:!bg-[#007AFF] hover:!text-white shrink-0">
+                    <button type="submit" class="btn-apple-gray !h-9 !px-3 text-[12px] font-semibold hover:!bg-[#0284c7] hover:!text-white shrink-0">
                         <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
                         <span>Generate Link</span>
                     </button>
@@ -1560,23 +1560,23 @@
                     <textarea x-model="productText" 
                               rows="3" 
                               placeholder="Ketik nama produk, spesifikasi bahan baku, merek, atau deskripsi barang (contoh: Laptop Asus ROG Intel i7 RAM 16GB, Kopi Arabika Gayo, Kaos Polos Katun Combed 30s...)" 
-                              class="w-full px-3.5 py-2.5 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-[#007AFF]"></textarea>
+                              class="w-full px-3.5 py-2.5 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-[#0284c7]"></textarea>
                 </div>
 
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pt-1">
                     <div class="flex items-center gap-1 text-[11px] text-slate-400">
                         <span>Contoh cepat:</span>
-                        <button type="button" @click="productText = 'Laptop Gaming 15.6 inch Intel Core i7 SSD 512GB RAM 16GB'; direction = 'import';" class="text-[#007AFF] hover:underline font-semibold">Laptop (Lartas)</button>
+                        <button type="button" @click="productText = 'Laptop Gaming 15.6 inch Intel Core i7 SSD 512GB RAM 16GB'; direction = 'import';" class="text-[#0284c7] hover:underline font-semibold">Laptop (Lartas)</button>
                         <span>&bull;</span>
-                        <button type="button" @click="productText = 'Kopi Arabika Roasting Kemasan Retail 250 Gram Asli Gayo'; direction = 'export';" class="text-[#007AFF] hover:underline font-semibold">Kopi (Ekspor)</button>
+                        <button type="button" @click="productText = 'Kopi Arabika Roasting Kemasan Retail 250 Gram Asli Gayo'; direction = 'export';" class="text-[#0284c7] hover:underline font-semibold">Kopi (Ekspor)</button>
                         <span>&bull;</span>
-                        <button type="button" @click="productText = 'Kain Tenun Sutra Motif Batik Tradisional'; direction = 'import';" class="text-[#007AFF] hover:underline font-semibold">Tekstil</button>
+                        <button type="button" @click="productText = 'Kain Tenun Sutra Motif Batik Tradisional'; direction = 'import';" class="text-[#0284c7] hover:underline font-semibold">Tekstil</button>
                     </div>
 
                     <button type="button" 
                             @click="detect()" 
                             :disabled="loading || !productText.trim()" 
-                            class="px-4 py-2 rounded-xl bg-[#007AFF] hover:bg-[#0062CC] text-white font-bold text-xs inline-flex items-center gap-1.5 shadow-xs transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer">
+                            class="px-4 py-2 rounded-xl bg-[#0284c7] hover:bg-[#0062CC] text-white font-bold text-xs inline-flex items-center gap-1.5 shadow-xs transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer">
                         <template x-if="loading">
                             <span class="inline-flex items-center gap-1.5">
                                 <svg class="animate-spin h-3.5 w-3.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
@@ -1709,7 +1709,7 @@
                            class="w-full px-3.5 py-2.5 rounded-xl border border-black/15 dark:border-white/15 bg-white dark:bg-[#2C2C2E] text-sm font-mono text-black dark:text-white">
                 </div>
                 <label class="inline-flex items-center space-x-2 text-xs text-black/70 dark:text-white/70 cursor-pointer">
-                    <input type="checkbox" name="auto_create_shipment" value="1" checked class="w-4 h-4 text-[#007AFF] rounded">
+                    <input type="checkbox" name="auto_create_shipment" value="1" checked class="w-4 h-4 text-[#0284c7] rounded">
                     <span>Otomatis buat proyek baru di Tim Document jika Nomor Aju belum ada</span>
                 </label>
                 <div class="flex items-center justify-end gap-2 pt-2 border-t border-black/5 dark:border-white/10">
@@ -1733,7 +1733,7 @@
                            class="w-full px-3.5 py-2 rounded-xl border border-black/15 dark:border-white/15 bg-white dark:bg-[#2C2C2E] text-sm font-mono text-black dark:text-white">
                 </div>
                 <label class="inline-flex items-center space-x-2 text-xs text-black/70 dark:text-white/70 cursor-pointer">
-                    <input type="checkbox" name="sync_status_after" value="1" checked class="w-4 h-4 text-[#007AFF] rounded">
+                    <input type="checkbox" name="sync_status_after" value="1" checked class="w-4 h-4 text-[#0284c7] rounded">
                     <span>Otomatis gabungkan dengan status &amp; respon real-time API CEISA (SPJM / SPPB / Gate Out)</span>
                 </label>
                 <div class="flex items-center justify-end gap-2 pt-2 border-t border-black/5 dark:border-white/10">

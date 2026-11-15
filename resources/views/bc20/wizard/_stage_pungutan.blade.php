@@ -5,7 +5,7 @@
             <p class="text-[11px] text-slate-500 dark:text-slate-400">Rincian kalkulasi Bea Masuk & Pajak Dalam Rangka Impor (PDRI) dari seluruh seri barang.</p>
         </div>
         <button type="button" @click="recalculatePungutan(true)"
-                class="px-3.5 py-2 rounded-xl border border-[#007AFF]/30 text-[#007AFF] hover:bg-[#007AFF]/10 font-semibold text-xs inline-flex items-center gap-1.5 cursor-pointer">
+                class="px-3.5 py-2 rounded-xl border border-[#0284c7]/30 text-[#0284c7] hover:bg-[#0284c7]/10 font-semibold text-xs inline-flex items-center gap-1.5 cursor-pointer">
             <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
             <span>Generate Pungutan</span>
         </button>
@@ -28,7 +28,7 @@
                 <template x-for="rowKey in ['PPH', 'PPN', 'BM', 'TOTAL']" :key="rowKey">
                     <tr :class="rowKey === 'TOTAL' ? 'bg-slate-50/80 dark:bg-white/[0.04] font-bold' : 'hover:bg-slate-50/40 dark:hover:bg-white/[0.02]'">
                         <td class="px-4 py-3.5 text-left font-sans font-bold text-slate-800 dark:text-white" x-text="rowKey"></td>
-                        <td class="px-4 py-3.5 text-[#007AFF] font-semibold" x-text="formatInt(pungutan[rowKey]?.dibayar || 0)"></td>
+                        <td class="px-4 py-3.5 text-[#0284c7] font-semibold" x-text="formatInt(pungutan[rowKey]?.dibayar || 0)"></td>
                         <td class="px-4 py-3.5 text-slate-600 dark:text-slate-300" x-text="formatInt(pungutan[rowKey]?.ditanggung_pemerintah || 0)"></td>
                         <td class="px-4 py-3.5 text-slate-600 dark:text-slate-300" x-text="formatInt(pungutan[rowKey]?.ditunda || 0)"></td>
                         <td class="px-4 py-3.5 text-slate-600 dark:text-slate-300" x-text="formatInt(pungutan[rowKey]?.tidak_dipungut || 0)"></td>

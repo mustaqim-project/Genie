@@ -6,10 +6,22 @@ use App\Models\Client;
 use App\Models\ClientInvoice;
 use App\Models\Shipment;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Gate;
 
-class ClientInvoiceController extends Controller
+class ClientInvoiceController extends Controller implements HasMiddleware
 {
+    /**
+     * Daftarkan middleware proteksi RBAC level Controller
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:finance.view|finance.invoice', only: ['index', 'show']),
+            new Middleware('permission:finance.manage|finance.invoice', except: ['index', 'show']),
+        ];
+    }
     /**
      * Daftar Seluruh Tagihan Invoice Klien (Finance)
      * Hak Akses: finance.view
@@ -29,7 +41,7 @@ class ClientInvoiceController extends Controller
             $query->where(function ($q) use ($s) {
                 $q->where('invoice_no', 'like', "%{$s}%")
                   ->orWhereHas('client', fn($cq) => $cq->where('name', 'like', "%{$s}%"))
-                  ->orWhereHas('shipment', fn($sq) => $sq->where('shipment_number', 'like', "%{$s}%")->orWhere('bl_number', 'like', "%{$s}%"));
+                  ->orWhereHas('shipment', fn($sq) => $sq->where('project_no', 'like', "%{$s}%")->orWhere('nomor_bl_awb', 'like', "%{$s}%"));
             });
         }
 

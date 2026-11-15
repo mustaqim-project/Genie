@@ -36,12 +36,12 @@
     <!-- Breadcrumb & Header Toolbar -->
     <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-5 sm:p-6 border border-black/[0.06] dark:border-white/[0.08] shadow-xs">
         <nav class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium mb-2" aria-label="Breadcrumb">
-            <a href="{{ route('dashboard') }}" class="hover:text-[#007AFF] transition-colors flex items-center gap-1">
+            <a href="{{ route('dashboard') }}" class="hover:text-[#0284c7] transition-colors flex items-center gap-1">
                 <i data-lucide="home" class="w-3.5 h-3.5"></i>
                 <span>Dashboard</span>
             </a>
             <i data-lucide="chevron-right" class="w-3 h-3 text-slate-300 dark:text-slate-600"></i>
-            <a href="{{ route('bc30.index') }}" class="hover:text-[#007AFF] transition-colors">BC 3.0 (Ekspor)</a>
+            <a href="{{ route('bc30.index') }}" class="hover:text-[#0284c7] transition-colors">BC 3.0 (Ekspor)</a>
             <i data-lucide="chevron-right" class="w-3 h-3 text-slate-300 dark:text-slate-600"></i>
             <span class="text-slate-800 dark:text-white font-mono font-semibold">{{ $bc30->nomor_aju }}</span>
         </nav>
@@ -271,7 +271,7 @@
                 </div>
                 <div>
                     <span class="text-slate-400 dark:text-slate-500 block font-medium">Bank Devisa Hasil Ekspor</span>
-                    <span class="font-bold text-[#007AFF]">{{ $bc30->bank_nama ?? '-' }}</span>
+                    <span class="font-bold text-[#0284c7]">{{ $bc30->bank_nama ?? '-' }}</span>
                     <div class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">Kode Bank: {{ $bc30->bank_kode ?? '-' }}</div>
                 </div>
             </div>
@@ -314,7 +314,7 @@
                         @forelse($barangList as $index => $item)
                             <tr class="hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
                                 <td class="py-3 px-3.5 font-mono text-slate-400">{{ $index + 1 }}</td>
-                                <td class="py-3 px-3.5 font-mono font-bold text-[#007AFF]">{{ $item['posTarif'] ?? '-' }}</td>
+                                <td class="py-3 px-3.5 font-mono font-bold text-[#0284c7]">{{ $item['posTarif'] ?? '-' }}</td>
                                 <td class="py-3 px-3.5">
                                     <div class="font-semibold text-slate-800 dark:text-white">{{ $item['uraian'] ?? '-' }}</div>
                                     <div class="text-[10px] text-slate-400 dark:text-slate-500">Merk: {{ $item['merk'] ?? '-' }} | Daerah: {{ $item['kodeDaerahAsal'] ?? '-' }}</div>
@@ -327,7 +327,7 @@
                                                     $docName = $dokumenRef[$docCode] ?? ($matchedDoc['namaDokumen'] ?? 'Izin Ekspor');
                                                     $docNo = $matchedDoc['nomorDokumen'] ?? '-';
                                                 @endphp
-                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-semibold bg-[#007AFF]/10 text-[#007AFF] border border-[#007AFF]/20">
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-semibold bg-[#0284c7]/10 text-[#0284c7] border border-[#0284c7]/20">
                                                     <span>📑 Seri #{{ $bd['seriDokumen'] }} [{{ $docCode }}]</span>
                                                     <span class="font-mono">{{ $docNo }}</span>
                                                 </span>
@@ -353,7 +353,7 @@
         <div>
             <h3 class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2 flex items-center justify-between">
                 <span class="flex items-center gap-2">
-                    <i data-lucide="files" class="w-4 h-4 text-[#007AFF]"></i>
+                    <i data-lucide="files" class="w-4 h-4 text-[#0284c7]"></i>
                     <span>Lampiran Dokumen Pelengkap Pabean & Perizinan Ekspor Lartas (CEISA 4.0)</span>
                 </span>
                 <span class="text-slate-400 dark:text-slate-500 font-mono text-[10px]">{{ count($dokumenList) }} Dokumen Terlampir</span>
@@ -422,7 +422,7 @@
         <details class="group bg-black/[0.02] dark:bg-white/[0.03] rounded-2xl p-4 border border-black/[0.06] dark:border-white/[0.06]">
             <summary class="cursor-pointer text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
                 <span>Inspeksi Raw JSON Payload & Respon CEISA 4.0</span>
-                <i data-lucide="chevron-down" class="w-4 h-4 text-[#007AFF] group-open:rotate-180 transition-transform"></i>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-[#0284c7] group-open:rotate-180 transition-transform"></i>
             </summary>
             <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-[11px] font-mono">
                 <div>
@@ -440,7 +440,7 @@
     <!-- Audit Logs for this document -->
     <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-6 border border-black/[0.06] dark:border-white/[0.08] shadow-xs">
         <h2 class="text-sm font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
-            <i data-lucide="scroll-text" class="w-4 h-4 text-[#007AFF]"></i>
+            <i data-lucide="scroll-text" class="w-4 h-4 text-[#0284c7]"></i>
             <span>Audit Log Interaksi API CEISA untuk Dokumen Ini</span>
         </h2>
         <div class="overflow-x-auto border border-black/[0.06] dark:border-white/[0.08] rounded-2xl">
@@ -459,7 +459,7 @@
                         <tr class="hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
                             <td class="py-3 px-3.5 text-slate-500 dark:text-slate-400 tabular-nums">{{ $log->created_at->format('d/m/Y H:i:s') }}</td>
                             <td class="py-3 px-3.5 font-mono">
-                                <span class="font-bold text-[#007AFF]">{{ $log->method }}</span> {{ $log->endpoint }}
+                                <span class="font-bold text-[#0284c7]">{{ $log->method }}</span> {{ $log->endpoint }}
                             </td>
                             <td class="py-3 px-3.5 font-mono font-bold {{ $log->status_code === 200 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400' }} tabular-nums">
                                 {{ $log->status_code }}

@@ -20,7 +20,7 @@
 
                 <!-- Clean Navigational Breadcrumb -->
                 <nav class="flex items-center space-x-2 text-[12px] truncate" aria-label="Breadcrumb">
-                    <a href="{{ route('dashboard') }}" class="font-bold text-black dark:text-white hover:text-[#007AFF] transition-colors truncate">
+                    <a href="{{ route('dashboard') }}" class="font-bold text-black dark:text-white hover:text-[#0284c7] transition-colors truncate">
                         GENIE
                     </a>
                     <i data-lucide="chevron-right" class="w-3.5 h-3.5 opacity-30 shrink-0"></i>
@@ -34,7 +34,7 @@
                         type="button"
                         class="w-full flex items-center justify-between h-9 px-3 rounded-[9px] bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] border border-black/[0.06] dark:border-white/[0.08] text-black/45 dark:text-white/45 text-[12px] transition-all group active:scale-[0.99] cursor-pointer">
                     <div class="flex items-center space-x-2 truncate">
-                        <i data-lucide="search" class="w-3.5 h-3.5 text-black/40 dark:text-white/40 group-hover:text-[#007AFF] transition-colors flex-shrink-0"></i>
+                        <i data-lucide="search" class="w-3.5 h-3.5 text-black/40 dark:text-white/40 group-hover:text-[#0284c7] transition-colors flex-shrink-0"></i>
                         <span class="truncate">Cari nomor aju, B/L, kontainer...</span>
                     </div>
                     <kbd class="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono font-medium bg-white dark:bg-[#2C2C2E] text-black/50 dark:text-white/50 border border-black/10 dark:border-white/10 rounded-[5px] shadow-2xs leading-none">
@@ -69,8 +69,8 @@
                             type="button"
                             class="h-8 flex items-center space-x-1.5 px-2.5 rounded-[8px] bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] text-black/80 dark:text-white/80 text-[12px] font-medium border border-black/[0.06] dark:border-white/[0.08] transition-all cursor-pointer"
                             title="Beralih Peran RBAC Cepat">
-                        <i data-lucide="shield-check" class="w-3.5 h-3.5 text-[#007AFF]"></i>
-                        <span class="font-mono font-semibold text-[#007AFF] dark:text-[#0A84FF] text-[11px]">{{ auth()->user()->roles->first()?->code ?? 'USER' }}</span>
+                        <i data-lucide="shield-check" class="w-3.5 h-3.5 text-[#0284c7]"></i>
+                        <span class="font-mono font-semibold text-[#0284c7] dark:text-[#0A84FF] text-[11px]">{{ auth()->user()->roles->first()?->code ?? 'USER' }}</span>
                         <i data-lucide="chevron-down" class="w-3 h-3 text-black/40 dark:text-white/40 transition-transform duration-200" :class="{ 'rotate-180': openRole }"></i>
                     </button>
 
@@ -100,11 +100,11 @@
                             </a>
                             <a href="{{ route('quick-login', 'R-DOC-SPV') }}" class="flex items-center justify-between px-3 py-1.5 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors">
                                 <span class="font-medium text-black/80 dark:text-white/80">Supervisor Dokumen</span>
-                                <span class="font-mono text-[10px] font-semibold text-[#007AFF]">R-DOC-SPV</span>
+                                <span class="font-mono text-[10px] font-semibold text-[#0284c7]">R-DOC-SPV</span>
                             </a>
                             <a href="{{ route('quick-login', 'R-DOC') }}" class="flex items-center justify-between px-3 py-1.5 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors">
                                 <span class="font-medium text-black/80 dark:text-white/80">Staff Dokumen</span>
-                                <span class="font-mono text-[10px] font-semibold text-[#007AFF]">R-DOC</span>
+                                <span class="font-mono text-[10px] font-semibold text-[#0284c7]">R-DOC</span>
                             </a>
                             <a href="{{ route('quick-login', 'R-DO') }}" class="flex items-center justify-between px-3 py-1.5 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors">
                                 <span class="font-medium text-black/80 dark:text-white/80">Staff Delivery Order</span>
@@ -161,7 +161,7 @@
                          class="absolute right-0 mt-2 w-72 rounded-[12px] bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-2xl border border-black/10 dark:border-white/10 shadow-xl py-1.5 z-50 text-[12px]">
                         <div class="px-3 py-2 border-b border-black/5 dark:border-white/5 flex items-center justify-between">
                             <span class="font-semibold text-black dark:text-white text-[11px]">Pemberitahuan Operasional</span>
-                            <span class="text-[10px] px-1.5 py-0.2 rounded-full bg-[#007AFF]/10 text-[#007AFF] font-medium font-mono">3 Baru</span>
+                            <span class="text-[10px] px-1.5 py-0.2 rounded-full bg-[#0284c7]/10 text-[#0284c7] font-medium font-mono">3 Baru</span>
                         </div>
                         <div class="divide-y divide-black/5 dark:divide-white/5">
                             <div class="p-2.5 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
@@ -173,7 +173,7 @@
                                 <span class="text-[10px] text-black/35 dark:text-white/35 mt-1 block">10 menit yang lalu</span>
                             </div>
                             <div class="p-2.5 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
-                                <div class="text-[#007AFF] font-semibold text-[11px] flex items-center gap-1">
+                                <div class="text-[#0284c7] font-semibold text-[11px] flex items-center gap-1">
                                     <i data-lucide="receipt" class="w-3 h-3"></i>
                                     <span>Billing MPN G3 Terbit</span>
                                 </div>

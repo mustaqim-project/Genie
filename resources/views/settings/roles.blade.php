@@ -11,7 +11,7 @@
     <header class="rounded-[16px] backdrop-blur-md bg-white/75 dark:bg-[#1C1C1E]/75 border border-black/5 dark:border-white/10 px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
         <div>
             <nav class="flex items-center gap-1.5 text-[12px] text-black/50 dark:text-white/50 mb-1" aria-label="Breadcrumb">
-                <a href="{{ route('dashboard') }}" class="hover:text-[#007AFF] transition-colors">Dashboard</a>
+                <a href="{{ route('dashboard') }}" class="hover:text-[#0284c7] transition-colors">Dashboard</a>
                 <i data-lucide="chevron-right" class="w-3.5 h-3.5 opacity-40"></i>
                 <span class="text-black/70 dark:text-white/70 font-medium">Pengaturan</span>
                 <i data-lucide="chevron-right" class="w-3.5 h-3.5 opacity-40"></i>
@@ -20,7 +20,7 @@
             <div class="flex items-center gap-2.5">
                 <h1 class="text-[20px] sm:text-[22px] font-bold text-black dark:text-white tracking-tight flex items-center space-x-2">
                     <span>Manajemen Peran & Hak Akses (RBAC)</span>
-                    <span class="px-2 py-0.5 rounded-[6px] bg-[#007AFF]/10 text-[#007AFF] text-[10px] font-mono font-bold uppercase">Multi-Tenant</span>
+                    <span class="px-2 py-0.5 rounded-[6px] bg-[#0284c7]/10 text-[#0284c7] text-[10px] font-mono font-bold uppercase">Multi-Tenant</span>
                 </h1>
             </div>
             <p class="text-[13px] text-black/50 dark:text-white/50 mt-0.5 leading-snug">
@@ -47,7 +47,7 @@
         <div class="rounded-[16px] bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/5 p-4 flex flex-col justify-between shadow-sm">
             <div class="flex items-center justify-between">
                 <span class="text-[11px] uppercase tracking-wider font-semibold text-black/45 dark:text-white/45">Total Peran (Roles)</span>
-                <div class="w-8 h-8 rounded-[10px] bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center">
+                <div class="w-8 h-8 rounded-[10px] bg-[#0284c7]/10 text-[#0284c7] flex items-center justify-center">
                     <i data-lucide="shield" class="w-4 h-4"></i>
                 </div>
             </div>
@@ -110,9 +110,9 @@
                         @click="activeTab = 'roles'"
                         :class="activeTab === 'roles' ? 'bg-white dark:bg-[#2C2C2E] text-black dark:text-white shadow-xs font-bold' : 'text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white'"
                         class="px-3.5 py-1.5 rounded-[8px] transition-all flex items-center gap-2 cursor-pointer">
-                    <i data-lucide="shield" class="w-3.5 h-3.5 text-[#007AFF]"></i>
+                    <i data-lucide="shield" class="w-3.5 h-3.5 text-[#0284c7]"></i>
                     <span>Daftar Peran (Roles)</span>
-                    <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-[#007AFF]/10 text-[#007AFF]">{{ $roles->count() }}</span>
+                    <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-[#0284c7]/10 text-[#0284c7]">{{ $roles->count() }}</span>
                 </button>
 
                 <button type="button" 
@@ -143,15 +143,15 @@
     </div>
 
     <!-- Interactive Apple Callout: Panduan RBAC -->
-    <div x-show="showGuide" x-transition class="rounded-[16px] bg-[#007AFF]/5 dark:bg-[#007AFF]/10 border border-[#007AFF]/20 p-4 sm:p-5 space-y-3">
+    <div x-show="showGuide" x-transition class="rounded-[16px] bg-[#0284c7]/5 dark:bg-[#0284c7]/10 border border-[#0284c7]/20 p-4 sm:p-5 space-y-3">
         <div class="flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-[#007AFF]"></span>
-            <h2 class="text-[11px] font-bold uppercase tracking-wider text-[#007AFF]">Panduan Tingkat Otoritas Hak Akses Peran</h2>
+            <span class="w-2 h-2 rounded-full bg-[#0284c7]"></span>
+            <h2 class="text-[11px] font-bold uppercase tracking-wider text-[#0284c7]">Panduan Tingkat Otoritas Hak Akses Peran</h2>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-[12px]">
             <div class="rounded-[12px] bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/5 p-3 space-y-1 shadow-2xs">
-                <span class="font-bold text-[#007AFF]">[R-ADM / R-OWN] Pimpinan & Admin</span>
+                <span class="font-bold text-[#0284c7]">[R-ADM / R-OWN] Pimpinan & Admin</span>
                 <p class="text-black/60 dark:text-white/60 leading-relaxed text-[11px]">Memiliki hak akses penuh tanpa batasan terhadap seluruh modul bisnis, laporan laba rugi, CEISA, dan approval pabean.</p>
             </div>
             <div class="rounded-[12px] bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/5 p-3 space-y-1 shadow-2xs">
@@ -180,7 +180,7 @@
                     $permIds = $role->permissions->pluck('id')->toArray();
                     $userCount = $role->users->count();
                 @endphp
-                <div class="rounded-[16px] bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/10 p-5 flex flex-col justify-between gap-4 shadow-sm hover:border-[#007AFF]/30 transition-all">
+                <div class="rounded-[16px] bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/10 p-5 flex flex-col justify-between gap-4 shadow-sm hover:border-[#0284c7]/30 transition-all">
                     <div class="space-y-3">
                         <div class="flex items-start justify-between gap-2">
                             <div>
@@ -192,7 +192,7 @@
                                         {{ $role->code }}
                                     </span>
                                     @if ($isPreset)
-                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#007AFF]/10 text-[#007AFF]">
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#0284c7]/10 text-[#0284c7]">
                                             Preset Sistem
                                         </span>
                                     @else
@@ -225,7 +225,7 @@
                                     <span class="text-black/40 dark:text-white/40 italic text-[11px]">Belum ada hak akses terhubung</span>
                                 @endforelse
                                 @if(count($permIds) > 8)
-                                    <span class="px-2 py-0.5 bg-[#007AFF]/10 rounded-[6px] text-[10px] font-bold text-[#007AFF]">
+                                    <span class="px-2 py-0.5 bg-[#0284c7]/10 rounded-[6px] text-[10px] font-bold text-[#0284c7]">
                                         +{{ count($permIds) - 8 }} lainnya
                                     </span>
                                 @endif
@@ -299,7 +299,7 @@
                         </td>
                         <td class="p-3.5">
                             @if($firstRole)
-                                <span class="px-2.5 py-1 rounded-[6px] text-[11px] font-bold bg-[#007AFF]/10 text-[#007AFF] font-mono">
+                                <span class="px-2.5 py-1 rounded-[6px] text-[11px] font-bold bg-[#0284c7]/10 text-[#0284c7] font-mono">
                                     [{{ $firstRole->code }}] {{ $firstRole->name }}
                                 </span>
                             @else
@@ -365,7 +365,7 @@
                 <tbody class="divide-y divide-black/5 dark:divide-white/5">
                     @foreach($permissions as $module => $perms)
                     <tr class="bg-black/[0.03] dark:bg-white/[0.04] font-bold text-black dark:text-white">
-                        <td colspan="{{ $roles->count() + 1 }}" class="p-2.5 text-[11px] uppercase tracking-wider text-[#007AFF]">
+                        <td colspan="{{ $roles->count() + 1 }}" class="p-2.5 text-[11px] uppercase tracking-wider text-[#0284c7]">
                             📁 Modul: {{ $module }}
                         </td>
                     </tr>
@@ -405,7 +405,7 @@
             
             <div class="flex items-center justify-between pb-3 border-b border-black/5 dark:border-white/5">
                 <div class="flex items-center space-x-2">
-                    <div class="w-8 h-8 rounded-[10px] bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center">
+                    <div class="w-8 h-8 rounded-[10px] bg-[#0284c7]/10 text-[#0284c7] flex items-center justify-center">
                         <i data-lucide="shield" class="w-4 h-4"></i>
                     </div>
                     <div>
@@ -434,7 +434,7 @@
                                x-model="formRoleName" 
                                required 
                                placeholder="Contoh: Operasional Impor Laut" 
-                               class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                               class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]">
                     </div>
                     <div>
                         <label class="block text-[12px] font-semibold text-black dark:text-white mb-1">
@@ -445,7 +445,7 @@
                                x-model="formRoleCode" 
                                :disabled="editingRole !== null"
                                placeholder="Contoh: R-SEAOPS" 
-                               class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] font-mono uppercase focus:outline-none focus:border-[#007AFF] disabled:opacity-50">
+                               class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] font-mono uppercase focus:outline-none focus:border-[#0284c7] disabled:opacity-50">
                     </div>
                 </div>
 
@@ -457,7 +457,7 @@
                               x-model="formRoleDesc" 
                               rows="2" 
                               placeholder="Deskripsi tugas dan tanggung jawab peran..." 
-                              class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]"></textarea>
+                              class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]"></textarea>
                 </div>
 
                 <!-- Permission Selector with Filter Search -->
@@ -477,10 +477,10 @@
                         @php $moduleIds = $perms->pluck('id')->toArray(); @endphp
                         <div class="py-2.5 px-2">
                             <div class="flex items-center justify-between mb-1.5 pb-1 border-b border-black/5 dark:border-white/5">
-                                <span class="font-bold text-[11px] text-[#007AFF] uppercase">📁 {{ $module }}</span>
+                                <span class="font-bold text-[11px] text-[#0284c7] uppercase">📁 {{ $module }}</span>
                                 <button type="button" 
                                         @click="toggleCategory({{ json_encode($moduleIds) }})" 
-                                        class="text-[10px] text-[#007AFF] hover:underline font-semibold cursor-pointer">
+                                        class="text-[10px] text-[#0284c7] hover:underline font-semibold cursor-pointer">
                                     Pilih/Batal Semua
                                 </button>
                             </div>
@@ -493,7 +493,7 @@
                                            value="{{ $p->id }}" 
                                            :checked="selectedPermissions.includes('{{ $p->id }}')"
                                            @change="toggleSinglePermission('{{ $p->id }}')"
-                                           class="rounded text-[#007AFF] focus:ring-[#007AFF] mt-0.5">
+                                           class="rounded text-[#0284c7] focus:ring-[#0284c7] mt-0.5">
                                     <div>
                                         <div class="font-semibold text-black dark:text-white text-[11px]">{{ $p->name }}</div>
                                         <code class="text-[9px] text-black/40 dark:text-white/40 font-mono">{{ $p->code }}</code>
@@ -558,7 +558,7 @@
                     <select name="role_id" 
                             x-model="memberSelectedRoleId" 
                             required 
-                            class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                            class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]">
                         @foreach($roles as $r)
                         <option value="{{ $r->id }}">[{{ $r->code }}] {{ $r->name }}</option>
                         @endforeach
@@ -611,24 +611,24 @@
 
                 <div>
                     <label class="block text-[12px] font-semibold text-black dark:text-white mb-1">Nama Lengkap <span class="text-[#FF3B30]">*</span></label>
-                    <input type="text" name="name" required placeholder="Nama lengkap staf..." class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                    <input type="text" name="name" required placeholder="Nama lengkap staf..." class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]">
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-[12px] font-semibold text-black dark:text-white mb-1">Email Login <span class="text-[#FF3B30]">*</span></label>
-                        <input type="email" name="email" required placeholder="staf@agungtrans.co.id" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                        <input type="email" name="email" required placeholder="staf@agungtrans.co.id" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]">
                     </div>
                     <div>
                         <label class="block text-[12px] font-semibold text-black dark:text-white mb-1">Kata Sandi <span class="text-[#FF3B30]">*</span></label>
-                        <input type="password" name="password" required placeholder="Minimal 6 karakter" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                        <input type="password" name="password" required placeholder="Minimal 6 karakter" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-[12px] font-semibold text-black dark:text-white mb-1">Peran (Role) <span class="text-[#FF3B30]">*</span></label>
-                        <select name="role_id" required class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                        <select name="role_id" required class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]">
                             @foreach($roles as $r)
                             <option value="{{ $r->id }}">[{{ $r->code }}] {{ $r->name }}</option>
                             @endforeach
@@ -636,18 +636,18 @@
                     </div>
                     <div>
                         <label class="block text-[12px] font-semibold text-black dark:text-white mb-1">No. Telepon / WA</label>
-                        <input type="text" name="phone" placeholder="0812..." class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                        <input type="text" name="phone" placeholder="0812..." class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-[12px] font-semibold text-black dark:text-white mb-1">Jabatan (Job Title)</label>
-                        <input type="text" name="job_title" placeholder="Staf Dokumen PPJK" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                        <input type="text" name="job_title" placeholder="Staf Dokumen PPJK" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]">
                     </div>
                     <div>
                         <label class="block text-[12px] font-semibold text-black dark:text-white mb-1">Departemen</label>
-                        <input type="text" name="department" placeholder="Operasional" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                        <input type="text" name="department" placeholder="Operasional" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]">
                     </div>
                 </div>
 

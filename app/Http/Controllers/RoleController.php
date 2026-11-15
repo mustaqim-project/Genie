@@ -7,12 +7,24 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
-class RoleController extends Controller
+class RoleController extends Controller implements HasMiddleware
 {
+    /**
+     * Daftarkan middleware proteksi RBAC level Controller
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:setting.view', only: ['index']),
+            new Middleware('permission:setting.manage', except: ['index']),
+        ];
+    }
     /**
      * Tampilkan Cockpit Manajemen Peran & Hak Akses (RBAC) bergaya Apple HIG / Cooca Core.
      */

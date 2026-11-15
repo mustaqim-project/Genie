@@ -7,10 +7,21 @@ use App\Models\TodoChecklist;
 use App\Models\Shipment;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 
-class TodoController extends Controller
+class TodoController extends Controller implements HasMiddleware
 {
+    /**
+     * Daftarkan middleware proteksi RBAC level Controller
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:dashboard.view|document.view|do.view|traffic.view|hrm.view|crm.view'),
+        ];
+    }
     /**
      * Dashboard Kanban / List To-Do
      */

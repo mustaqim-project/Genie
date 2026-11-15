@@ -19,7 +19,7 @@
                 <h1 class="text-xl sm:text-2xl font-bold font-apple-display tracking-tight text-slate-900 dark:text-white">
                     Surat Penawaran Harga (Quotation)
                 </h1>
-                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-100 dark:bg-sky-950/50 text-[#007AFF] border border-sky-200 dark:border-sky-800">
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-100 dark:bg-sky-950/50 text-[#0284c7] border border-sky-200 dark:border-sky-800">
                     P01 Pre-Ops
                 </span>
             </div>
@@ -40,7 +40,7 @@
     <!-- Apple HIG Bento 4-KPI Summary Grid -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div class="p-4 rounded-2xl bg-white dark:bg-[#1C1C1E] border border-slate-200/80 dark:border-white/10 shadow-xs flex items-center space-x-3.5 hover:border-slate-300 dark:hover:border-white/20 transition-all">
-            <div class="w-11 h-11 rounded-xl bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center flex-shrink-0">
+            <div class="w-11 h-11 rounded-xl bg-[#0284c7]/10 text-[#0284c7] flex items-center justify-center flex-shrink-0">
                 <i data-lucide="file-text" class="w-5 h-5"></i>
             </div>
             <div class="overflow-hidden">
@@ -62,7 +62,7 @@
         </div>
 
         <div class="p-4 rounded-2xl bg-white dark:bg-[#1C1C1E] border border-slate-200/80 dark:border-white/10 shadow-xs flex items-center space-x-3.5 hover:border-slate-300 dark:hover:border-white/20 transition-all">
-            <div class="w-11 h-11 rounded-xl bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center flex-shrink-0">
+            <div class="w-11 h-11 rounded-xl bg-[#0284c7]/10 text-[#0284c7] flex items-center justify-center flex-shrink-0">
                 <i data-lucide="send" class="w-5 h-5"></i>
             </div>
             <div class="overflow-hidden">
@@ -88,7 +88,7 @@
     <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-xs p-4 mb-6">
         <form method="GET" action="{{ route('crm.quotations.index') }}" class="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
             <div class="flex items-center gap-2 w-full sm:w-auto">
-                <select name="status" class="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                <select name="status" class="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
                     <option value="">-- Semua Status Quotation --</option>
                     <option value="DRAFT" {{ request('status') === 'DRAFT' ? 'selected' : '' }}>DRAFT (Kalkulasi)</option>
                     <option value="SENT" {{ request('status') === 'SENT' ? 'selected' : '' }}>SENT (Terkirim)</option>
@@ -236,7 +236,7 @@
                 @csrf
                 <div>
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Pilih Klien / Prospek <span class="text-rose-500">*</span></label>
-                    <select name="client_id" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                    <select name="client_id" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
                         <option value="">-- Pilih Klien --</option>
                         @foreach($clients as $c)
                             <option value="{{ $c->id }}">{{ $c->name }}</option>
@@ -247,22 +247,22 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Pelabuhan Asal <span class="text-rose-500">*</span></label>
-                        <input type="text" name="origin_port" required value="Shanghai (CNSHA)" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                        <input type="text" name="origin_port" required value="Shanghai (CNSHA)" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Pelabuhan Tujuan <span class="text-rose-500">*</span></label>
-                        <input type="text" name="destination_port" required value="Tanjung Priok (IDTPP)" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                        <input type="text" name="destination_port" required value="Tanjung Priok (IDTPP)" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
                     </div>
                 </div>
 
                 <div>
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Estimasi Total Penawaran (IDR) <span class="text-rose-500">*</span></label>
-                    <input type="number" name="total_estimate" required placeholder="Contoh: 26800000" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF] focus:outline-none font-mono">
+                    <input type="number" name="total_estimate" required placeholder="Contoh: 26800000" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#0284c7] focus:outline-none font-mono">
                 </div>
 
                 <div>
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Masa Berlaku Penawaran Sampai</label>
-                    <input type="date" name="valid_until" value="{{ now()->addDays(30)->format('Y-m-d') }}" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                    <input type="date" name="valid_until" value="{{ now()->addDays(30)->format('Y-m-d') }}" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
                 </div>
 
                 <div class="pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-end space-x-2">

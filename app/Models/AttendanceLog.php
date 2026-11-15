@@ -87,4 +87,20 @@ class AttendanceLog extends Model
         }
         return number_format($this->face_match * 100, 1) . '%';
     }
+
+    /**
+     * URL streaming foto presensi aman melalui gate otorisasi PrivateMediaController (UU PDP No. 27/2022).
+     */
+    public function getSecurePhotoUrlAttribute(): ?string
+    {
+        if (empty($this->photo_url)) {
+            return null;
+        }
+
+        if (str_starts_with($this->photo_url, 'data:image')) {
+            return $this->photo_url;
+        }
+
+        return route('private.attendance-photo', $this->id);
+    }
 }

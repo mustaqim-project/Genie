@@ -3,12 +3,23 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
-class ProfileController extends Controller
+class ProfileController extends Controller implements HasMiddleware
 {
+    /**
+     * Daftarkan middleware proteksi level Controller
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('auth'),
+        ];
+    }
     /**
      * Tampilkan halaman profil pengguna saat ini beserta hak akses yang dimiliki
      */

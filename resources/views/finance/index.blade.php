@@ -8,7 +8,7 @@
     <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-5 sm:p-6 border border-black/[0.06] dark:border-white/[0.08] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
             <nav class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium mb-1.5" aria-label="Breadcrumb">
-                <a href="{{ route('dashboard') }}" class="hover:text-[#007AFF] transition-colors flex items-center gap-1">
+                <a href="{{ route('dashboard') }}" class="hover:text-[#0284c7] transition-colors flex items-center gap-1">
                     <i data-lucide="home" class="w-3.5 h-3.5"></i>
                     <span>Dashboard</span>
                 </a>
@@ -31,7 +31,7 @@
                 <span>Hutang Vendor (AP)</span>
             </a>
             <a href="{{ route('finance.cash-bank.index') }}" 
-               class="btn-apple-gray px-3.5 py-2 text-xs inline-flex items-center gap-1.5 text-[#007AFF]">
+               class="btn-apple-gray px-3.5 py-2 text-xs inline-flex items-center gap-1.5 text-[#0284c7]">
                 <i data-lucide="landmark" class="w-4 h-4"></i>
                 <span>Kas & Bank</span>
             </a>
@@ -75,19 +75,19 @@
         </div>
 
         <!-- Kas & Bank Likuiditas Real-Time -->
-        <div class="bg-white dark:bg-[#1C1C1E] p-5 rounded-2xl border border-black/[0.06] dark:border-white/[0.08] shadow-xs hover:border-[#007AFF]/30 transition-all">
+        <div class="bg-white dark:bg-[#1C1C1E] p-5 rounded-2xl border border-black/[0.06] dark:border-white/[0.08] shadow-xs hover:border-[#0284c7]/30 transition-all">
             <div class="flex items-center justify-between mb-3">
                 <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Likuiditas Kas & Bank</span>
-                <span class="p-2 rounded-xl bg-[#007AFF]/10 text-[#007AFF]">
+                <span class="p-2 rounded-xl bg-[#0284c7]/10 text-[#0284c7]">
                     <i data-lucide="wallet" class="w-4 h-4"></i>
                 </span>
             </div>
-            <div class="text-3xl font-bold font-mono text-[#007AFF] tracking-tight tabular-nums">
+            <div class="text-3xl font-bold font-mono text-[#0284c7] tracking-tight tabular-nums">
                 Rp {{ number_format($totalCashBank, 0, ',', '.') }}
             </div>
             <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-2 flex items-center justify-between pt-2 border-t border-black/[0.06] dark:border-white/[0.06]">
                 <span>Saldo Rekening Aktif</span>
-                <span class="font-semibold text-[#007AFF]">BCA, Mandiri, Kas Kecil</span>
+                <span class="font-semibold text-[#0284c7]">BCA, Mandiri, Kas Kecil</span>
             </div>
         </div>
     </div>
@@ -99,7 +99,7 @@
                 <h3 class="font-bold text-slate-900 dark:text-white text-sm">Daftar Tagihan Shipment Klien (Invoice P19)</h3>
                 <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Penagihan jasa kepabeanan PPJK, trucking, serta penggantian talangan pabean</p>
             </div>
-            <a href="{{ route('finance.invoices.index') }}" class="text-xs font-semibold text-[#007AFF] hover:underline flex items-center gap-1">
+            <a href="{{ route('finance.invoices.index') }}" class="text-xs font-semibold text-[#0284c7] hover:underline flex items-center gap-1">
                 <span>Kelola Semua Invoice</span>
                 <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
             </a>
@@ -121,7 +121,7 @@
                     @forelse($invoices as $inv)
                         <tr class="hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
                             <td class="py-3.5 px-4 font-mono font-semibold text-slate-900 dark:text-white">
-                                <a href="{{ route('finance.invoices.show', $inv->id) }}" class="font-bold text-[#007AFF] hover:underline">
+                                <a href="{{ route('finance.invoices.show', $inv->id) }}" class="font-bold text-[#0284c7] hover:underline">
                                     {{ $inv->invoice_number ?? $inv->invoice_no }}
                                 </a>
                                 <div class="text-[10px] text-slate-400 dark:text-slate-500 font-sans">

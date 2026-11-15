@@ -2,7 +2,7 @@
     <!-- Toolbar -->
     <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-black/[0.06] dark:border-white/[0.06]">
         <div class="flex items-center gap-2">
-            <span class="px-2.5 py-1 rounded-lg bg-[#007AFF]/10 text-[#007AFF] border border-[#007AFF]/20 font-bold text-xs font-mono"
+            <span class="px-2.5 py-1 rounded-lg bg-[#0284c7]/10 text-[#0284c7] border border-[#0284c7]/20 font-bold text-xs font-mono"
                   x-text="'TOTAL: ' + w.dokumen.length"></span>
             <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">Dokumen Pelengkap Pabean</span>
         </div>
@@ -15,17 +15,17 @@
             </button>
             <button type="button" @click="sortDocumentsAuto()"
                     class="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] hover:bg-slate-50 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 font-semibold inline-flex items-center gap-1.5 cursor-pointer">
-                <i data-lucide="arrow-up-down" class="w-3.5 h-3.5 text-[#007AFF]"></i>
+                <i data-lucide="arrow-up-down" class="w-3.5 h-3.5 text-[#0284c7]"></i>
                 <span>Urutkan Otomatis</span>
             </button>
             <button type="button" @click="$refs.wizardDocUploadInput.click()"
-                    class="px-3 py-1.5 rounded-xl border border-[#007AFF]/30 bg-[#007AFF]/10 hover:bg-[#007AFF]/20 text-[#007AFF] font-semibold inline-flex items-center gap-1.5 cursor-pointer">
+                    class="px-3 py-1.5 rounded-xl border border-[#0284c7]/30 bg-[#0284c7]/10 hover:bg-[#0284c7]/20 text-[#0284c7] font-semibold inline-flex items-center gap-1.5 cursor-pointer">
                 <i data-lucide="upload" class="w-3.5 h-3.5"></i>
                 <span>Unggah PDF</span>
             </button>
             <input type="file" x-ref="wizardDocUploadInput" class="hidden" accept=".pdf,.png,.jpg,.jpeg,.webp" @change="handleWizardDocUpload($event, 'dokumen')">
             <button type="button" @click="openNewDocModal()"
-                    class="px-3 py-1.5 rounded-xl bg-[#007AFF] hover:bg-[#0066D6] text-white font-semibold inline-flex items-center gap-1.5 cursor-pointer">
+                    class="px-3 py-1.5 rounded-xl bg-[#0284c7] hover:bg-[#0066D6] text-white font-semibold inline-flex items-center gap-1.5 cursor-pointer">
                 <i data-lucide="plus" class="w-3.5 h-3.5"></i>
                 <span>Isi manual</span>
             </button>
@@ -48,7 +48,7 @@
             <tbody class="divide-y divide-black/[0.05] dark:divide-white/[0.06]">
                 <template x-for="(doc, idx) in w.dokumen" :key="idx">
                     <tr @click="selectDocForPreview(doc)"
-                        :class="isDocActiveInPreview(doc) ? 'bg-[#007AFF]/10 dark:bg-[#007AFF]/15' : 'hover:bg-slate-50/80 dark:hover:bg-white/[0.02]'"
+                        :class="isDocActiveInPreview(doc) ? 'bg-[#0284c7]/10 dark:bg-[#0284c7]/15' : 'hover:bg-slate-50/80 dark:hover:bg-white/[0.02]'"
                         class="transition-colors cursor-pointer">
                         <td class="px-3 py-3 text-center">
                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/50 font-mono font-bold text-[11px]">
@@ -89,7 +89,7 @@
                                 <button type="button"
                                         @click="previewDocumentRow(doc)"
                                         :title="doc.shipmentDocumentId ? 'Preview langsung berkas di panel kiri' : 'Unggah / pilih berkas untuk preview'"
-                                        :class="doc.shipmentDocumentId ? 'text-[#007AFF] hover:bg-[#007AFF]/10' : 'text-slate-300 dark:text-slate-600 cursor-not-allowed'"
+                                        :class="doc.shipmentDocumentId ? 'text-[#0284c7] hover:bg-[#0284c7]/10' : 'text-slate-300 dark:text-slate-600 cursor-not-allowed'"
                                         class="p-1.5 rounded-lg transition-colors cursor-pointer">
                                     <i data-lucide="eye" class="w-4 h-4"></i>
                                 </button>
@@ -114,7 +114,7 @@
     </div>
 
     <!-- Modal / Inline Drawer Edit / Tambah Dokumen -->
-    <div x-show="docModalOpen" x-cloak class="p-4 rounded-2xl bg-slate-50 dark:bg-[#2C2C2E] border border-[#007AFF]/30 space-y-3">
+    <div x-show="docModalOpen" x-cloak class="p-4 rounded-2xl bg-slate-50 dark:bg-[#2C2C2E] border border-[#0284c7]/30 space-y-3">
         <div class="flex items-center justify-between">
             <h4 class="font-bold text-xs text-slate-900 dark:text-white" x-text="editingDocIndex === null ? 'Tambah Dokumen Pelengkap' : 'Edit Dokumen Seri #' + (editingDocIndex + 1)"></h4>
             <button type="button" @click="docModalOpen = false" class="text-xs text-slate-500 hover:text-slate-900 dark:hover:text-white cursor-pointer">&times; Tutup</button>

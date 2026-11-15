@@ -50,7 +50,7 @@
 
         <div class="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/10">
             <span class="block text-[10px] font-semibold text-slate-500 dark:text-slate-400">Nilai Pabean dalam Rupiah (CIF &times; NDPBM)</span>
-            <div class="font-mono font-bold text-base text-[#007AFF] tabular-nums mt-0.5" x-text="'Rp ' + formatInt(computedCifRupiah())"></div>
+            <div class="font-mono font-bold text-base text-[#0284c7] tabular-nums mt-0.5" x-text="'Rp ' + formatInt(computedCifRupiah())"></div>
         </div>
     </div>
 
@@ -76,8 +76,8 @@
         </div>
 
         <div @click="$refs.freightUploadInput.click()"
-             class="p-3 rounded-xl border border-dashed border-slate-300 dark:border-white/20 bg-slate-50/70 dark:bg-white/[0.02] hover:border-[#007AFF] transition-colors cursor-pointer flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center shrink-0">
+             class="p-3 rounded-xl border border-dashed border-slate-300 dark:border-white/20 bg-slate-50/70 dark:bg-white/[0.02] hover:border-[#0284c7] transition-colors cursor-pointer flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-[#0284c7]/10 text-[#0284c7] flex items-center justify-center shrink-0">
                 <i data-lucide="file-up" class="w-4 h-4"></i>
             </div>
             <div class="min-w-0">
@@ -88,7 +88,7 @@
         </div>
 
         <button type="button" x-show="w.transaksi.freight_document_id" @click="previewByDocId(w.transaksi.freight_document_id)"
-                class="w-full py-1.5 rounded-xl bg-[#007AFF]/10 text-[#007AFF] font-semibold text-[11px] cursor-pointer">
+                class="w-full py-1.5 rounded-xl bg-[#0284c7]/10 text-[#0284c7] font-semibold text-[11px] cursor-pointer">
             &bull; Lihat Preview Bukti Freight
         </button>
 
@@ -127,7 +127,7 @@
             <label class="block font-semibold text-slate-600 dark:text-slate-300 mb-1">Berat Bersih (KGM) <span class="text-rose-500">*</span></label>
             <input type="number" step="0.01" x-model.number="w.transaksi.netto" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] dark:text-white font-mono font-bold tabular-nums">
             <button type="button" @click="w.transaksi.netto = w.transaksi.bruto"
-                    class="mt-2 text-[11px] font-semibold text-[#007AFF] hover:underline cursor-pointer">
+                    class="mt-2 text-[11px] font-semibold text-[#0284c7] hover:underline cursor-pointer">
                 Samakan ke berat kotor
             </button>
             <p x-show="parseFloat(w.transaksi.netto) !== parseFloat(w.transaksi.bruto)" class="text-[10px] text-amber-600 dark:text-amber-400 mt-1">

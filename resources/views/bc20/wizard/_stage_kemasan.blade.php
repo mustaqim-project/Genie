@@ -7,7 +7,7 @@
                 <span class="w-2 h-2 rounded-full bg-rose-500" x-show="w.kemasan.length === 0"></span>
             </div>
             <button type="button" @click="addKemasan()"
-                    class="px-3 py-1.5 rounded-xl border border-[#007AFF]/30 text-[#007AFF] hover:bg-[#007AFF]/10 font-semibold inline-flex items-center gap-1 cursor-pointer">
+                    class="px-3 py-1.5 rounded-xl border border-[#0284c7]/30 text-[#0284c7] hover:bg-[#0284c7]/10 font-semibold inline-flex items-center gap-1 cursor-pointer">
                 <i data-lucide="plus" class="w-3.5 h-3.5"></i>
                 <span>Tambah Kemasan</span>
             </button>
@@ -43,7 +43,7 @@
                             </td>
                             <td class="px-3 py-2.5 text-center whitespace-nowrap sticky right-0 z-10 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-xs border-l border-black/[0.06] dark:border-white/[0.08] shadow-[-6px_0_12px_rgba(0,0,0,0.06)]">
                                 <div class="flex items-center justify-center gap-1">
-                                    <button type="button" @click="duplicateKemasan(kIdx)" title="Duplikat" class="p-1.5 rounded-lg text-[#007AFF] hover:bg-[#007AFF]/10 cursor-pointer">
+                                    <button type="button" @click="duplicateKemasan(kIdx)" title="Duplikat" class="p-1.5 rounded-lg text-[#0284c7] hover:bg-[#0284c7]/10 cursor-pointer">
                                         <i data-lucide="copy" class="w-3.5 h-3.5"></i>
                                     </button>
                                     <button type="button" @click="removeKemasan(kIdx)" x-show="w.kemasan.length > 1" title="Hapus" class="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 cursor-pointer">
@@ -63,10 +63,10 @@
         <div class="flex items-center justify-between pb-3 border-b border-black/[0.06] dark:border-white/[0.06]">
             <div class="flex items-center gap-2">
                 <h3 class="font-bold text-sm text-slate-900 dark:text-white">Peti Kemas</h3>
-                <span class="px-2 py-0.5 rounded-md bg-[#007AFF]/10 text-[#007AFF] font-mono font-bold text-[10px]" x-text="'TOTAL: ' + w.kontainer.length"></span>
+                <span class="px-2 py-0.5 rounded-md bg-[#0284c7]/10 text-[#0284c7] font-mono font-bold text-[10px]" x-text="'TOTAL: ' + w.kontainer.length"></span>
             </div>
             <button type="button" @click="addKontainer()"
-                    class="px-3 py-1.5 rounded-xl border border-[#007AFF]/30 text-[#007AFF] hover:bg-[#007AFF]/10 font-semibold inline-flex items-center gap-1 cursor-pointer">
+                    class="px-3 py-1.5 rounded-xl border border-[#0284c7]/30 text-[#0284c7] hover:bg-[#0284c7]/10 font-semibold inline-flex items-center gap-1 cursor-pointer">
                 <i data-lucide="plus" class="w-3.5 h-3.5"></i>
                 <span>Tambah Peti Kemas</span>
             </button>
@@ -114,7 +114,7 @@
                             </td>
                             <td class="px-3 py-2.5 text-center whitespace-nowrap sticky right-0 z-10 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-xs border-l border-black/[0.06] dark:border-white/[0.08] shadow-[-6px_0_12px_rgba(0,0,0,0.06)]">
                                 <div class="flex items-center justify-center gap-1">
-                                    <button type="button" @click="duplicateKontainer(cIdx)" title="Duplikat" class="p-1.5 rounded-lg text-[#007AFF] hover:bg-[#007AFF]/10 cursor-pointer">
+                                    <button type="button" @click="duplicateKontainer(cIdx)" title="Duplikat" class="p-1.5 rounded-lg text-[#0284c7] hover:bg-[#0284c7]/10 cursor-pointer">
                                         <i data-lucide="copy" class="w-3.5 h-3.5"></i>
                                     </button>
                                     <button type="button" @click="removeKontainer(cIdx)" x-show="w.kontainer.length > 1" title="Hapus" class="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 cursor-pointer">

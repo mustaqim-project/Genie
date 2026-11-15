@@ -333,45 +333,45 @@
                 
                 <div>
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Perusahaan / Importir <span class="text-rose-500">*</span></label>
-                    <input type="text" name="name" required placeholder="Contoh: PT. JINDI MATERIAL INDONESIA" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                    <input type="text" name="name" required placeholder="Contoh: PT. JINDI MATERIAL INDONESIA" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">NPWP Perusahaan (16 Digit)</label>
-                        <input type="text" name="npwp" placeholder="Contoh: 75.296.714.1-041.000" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF] focus:outline-none font-mono">
+                        <input type="text" name="npwp" placeholder="Contoh: 75.296.714.1-041.000" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#0284c7] focus:outline-none font-mono">
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">NIB (Nomor Induk Berusaha)</label>
-                        <input type="text" name="nib" placeholder="Contoh: 1234567890123" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF] focus:outline-none font-mono">
+                        <input type="text" name="nib" placeholder="Contoh: 1234567890123" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#0284c7] focus:outline-none font-mono">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama PIC (Contact Person)</label>
-                        <input type="text" name="pic_name" placeholder="Contoh: Bpk. Hendra / Ibu Maya" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                        <input type="text" name="pic_name" placeholder="Contoh: Bpk. Hendra / Ibu Maya" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor WhatsApp / HP</label>
-                        <input type="text" name="phone" placeholder="Contoh: 081290008888" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                        <input type="text" name="phone" placeholder="Contoh: 081290008888" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Email Resmi Klien</label>
-                        <input type="email" name="email" placeholder="import@perusahaan.co.id" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                        <input type="email" name="email" placeholder="import@perusahaan.co.id" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Masa Berlaku Surat Kuasa PPJK</label>
-                        <input type="date" name="surat_kuasa_expired_at" value="{{ now()->addYear()->format('Y-m-d') }}" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                        <input type="date" name="surat_kuasa_expired_at" value="{{ now()->addYear()->format('Y-m-d') }}" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
                     </div>
                 </div>
 
                 <div>
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Alamat Domisili Perusahaan</label>
-                    <textarea name="address" rows="2" placeholder="Jalan, Kawasan Industri, Gedung, Kota, Kode Pos" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF] focus:outline-none"></textarea>
+                    <textarea name="address" rows="2" placeholder="Jalan, Kawasan Industri, Gedung, Kota, Kode Pos" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#0284c7] focus:outline-none"></textarea>
                 </div>
 
                 <div class="pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-end space-x-2">

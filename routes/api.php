@@ -25,3 +25,9 @@ Route::prefix('mcp')->group(function () {
     Route::post('/shipments/{id}/detect-hs', [\App\Http\Controllers\Api\McpCustomsAgentController::class, 'detectShipmentCustoms'])->name('api.mcp.shipments.detect-hs');
     Route::post('/shipments/{id}/generate-declaration', [\App\Http\Controllers\Api\McpCustomsAgentController::class, 'generateDeclaration'])->name('api.mcp.shipments.generate-declaration');
 });
+
+// WhatsApp Meta Cloud API Official Inbound Webhook (FSD 3.7)
+Route::prefix('webhook/whatsapp')->group(function () {
+    Route::get('/', [\App\Http\Controllers\WhatsAppController::class, 'verifyWebhook'])->name('api.whatsapp.webhook.verify');
+    Route::post('/', [\App\Http\Controllers\WhatsAppController::class, 'handleWebhook'])->name('api.whatsapp.webhook.handle');
+});

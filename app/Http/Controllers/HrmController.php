@@ -361,6 +361,19 @@ class HrmController extends Controller implements HasMiddleware
             }
         }
 
+        // Verifikasi Biometrik Wajah Riil (FIX-11)
+        $faceScore = null;
+        if ($request->filled('face_descriptor') || $request->filled('face_photo')) {
+            $verification = app(\App\Services\Hrm\FaceVerificationService::class)->verify(
+                $employee,
+                $request->input('face_descriptor'),
+                $request->input('face_photo')
+            );
+            $faceScore = $verification['score'];
+        } elseif ($request->filled('face_match')) {
+            $faceScore = (float) $validated['face_match'];
+        }
+
         // Simpan log absensi
         $log = AttendanceLog::create([
             'employee_id' => $employee->id,
@@ -369,8 +382,8 @@ class HrmController extends Controller implements HasMiddleware
             'lat' => $validated['lat'],
             'lng' => $validated['lng'],
             'location_id' => $matchedLocation?->id,
-            'face_match' => $validated['face_match'] ?? 0.965,
-            'valid' => $isWithinAnyGeofence,
+            'face_match' => $faceScore,
+            'valid' => $isWithinAnyGeofence && ($faceScore === null || $faceScore >= 0.75),
         ]);
 
         $locationName = $matchedLocation ? $matchedLocation->name : 'Luar Radius Kantor/Pelabuhan TPS';

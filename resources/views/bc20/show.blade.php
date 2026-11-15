@@ -26,12 +26,12 @@
     <!-- 1. Breadcrumb & Header Toolbar Tunggal (Harmonis dengan Create & Edit) -->
     <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-5 sm:p-6 border border-black/[0.06] dark:border-white/[0.08] shadow-xs">
         <nav class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium mb-2" aria-label="Breadcrumb">
-            <a href="{{ route('dashboard') }}" class="hover:text-[#007AFF] transition-colors flex items-center gap-1">
+            <a href="{{ route('dashboard') }}" class="hover:text-[#0284c7] transition-colors flex items-center gap-1">
                 <i data-lucide="home" class="w-3.5 h-3.5"></i>
                 <span>Dashboard</span>
             </a>
             <i data-lucide="chevron-right" class="w-3 h-3 text-slate-300 dark:text-slate-600"></i>
-            <a href="{{ route('bc20.index') }}" class="hover:text-[#007AFF] transition-colors">BC 2.0 (Impor)</a>
+            <a href="{{ route('bc20.index') }}" class="hover:text-[#0284c7] transition-colors">BC 2.0 (Impor)</a>
             <i data-lucide="chevron-right" class="w-3 h-3 text-slate-300 dark:text-slate-600"></i>
             <span class="text-slate-800 dark:text-white font-mono font-semibold">{{ $bc20->nomor_aju }}</span>
         </nav>
@@ -39,7 +39,7 @@
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5 pt-2">
             <div>
                 <div class="flex flex-wrap items-center gap-2 mb-2">
-                    <span class="px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-[#007AFF]/10 text-[#007AFF] border border-[#007AFF]/20">
+                    <span class="px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-[#0284c7]/10 text-[#0284c7] border border-[#0284c7]/20">
                         BC 2.0 (PIB)
                     </span>
                     <span class="inline-flex items-center px-3 py-0.5 rounded-full text-xs font-semibold {{ $bc20->status_badge_class }}">
@@ -51,7 +51,7 @@
                         </span>
                     @endif
                     @if(isset($shipment))
-                        <a href="{{ route('core.document.show', $shipment->id) }}" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-mono font-semibold bg-sky-50 dark:bg-sky-950/40 text-[#007AFF] border border-sky-200/80 hover:underline" title="Buka Workspace Proyek Pengapalan">
+                        <a href="{{ route('core.document.show', $shipment->id) }}" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-mono font-semibold bg-sky-50 dark:bg-sky-950/40 text-[#0284c7] border border-sky-200/80 hover:underline" title="Buka Workspace Proyek Pengapalan">
                             <i data-lucide="package" class="w-3 h-3"></i>
                             <span>Proyek: {{ $shipment->shipment_number ?? $shipment->project_no }}</span>
                         </a>
@@ -68,7 +68,7 @@
                 <!-- Tautan Terpadu ke Cockpit Tracking Dokumen (11 Pos Operasional) -->
                 <a href="{{ route('core.tracking.index', ['mode' => 'tracking_dok', 'search' => $shipment?->project_no ?? $bc20->nomor_aju]) }}"
                    target="_blank"
-                   class="w-9 h-9 rounded-xl border border-sky-300 dark:border-sky-800 bg-sky-50/80 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 text-[#007AFF] inline-flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+                   class="w-9 h-9 rounded-xl border border-sky-300 dark:border-sky-800 bg-sky-50/80 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 text-[#0284c7] inline-flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
                    title="Buka Cockpit Tracking Dokumen (11 Pos Operasional)"
                    aria-label="Tracking 11 Pos">
                     <i data-lucide="compass" class="w-4 h-4"></i>
@@ -92,7 +92,7 @@
                            class="w-9 h-9 rounded-xl border border-slate-200 dark:border-white/15 bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 inline-flex items-center justify-center transition-colors shadow-2xs"
                            title="Lihat Proses Sebelumnya (Pos 1 - 3)"
                            aria-label="Proses Sebelumnya">
-                            <i data-lucide="folder" class="w-4 h-4 text-[#007AFF]"></i>
+                            <i data-lucide="folder" class="w-4 h-4 text-[#0284c7]"></i>
                         </a>
                     @endif
                 @else
@@ -180,10 +180,10 @@
                 <form action="{{ route('bc20.fetch-response', $bc20->id) }}" method="POST" class="inline">
                     @csrf
                     <button type="submit"
-                            class="w-9 h-9 rounded-xl border border-sky-300 dark:border-sky-800 bg-sky-50/80 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 text-[#007AFF] inline-flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+                            class="w-9 h-9 rounded-xl border border-sky-300 dark:border-sky-800 bg-sky-50/80 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 text-[#0284c7] inline-flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
                             title="Tarik Respon Kepabeanan (SPPB / Billing)"
                             aria-label="Tarik Respon">
-                        <i data-lucide="download" class="w-4 h-4 text-[#007AFF]"></i>
+                        <i data-lucide="download" class="w-4 h-4 text-[#0284c7]"></i>
                     </button>
                 </form>
             </div>
@@ -207,7 +207,7 @@
         @if(isset($shipment))
         <div class="mt-6 pt-5 border-t border-black/[0.06] dark:border-white/[0.06] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div class="flex items-center gap-2">
-                <span class="px-2.5 py-1 rounded-lg bg-[#007AFF]/10 text-[#007AFF] text-xs font-bold font-mono">
+                <span class="px-2.5 py-1 rounded-lg bg-[#0284c7]/10 text-[#0284c7] text-xs font-bold font-mono">
                     {{ $shipment->shipment_number ?? $shipment->project_no }}
                 </span>
                 <span class="text-xs text-slate-600 dark:text-slate-300">
@@ -314,7 +314,7 @@
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
                 <div>
                     <span class="text-slate-400 dark:text-slate-500 block font-medium">Nomor / Tanggal BC 1.1</span>
-                    <span class="font-mono font-bold text-[#007AFF]">{{ $bc20->nomor_bc11 ?? '-' }} ({{ $bc20->tanggal_bc11?->format('d/m/Y') ?? '-' }})</span>
+                    <span class="font-mono font-bold text-[#0284c7]">{{ $bc20->nomor_bc11 ?? '-' }} ({{ $bc20->tanggal_bc11?->format('d/m/Y') ?? '-' }})</span>
                 </div>
                 <div>
                     <span class="text-slate-400 dark:text-slate-500 block font-medium">Pos / Subpos BC 1.1</span>
@@ -369,7 +369,7 @@
                         @forelse($barangList as $index => $item)
                             <tr class="hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
                                 <td class="py-3 px-3.5 font-mono text-slate-400">{{ $index + 1 }}</td>
-                                <td class="py-3 px-3.5 font-mono font-bold text-[#007AFF]">{{ $item['posTarif'] ?? '-' }}</td>
+                                <td class="py-3 px-3.5 font-mono font-bold text-[#0284c7]">{{ $item['posTarif'] ?? '-' }}</td>
                                 <td class="py-3 px-3.5">
                                     <div class="font-semibold text-slate-800 dark:text-white">{{ $item['uraian'] ?? '-' }}</div>
                                     <div class="text-[10px] text-slate-400 dark:text-slate-500">Merk: {{ $item['merk'] ?? '-' }} | Tipe: {{ $item['tipe'] ?? '-' }}</div>
@@ -382,7 +382,7 @@
                                                     $docName = $dokumenRef[$docCode] ?? ($matchedDoc['namaDokumen'] ?? 'Izin Pabean');
                                                     $docNo = $matchedDoc['nomorDokumen'] ?? '-';
                                                 @endphp
-                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-semibold bg-[#007AFF]/10 text-[#007AFF] border border-[#007AFF]/20">
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-semibold bg-[#0284c7]/10 text-[#0284c7] border border-[#0284c7]/20">
                                                     <span>📑 Seri #{{ $bd['seriDokumen'] }} [{{ $docCode }}]</span>
                                                     <span class="font-mono">{{ $docNo }}</span>
                                                 </span>
@@ -408,7 +408,7 @@
         <div>
             <h3 class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2 flex items-center justify-between">
                 <span class="flex items-center gap-2">
-                    <i data-lucide="files" class="w-4 h-4 text-[#007AFF]"></i>
+                    <i data-lucide="files" class="w-4 h-4 text-[#0284c7]"></i>
                     <span>Lampiran Dokumen Pelengkap Pabean & Perizinan Lartas (CEISA 4.0)</span>
                 </span>
                 <span class="text-slate-400 dark:text-slate-500 font-mono text-[10px]">{{ count($dokumenList) }} Dokumen Terlampir</span>
@@ -477,7 +477,7 @@
         <details class="group bg-black/[0.02] dark:bg-white/[0.03] rounded-2xl p-4 border border-black/[0.06] dark:border-white/[0.06]">
             <summary class="cursor-pointer text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
                 <span>Inspeksi Raw JSON Payload & Respon CEISA 4.0</span>
-                <i data-lucide="chevron-down" class="w-4 h-4 text-[#007AFF] group-open:rotate-180 transition-transform"></i>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-[#0284c7] group-open:rotate-180 transition-transform"></i>
             </summary>
             <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-[11px] font-mono">
                 <div>
@@ -495,7 +495,7 @@
     <!-- Audit Logs for this document -->
     <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-6 border border-black/[0.06] dark:border-white/[0.08] shadow-xs">
         <h2 class="text-sm font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
-            <i data-lucide="scroll-text" class="w-4 h-4 text-[#007AFF]"></i>
+            <i data-lucide="scroll-text" class="w-4 h-4 text-[#0284c7]"></i>
             <span>Audit Log Interaksi API CEISA untuk Dokumen Ini</span>
         </h2>
         <div class="overflow-x-auto border border-black/[0.06] dark:border-white/[0.08] rounded-2xl">
@@ -514,7 +514,7 @@
                         <tr class="hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
                             <td class="py-3 px-3.5 text-slate-500 dark:text-slate-400 tabular-nums">{{ $log->created_at->format('d/m/Y H:i:s') }}</td>
                             <td class="py-3 px-3.5 font-mono">
-                                <span class="font-bold text-[#007AFF]">{{ $log->method }}</span> {{ $log->endpoint }}
+                                <span class="font-bold text-[#0284c7]">{{ $log->method }}</span> {{ $log->endpoint }}
                             </td>
                             <td class="py-3 px-3.5 font-mono font-bold {{ $log->status_code === 200 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400' }} tabular-nums">
                                 {{ $log->status_code }}

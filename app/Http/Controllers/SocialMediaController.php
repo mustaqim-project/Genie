@@ -152,11 +152,11 @@ class SocialMediaController extends Controller implements HasMiddleware
                 'metrics' => [
                     'aspect_ratio' => $validated['aspect_ratio'] ?? '4:5',
                     'media_fit' => $validated['media_fit'] ?? 'cover',
-                    'impressions' => $status === 'published' ? rand(300, 750) : 0,
-                    'reach' => $status === 'published' ? rand(220, 600) : 0,
-                    'likes' => $status === 'published' ? rand(15, 65) : 0,
-                    'comments' => $status === 'published' ? rand(2, 12) : 0,
-                    'shares' => $status === 'published' ? rand(1, 8) : 0,
+                    'impressions' => 0,
+                    'reach' => 0,
+                    'likes' => 0,
+                    'comments' => 0,
+                    'shares' => 0,
                 ],
             ]);
         }
@@ -177,11 +177,11 @@ class SocialMediaController extends Controller implements HasMiddleware
             'status' => 'published',
             'published_at' => now(),
             'metrics' => array_merge($post->metrics ?? [], [
-                'impressions' => rand(250, 500),
-                'reach' => rand(180, 420),
-                'likes' => rand(10, 35),
-                'comments' => rand(1, 6),
-                'shares' => rand(1, 4),
+                'impressions' => (int) ($post->metrics['impressions'] ?? 0),
+                'reach' => (int) ($post->metrics['reach'] ?? 0),
+                'likes' => (int) ($post->metrics['likes'] ?? 0),
+                'comments' => (int) ($post->metrics['comments'] ?? 0),
+                'shares' => (int) ($post->metrics['shares'] ?? 0),
             ]),
         ]);
 

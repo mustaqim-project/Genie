@@ -28,13 +28,13 @@
     <!-- 1. APPLE macOS STYLE HEADER & BRAND LOGO -->
     <div class="h-14 flex items-center justify-between px-3.5 border-b border-black/[0.06] dark:border-white/[0.08] bg-white/40 dark:bg-white/[0.02] shrink-0">
         <a href="{{ route('dashboard') }}" class="flex items-center space-x-2.5 overflow-hidden group min-w-0">
-            <div class="w-8 h-8 rounded-[9px] bg-gradient-to-tr from-[#007AFF] to-[#5856D6] flex items-center justify-center text-white font-bold shadow-xs flex-shrink-0">
+            <div class="w-8 h-8 rounded-[9px] bg-gradient-to-tr from-[#0284c7] to-[#5856D6] flex items-center justify-center text-white font-bold shadow-xs flex-shrink-0">
                 <i data-lucide="ship" class="w-4 h-4 text-white"></i>
             </div>
             <div x-show="!sidebarCollapsed" class="transition-opacity duration-200 min-w-0">
                 <div class="flex items-center space-x-1.5 leading-none">
                     <span class="font-bold text-[14px] tracking-tight text-black dark:text-white">GENIE</span>
-                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-[5px] bg-[#007AFF]/10 text-[#007AFF] font-mono leading-none">ERP</span>
+                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-[5px] bg-[#0284c7]/10 text-[#0284c7] font-mono leading-none">ERP</span>
                 </div>
                 <div class="text-[10px] text-black/40 dark:text-white/40 font-medium truncate mt-0.5">Agung Trans Solusindo</div>
             </div>
@@ -68,7 +68,7 @@
             </div>
             @if(!auth()->check() || auth()->user()->hasPermission('dashboard.view'))
             <a href="{{ route('dashboard') }}" 
-               class="flex items-center space-x-2.5 px-2.5 py-1.5 rounded-[9px] font-medium transition-all group min-h-[36px] active:scale-[0.98] {{ request()->routeIs('dashboard') ? 'bg-[#007AFF] text-white font-semibold shadow-[0_2px_8px_rgba(0,122,255,0.30)]' : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.06]' }}"
+               class="flex items-center space-x-2.5 px-2.5 py-1.5 rounded-[9px] font-medium transition-all group min-h-[36px] active:scale-[0.98] {{ request()->routeIs('dashboard') ? 'bg-[#0284c7] text-white font-semibold shadow-[0_2px_8px_rgba(0,122,255,0.30)]' : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.06]' }}"
                title="Dashboard & KPI Operasional">
                 <i data-lucide="layout-dashboard" class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('dashboard') ? 'text-white' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white' }}"></i>
                 <span x-show="!sidebarCollapsed" class="truncate">Dashboard</span>
@@ -93,7 +93,7 @@
                         class="w-full flex items-center justify-between px-2.5 py-1.5 rounded-[9px] font-medium transition-all group min-h-[36px] cursor-pointer active:scale-[0.98] {{ $isDocActive ? 'bg-black/[0.05] dark:bg-white/[0.06] text-slate-900 dark:text-white font-semibold' : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.06]' }}"
                         title="Proyek Pengapalan & Pabean (PIB/PEB)">
                     <div class="flex items-center space-x-2.5 min-w-0 flex-1 mr-1">
-                        <i data-lucide="file-text" class="w-4 h-4 flex-shrink-0 {{ $isDocActive ? 'text-[#007AFF] dark:text-[#0A84FF]' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white' }}"></i>
+                        <i data-lucide="file-text" class="w-4 h-4 flex-shrink-0 {{ $isDocActive ? 'text-[#0284c7] dark:text-[#0A84FF]' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white' }}"></i>
                         <span x-show="!sidebarCollapsed" class="truncate">Proyek & Pabean</span>
                     </div>
                     <i x-show="!sidebarCollapsed" 
@@ -112,17 +112,17 @@
                         $isCoreIndexActive = request()->routeIs('core.document.index') || (!$isBc20Active && !$isBc30Active && request()->routeIs('core.document.*'));
                     @endphp
                     <a href="{{ route('core.document.index') }}" 
-                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ $isCoreIndexActive ? 'bg-[#007AFF] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ $isCoreIndexActive ? 'bg-[#0284c7] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
                         <span class="w-1.5 h-1.5 rounded-full {{ $isCoreIndexActive ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
                         <span class="truncate">Semua Proyek</span>
                     </a>
                     <a href="{{ route('bc20.index') }}" 
-                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ $isBc20Active ? 'bg-[#007AFF] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ $isBc20Active ? 'bg-[#0284c7] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
                         <span class="w-1.5 h-1.5 rounded-full {{ $isBc20Active ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
                         <span class="truncate">BC 2.0 (PIB)</span>
                     </a>
                     <a href="{{ route('bc30.index') }}" 
-                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ $isBc30Active ? 'bg-[#007AFF] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ $isBc30Active ? 'bg-[#0284c7] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
                         <span class="w-1.5 h-1.5 rounded-full {{ $isBc30Active ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
                         <span class="truncate">BC 3.0 (PEB)</span>
                     </a>
@@ -133,16 +133,16 @@
             <!-- MENU TRACKING PROJECT (11 POS WORKFLOW) -->
             @if(!auth()->check() || auth()->user()->hasPermission('document.view') || auth()->user()->hasPermission('traffic.view') || auth()->user()->hasPermission('do.view'))
             <a href="{{ route('core.tracking.index') }}" 
-               class="flex items-center space-x-2.5 px-2.5 py-1.5 rounded-[9px] font-medium transition-all group min-h-[36px] active:scale-[0.98] {{ request()->routeIs('core.tracking.*') ? 'bg-[#007AFF] text-white font-semibold shadow-[0_2px_8px_rgba(0,122,255,0.30)]' : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.06]' }}"
+               class="flex items-center space-x-2.5 px-2.5 py-1.5 rounded-[9px] font-medium transition-all group min-h-[36px] active:scale-[0.98] {{ request()->routeIs('core.tracking.*') ? 'bg-[#0284c7] text-white font-semibold shadow-[0_2px_8px_rgba(0,122,255,0.30)]' : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.06]' }}"
                title="Tracking Project & Workflow 11 Pos">
                 <i data-lucide="milestone" class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('core.tracking.*') ? 'text-white' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white' }}"></i>
                 <span x-show="!sidebarCollapsed" class="truncate">Tracking 11 Pos</span>
             </a>
             @endif
 
-            <!-- MENU TO-DO & DELEGASI TUGAS (F23) -->
+            <!-- MENU TO-DO & DELEGASI TUGAS -->
             <a href="{{ route('todos.index') }}" 
-               class="flex items-center space-x-2.5 px-2.5 py-1.5 rounded-[9px] font-medium transition-all group min-h-[36px] active:scale-[0.98] {{ request()->routeIs('todos.*') ? 'bg-[#007AFF] text-white font-semibold shadow-[0_2px_8px_rgba(0,122,255,0.30)]' : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.06]' }}"
+               class="flex items-center space-x-2.5 px-2.5 py-1.5 rounded-[9px] font-medium transition-all group min-h-[36px] active:scale-[0.98] {{ request()->routeIs('todos.*') ? 'bg-[#0284c7] text-white font-semibold shadow-[0_2px_8px_rgba(0,122,255,0.30)]' : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.06]' }}"
                title="Papan Tugas & Delegasi Rekan (To-Do)">
                 <i data-lucide="check-square" class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('todos.*') ? 'text-white' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white' }}"></i>
                 <span x-show="!sidebarCollapsed" class="truncate">Tugas & Delegasi (To-Do)</span>
@@ -151,7 +151,7 @@
             <!-- MENU 2: TIM DO (DELIVERY ORDER) -->
             @if(!auth()->check() || auth()->user()->hasPermission('do.view'))
             <a href="{{ route('core.do.index') }}" 
-               class="flex items-center space-x-2.5 px-2.5 py-1.5 rounded-[9px] font-medium transition-all group min-h-[36px] active:scale-[0.98] {{ request()->routeIs('core.do.*', 'do.*') ? 'bg-[#007AFF] text-white font-semibold shadow-[0_2px_8px_rgba(0,122,255,0.30)]' : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.06]' }}"
+               class="flex items-center space-x-2.5 px-2.5 py-1.5 rounded-[9px] font-medium transition-all group min-h-[36px] active:scale-[0.98] {{ request()->routeIs('core.do.*', 'do.*') ? 'bg-[#0284c7] text-white font-semibold shadow-[0_2px_8px_rgba(0,122,255,0.30)]' : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.06]' }}"
                title="Penebusan Delivery Order Pelayaran & Free Time">
                 <i data-lucide="clipboard-check" class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('core.do.*', 'do.*') ? 'text-white' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white' }}"></i>
                 <span x-show="!sidebarCollapsed" class="truncate">DO Pelayaran</span>
@@ -161,7 +161,7 @@
             <!-- MENU 3: TIM TRAFFIC & LAPANGAN -->
             @if(!auth()->check() || auth()->user()->hasPermission('traffic.view'))
             <a href="{{ route('core.traffic.index') }}" 
-               class="flex items-center space-x-2.5 px-2.5 py-1.5 rounded-[9px] font-medium transition-all group min-h-[36px] active:scale-[0.98] {{ request()->routeIs('core.traffic.*', 'traffic.*') ? 'bg-[#007AFF] text-white font-semibold shadow-[0_2px_8px_rgba(0,122,255,0.30)]' : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.06]' }}"
+               class="flex items-center space-x-2.5 px-2.5 py-1.5 rounded-[9px] font-medium transition-all group min-h-[36px] active:scale-[0.98] {{ request()->routeIs('core.traffic.*', 'traffic.*') ? 'bg-[#0284c7] text-white font-semibold shadow-[0_2px_8px_rgba(0,122,255,0.30)]' : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.06]' }}"
                title="Penjaluran SPPB, Gate Out TPS & Bukti Serah Terima (POD)">
                 <i data-lucide="truck" class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('core.traffic.*', 'traffic.*') ? 'text-white' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white' }}"></i>
                 <span x-show="!sidebarCollapsed" class="truncate">Traffic & Pelabuhan</span>
@@ -200,22 +200,22 @@
                      x-collapse 
                      class="ml-3.5 pl-2.5 border-l border-black/[0.08] dark:border-white/[0.1] space-y-0.5 mt-0.5">
                     <a href="{{ route('finance.invoices.index') }}" 
-                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('finance.invoices.*') ? 'bg-[#007AFF] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('finance.invoices.*') ? 'bg-[#0284c7] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
                         <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('finance.invoices.*') ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
                         <span class="truncate">Piutang & Invoice Klien</span>
                     </a>
                     <a href="{{ route('finance.bills.index') }}" 
-                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('finance.bills.*') ? 'bg-[#007AFF] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('finance.bills.*') ? 'bg-[#0284c7] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
                         <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('finance.bills.*') ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
                         <span class="truncate">Hutang Vendor (AP)</span>
                     </a>
                     <a href="{{ route('finance.cash-bank.index') }}" 
-                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('finance.cash-bank.*') ? 'bg-[#007AFF] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('finance.cash-bank.*') ? 'bg-[#0284c7] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
                         <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('finance.cash-bank.*') ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
                         <span class="truncate">Buku Kas & Bank</span>
                     </a>
                     <a href="{{ route('finance.tax.index') }}" 
-                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('finance.tax.*') ? 'bg-[#007AFF] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('finance.tax.*') ? 'bg-[#0284c7] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
                         <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('finance.tax.*') ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
                         <span class="truncate">Perpajakan (PPN & PPh)</span>
                     </a>
@@ -226,7 +226,7 @@
             <!-- MENU 2: AKUNTANSI & BUKU BESAR -->
             @if(!auth()->check() || auth()->user()->hasPermission('accounting.view'))
             <a href="{{ route('accounting.index') }}" 
-               class="flex items-center space-x-2.5 px-2.5 py-1.5 rounded-[9px] font-medium transition-all group min-h-[36px] active:scale-[0.98] {{ request()->routeIs('accounting.*') ? 'bg-[#007AFF] text-white font-semibold shadow-[0_2px_8px_rgba(0,122,255,0.30)]' : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.06]' }}"
+               class="flex items-center space-x-2.5 px-2.5 py-1.5 rounded-[9px] font-medium transition-all group min-h-[36px] active:scale-[0.98] {{ request()->routeIs('accounting.*') ? 'bg-[#0284c7] text-white font-semibold shadow-[0_2px_8px_rgba(0,122,255,0.30)]' : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.06]' }}"
                title="Buku Besar, Jurnal Umum, Laba Rugi & Neraca">
                 <i data-lucide="book-open" class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('accounting.*') ? 'text-white' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white' }}"></i>
                 <span x-show="!sidebarCollapsed" class="truncate">Akuntansi & Jurnal</span>
@@ -251,7 +251,7 @@
                         class="w-full flex items-center justify-between px-2.5 py-1.5 rounded-[9px] font-medium transition-all group min-h-[36px] cursor-pointer active:scale-[0.98] {{ $isCrmActive ? 'bg-black/[0.05] dark:bg-white/[0.06] text-slate-900 dark:text-white font-semibold' : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.06]' }}"
                         title="CRM Klien, Kotak Masuk, WhatsApp WABA & Media Sosial">
                     <div class="flex items-center space-x-2.5 min-w-0 flex-1 mr-1">
-                        <i data-lucide="users" class="w-4 h-4 flex-shrink-0 {{ $isCrmActive ? 'text-[#007AFF] dark:text-[#0A84FF]' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white' }}"></i>
+                        <i data-lucide="users" class="w-4 h-4 flex-shrink-0 {{ $isCrmActive ? 'text-[#0284c7] dark:text-[#0A84FF]' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white' }}"></i>
                         <span x-show="!sidebarCollapsed" class="truncate">CRM & Komunikasi</span>
                     </div>
                     <i x-show="!sidebarCollapsed" 
@@ -265,32 +265,32 @@
                      x-collapse 
                      class="ml-3.5 pl-2.5 border-l border-black/[0.08] dark:border-white/[0.1] space-y-0.5 mt-0.5">
                     <a href="{{ route('crm.index') }}" 
-                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('crm.index') ? 'bg-[#007AFF] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('crm.index') ? 'bg-[#0284c7] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
                         <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('crm.index') ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
                         <span class="truncate">Direktori Klien</span>
                     </a>
                     <a href="{{ route('crm.quotations.index') }}" 
-                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('crm.quotations.*') ? 'bg-[#007AFF] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('crm.quotations.*') ? 'bg-[#0284c7] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
                         <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('crm.quotations.*') ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
                         <span class="truncate">Penawaran (Quotation & SO)</span>
                     </a>
                     <a href="{{ route('crm.sales-visits.index') }}" 
-                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('crm.sales-visits.*') ? 'bg-[#007AFF] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('crm.sales-visits.*') ? 'bg-[#0284c7] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
                         <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('crm.sales-visits.*') ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
                         <span class="truncate">Kunjungan Sales (GPS)</span>
                     </a>
                     <a href="{{ route('inbox.index') }}" 
-                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('inbox.*') ? 'bg-[#007AFF] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('inbox.*') ? 'bg-[#0284c7] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
                         <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('inbox.*') ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
                         <span class="truncate">Kotak Masuk Terpadu</span>
                     </a>
                     <a href="{{ route('whatsapp.index') }}" 
-                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('whatsapp.*') ? 'bg-[#007AFF] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('whatsapp.*') ? 'bg-[#0284c7] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
                         <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('whatsapp.*') ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
                         <span class="truncate">WhatsApp WABA Cloud</span>
                     </a>
                     <a href="{{ route('social-media.index') }}" 
-                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('social-media.*') ? 'bg-[#007AFF] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('social-media.*') ? 'bg-[#0284c7] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
                         <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('social-media.*') ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
                         <span class="truncate">Media Sosial Multi-Channel</span>
                     </a>
@@ -321,12 +321,12 @@
                      x-collapse 
                      class="ml-3.5 pl-2.5 border-l border-black/[0.08] dark:border-white/[0.1] space-y-0.5 mt-0.5">
                     <a href="{{ route('hrm.index') }}" 
-                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('hrm.index') || (request()->routeIs('hrm.*') && !request()->routeIs('hrm.portal*')) ? 'bg-[#007AFF] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('hrm.index') || (request()->routeIs('hrm.*') && !request()->routeIs('hrm.portal*')) ? 'bg-[#0284c7] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
                         <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('hrm.index') || (request()->routeIs('hrm.*') && !request()->routeIs('hrm.portal*')) ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
                         <span class="truncate">Karyawan & Penggajian</span>
                     </a>
                     <a href="{{ route('hrm.portal') }}" 
-                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('hrm.portal*') ? 'bg-[#007AFF] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('hrm.portal*') ? 'bg-[#0284c7] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
                         <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('hrm.portal*') ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
                         <span class="truncate">Portal Mandiri (ESS)</span>
                     </a>
@@ -366,7 +366,7 @@
                      class="ml-3.5 pl-2.5 border-l border-black/[0.08] dark:border-white/[0.1] space-y-0.5 mt-0.5">
                     @if(!auth()->check() || auth()->user()->hasPermission('setting.manage') || auth()->user()->hasPermission('setting.view'))
                     <a href="{{ route('settings.roles.index') }}" 
-                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('settings.roles*') ? 'bg-[#007AFF] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('settings.roles*') ? 'bg-[#0284c7] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
                         <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('settings.roles*') ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
                         <span class="truncate">Peran & Akses (RBAC)</span>
                     </a>
@@ -374,7 +374,7 @@
 
                     @if(!auth()->check() || auth()->user()->hasPermission('setting.view'))
                     <a href="{{ route('setting.index') }}" 
-                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('setting.*') && !request()->routeIs('settings.roles*') ? 'bg-[#007AFF] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('setting.*') && !request()->routeIs('settings.roles*') ? 'bg-[#0284c7] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
                         <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('setting.*') && !request()->routeIs('settings.roles*') ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
                         <span class="truncate">User & Gateway Komunikasi</span>
                     </a>
@@ -382,7 +382,7 @@
 
                     @if(!auth()->check() || auth()->user()->hasPermission('setting.manage'))
                     <a href="{{ route('config.index') }}" 
-                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('config.*') ? 'bg-[#007AFF] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('config.*') ? 'bg-[#0284c7] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
                         <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('config.*') ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
                         <span class="truncate">Gateway CEISA 4.0 DJBC</span>
                     </a>
@@ -398,7 +398,7 @@
                         class="w-full flex items-center justify-between px-2.5 py-1.5 rounded-[9px] font-medium transition-all group min-h-[36px] cursor-pointer active:scale-[0.98] {{ $isAiActive ? 'bg-black/[0.05] dark:bg-white/[0.06] text-slate-900 dark:text-white font-semibold' : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.06]' }}"
                         title="MCP Server AI & Asisten Pos Tarif HS Code">
                     <div class="flex items-center space-x-2.5 min-w-0 flex-1 mr-1">
-                        <i data-lucide="cpu" class="w-4 h-4 flex-shrink-0 {{ $isAiActive ? 'text-[#007AFF] dark:text-[#0A84FF]' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white' }}"></i>
+                        <i data-lucide="cpu" class="w-4 h-4 flex-shrink-0 {{ $isAiActive ? 'text-[#0284c7] dark:text-[#0A84FF]' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white' }}"></i>
                         <span x-show="!sidebarCollapsed" class="truncate">Integrasi & Protokol</span>
                     </div>
                     <i x-show="!sidebarCollapsed" 
@@ -412,13 +412,13 @@
                      x-collapse 
                      class="ml-3.5 pl-2.5 border-l border-black/[0.08] dark:border-white/[0.1] space-y-0.5 mt-0.5">
                     <a href="{{ route('settings.mcp') }}" 
-                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('settings.mcp*') || request()->routeIs('mcp.*') ? 'bg-[#007AFF] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('settings.mcp*') || request()->routeIs('mcp.*') ? 'bg-[#0284c7] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
                         <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('settings.mcp*') || request()->routeIs('mcp.*') ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
                         <span class="truncate">MCP Server Protocol</span>
                     </a>
                     @if(!auth()->check() || auth()->user()->hasPermission('ai.view'))
                     <a href="{{ route('ai.index') }}" 
-                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('ai.*') ? 'bg-[#007AFF] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('ai.*') ? 'bg-[#0284c7] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
                         <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('ai.*') ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
                         <span class="truncate">Asisten Pos Tarif HS Code</span>
                     </a>

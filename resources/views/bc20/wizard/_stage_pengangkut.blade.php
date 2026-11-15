@@ -1,7 +1,7 @@
 <div class="space-y-4">
     <div class="flex items-center justify-end">
         <button type="button" @click="smartSyncBc11()"
-                class="px-3.5 py-2 rounded-xl bg-[#007AFF] hover:bg-[#0066D6] text-white text-xs font-semibold inline-flex items-center gap-1.5 shadow-xs cursor-pointer">
+                class="px-3.5 py-2 rounded-xl bg-[#0284c7] hover:bg-[#0066D6] text-white text-xs font-semibold inline-flex items-center gap-1.5 shadow-xs cursor-pointer">
             <i data-lucide="wand-2" class="w-3.5 h-3.5"></i>
             <span>Smart Sync dengan BC 1.1</span>
         </button>
@@ -119,7 +119,7 @@
                 <div class="flex items-center gap-2 p-2 rounded-xl border border-slate-200 dark:border-white/15 bg-slate-50 dark:bg-[#2C2C2E]">
                     <input type="file" accept=".pdf,.png,.jpg,.jpeg" @change="handleWizardDocUpload($event, 'noa')" class="text-[11px] w-full text-slate-600 dark:text-slate-300">
                     <button type="button" x-show="w.pengangkut.noa_document_id" @click="previewByDocId(w.pengangkut.noa_document_id)"
-                            class="px-2 py-1 rounded-lg bg-[#007AFF]/10 text-[#007AFF] font-semibold text-[10px] shrink-0 cursor-pointer">
+                            class="px-2 py-1 rounded-lg bg-[#0284c7]/10 text-[#0284c7] font-semibold text-[10px] shrink-0 cursor-pointer">
                         Preview NOA
                     </button>
                 </div>

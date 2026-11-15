@@ -12,10 +12,22 @@ use App\Models\StagePrerequisite;
 use App\Services\Shipment\BatchImportService;
 use App\Services\Shipment\StageJumpService;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Gate;
 
-class BatchImportController extends Controller
+class BatchImportController extends Controller implements HasMiddleware
 {
+    /**
+     * Daftarkan middleware proteksi RBAC level Controller
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:document.view', only: ['index', 'show', 'review']),
+            new Middleware('permission:document.create|document.edit', only: ['store', 'updateField', 'applyJumpStage', 'destroy', 'destroyDocument']),
+        ];
+    }
     protected BatchImportService $importService;
     protected StageJumpService $jumpService;
 

@@ -15,13 +15,13 @@
                 <h1 class="text-[20px] sm:text-[22px] font-bold text-black dark:text-white tracking-tight">
                     Batch: {{ $batch->batch_no }}
                 </h1>
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#007AFF]/10 text-[#007AFF]">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#0284c7]/10 text-[#0284c7]">
                     {{ $documents->count() }} Dokumen Logis
                 </span>
                 @if($batch->type === 'EXPORT')
                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#AF52DE]/15 text-[#AF52DE]">EKSPOR (BC 3.0)</span>
                 @elseif($batch->type === 'IMPORT')
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#007AFF]/15 text-[#007AFF]">IMPOR (BC 2.0)</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#0284c7]/15 text-[#0284c7]">IMPOR (BC 2.0)</span>
                 @endif
             </div>
             <p class="text-[13px] text-black/50 dark:text-white/50 mt-1 leading-snug">
@@ -78,7 +78,7 @@
                             <span class="text-[11px] text-black/40 dark:text-white/40">{{ $doc->file?->file_size_kb }} KB &bull; SHA: {{ substr($doc->file?->file_hash ?? '', 0, 8) }}...</span>
                         </td>
                         <td class="px-6 py-4">
-                            <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#007AFF]/10 text-[#007AFF]">
+                            <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#0284c7]/10 text-[#0284c7]">
                                 {{ $doc->document_type }}
                             </span>
                             <span class="block text-[11px] text-[#34C759] font-medium mt-0.5">
@@ -104,7 +104,7 @@
                             @endif
                         </td>
                         <td class="px-6 py-4 text-right whitespace-nowrap space-x-1">
-                            <a href="{{ route('core.import.review', $doc->id) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[12px] font-semibold bg-[#007AFF] hover:bg-[#0066CC] text-white transition shadow-sm">
+                            <a href="{{ route('core.import.review', $doc->id) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[12px] font-semibold bg-[#0284c7] hover:bg-[#0066CC] text-white transition shadow-sm">
                                 Review Layar Terbagi
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
                             </a>

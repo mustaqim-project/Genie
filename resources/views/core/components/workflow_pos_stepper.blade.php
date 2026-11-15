@@ -74,18 +74,18 @@ window.openRollbackModalForStage = function(stageCode) {
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
             <div class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium mb-1.5" aria-label="Breadcrumb">
-                <a href="{{ route('core.document.index') }}" class="hover:text-[#007AFF] transition-colors flex items-center gap-1">
+                <a href="{{ route('core.document.index') }}" class="hover:text-[#0284c7] transition-colors flex items-center gap-1">
                     <i data-lucide="folder" class="w-3.5 h-3.5"></i>
                     <span>Semua Proyek</span>
                 </a>
                 <i data-lucide="chevron-right" class="w-3 h-3 text-slate-300 dark:text-slate-600"></i>
                 @if($shipment->type === 'EXPORT')
-                    <a href="{{ route('bc30.index') }}" class="hover:text-[#007AFF] text-indigo-600 dark:text-indigo-400 font-bold transition-colors flex items-center gap-1">
+                    <a href="{{ route('bc30.index') }}" class="hover:text-[#0284c7] text-indigo-600 dark:text-indigo-400 font-bold transition-colors flex items-center gap-1">
                         <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
                         <span>BC 3.0 (PEB)</span>
                     </a>
                 @else
-                    <a href="{{ route('bc20.index') }}" class="hover:text-[#007AFF] text-[#007AFF] font-bold transition-colors flex items-center gap-1">
+                    <a href="{{ route('bc20.index') }}" class="hover:text-[#0284c7] text-[#0284c7] font-bold transition-colors flex items-center gap-1">
                         <i data-lucide="arrow-down-left" class="w-3.5 h-3.5"></i>
                         <span>BC 2.0 (PIB)</span>
                     </a>
@@ -105,7 +105,7 @@ window.openRollbackModalForStage = function(stageCode) {
                         BC 3.0 (PEB)
                     </span>
                 @else
-                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold font-mono bg-sky-50 dark:bg-sky-950/60 text-[#007AFF] border border-sky-200/80">
+                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold font-mono bg-sky-50 dark:bg-sky-950/60 text-[#0284c7] border border-sky-200/80">
                         BC 2.0 (PIB)
                     </span>
                 @endif
@@ -150,10 +150,10 @@ window.openRollbackModalForStage = function(stageCode) {
             <!-- Tombol Lihat Proses Sebelumnya -->
             <button type="button" 
                     onclick="openViewPreviousProcessModal()"
-                    class="w-9 h-9 rounded-xl border border-sky-300 dark:border-sky-800 bg-sky-50/80 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 text-[#007AFF] inline-flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+                    class="w-9 h-9 rounded-xl border border-sky-300 dark:border-sky-800 bg-sky-50/80 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 text-[#0284c7] inline-flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
                     title="Lihat rincian riwayat dan seluruh proses sebelumnya dari Pos 1 hingga Pos berjalan"
                     aria-label="Lihat Proses Sebelumnya">
-                <i data-lucide="eye" class="w-4 h-4 text-[#007AFF]"></i>
+                <i data-lucide="eye" class="w-4 h-4 text-[#0284c7]"></i>
             </button>
 
             <!-- Matriks Tracing 11 Pos -->
@@ -202,7 +202,7 @@ window.openRollbackModalForStage = function(stageCode) {
             <!-- Portal Pelacakan Klien & Timer Button -->
             <button type="button" 
                     onclick="openPortalModalShow()"
-                    class="w-9 h-9 rounded-xl border inline-flex items-center justify-center transition-colors shadow-2xs cursor-pointer relative {{ $shipment->isPortalActive() ? 'border-[#007AFF]/40 bg-[#007AFF]/10 text-[#007AFF]' : 'border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10' }}"
+                    class="w-9 h-9 rounded-xl border inline-flex items-center justify-center transition-colors shadow-2xs cursor-pointer relative {{ $shipment->isPortalActive() ? 'border-[#0284c7]/40 bg-[#0284c7]/10 text-[#0284c7]' : 'border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10' }}"
                     title="Bagikan Tautan Pelacakan Portal Klien & Atur Timer"
                     aria-label="Portal Klien">
                 <i data-lucide="share-2" class="w-4 h-4"></i>
@@ -297,7 +297,7 @@ window.openRollbackModalForStage = function(stageCode) {
                     @if($stageStatus === 'done')
                         <button type="button" 
                                 onclick="navigateToWorkflowStage({{ $i }})"
-                                class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-emerald-500 border-2 border-emerald-500 text-white flex items-center justify-center font-bold text-xs mx-auto mb-2 shadow-xs transition-transform group-hover:scale-110 cursor-pointer hover:ring-2 hover:ring-[#007AFF]"
+                                class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-emerald-500 border-2 border-emerald-500 text-white flex items-center justify-center font-bold text-xs mx-auto mb-2 shadow-xs transition-transform group-hover:scale-110 cursor-pointer hover:ring-2 hover:ring-[#0284c7]"
                                 title="{{ $stage['title'] }}: Selesai {{ $picName ? '(' . $picName . ')' : '' }} — Klik untuk melihat rincian proses pos ini">
                             <i data-lucide="check" class="w-4 h-4 stroke-[3]"></i>
                         </button>
@@ -314,7 +314,7 @@ window.openRollbackModalForStage = function(stageCode) {
                     @elseif($stageStatus === 'cur')
                         <button type="button"
                                 onclick="navigateToWorkflowStage({{ $i }})"
-                                class="w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 border-[#007AFF] bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center font-extrabold text-xs mx-auto mb-2 ring-4 ring-[#007AFF]/20 transition-transform group-hover:scale-110 shadow-sm cursor-pointer"
+                                class="w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 border-[#0284c7] bg-[#0284c7]/10 text-[#0284c7] flex items-center justify-center font-extrabold text-xs mx-auto mb-2 ring-4 ring-[#0284c7]/20 transition-transform group-hover:scale-110 shadow-sm cursor-pointer"
                                 title="Pos Berjalan: {{ $stage['title'] }} {{ $picName ? '— PIC: ' . $picName : '— Belum ada PIC' }} — Klik untuk melihat">
                             <span>{{ $posNumber }}</span>
                         </button>
@@ -324,8 +324,8 @@ window.openRollbackModalForStage = function(stageCode) {
                             {{ $stage['title'] }}
                         </div>
                         <div class="inline-flex items-center gap-1 mt-0.5">
-                            <span class="w-1.5 h-1.5 rounded-full bg-[#007AFF] animate-ping"></span>
-                            <span class="text-[10px] font-bold text-[#007AFF] font-mono truncate">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#0284c7] animate-ping"></span>
+                            <span class="text-[10px] font-bold text-[#0284c7] font-mono truncate">
                                 {{ $picName ? Str::limit(explode(' ', $picName)[0], 8) : 'Perlu PIC' }}
                             </span>
                         </div>
@@ -373,7 +373,7 @@ window.openRollbackModalForStage = function(stageCode) {
     <div class="bg-white dark:bg-[#1C1C1E] w-full max-w-2xl rounded-2xl border border-black/10 dark:border-white/10 shadow-2xl p-6 text-xs text-slate-800 dark:text-slate-200 max-h-[90vh] flex flex-col">
         <div class="flex items-center justify-between pb-3 border-b border-black/10 dark:border-white/10 mb-4 shrink-0">
             <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-xl bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center shrink-0">
+                <div class="w-8 h-8 rounded-xl bg-[#0284c7]/10 text-[#0284c7] flex items-center justify-center shrink-0">
                     <i data-lucide="eye" class="w-4 h-4"></i>
                 </div>
                 <div>
@@ -450,7 +450,7 @@ window.openRollbackModalForStage = function(stageCode) {
                         No Aju: {{ $shipment->ceisaDocument?->nomor_aju ?? 'Belum ada draf' }}
                     </p>
                     <div class="text-[11px] text-slate-600 dark:text-slate-400 flex items-center gap-2">
-                        <span>Status: <strong class="font-bold text-[#007AFF]">{{ $shipment->ceisaDocument?->status ?? 'DRAFT' }}</strong></span>
+                        <span>Status: <strong class="font-bold text-[#0284c7]">{{ $shipment->ceisaDocument?->status ?? 'DRAFT' }}</strong></span>
                         @if($shipment->customs_channel)
                             &bull; <span>Jalur: <strong class="font-bold">{{ $shipment->customs_channel }}</strong></span>
                         @endif
@@ -572,7 +572,7 @@ window.openRollbackModalForStage = function(stageCode) {
             @csrf
             <div>
                 <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300">Pos / Tahapan Target Pembukaan Kembali *</label>
-                <select name="target_stage" id="rollback_target_stage" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white font-semibold focus:ring-2 focus:ring-[#007AFF]">
+                <select name="target_stage" id="rollback_target_stage" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white font-semibold focus:ring-2 focus:ring-[#0284c7]">
                     <option value="DOC_COLLECTING" {{ $isBillingLocked ? 'disabled' : '' }} {{ $currentIdx > 0 && !$isBillingLocked ? 'selected' : '' }}>Pos 1: Dokumen (Pengumpulan & Kelengkapan Berkas) {{ $isBillingLocked ? '[Terkunci - Billing Terbit]' : '' }}</option>
                     <option value="HS_DETECTED" {{ $isBillingLocked ? 'disabled' : '' }} {{ $currentIdx > 1 && !$isBillingLocked ? 'selected' : '' }}>Pos 2: HS & Lartas (Pencocokan Pos Tarif BTKI) {{ $isBillingLocked ? '[Terkunci - Billing Terbit]' : '' }}</option>
                     <option value="DRAFT_REVIEW" {{ $isBillingLocked ? 'disabled' : '' }} {{ $currentIdx > 2 && !$isBillingLocked ? 'selected' : '' }}>Pos 3: Dokumen Pabean (Draft Review PIB/PEB) {{ $isBillingLocked ? '[Terkunci - Billing Terbit]' : '' }}</option>
@@ -599,7 +599,7 @@ window.openRollbackModalForStage = function(stageCode) {
             @if($shipment->ceisaDocument)
                 <div class="p-3 rounded-xl bg-slate-50 dark:bg-[#2C2C2E]/60 border border-slate-200 dark:border-white/10">
                     <label class="flex items-start gap-2.5 {{ $isBillingLocked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer' }}">
-                        <input type="checkbox" name="reopen_ceisa_draft" value="1" {{ $isBillingLocked ? 'disabled' : 'checked' }} class="mt-0.5 rounded text-[#007AFF] focus:ring-[#007AFF]">
+                        <input type="checkbox" name="reopen_ceisa_draft" value="1" {{ $isBillingLocked ? 'disabled' : 'checked' }} class="mt-0.5 rounded text-[#0284c7] focus:ring-[#0284c7]">
                         <div>
                             <span class="font-semibold block text-slate-800 dark:text-white">Buka Kembali Dokumen Pabean (CEISA) ke Status DRAFT</span>
                             <span class="text-[11px] text-slate-500 dark:text-slate-400 block mt-0.5">
@@ -617,7 +617,7 @@ window.openRollbackModalForStage = function(stageCode) {
             <div>
                 <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300">Alasan Pembukaan Kembali (Catatan Audit Trail)</label>
                 <textarea name="alasan" rows="3" placeholder="Contoh: Revisi rincian nilai invoice / perubahan pos tarif HS Code dari supplier..." 
-                          class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF] text-xs"></textarea>
+                          class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#0284c7] text-xs"></textarea>
             </div>
 
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-black/10 dark:border-white/10">

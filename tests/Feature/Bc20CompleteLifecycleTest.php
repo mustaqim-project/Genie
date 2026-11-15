@@ -115,7 +115,7 @@ class Bc20CompleteLifecycleTest extends TestCase
         $shipment = Shipment::where('nomor_bl_awb', 'MSKU9821739')->first();
         $this->assertNotNull($shipment, 'Shipment BC 2.0 gagal dibuat di database');
         $this->assertEquals('IMPORT', $shipment->type);
-        $this->assertEquals(9, $shipment->documents()->count(), '9 slot checklist dokumen wajib harus terinisialisasi');
+        $this->assertEquals(14, $shipment->documents()->count(), '14 slot checklist dokumen wajib harus terinisialisasi');
 
         // Pastikan berkas inti tersimpan di dokumen
         $docBL = $shipment->documents()->where('jenis_dokumen', 'BL_AWB')->first();

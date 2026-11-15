@@ -9,7 +9,7 @@
     <header class="rounded-[16px] backdrop-blur-md bg-white/75 dark:bg-[#1C1C1E]/75 border border-black/5 dark:border-white/10 px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
         <div>
             <nav class="flex items-center gap-1.5 text-[12px] text-black/50 dark:text-white/50 mb-1" aria-label="Breadcrumb">
-                <a href="{{ route('dashboard') }}" class="hover:text-[#007AFF] transition-colors">Dashboard</a>
+                <a href="{{ route('dashboard') }}" class="hover:text-[#0284c7] transition-colors">Dashboard</a>
                 <i data-lucide="chevron-right" class="w-3.5 h-3.5 opacity-40"></i>
                 <span class="text-black/70 dark:text-white/70 font-medium">Core Bisnis</span>
                 <i data-lucide="chevron-right" class="w-3.5 h-3.5 opacity-40"></i>
@@ -144,7 +144,7 @@
                             </td>
                             <td class="py-3 px-4">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold font-mono
-                                    {{ $shp->status === 'DELIVERED' ? 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158]' : ($shp->status === 'GATE_OUT' ? 'bg-[#007AFF]/15 text-[#007AFF]' : 'bg-black/[0.06] dark:bg-white/[0.08] text-black/70 dark:text-white/70') }}">
+                                    {{ $shp->status === 'DELIVERED' ? 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158]' : ($shp->status === 'GATE_OUT' ? 'bg-[#0284c7]/15 text-[#0284c7]' : 'bg-black/[0.06] dark:bg-white/[0.08] text-black/70 dark:text-white/70') }}">
                                     {{ $shp->status }}
                                 </span>
                             </td>
@@ -152,7 +152,7 @@
                                 <button type="button"
                                         onclick="openPhotoInspectionModal('{{ $shp->id }}', '{{ $shp->shipment_number ?? $shp->project_no }}', '{{ $shp->nomor_kontainer }}', '{{ $shp->new_seal_number }}')"
                                         class="btn-apple-gray !h-8 !px-2.5 !text-[11px] inline-flex items-center gap-1">
-                                    <i data-lucide="camera" class="w-3.5 h-3.5 text-[#007AFF]"></i>
+                                    <i data-lucide="camera" class="w-3.5 h-3.5 text-[#0284c7]"></i>
                                     <span>Foto SPJM/Segel</span>
                                 </button>
                                 @if($shp->status === 'GATE_OUT')
@@ -213,17 +213,17 @@
             @csrf
             <div>
                 <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Nomor Polisi Truk Trailer <span class="text-[#FF3B30]">*</span></label>
-                <input type="text" name="truck_plate_number" required placeholder="Contoh: B 9281 UEM" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                <input type="text" name="truck_plate_number" required placeholder="Contoh: B 9281 UEM" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]">
             </div>
 
             <div>
                 <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Nama Pengemudi / Supir <span class="text-[#FF3B30]">*</span></label>
-                <input type="text" name="driver_name" required placeholder="Contoh: Joko Susilo" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                <input type="text" name="driver_name" required placeholder="Contoh: Joko Susilo" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]">
             </div>
 
             <div>
                 <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Nomor Surat Jalan Ekspedisi <span class="text-[#FF3B30]">*</span></label>
-                <input type="text" name="surat_jalan_number" required placeholder="Contoh: SJ-ATS-202610-0081" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                <input type="text" name="surat_jalan_number" required placeholder="Contoh: SJ-ATS-202610-0081" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]">
             </div>
 
             <div class="pt-3 border-t border-black/5 dark:border-white/5 flex items-center justify-end space-x-2">
@@ -252,7 +252,7 @@
             @csrf
             <div>
                 <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Nama Penerima Barang di Gudang Klien <span class="text-[#FF3B30]">*</span></label>
-                <input type="text" name="receiver_name" required placeholder="Contoh: Bpk. Bambang Pamungkas (Warehouse Head)" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                <input type="text" name="receiver_name" required placeholder="Contoh: Bpk. Bambang Pamungkas (Warehouse Head)" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]">
             </div>
 
             <div>

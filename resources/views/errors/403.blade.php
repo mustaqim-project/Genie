@@ -12,7 +12,7 @@
                 extend: {
                     colors: {
                         apple: {
-                            blue: '#007AFF',
+                            blue: '#0284c7',
                             gray: '#8E8E93',
                         }
                     }
@@ -42,7 +42,7 @@
             border-radius: 980px;
             font-size: 0.8125rem;
             font-weight: 600;
-            background-color: #007AFF;
+            background-color: #0284c7;
             color: #ffffff;
             transition: all 0.15s cubic-bezier(0.25, 0.1, 0.25, 1);
         }
@@ -112,26 +112,26 @@
             <!-- Quick Switcher Demo (Jika Ingin Coba Sebagai Role Lain) -->
             <div class="mb-6 p-4 rounded-2xl bg-sky-50 dark:bg-sky-950/30 border border-sky-200/60 dark:border-sky-800/40 text-left">
                 <div class="text-[11px] font-bold text-sky-800 dark:text-sky-300 mb-2 flex items-center space-x-1.5">
-                    <i data-lucide="arrow-left-right" class="w-3.5 h-3.5 text-[#007AFF]"></i>
+                    <i data-lucide="arrow-left-right" class="w-3.5 h-3.5 text-[#0284c7]"></i>
                     <span>Simulasi: Uji Coba Masuk Sebagai Peran Berwenang</span>
                 </div>
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5 text-[11px]">
-                    <a href="{{ route('quick-login', 'R-ADM') }}" class="p-1.5 rounded-lg bg-white dark:bg-[#1C1C1E] border border-sky-200 dark:border-white/15 text-[#007AFF] font-semibold text-center hover:bg-[#007AFF] hover:text-white transition-colors">
+                    <a href="{{ route('quick-login', 'R-ADM') }}" class="p-1.5 rounded-lg bg-white dark:bg-[#1C1C1E] border border-sky-200 dark:border-white/15 text-[#0284c7] font-semibold text-center hover:bg-[#0284c7] hover:text-white transition-colors">
                         [R-ADM] Admin
                     </a>
-                    <a href="{{ route('quick-login', 'R-OWN') }}" class="p-1.5 rounded-lg bg-white dark:bg-[#1C1C1E] border border-sky-200 dark:border-white/15 text-[#007AFF] font-semibold text-center hover:bg-[#007AFF] hover:text-white transition-colors">
+                    <a href="{{ route('quick-login', 'R-OWN') }}" class="p-1.5 rounded-lg bg-white dark:bg-[#1C1C1E] border border-sky-200 dark:border-white/15 text-[#0284c7] font-semibold text-center hover:bg-[#0284c7] hover:text-white transition-colors">
                         [R-OWN] Pimpinan
                     </a>
-                    <a href="{{ route('quick-login', 'R-DOC-SPV') }}" class="p-1.5 rounded-lg bg-white dark:bg-[#1C1C1E] border border-sky-200 dark:border-white/15 text-[#007AFF] font-semibold text-center hover:bg-[#007AFF] hover:text-white transition-colors">
+                    <a href="{{ route('quick-login', 'R-DOC-SPV') }}" class="p-1.5 rounded-lg bg-white dark:bg-[#1C1C1E] border border-sky-200 dark:border-white/15 text-[#0284c7] font-semibold text-center hover:bg-[#0284c7] hover:text-white transition-colors">
                         [R-DOC-SPV] Spv
                     </a>
-                    <a href="{{ route('quick-login', 'R-FIN') }}" class="p-1.5 rounded-lg bg-white dark:bg-[#1C1C1E] border border-sky-200 dark:border-white/15 text-[#007AFF] font-semibold text-center hover:bg-[#007AFF] hover:text-white transition-colors">
+                    <a href="{{ route('quick-login', 'R-FIN') }}" class="p-1.5 rounded-lg bg-white dark:bg-[#1C1C1E] border border-sky-200 dark:border-white/15 text-[#0284c7] font-semibold text-center hover:bg-[#0284c7] hover:text-white transition-colors">
                         [R-FIN] Finance
                     </a>
-                    <a href="{{ route('quick-login', 'R-HR') }}" class="p-1.5 rounded-lg bg-white dark:bg-[#1C1C1E] border border-sky-200 dark:border-white/15 text-[#007AFF] font-semibold text-center hover:bg-[#007AFF] hover:text-white transition-colors">
+                    <a href="{{ route('quick-login', 'R-HR') }}" class="p-1.5 rounded-lg bg-white dark:bg-[#1C1C1E] border border-sky-200 dark:border-white/15 text-[#0284c7] font-semibold text-center hover:bg-[#0284c7] hover:text-white transition-colors">
                         [R-HR] HR
                     </a>
-                    <a href="{{ route('quick-login', 'R-DO') }}" class="p-1.5 rounded-lg bg-white dark:bg-[#1C1C1E] border border-sky-200 dark:border-white/15 text-[#007AFF] font-semibold text-center hover:bg-[#007AFF] hover:text-white transition-colors">
+                    <a href="{{ route('quick-login', 'R-DO') }}" class="p-1.5 rounded-lg bg-white dark:bg-[#1C1C1E] border border-sky-200 dark:border-white/15 text-[#0284c7] font-semibold text-center hover:bg-[#0284c7] hover:text-white transition-colors">
                         [R-DO] Staff DO
                     </a>
                 </div>

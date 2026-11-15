@@ -61,7 +61,7 @@
                     },
                     colors: {
                         apple: {
-                            blue: '#007AFF',
+                            blue: '#0284c7',
                             'blue-dark': '#0A84FF',
                             green: '#34C759',
                             'green-dark': '#30D158',
@@ -90,7 +90,7 @@
                             200: '#bae0fd',
                             300: '#7cc5fb',
                             400: '#36a6f7',
-                            500: '#007AFF',
+                            500: '#0284c7',
                             600: '#0071E3',
                             700: '#0056b3',
                             800: '#00448f',
@@ -137,13 +137,13 @@
             --border-str: rgba(60, 60, 67, 0.18);
 
             /* Brand Colors (System Blue Master Accent) */
-            --brand: #007AFF;
+            --brand: #0284c7;
             --brand-hover: #0071E3;
             --brand-light: rgba(0, 122, 255, 0.1);
-            --brand-text: #007AFF;
+            --brand-text: #0284c7;
 
             /* Apple Semantic Status Tokens */
-            --color-accent: #007AFF;
+            --color-accent: #0284c7;
             --color-success: #34C759;
             --color-warning: #FF9500;
             --color-danger: #FF3B30;
@@ -209,7 +209,7 @@
 
             /* Brand Colors */
             --brand: #0A84FF;
-            --brand-hover: #007AFF;
+            --brand-hover: #0284c7;
             --brand-light: rgba(10, 132, 255, 0.15);
             --brand-text: #0A84FF;
 
@@ -363,7 +363,7 @@
             font-size: 0.8125rem;
             font-weight: 600;
             color: #ffffff;
-            background-color: #007AFF;
+            background-color: #0284c7;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -388,7 +388,7 @@
             border-radius: var(--r-md);
             font-size: 0.8125rem;
             font-weight: 600;
-            color: #007AFF;
+            color: #0284c7;
             background-color: rgba(0, 122, 255, 0.1);
             display: inline-flex;
             align-items: center;
@@ -452,7 +452,7 @@
             border-radius: var(--r-sm);
             font-size: 0.8125rem;
             font-weight: 500;
-            color: #007AFF;
+            color: #0284c7;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -501,7 +501,7 @@
 
         /* Backward compatibility mappings */
         .btn-brand-primary {
-            background: #007AFF;
+            background: #0284c7;
             color: #ffffff;
             font-weight: 600;
             font-size: 0.8125rem;
@@ -674,9 +674,10 @@
 
     @stack('styles')
 </head>
-<body class="h-full bg-[#F2F2F7] dark:bg-[#1E1E1E] text-black dark:text-white antialiased selection:bg-[#007AFF]/20 selection:text-[#007AFF] flex flex-col min-h-[100dvh]"
+<body class="h-full bg-[#F2F2F7] dark:bg-[#1E1E1E] text-black dark:text-white antialiased selection:bg-[#0284c7]/20 selection:text-[#0284c7] flex flex-col min-h-[100dvh]"
       x-data="{ 
           sidebarOpen: false, 
+          mobileMenuOpen: false,
           sidebarCollapsed: localStorage.getItem('genie-sidebar-collapsed') === 'true',
           quickSearchOpen: false,
           searchQuery: '',
@@ -844,14 +845,14 @@
                 <div class="font-bold text-[10px] text-black/40 dark:text-white/40 uppercase tracking-wider px-2 py-1">Pintasan Cepat Operasional (Spotlight)</div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1.5">
                     <a href="{{ route('core.document.index') }}" class="p-2.5 rounded-[12px] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] border border-transparent hover:border-black/5 dark:hover:border-white/5 flex items-center space-x-3 text-black/80 dark:text-white/80 font-medium transition-all group">
-                        <span class="w-8 h-8 rounded-[10px] bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center font-bold text-xs flex-shrink-0 group-hover:scale-105 transition-transform">P01</span>
+                        <span class="w-8 h-8 rounded-[10px] bg-[#0284c7]/10 text-[#0284c7] flex items-center justify-center font-bold text-xs flex-shrink-0 group-hover:scale-105 transition-transform">P01</span>
                         <div class="truncate">
                             <div class="text-[13px] font-bold text-black dark:text-white truncate">Project Lifecycle (P01)</div>
                             <div class="text-[11px] text-black/45 dark:text-white/45 truncate">Buat & kelola berkas pengiriman</div>
                         </div>
                     </a>
                     <a href="{{ route('bc20.create') }}" class="p-2.5 rounded-[12px] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] border border-transparent hover:border-black/5 dark:hover:border-white/5 flex items-center space-x-3 text-black/80 dark:text-white/80 font-medium transition-all group">
-                        <span class="w-8 h-8 rounded-[10px] bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center font-bold text-xs flex-shrink-0 group-hover:scale-105 transition-transform">BC20</span>
+                        <span class="w-8 h-8 rounded-[10px] bg-[#0284c7]/10 text-[#0284c7] flex items-center justify-center font-bold text-xs flex-shrink-0 group-hover:scale-105 transition-transform">BC20</span>
                         <div class="truncate">
                             <div class="text-[13px] font-bold text-black dark:text-white truncate">Draft PIB (BC 2.0 Impor)</div>
                             <div class="text-[11px] text-black/45 dark:text-white/45 truncate">Integrasi CEISA 4.0 DJBC</div>
@@ -872,7 +873,7 @@
                         </div>
                     </a>
                     <a href="{{ route('finance.cash-bank.index') }}" class="p-2.5 rounded-[12px] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] border border-transparent hover:border-black/5 dark:hover:border-white/5 flex items-center space-x-3 text-black/80 dark:text-white/80 font-medium transition-all group">
-                        <span class="w-8 h-8 rounded-[10px] bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center font-bold text-xs flex-shrink-0 group-hover:scale-105 transition-transform">CB</span>
+                        <span class="w-8 h-8 rounded-[10px] bg-[#0284c7]/10 text-[#0284c7] flex items-center justify-center font-bold text-xs flex-shrink-0 group-hover:scale-105 transition-transform">CB</span>
                         <div class="truncate">
                             <div class="text-[13px] font-bold text-black dark:text-white truncate">Buku Kas & Rekening Bank</div>
                             <div class="text-[11px] text-black/45 dark:text-white/45 truncate">Mutasi, transfer & rekonsiliasi</div>

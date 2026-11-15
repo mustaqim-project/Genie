@@ -3,6 +3,7 @@
 namespace App\Services\Ceisa;
 
 use App\Models\CeisaApiLog;
+use App\Models\SystemSetting;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -212,6 +213,11 @@ class CeisaClientService
             ];
         }
 
+        $respTemplate = SystemSetting::get('ceisa_mock_response_template', []);
+        $kodeStatusDef = $respTemplate['kode_status_default'] ?? '200';
+        $ketStatusDef = $respTemplate['keterangan_status'] ?? 'Dokumen terdaftar dan telah masuk dalam sistem penjaluran DJBC';
+        $headerPrefix = $respTemplate['id_header_prefix'] ?? 'fbb63046';
+
         // 2. Endpoint Kirim Dokumen Resmi (POST /document)
         if (str_contains($endpoint, 'document') || (str_contains($endpoint, 'dokumen') && !str_contains($endpoint, 'status') && !str_contains($endpoint, 'respon'))) {
             return [
@@ -220,7 +226,7 @@ class CeisaClientService
                 'data' => [
                     'status' => 'OK',
                     'message' => 'Sukses, Data Berhasil Ditambahkan',
-                    'idHeader' => 'fbb63046-' . substr(md5($nomorAju), 0, 4) . '-4649-98ae-bfcb0aa82f09',
+                    'idHeader' => $headerPrefix . '-' . substr(md5($nomorAju), 0, 4) . '-4649-98ae-bfcb0aa82f09',
                     'nomorAju' => $nomorAju,
                     'waktuTerima' => now()->toIso8601String(),
                 ],
@@ -241,11 +247,11 @@ class CeisaClientService
                     'dataStatus' => [
                         [
                             'nomorAju' => $nomorAju,
-                            'kodeStatus' => '200',
+                            'kodeStatus' => $kodeStatusDef,
                             'nomorDaftar' => $noDaftar,
                             'tanggalDaftar' => $tglDaftar,
                             'waktuStatus' => now()->toIso8601String(),
-                            'keterangan' => 'Dokumen terdaftar dan telah masuk dalam sistem penjaluran DJBC',
+                            'keterangan' => $ketStatusDef,
                         ],
                     ],
                     'dataRespon' => [

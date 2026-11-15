@@ -36,7 +36,7 @@ class StagePrerequisiteSeeder extends Seeder
                 'required_fields' => ['client_id', 'nomor_bl_awb', 'total_cif'],
                 'required_documents' => ['INVOICE', 'PACKING_LIST', 'BL_AWB'],
                 'is_approval_required' => true,
-                'approver_role' => 'R-SPV',
+                'approver_role' => 'R-DOC-SPV',
             ],
             [
                 'stage_number' => 4,
@@ -45,7 +45,7 @@ class StagePrerequisiteSeeder extends Seeder
                 'required_fields' => ['nomor_bl_awb'],
                 'required_documents' => [],
                 'is_approval_required' => true,
-                'approver_role' => 'R-SPV',
+                'approver_role' => 'R-DOC-SPV',
             ],
             [
                 'stage_number' => 5,

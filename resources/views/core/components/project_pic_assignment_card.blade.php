@@ -35,7 +35,7 @@
                 <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight">
                     Tim & PIC Project (Pembagian Tugas 11 Pos)
                 </h3>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#007AFF]/10 text-[#007AFF] border border-[#007AFF]/20">
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#0284c7]/10 text-[#0284c7] border border-[#0284c7]/20">
                     Delegasi SLA
                 </span>
             </div>
@@ -85,13 +85,13 @@
                         $isCurrentStage = ($stageStatus === 'cur');
                         $userCanTakeOver = $authUser && $isCurrentStage && ($authUser->hasRole($stg['role']) || $canManagePic) && ($primaryUser?->id !== $authUser->id);
                     @endphp
-                    <tr class="hover:bg-black/[0.015] dark:hover:bg-white/[0.015] transition-colors {{ $isCurrentStage ? 'bg-[#007AFF]/[0.03] dark:bg-[#007AFF]/[0.06]' : '' }}">
+                    <tr class="hover:bg-black/[0.015] dark:hover:bg-white/[0.015] transition-colors {{ $isCurrentStage ? 'bg-[#0284c7]/[0.03] dark:bg-[#0284c7]/[0.06]' : '' }}">
                         <!-- Pos Number -->
                         <td class="py-3.5 px-3.5 text-center">
                             @if($stageStatus === 'done')
                                 <span class="w-6 h-6 rounded-full bg-emerald-500 text-white font-bold text-[11px] inline-flex items-center justify-center">✓</span>
                             @elseif($stageStatus === 'cur')
-                                <span class="w-6 h-6 rounded-full bg-[#007AFF] text-white font-bold text-[11px] inline-flex items-center justify-center ring-2 ring-[#007AFF]/30">{{ $posNumber }}</span>
+                                <span class="w-6 h-6 rounded-full bg-[#0284c7] text-white font-bold text-[11px] inline-flex items-center justify-center ring-2 ring-[#0284c7]/30">{{ $posNumber }}</span>
                             @else
                                 <span class="w-6 h-6 rounded-full bg-black/5 dark:bg-white/10 text-slate-500 font-medium text-[11px] inline-flex items-center justify-center">{{ $posNumber }}</span>
                             @endif
@@ -102,7 +102,7 @@
                             <div class="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                                 <span>{{ $stg['title'] }}</span>
                                 @if($isCurrentStage)
-                                    <span class="w-2 h-2 rounded-full bg-[#007AFF] animate-ping"></span>
+                                    <span class="w-2 h-2 rounded-full bg-[#0284c7] animate-ping"></span>
                                 @endif
                             </div>
                             <div class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
@@ -121,10 +121,10 @@
                         <td class="py-3.5 px-3.5">
                             <div class="flex flex-wrap items-center gap-1.5">
                                 @if($primaryUser)
-                                    <div class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#007AFF]/10 text-[#007AFF] dark:text-[#64B5FF] font-medium text-[11px] border border-[#007AFF]/20">
+                                    <div class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#0284c7]/10 text-[#0284c7] dark:text-[#64B5FF] font-medium text-[11px] border border-[#0284c7]/20">
                                         <i data-lucide="user" class="w-3 h-3"></i>
                                         <strong>{{ $primaryUser->name }}</strong>
-                                        <span class="text-[9px] uppercase px-1 rounded bg-[#007AFF]/20">Utama</span>
+                                        <span class="text-[9px] uppercase px-1 rounded bg-[#0284c7]/20">Utama</span>
                                     </div>
                                     @if($backupUser)
                                         <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-black/5 dark:bg-white/10 text-slate-600 dark:text-slate-400 font-medium text-[10px]">
@@ -153,7 +153,7 @@
                                     Selesai
                                 </span>
                             @elseif($stageStatus === 'cur')
-                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#007AFF]/15 text-[#007AFF] dark:text-[#64B5FF] border border-[#007AFF]/20">
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#0284c7]/15 text-[#0284c7] dark:text-[#64B5FF] border border-[#0284c7]/20">
                                     Berjalan
                                 </span>
                             @elseif($stageStatus === 'skip')
@@ -214,7 +214,7 @@
         <div class="relative bg-white dark:bg-[#1C1C1E] rounded-2xl border border-black/10 dark:border-white/10 shadow-2xl max-w-md w-full p-6 text-xs animate-in fade-in zoom-in-95 duration-150">
             <div class="flex items-center justify-between pb-3 border-b border-black/5 dark:border-white/5 mb-4">
                 <div class="flex items-center space-x-2">
-                    <div class="w-8 h-8 rounded-lg bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center">
+                    <div class="w-8 h-8 rounded-lg bg-[#0284c7]/10 text-[#0284c7] flex items-center justify-center">
                         <i data-lucide="user-check" class="w-4 h-4"></i>
                     </div>
                     <div>
@@ -235,7 +235,7 @@
                     <label class="block font-semibold text-slate-800 dark:text-slate-200 mb-1">
                         Pilih PIC Utama <span class="text-rose-500">*</span>
                     </label>
-                    <select name="user_id" x-model="selectedPicId" required class="w-full px-3 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-slate-900 dark:text-white focus:outline-none focus:border-[#007AFF]">
+                    <select name="user_id" x-model="selectedPicId" required class="w-full px-3 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-slate-900 dark:text-white focus:outline-none focus:border-[#0284c7]">
                         <option value="">-- Pilih Karyawan PIC Utama --</option>
                         @foreach($allUsers as $u)
                             @php
@@ -256,7 +256,7 @@
                     <label class="block font-semibold text-slate-800 dark:text-slate-200 mb-1">
                         Pilih PIC Backup (Cadangan / Pendamping)
                     </label>
-                    <select name="backup_id" x-model="selectedBackupId" class="w-full px-3 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-slate-900 dark:text-white focus:outline-none focus:border-[#007AFF]">
+                    <select name="backup_id" x-model="selectedBackupId" class="w-full px-3 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-slate-900 dark:text-white focus:outline-none focus:border-[#0284c7]">
                         <option value="">-- Tanpa PIC Backup --</option>
                         @foreach($allUsers as $u)
                             <option value="{{ $u->id }}">
@@ -267,7 +267,7 @@
                 </div>
 
                 <div class="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-black/5 dark:border-white/5 text-[11px] text-slate-500 dark:text-slate-400">
-                    <i data-lucide="info" class="w-3.5 h-3.5 inline text-[#007AFF] mr-1"></i>
+                    <i data-lucide="info" class="w-3.5 h-3.5 inline text-[#0284c7] mr-1"></i>
                     Staf yang ditugaskan akan mendapatkan notifikasi penugasan dan pengingat batas waktu target SLA pengerjaan.
                 </div>
 

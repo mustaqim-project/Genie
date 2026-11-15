@@ -342,4 +342,34 @@ class SettingController extends Controller implements HasMiddleware
         return redirect()->route('setting.index', ['tab' => 'security'])
             ->with('success', 'Seluruh sesi pengguna aktif berhasil di-reset secara paksa.');
     }
+
+    /**
+     * Simpan Parameter Konfigurasi Bisnis & Integrasi Terpusat (Zero Hardcoding)
+     */
+    public function updateSystemParameters(Request $request)
+    {
+        $validated = $request->validate([
+            'group' => 'required|string|in:ceisa,accounting,shipment,tax,crm,company',
+            'key' => 'required|string',
+            'value' => 'required',
+            'description' => 'nullable|string',
+        ]);
+
+        $val = $validated['value'];
+        if (is_string($val) && (str_starts_with(trim($val), '{') || str_starts_with(trim($val), '['))) {
+            $decoded = json_decode($val, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $val = $decoded;
+            }
+        }
+
+        \App\Models\SystemSetting::set(
+            $validated['key'],
+            $val,
+            $validated['group'],
+            $validated['description'] ?? null
+        );
+
+        return back()->with('success', "Parameter [{$validated['key']}] berhasil diperbarui di basis data.");
+    }
 }

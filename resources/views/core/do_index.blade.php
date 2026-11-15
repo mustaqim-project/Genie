@@ -9,7 +9,7 @@
     <header class="rounded-[16px] backdrop-blur-md bg-white/75 dark:bg-[#1C1C1E]/75 border border-black/5 dark:border-white/10 px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
         <div>
             <nav class="flex items-center gap-1.5 text-[12px] text-black/50 dark:text-white/50 mb-1" aria-label="Breadcrumb">
-                <a href="{{ route('dashboard') }}" class="hover:text-[#007AFF] transition-colors">Dashboard</a>
+                <a href="{{ route('dashboard') }}" class="hover:text-[#0284c7] transition-colors">Dashboard</a>
                 <i data-lucide="chevron-right" class="w-3.5 h-3.5 opacity-40"></i>
                 <span class="text-black/70 dark:text-white/70 font-medium">Core Bisnis</span>
                 <i data-lucide="chevron-right" class="w-3.5 h-3.5 opacity-40"></i>
@@ -53,7 +53,7 @@
             </div>
             <div class="flex items-center space-x-2 text-[12px]">
                 <form method="GET" action="{{ route('core.do.index') }}" class="flex items-center space-x-2">
-                    <select name="vendor_id" onchange="this.form.submit()" class="px-3 py-1.5 rounded-[10px] bg-black/[0.03] dark:bg-white/[0.06] border border-black/10 dark:border-white/10 text-black dark:text-white text-[12px] focus:outline-none focus:border-[#007AFF]">
+                    <select name="vendor_id" onchange="this.form.submit()" class="px-3 py-1.5 rounded-[10px] bg-black/[0.03] dark:bg-white/[0.06] border border-black/10 dark:border-white/10 text-black dark:text-white text-[12px] focus:outline-none focus:border-[#0284c7]">
                         <option value="">-- Semua Maskapai Pelayaran --</option>
                         @foreach($vendors as $v)
                             <option value="{{ $v->id }}" {{ request('vendor_id') == $v->id ? 'selected' : '' }}>{{ $v->name }}</option>
@@ -172,12 +172,12 @@
             @csrf
             <div>
                 <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Nomor DO Resmi dari Pelayaran <span class="text-[#FF3B30]">*</span></label>
-                <input type="text" name="do_number" required placeholder="Contoh: DO-MAE-202610-0921" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                <input type="text" name="do_number" required placeholder="Contoh: DO-MAE-202610-0921" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]">
             </div>
 
             <div>
                 <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Masa Berlaku DO Berakhir (Valid Until) <span class="text-[#FF3B30]">*</span></label>
-                <input type="date" name="do_expired_at" required value="{{ now()->addDays(7)->format('Y-m-d') }}" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#007AFF]">
+                <input type="date" name="do_expired_at" required value="{{ now()->addDays(7)->format('Y-m-d') }}" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]">
             </div>
 
             <div>

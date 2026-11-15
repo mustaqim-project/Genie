@@ -16,7 +16,7 @@
         <!-- Right: Functional Operational Status & Build -->
         <div class="flex items-center space-x-3 text-black/50 dark:text-white/50">
             <a href="{{ route('config.index') }}" 
-               class="inline-flex items-center space-x-1.5 hover:text-[#007AFF] transition-colors"
+               class="inline-flex items-center space-x-1.5 hover:text-[#0284c7] transition-colors"
                title="Periksa Koneksi Gateway Pabean">
                 <span class="w-1.5 h-1.5 rounded-full bg-[#34C759]"></span>
                 <span class="font-medium">Gateway CEISA 4.0</span>

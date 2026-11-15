@@ -18,7 +18,7 @@ class WhatsAppController extends Controller implements HasMiddleware
     {
         return [
             new Middleware('permission:crm.view', only: ['index']),
-            new Middleware('permission:crm.manage', except: ['index']),
+            new Middleware('permission:crm.manage', except: ['index', 'verifyWebhook', 'handleWebhook']),
         ];
     }
 
@@ -70,7 +70,7 @@ class WhatsAppController extends Controller implements HasMiddleware
     /**
      * Eksekusi Kirim Siaran Massal (Broadcast / Blast).
      */
-    public function storeBroadcast(Request $request)
+    public function storeBroadcast(Request $request, \App\Services\Crm\MetaWabaService $wabaService)
     {
         $validated = $request->validate([
             'title' => 'required|string|max:200',
@@ -88,6 +88,8 @@ class WhatsAppController extends Controller implements HasMiddleware
         }
 
         $totalRecipients = $clients->count();
+        $sentCount = 0;
+        $failedCount = 0;
 
         $campaign = WhatsappBroadcastCampaign::create([
             'title' => $validated['title'],
@@ -96,25 +98,41 @@ class WhatsAppController extends Controller implements HasMiddleware
             'media_url' => $validated['media_url'] ?? null,
             'target_type' => $validated['target_type'],
             'total_recipients' => $totalRecipients,
-            'total_sent' => $totalRecipients,
+            'total_sent' => 0,
             'total_failed' => 0,
-            'status' => 'completed',
+            'status' => 'processing',
             'sent_at' => now(),
         ]);
 
         foreach ($clients as $client) {
+            $phone = $client->phone ?: '+6281234567890';
+            $res = $wabaService->sendTextMessage($phone, $validated['message']);
+
+            $isSuccess = $res['success'] ?? false;
+            if ($isSuccess) {
+                $sentCount++;
+            } else {
+                $failedCount++;
+            }
+
             WhatsappBroadcastRecipient::create([
                 'campaign_id' => $campaign->id,
                 'client_id' => $client->id,
                 'recipient_name' => $client->pic_name ?: $client->name,
-                'phone_number' => $client->phone ?: '+6281234567890',
-                'status' => 'sent',
+                'phone_number' => $phone,
+                'status' => $isSuccess ? 'sent' : 'failed',
                 'sent_at' => now(),
             ]);
         }
 
+        $campaign->update([
+            'total_sent' => $sentCount,
+            'total_failed' => $failedCount,
+            'status' => 'completed',
+        ]);
+
         return redirect()->route('whatsapp.index', ['tab' => 'broadcasts'])
-            ->with('success', "Siaran (Broadcast) '{$campaign->title}' berhasil dieksekusi ke {$totalRecipients} kontak klien.");
+            ->with('success', "Siaran (Broadcast) '{$campaign->title}' berhasil diproses via Meta WABA: {$sentCount} terkirim, {$failedCount} gagal.");
     }
 
     /**
@@ -148,9 +166,9 @@ class WhatsAppController extends Controller implements HasMiddleware
     }
 
     /**
-     * Uji Kirim Pesan Cepat WhatsApp.
+     * Uji Kirim Pesan Cepat WhatsApp via Meta Cloud API.
      */
-    public function sendTest(Request $request)
+    public function sendTest(Request $request, \App\Services\Crm\MetaWabaService $wabaService)
     {
         $validated = $request->validate([
             'test_phone' => 'required|string',
@@ -162,7 +180,31 @@ class WhatsAppController extends Controller implements HasMiddleware
             $phone = '62' . substr($phone, 1);
         }
 
+        $res = $wabaService->sendTextMessage($phone, $validated['test_message']);
+
+        if (!($res['success'] ?? false)) {
+            return redirect()->route('whatsapp.index')
+                ->with('warning', "Pesan uji coba dikirim ke +{$phone}. Catatan Gateway: " . ($res['error'] ?? 'Simulasi Lokal / Cek Kredensial Meta'));
+        }
+
         return redirect()->route('whatsapp.index')
             ->with('success', "Pesan uji coba WhatsApp resmi berhasil terkirim ke +{$phone} via Meta WABA Gateway.");
+    }
+
+    /**
+     * Verifikasi webhook Meta Cloud API (GET).
+     */
+    public function verifyWebhook(Request $request, \App\Services\Crm\MetaWabaService $wabaService)
+    {
+        return $wabaService->verifyWebhook($request);
+    }
+
+    /**
+     * Tangani payload pesan masuk dari Meta Cloud API (POST).
+     */
+    public function handleWebhook(Request $request, \App\Services\Crm\MetaWabaService $wabaService)
+    {
+        $result = $wabaService->handleInboundWebhook($request);
+        return response()->json($result);
     }
 }

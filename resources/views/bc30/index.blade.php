@@ -49,7 +49,7 @@
     <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-5 sm:p-6 border border-black/[0.06] dark:border-white/[0.08] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <nav class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium mb-1.5" aria-label="Breadcrumb">
-                <a href="{{ route('dashboard') }}" class="hover:text-[#007AFF] transition-colors flex items-center gap-1">
+                <a href="{{ route('dashboard') }}" class="hover:text-[#0284c7] transition-colors flex items-center gap-1">
                     <i data-lucide="home" class="w-3.5 h-3.5"></i>
                     <span>Dashboard</span>
                 </a>
@@ -98,7 +98,7 @@
     <!-- Apple HIG Bento Grid KPI Summary (Termasuk Metrik Lartas) -->
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
         <!-- KPI 1: Total PEB -->
-        <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] shadow-xs flex items-center gap-3.5 hover:border-[#007AFF]/30 transition-all">
+        <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] shadow-xs flex items-center gap-3.5 hover:border-[#0284c7]/30 transition-all">
             <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
                 <i data-lucide="arrow-up-right" class="w-5 h-5"></i>
             </div>
@@ -122,13 +122,13 @@
         </div>
 
         <!-- KPI 3: Proses Validasi -->
-        <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] shadow-xs flex items-center gap-3.5 hover:border-[#007AFF]/30 transition-all">
-            <div class="w-10 h-10 rounded-xl bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center shrink-0">
+        <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] shadow-xs flex items-center gap-3.5 hover:border-[#0284c7]/30 transition-all">
+            <div class="w-10 h-10 rounded-xl bg-[#0284c7]/10 text-[#0284c7] flex items-center justify-center shrink-0">
                 <i data-lucide="zap" class="w-5 h-5"></i>
             </div>
             <div class="min-w-0 flex-1">
                 <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Proses CEISA</div>
-                <div class="text-xl font-bold text-[#007AFF] font-mono tabular-nums">{{ $stats['proses'] ?? 0 }}</div>
+                <div class="text-xl font-bold text-[#0284c7] font-mono tabular-nums">{{ $stats['proses'] ?? 0 }}</div>
                 <div class="text-[10px] text-slate-400 dark:text-slate-500">Validasi sistem</div>
             </div>
         </div>
@@ -177,11 +177,11 @@
                        name="search" 
                        value="{{ request('search') }}" 
                        placeholder="Cari Nomor Aju, Pembeli LN, No Pen..." 
-                       class="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#007AFF]">
+                       class="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0284c7]">
             </div>
 
             <div class="sm:col-span-3">
-                <select name="status" class="w-full px-3 py-2 text-xs rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-[#007AFF]">
+                <select name="status" class="w-full px-3 py-2 text-xs rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-[#0284c7]">
                     <option value="">-- Semua Status Dokumen --</option>
                     <option value="DRAFT" {{ request('status') === 'DRAFT' ? 'selected' : '' }}>DRAFT (Pengisian Awal)</option>
                     <option value="SUBMITTED" {{ request('status') === 'SUBMITTED' ? 'selected' : '' }}>SUBMITTED (Terkirim ke CEISA)</option>
@@ -216,7 +216,7 @@
         <div class="flex items-center gap-1.5 text-xs">
             <span class="text-[11px] font-semibold text-slate-400 dark:text-slate-500 mr-1">Filter Cepat:</span>
             <a href="{{ route('bc30.index', array_merge(request()->except('lartas'), ['lartas' => ''])) }}" 
-               class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all {{ !request('lartas') ? 'bg-[#007AFF] text-white shadow-xs' : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:bg-slate-200' }}">
+               class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all {{ !request('lartas') ? 'bg-[#0284c7] text-white shadow-xs' : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:bg-slate-200' }}">
                 Semua Dokumen ({{ $stats['total'] ?? 0 }})
             </a>
             <a href="{{ route('bc30.index', array_merge(request()->except('lartas'), ['lartas' => 'yes'])) }}" 
@@ -239,7 +239,7 @@
                 @elseif(request('lartas') === 'no')
                     <span class="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-bold text-[10px]">Hanya Bebas Lartas</span>
                 @endif
-                <a href="{{ route('bc30.index') }}" class="text-[#007AFF] hover:underline font-bold text-[10px]">Hapus Filter &times;</a>
+                <a href="{{ route('bc30.index') }}" class="text-[#0284c7] hover:underline font-bold text-[10px]">Hapus Filter &times;</a>
             </div>
         @endif
     </div>
@@ -277,7 +277,7 @@
                         @endphp
                         <tr class="hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
                             <td class="py-3.5 px-4 font-mono" data-sort-value="{{ $doc->nomor_aju }}">
-                                <a href="{{ route('bc30.show', $doc->id) }}" class="font-bold text-[#007AFF] hover:underline">
+                                <a href="{{ route('bc30.show', $doc->id) }}" class="font-bold text-[#0284c7] hover:underline">
                                     {{ $doc->nomor_aju }}
                                 </a>
                                 @if($doc->nomor_daftar)
@@ -410,22 +410,22 @@
                 <textarea x-model="aiQuery" 
                           rows="3" 
                           placeholder="Ketik nama produk, spesifikasi bahan baku, merek, atau deskripsi barang ekspor (contoh: Kopi Arabika Gayo Roasting Kemasan Retail 250gr, Sarang Burung Walet, Minyak Sawit CPO, Sepatu Kulit...)" 
-                          class="w-full px-3.5 py-2.5 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-[#007AFF]"></textarea>
+                          class="w-full px-3.5 py-2.5 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-[#0284c7]"></textarea>
 
                 <div class="flex justify-between items-center pt-1">
                     <div class="flex items-center gap-1 text-[11px] text-slate-400">
                         <span>Contoh cepat:</span>
-                        <button type="button" @click="aiQuery = 'Kopi Arabika Roasting Kemasan Retail 250 Gram Asli Gayo'" class="text-[#007AFF] hover:underline font-semibold">Kopi Arabika</button>
+                        <button type="button" @click="aiQuery = 'Kopi Arabika Roasting Kemasan Retail 250 Gram Asli Gayo'" class="text-[#0284c7] hover:underline font-semibold">Kopi Arabika</button>
                         <span>&bull;</span>
-                        <button type="button" @click="aiQuery = 'Sarang Burung Walet Bersih Siap Konsumsi Kualitas Ekspor'" class="text-[#007AFF] hover:underline font-semibold">Sarang Walet</button>
+                        <button type="button" @click="aiQuery = 'Sarang Burung Walet Bersih Siap Konsumsi Kualitas Ekspor'" class="text-[#0284c7] hover:underline font-semibold">Sarang Walet</button>
                         <span>&bull;</span>
-                        <button type="button" @click="aiQuery = 'Papan Kayu Olahan Merbau Moulding S4S Decking'" class="text-[#007AFF] hover:underline font-semibold">Produk Kayu</button>
+                        <button type="button" @click="aiQuery = 'Papan Kayu Olahan Merbau Moulding S4S Decking'" class="text-[#0284c7] hover:underline font-semibold">Produk Kayu</button>
                     </div>
 
                     <button type="button" 
                             @click="runAiClassify()" 
                             :disabled="aiLoading" 
-                            class="px-4 py-2 rounded-xl bg-[#007AFF] hover:bg-[#0062CC] text-white font-bold text-xs inline-flex items-center gap-1.5 shadow-xs transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer">
+                            class="px-4 py-2 rounded-xl bg-[#0284c7] hover:bg-[#0062CC] text-white font-bold text-xs inline-flex items-center gap-1.5 shadow-xs transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer">
                         <template x-if="aiLoading">
                             <span class="inline-flex items-center gap-1.5">
                                 <svg class="animate-spin h-3.5 w-3.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>

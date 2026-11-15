@@ -321,7 +321,7 @@
                     <div>
                         <span class="text-slate-400 dark:text-slate-500 block text-[10px] uppercase font-bold">Nomor Proyek (Job Order)</span>
                         <a href="{{ $invoice->shipment ? route('core.document.show', $invoice->shipment->id) : '#' }}" 
-                           class="font-mono font-bold text-[#007AFF] hover:underline">
+                           class="font-mono font-bold text-[#0284c7] hover:underline">
                             {{ $invoice->shipment->project_no ?? $invoice->shipment->shipment_number ?? '-' }}
                         </a>
                     </div>
@@ -415,13 +415,13 @@
                     <div>
                         <label for="payment_date" class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Pembayaran *</label>
                         <input type="date" name="payment_date" id="payment_date" value="{{ date('Y-m-d') }}" required
-                               class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007AFF] transition-all">
+                               class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] transition-all">
                     </div>
 
                     <div>
                         <label for="account_id" class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Rekening Bank Tujuan Penerimaan *</label>
                         <select name="account_id" id="account_id" required
-                                class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007AFF] transition-all font-medium">
+                                class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] transition-all font-medium">
                             @if(isset($bankAccounts) && $bankAccounts->isNotEmpty())
                                 @foreach($bankAccounts as $acc)
                                     <option value="{{ $acc->id }}">{{ $acc->name }} ({{ $acc->bank }} - {{ $acc->account_no }})</option>
@@ -435,7 +435,7 @@
                     <div>
                         <label for="notes" class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Referensi / Catatan</label>
                         <input type="text" name="notes" id="notes" placeholder="Contoh: Ref Transfer BCA-91823719"
-                               class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007AFF] transition-all">
+                               class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] transition-all">
                     </div>
                 </div>
 

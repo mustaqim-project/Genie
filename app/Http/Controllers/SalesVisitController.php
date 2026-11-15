@@ -6,11 +6,23 @@ use App\Models\Client;
 use App\Models\SalesVisit;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 
-class SalesVisitController extends Controller
+class SalesVisitController extends Controller implements HasMiddleware
 {
+    /**
+     * Daftarkan middleware proteksi RBAC level Controller
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:crm.view', only: ['index', 'show']),
+            new Middleware('permission:crm.manage', except: ['index', 'show']),
+        ];
+    }
     /**
      * Daftar Riwayat Kunjungan Sales
      */

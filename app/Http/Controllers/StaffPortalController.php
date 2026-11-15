@@ -17,12 +17,23 @@ use App\Models\Shift;
 use App\Models\WorkLocation;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
-class StaffPortalController extends Controller
+class StaffPortalController extends Controller implements HasMiddleware
 {
+    /**
+     * Daftarkan middleware proteksi RBAC level Controller
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('auth'),
+        ];
+    }
     /**
      * Helper to get or auto-link active employee for currently authenticated user.
      */
@@ -245,6 +256,21 @@ class StaffPortalController extends Controller
     {
         $employee = $this->getActiveEmployee();
 
+        // Validasi Kepatuhan UU PDP No. 27/2022: Lembar Persetujuan Biometrik Wajib Aktif
+        if (!$employee || !$employee->hasValidBiometricConsent()) {
+            $msg = 'Persetujuan pemrosesan data biometrik wajah (UU PDP No. 27/2022) belum disetujui atau telah kedaluwarsa. Silakan berikan persetujuan terlebih dahulu.';
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $msg,
+                    'require_consent' => true,
+                ], 403);
+            }
+            return redirect()->route('hrm.portal', ['tab' => 'attendance'])
+                ->with('error', $msg)
+                ->with('require_biometric_consent', true);
+        }
+
         $validated = $request->validate([
             'lat' => 'required|numeric|between:-90,90',
             'lng' => 'required|numeric|between:-180,180',
@@ -286,23 +312,36 @@ class StaffPortalController extends Controller
         $allowedRadius = $targetLocation ? (int) $targetLocation->radius_m : 250;
         $isGeofenced = $minDistance <= $allowedRadius;
 
-        // Simpan foto selfie jika dikirim dalam bentuk base64
+        // Simpan foto selfie ke private disk storage/app/private/attendances/ (UU PDP)
         $photoUrl = null;
         if (!empty($validated['face_photo']) && str_starts_with($validated['face_photo'], 'data:image')) {
             try {
                 $image = preg_replace('/^data:image\/\w+;base64,/', '', $validated['face_photo']);
                 $image = str_replace(' ', '+', $image);
                 $imageName = 'att_' . $employee->id . '_' . time() . '.jpg';
-                $destDir = public_path('uploads/attendances');
+                $destDir = storage_path('app/private/attendances');
                 if (!File::exists($destDir)) {
-                    File::makeDirectory($destDir, 0755, true);
+                    File::makeDirectory($destDir, 0750, true);
                 }
                 File::put($destDir . '/' . $imageName, base64_decode($image));
-                $photoUrl = asset('uploads/attendances/' . $imageName);
+                $photoUrl = $imageName;
             } catch (\Exception $e) {
                 // Fallback simpan data uri jika filesystem gagal
                 $photoUrl = substr($validated['face_photo'], 0, 1000);
             }
+        }
+
+        // Verifikasi Biometrik Wajah Riil (FIX-11)
+        $faceScore = null;
+        $faceVerified = true;
+        if ($employee && $employee->hasFaceRegistered() && (!empty($validated['face_photo']) || $request->filled('face_descriptor'))) {
+            $verification = app(\App\Services\Hrm\BiometricVerificationService::class)->verify(
+                $employee,
+                $request->input('face_descriptor'),
+                $validated['face_photo'] ?? null
+            );
+            $faceScore = $verification['score'];
+            $faceVerified = $verification['verified'];
         }
 
         $log = AttendanceLog::create([
@@ -312,8 +351,8 @@ class StaffPortalController extends Controller
             'lat' => $validated['lat'],
             'lng' => $validated['lng'],
             'location_id' => $targetLocation?->id,
-            'face_match' => 0.96,
-            'valid' => true,
+            'face_match' => $faceScore,
+            'valid' => $isGeofenced && $faceVerified,
             'photo_url' => $photoUrl,
             'notes' => $validated['notes'] ?? 'Clock-In Mandiri via Portal Staf',
             'is_geofenced' => $isGeofenced,
@@ -346,6 +385,21 @@ class StaffPortalController extends Controller
     {
         $employee = $this->getActiveEmployee();
 
+        // Validasi Kepatuhan UU PDP No. 27/2022: Lembar Persetujuan Biometrik Wajib Aktif
+        if (!$employee || !$employee->hasValidBiometricConsent()) {
+            $msg = 'Persetujuan pemrosesan data biometrik wajah (UU PDP No. 27/2022) belum disetujui atau telah kedaluwarsa. Silakan berikan persetujuan terlebih dahulu.';
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $msg,
+                    'require_consent' => true,
+                ], 403);
+            }
+            return redirect()->route('hrm.portal', ['tab' => 'attendance'])
+                ->with('error', $msg)
+                ->with('require_biometric_consent', true);
+        }
+
         $validated = $request->validate([
             'lat' => 'required|numeric|between:-90,90',
             'lng' => 'required|numeric|between:-180,180',
@@ -377,16 +431,32 @@ class StaffPortalController extends Controller
                 $image = preg_replace('/^data:image\/\w+;base64,/', '', $validated['face_photo']);
                 $image = str_replace(' ', '+', $image);
                 $imageName = 'att_out_' . $employee->id . '_' . time() . '.jpg';
-                $destDir = public_path('uploads/attendances');
+                $destDir = storage_path('app/private/attendances');
                 if (!File::exists($destDir)) {
-                    File::makeDirectory($destDir, 0755, true);
+                    File::makeDirectory($destDir, 0750, true);
                 }
                 File::put($destDir . '/' . $imageName, base64_decode($image));
-                $photoUrl = asset('uploads/attendances/' . $imageName);
+                $photoUrl = $imageName;
             } catch (\Exception $e) {
                 $photoUrl = substr($validated['face_photo'], 0, 1000);
             }
         }
+
+        // Verifikasi Biometrik Wajah Riil (FIX-11)
+        $faceScore = null;
+        $faceVerified = true;
+        if ($employee && $employee->hasFaceRegistered() && (!empty($validated['face_photo']) || $request->filled('face_descriptor'))) {
+            $verification = app(\App\Services\Hrm\BiometricVerificationService::class)->verify(
+                $employee,
+                $request->input('face_descriptor'),
+                $validated['face_photo'] ?? null
+            );
+            $faceScore = $verification['score'];
+            $faceVerified = $verification['verified'];
+        }
+
+        $allowedRadius = $targetLocation ? (int) $targetLocation->radius_m : 250;
+        $isGeofenced = $minDistance <= $allowedRadius;
 
         $log = AttendanceLog::create([
             'employee_id' => $employee->id,
@@ -395,11 +465,11 @@ class StaffPortalController extends Controller
             'lat' => $validated['lat'],
             'lng' => $validated['lng'],
             'location_id' => $targetLocation?->id,
-            'face_match' => 0.95,
-            'valid' => true,
+            'face_match' => $faceScore,
+            'valid' => $isGeofenced && $faceVerified,
             'photo_url' => $photoUrl,
             'notes' => $validated['notes'] ?? 'Clock-Out Mandiri via Portal Staf',
-            'is_geofenced' => $minDistance <= ($targetLocation ? (int) $targetLocation->radius_m : 250),
+            'is_geofenced' => $isGeofenced,
             'distance_m' => round($minDistance),
             'device_info' => $request->userAgent(),
         ]);
@@ -520,8 +590,12 @@ class StaffPortalController extends Controller
             }
         }
 
+        $faceData = $request->filled('face_descriptor')
+            ? (is_array($request->input('face_descriptor')) ? json_encode($request->input('face_descriptor')) : $request->input('face_descriptor'))
+            : 'BIO_V2_' . sha1($validated['face_photo']);
+
         $employee->update([
-            'face_data' => 'BIO_V2_' . sha1($validated['face_photo']),
+            'face_data' => $faceData,
             'photo_url' => $photoPath,
         ]);
 
@@ -548,11 +622,31 @@ class StaffPortalController extends Controller
      */
     public function verifyFace(Request $request)
     {
+        $employee = $this->getActiveEmployee();
+        if (!$employee) {
+            return response()->json([
+                'success' => false,
+                'score' => 0.0,
+                'distance' => 2.0,
+                'threshold' => \App\Services\Hrm\FaceVerificationService::DEFAULT_MATCH_THRESHOLD,
+                'verified' => false,
+                'message' => 'Profil karyawan tidak ditemukan.',
+            ], 404);
+        }
+
+        $verification = app(\App\Services\Hrm\FaceVerificationService::class)->verify(
+            $employee,
+            $request->input('face_descriptor'),
+            $request->input('face_photo')
+        );
+
         return response()->json([
-            'success' => true,
-            'score' => 0.94,
-            'verified' => true,
-            'message' => 'Verifikasi biometrik anti-spoofing terkonfirmasi sah.',
+            'success' => $verification['verified'],
+            'score' => $verification['score'],
+            'distance' => $verification['distance'],
+            'threshold' => $verification['threshold'],
+            'verified' => $verification['verified'],
+            'message' => $verification['message'],
         ]);
     }
 

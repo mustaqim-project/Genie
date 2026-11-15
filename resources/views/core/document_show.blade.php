@@ -54,10 +54,10 @@
             <div>
                 <div class="font-bold text-slate-900 dark:text-white border-b border-black/[0.06] dark:border-white/[0.06] pb-3 flex items-center justify-between">
                     <span class="flex items-center gap-2">
-                        <i data-lucide="ship" class="w-4 h-4 text-[#007AFF]"></i>
+                        <i data-lucide="ship" class="w-4 h-4 text-[#0284c7]"></i>
                         <span>Identitas Kargo & Pengangkutan</span>
                     </span>
-                    <span class="px-2 py-0.5 bg-[#007AFF]/10 text-[#007AFF] rounded-md text-[10px] font-bold font-mono">
+                    <span class="px-2 py-0.5 bg-[#0284c7]/10 text-[#0284c7] rounded-md text-[10px] font-bold font-mono">
                         {{ $shipment->bl_number ?? '-' }}
                     </span>
                 </div>
@@ -114,7 +114,7 @@
                 </div>
                 <div class="mt-3">
                     <div class="w-full bg-slate-100 dark:bg-white/10 rounded-full h-2 overflow-hidden">
-                        <div class="h-2 rounded-full transition-all duration-500 {{ $completionRate >= 100 ? 'bg-emerald-500' : ($completionRate >= 50 ? 'bg-[#007AFF]' : 'bg-amber-500') }}" 
+                        <div class="h-2 rounded-full transition-all duration-500 {{ $completionRate >= 100 ? 'bg-emerald-500' : ($completionRate >= 50 ? 'bg-[#0284c7]' : 'bg-amber-500') }}" 
                              style="width: {{ $completionRate }}%"></div>
                     </div>
                 </div>
@@ -177,7 +177,7 @@
                     </span>
                     <span class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold font-mono
                         @if($shipment->ceisaDocument?->status === 'SPPB') bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/80
-                        @elseif($shipment->ceisaDocument?->status === 'SUBMITTED' || $shipment->ceisaDocument?->status === 'BILLING') bg-[#007AFF]/10 text-[#007AFF] border border-[#007AFF]/20
+                        @elseif($shipment->ceisaDocument?->status === 'SUBMITTED' || $shipment->ceisaDocument?->status === 'BILLING') bg-[#0284c7]/10 text-[#0284c7] border border-[#0284c7]/20
                         @else bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/10 @endif">
                         {{ $shipment->ceisaDocument?->status ?? 'DRAFT' }}
                     </span>
@@ -265,7 +265,7 @@
         <!-- Tab Bar Buttons macOS Style -->
         <div class="border-b border-black/[0.06] dark:border-white/[0.06] bg-black/[0.02] dark:bg-white/[0.02] p-2 flex items-center gap-1.5 overflow-x-auto text-xs font-semibold">
             <button type="button" @click="activeTab = 'docs'"
-                    :class="activeTab === 'docs' ? 'bg-white dark:bg-[#2C2C2E] text-[#007AFF] shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                    :class="activeTab === 'docs' ? 'bg-white dark:bg-[#2C2C2E] text-[#0284c7] shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
                     class="py-2 px-3.5 rounded-xl transition-all whitespace-nowrap flex items-center gap-2 cursor-pointer">
                 <i data-lucide="files" class="w-3.5 h-3.5"></i>
                 <span>Berkas Lampiran & Lartas</span>
@@ -273,7 +273,7 @@
             </button>
 
             <button type="button" @click="activeTab = 'items'"
-                    :class="activeTab === 'items' ? 'bg-white dark:bg-[#2C2C2E] text-[#007AFF] shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                    :class="activeTab === 'items' ? 'bg-white dark:bg-[#2C2C2E] text-[#0284c7] shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
                     class="py-2 px-3.5 rounded-xl transition-all whitespace-nowrap flex items-center gap-2 cursor-pointer">
                 <i data-lucide="package" class="w-3.5 h-3.5"></i>
                 <span>Item Barang & Pos Tarif (HS)</span>
@@ -281,14 +281,14 @@
             </button>
 
             <button type="button" @click="activeTab = 'ops'"
-                    :class="activeTab === 'ops' ? 'bg-white dark:bg-[#2C2C2E] text-[#007AFF] shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                    :class="activeTab === 'ops' ? 'bg-white dark:bg-[#2C2C2E] text-[#0284c7] shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
                     class="py-2 px-3.5 rounded-xl transition-all whitespace-nowrap flex items-center gap-2 cursor-pointer">
                 <i data-lucide="truck" class="w-3.5 h-3.5"></i>
                 <span>DO Pelayaran & Lapangan</span>
             </button>
 
             <button type="button" @click="activeTab = 'ceisa'"
-                    :class="activeTab === 'ceisa' ? 'bg-white dark:bg-[#2C2C2E] text-[#007AFF] shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                    :class="activeTab === 'ceisa' ? 'bg-white dark:bg-[#2C2C2E] text-[#0284c7] shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
                     class="py-2 px-3.5 rounded-xl transition-all whitespace-nowrap flex items-center gap-2 cursor-pointer">
                 <i data-lucide="landmark" class="w-3.5 h-3.5"></i>
                 <span>Draf Pabean & Log CEISA</span>
@@ -316,7 +316,7 @@
                     @foreach($shipment->documents as $doc)
                         <div class="p-4 rounded-2xl border transition-all flex flex-col justify-between
                             @if($doc->status === 'VERIFIED') bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-200/80 dark:border-emerald-800/40
-                            @elseif($doc->status === 'UPLOADED') bg-[#007AFF]/5 dark:bg-[#007AFF]/10 border-[#007AFF]/20
+                            @elseif($doc->status === 'UPLOADED') bg-[#0284c7]/5 dark:bg-[#0284c7]/10 border-[#0284c7]/20
                             @elseif($doc->status === 'REJECTED') bg-rose-50/40 dark:bg-rose-950/20 border-rose-200/80 dark:border-rose-900/40
                             @else bg-black/[0.02] dark:bg-white/[0.03] border-black/[0.06] dark:border-white/[0.06] @endif">
                             
@@ -327,7 +327,7 @@
                                     </span>
                                     <span class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold font-mono
                                         @if($doc->status === 'VERIFIED') bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300 border border-emerald-300/60
-                                        @elseif($doc->status === 'UPLOADED') bg-[#007AFF]/15 text-[#007AFF] border border-[#007AFF]/30
+                                        @elseif($doc->status === 'UPLOADED') bg-[#0284c7]/15 text-[#0284c7] border border-[#0284c7]/30
                                         @elseif($doc->status === 'REJECTED') bg-rose-100 dark:bg-rose-900/40 text-rose-800 dark:text-rose-300 border border-rose-300/60
                                         @else bg-slate-200/80 dark:bg-white/10 text-slate-700 dark:text-slate-400 @endif">
                                         {{ $doc->status }}
@@ -370,7 +370,7 @@
                                         <div class="flex items-center gap-3">
                                             <button type="button"
                                                     @click="openDocPreview('{{ route('core.document.preview-doc', [$shipment->id, $doc->id]) }}', '{{ addslashes($doc->nama_file ?? $doc->jenis_dokumen) }}', {{ $isImgDoc ? 'true' : 'false' }})"
-                                                    class="text-[11px] text-[#007AFF] hover:underline font-semibold inline-flex items-center gap-1 cursor-pointer">
+                                                    class="text-[11px] text-[#0284c7] hover:underline font-semibold inline-flex items-center gap-1 cursor-pointer">
                                                 <i data-lucide="eye" class="w-3.5 h-3.5"></i>
                                                 <span>Preview</span>
                                             </button>
@@ -435,10 +435,10 @@
                                 @foreach($shipment->itemCustomsDocuments as $customDoc)
                                     <tr class="hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
                                         <td class="p-3.5 font-medium text-slate-800 dark:text-white">
-                                            <span class="font-mono font-bold text-[#007AFF]">[{{ $customDoc->kode_dokumen }}]</span> {{ $customDoc->nama_dokumen }}
+                                            <span class="font-mono font-bold text-[#0284c7]">[{{ $customDoc->kode_dokumen }}]</span> {{ $customDoc->nama_dokumen }}
                                         </td>
                                         <td class="p-3.5 text-slate-600 dark:text-slate-300">
-                                            <span class="font-mono text-[#007AFF] font-semibold">{{ $customDoc->item->kode_hs ?? '-' }}</span> &bull; {{ Str::limit($customDoc->item->uraian_barang ?? 'Seluruh Barang', 35) }}
+                                            <span class="font-mono text-[#0284c7] font-semibold">{{ $customDoc->item->kode_hs ?? '-' }}</span> &bull; {{ Str::limit($customDoc->item->uraian_barang ?? 'Seluruh Barang', 35) }}
                                         </td>
                                         <td class="p-3.5 text-slate-500 dark:text-slate-400">
                                             {{ $customDoc->instansi_penerbit ?? '-' }}
@@ -452,7 +452,7 @@
                                         <td class="p-3.5">
                                             <span class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold font-mono
                                                 @if($customDoc->status === 'VERIFIED') bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/80
-                                                @elseif($customDoc->status === 'UPLOADED') bg-[#007AFF]/10 text-[#007AFF] border border-[#007AFF]/20
+                                                @elseif($customDoc->status === 'UPLOADED') bg-[#0284c7]/10 text-[#0284c7] border border-[#0284c7]/20
                                                 @else bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200/80 @endif">
                                                 {{ $customDoc->status }}
                                             </span>
@@ -491,7 +491,7 @@
                 <div class="flex items-center gap-2">
                     <button type="button" onclick="document.getElementById('modal-ai-ocr-scan').classList.remove('hidden')"
                             class="btn-apple-gray text-xs px-3.5 py-2 inline-flex items-center gap-1.5">
-                        <i data-lucide="scan-text" class="w-3.5 h-3.5 text-[#007AFF]"></i>
+                        <i data-lucide="scan-text" class="w-3.5 h-3.5 text-[#0284c7]"></i>
                         <span>Ekstraksi Packing List</span>
                     </button>
                     @can('document.create')
@@ -523,7 +523,7 @@
                         @forelse($shipment->items as $idx => $it)
                             <tr class="hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
                                 <td class="p-3.5 text-slate-400 dark:text-slate-500 font-mono">{{ $idx + 1 }}</td>
-                                <td class="p-3.5 font-mono font-bold text-[#007AFF] whitespace-nowrap">
+                                <td class="p-3.5 font-mono font-bold text-[#0284c7] whitespace-nowrap">
                                     {{ $it->kode_hs }}
                                     @if($it->has_lartas)
                                         <span class="block text-[9px] font-sans font-semibold text-amber-600 dark:text-amber-400">⚠️ Wajib Lartas</span>
@@ -826,7 +826,7 @@
                         </h3>
                         <p class="text-slate-500 dark:text-slate-400 text-xs mt-0.5">Unggah bukti foto lapangan per tahapan hingga kontainer disegel kembali dan siap Gate Out.</p>
                     </div>
-                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#007AFF]/10 text-[#007AFF]">
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#0284c7]/10 text-[#0284c7]">
                         {{ $shipment->inspectionPhotos->count() }} Foto Tersimpan
                     </span>
                 </div>
@@ -852,7 +852,7 @@
                         </div>
                         <div>
                             <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Pilih Foto (Bisa Multi-Foto)</label>
-                            <input type="file" name="photos[]" multiple required accept=".jpg,.jpeg,.png,.webp,.pdf" class="w-full text-[11px] file:mr-2 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-[#007AFF]/10 file:text-[#007AFF]">
+                            <input type="file" name="photos[]" multiple required accept=".jpg,.jpeg,.png,.webp,.pdf" class="w-full text-[11px] file:mr-2 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-[#0284c7]/10 file:text-[#0284c7]">
                         </div>
                     </div>
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -870,7 +870,7 @@
                     <div class="p-3 rounded-xl border border-black/[0.06] dark:border-white/[0.08] bg-black/[0.015] dark:bg-white/[0.02] flex flex-col justify-between gap-2 text-xs">
                         <div class="flex items-start justify-between gap-2">
                             <div>
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#007AFF]/10 text-[#007AFF]">
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#0284c7]/10 text-[#0284c7]">
                                     {{ $photo->stage_label }}
                                 </span>
                                 <div class="font-mono text-[10px] text-slate-500 mt-1">
@@ -890,7 +890,7 @@
                             <img src="{{ $photo->url }}" alt="{{ $photo->file_name }}" class="w-full h-full object-cover">
                         </a>
                         @else
-                        <a href="{{ $photo->url }}" target="_blank" class="px-3 py-2 rounded-lg bg-black/5 text-[#007AFF] font-semibold truncate">
+                        <a href="{{ $photo->url }}" target="_blank" class="px-3 py-2 rounded-lg bg-black/5 text-[#0284c7] font-semibold truncate">
                             📄 {{ $photo->file_name }}
                         </a>
                         @endif
@@ -986,7 +986,7 @@
                             <div>Nomor Aju: <strong class="font-mono text-slate-900 dark:text-white">{{ $shipment->ceisaDocument->nomor_aju }}</strong></div>
                             <div>Kantor Pabean: <strong class="text-slate-800 dark:text-slate-200">{{ $shipment->ceisaDocument->nama_kantor }}</strong> ({{ $shipment->ceisaDocument->kode_kantor }})</div>
                             <div>Nilai Pabean: <strong class="text-slate-800 dark:text-slate-200 tabular-nums">{{ $shipment->ceisaDocument->kode_valuta }} {{ number_format($shipment->ceisaDocument->total_nilai, 2) }}</strong></div>
-                            <div>Status Dokumen: <strong class="text-[#007AFF]">{{ $shipment->ceisaDocument->status }}</strong></div>
+                            <div>Status Dokumen: <strong class="text-[#0284c7]">{{ $shipment->ceisaDocument->status }}</strong></div>
                         </div>
                     </div>
 
@@ -1008,7 +1008,7 @@
                         @forelse($shipment->ceisaDocument->logs as $log)
                             <div class="p-3 rounded-xl border border-black/[0.06] dark:border-white/[0.06] bg-black/[0.02] dark:bg-white/[0.02] text-xs flex items-center justify-between font-mono">
                                 <div class="flex items-center gap-2">
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold {{ $log->method === 'POST' ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300' : 'bg-[#007AFF]/10 text-[#007AFF]' }}">{{ $log->method }}</span>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold {{ $log->method === 'POST' ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300' : 'bg-[#0284c7]/10 text-[#0284c7]' }}">{{ $log->method }}</span>
                                     <span class="text-slate-700 dark:text-slate-300">{{ $log->endpoint }}</span>
                                 </div>
                                 <div class="flex items-center gap-3 text-slate-400 dark:text-slate-500 text-[10px]">
@@ -1111,43 +1111,43 @@
             @csrf
             <div>
                 <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Pos Tarif HS Code (BTKI) <span class="text-rose-500">*</span></label>
-                <input type="text" name="kode_hs" id="modal_kode_hs" onchange="lookupHsModal(this.value)" required placeholder="Contoh: 8452.29.00 / 8471.30.20" class="w-full px-3.5 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white font-mono text-xs focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                <input type="text" name="kode_hs" id="modal_kode_hs" onchange="lookupHsModal(this.value)" required placeholder="Contoh: 8452.29.00 / 8471.30.20" class="w-full px-3.5 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white font-mono text-xs focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
                 <div id="modal_hs_lartas_badge" class="hidden mt-1.5 p-2 rounded-xl text-[11px]"></div>
             </div>
 
             <div>
                 <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Uraian Komoditas Barang <span class="text-rose-500">*</span></label>
-                <input type="text" name="uraian_barang" required placeholder="Nama spesifikasi komoditas barang lengkap" class="w-full px-3.5 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                <input type="text" name="uraian_barang" required placeholder="Nama spesifikasi komoditas barang lengkap" class="w-full px-3.5 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
             </div>
 
             <div>
                 <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Dasar Hukum & Catatan Pos Tarif</label>
-                <input type="text" name="hs_legal_basis" placeholder="BTKI 2022 Pos 8452" class="w-full px-3.5 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                <input type="text" name="hs_legal_basis" placeholder="BTKI 2022 Pos 8452" class="w-full px-3.5 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
             </div>
 
             <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jumlah Kemasan</label>
-                    <input type="number" name="jumlah_kemasan" value="50" min="1" required class="w-full px-3.5 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white text-xs tabular-nums focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                    <input type="number" name="jumlah_kemasan" value="50" min="1" required class="w-full px-3.5 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white text-xs tabular-nums focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
                 </div>
                 <div>
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jenis Kemasan</label>
-                    <input type="text" name="jenis_kemasan" value="CTN" class="w-full px-3.5 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white text-xs uppercase focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                    <input type="text" name="jenis_kemasan" value="CTN" class="w-full px-3.5 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white text-xs uppercase focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
                 </div>
             </div>
 
             <div class="grid grid-cols-3 gap-3">
                 <div>
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Berat Bruto (Kg)</label>
-                    <input type="number" step="0.01" name="berat_bruto" value="100.00" required class="w-full px-3 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white text-xs tabular-nums focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                    <input type="number" step="0.01" name="berat_bruto" value="100.00" required class="w-full px-3 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white text-xs tabular-nums focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
                 </div>
                 <div>
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Berat Netto (Kg)</label>
-                    <input type="number" step="0.01" name="berat_netto" value="95.00" required class="w-full px-3 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white text-xs tabular-nums focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                    <input type="number" step="0.01" name="berat_netto" value="95.00" required class="w-full px-3 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white text-xs tabular-nums focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
                 </div>
                 <div>
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nilai FOB/CIF ({{ $shipment->currency }})</label>
-                    <input type="number" step="0.01" name="nilai_fob" value="1000.00" required class="w-full px-3 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white text-xs font-mono tabular-nums focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                    <input type="number" step="0.01" name="nilai_fob" value="1000.00" required class="w-full px-3 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white text-xs font-mono tabular-nums focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
                 </div>
             </div>
 
@@ -1200,30 +1200,30 @@
                 </div>
                 <div class="text-slate-500 dark:text-slate-400 text-[10px]" id="fulfill_doc_instansi">Kementerian Perdagangan / Surveyor</div>
                 <div class="pt-1.5 border-t border-black/[0.06] dark:border-white/[0.06] text-slate-600 dark:text-slate-300 flex justify-between">
-                    <span>Pos Tarif: <strong id="fulfill_item_hs" class="font-mono text-[#007AFF]">8504.40.90</strong></span>
+                    <span>Pos Tarif: <strong id="fulfill_item_hs" class="font-mono text-[#0284c7]">8504.40.90</strong></span>
                     <span id="fulfill_item_name" class="truncate max-w-[200px] text-right font-medium">Power Inverter</span>
                 </div>
             </div>
 
             <div>
                 <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Dokumen / Surat Izin <span class="text-rose-500">*</span></label>
-                <input type="text" name="nomor_dokumen" id="fulfill_nomor_dokumen" required placeholder="Contoh: LS-08912/KMD/X/2026 atau PI-98218-E" class="w-full px-3.5 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white font-mono text-xs focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                <input type="text" name="nomor_dokumen" id="fulfill_nomor_dokumen" required placeholder="Contoh: LS-08912/KMD/X/2026 atau PI-98218-E" class="w-full px-3.5 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white font-mono text-xs focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
             </div>
 
             <div>
                 <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Dokumen / Surat Izin <span class="text-rose-500">*</span></label>
-                <input type="date" name="tanggal_dokumen" id="fulfill_tanggal_dokumen" required class="w-full px-3.5 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                <input type="date" name="tanggal_dokumen" id="fulfill_tanggal_dokumen" required class="w-full px-3.5 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
             </div>
 
             <div>
                 <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">Unggah Berkas Fisik (PDF / Gambar) <span class="text-slate-400 font-normal">(Opsional)</span></label>
                 <input type="file" name="document_file" class="text-xs text-slate-500 dark:text-slate-400 w-full file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-[11px] file:font-semibold file:bg-black/5 dark:file:bg-white/10 file:text-slate-700 dark:file:text-slate-200 hover:file:bg-black/10">
-                <p id="fulfill_current_file" class="text-[10px] text-[#007AFF] mt-1 hidden"></p>
+                <p id="fulfill_current_file" class="text-[10px] text-[#0284c7] mt-1 hidden"></p>
             </div>
 
             <div>
                 <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">Catatan Tambahan / Keterangan</label>
-                <input type="text" name="catatan" id="fulfill_catatan" placeholder="Masa berlaku s.d 31 Des 2026" class="w-full px-3.5 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                <input type="text" name="catatan" id="fulfill_catatan" placeholder="Masa berlaku s.d 31 Des 2026" class="w-full px-3.5 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
             </div>
 
             @can('document.verify')
@@ -1268,7 +1268,7 @@
             <div>
                 <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Pos Tarif HS Code (BTKI) <span class="text-rose-500">*</span></label>
                 <div class="flex gap-2">
-                    <input type="text" name="kode_hs" id="edit_item_kode_hs" onchange="lookupEditHsModal(this.value)" required class="w-full px-3.5 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white font-mono text-xs focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                    <input type="text" name="kode_hs" id="edit_item_kode_hs" onchange="lookupEditHsModal(this.value)" required class="w-full px-3.5 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white font-mono text-xs focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
                     <button type="button" onclick="lookupEditHsModal(document.getElementById('edit_item_kode_hs').value)" class="btn-apple-gray px-3.5 py-2 text-xs shrink-0">
                         Cek Tarif & Lartas
                     </button>
@@ -1278,7 +1278,7 @@
 
             <div>
                 <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Uraian Komoditas Barang <span class="text-rose-500">*</span></label>
-                <input type="text" name="uraian_barang" id="edit_item_uraian_barang" required class="w-full px-3.5 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                <input type="text" name="uraian_barang" id="edit_item_uraian_barang" required class="w-full px-3.5 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
             </div>
 
             <div class="grid grid-cols-2 gap-3">
@@ -1361,11 +1361,11 @@
         <form action="{{ route('core.document.detect-hs', $shipment->id) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
             @csrf
 
-            <div class="p-5 rounded-2xl border-2 border-dashed border-black/10 dark:border-white/10 hover:border-[#007AFF] transition-colors bg-black/[0.02] dark:bg-white/[0.02]">
+            <div class="p-5 rounded-2xl border-2 border-dashed border-black/10 dark:border-white/10 hover:border-[#0284c7] transition-colors bg-black/[0.02] dark:bg-white/[0.02]">
                 <label class="block font-semibold text-slate-800 dark:text-white mb-1">Unggah Berkas Packing List (PDF, Excel XLSX/XLS, Gambar, CSV)</label>
                 <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Sistem mengekstrak tabel barang, jumlah kemasan, bobot bruto/netto, dan nilai kargo.</p>
                 <input type="file" name="packing_list_file" id="scanner_file_input" accept=".pdf,.xlsx,.xls,.csv,.txt,.jpg,.jpeg,.png"
-                       class="text-xs text-slate-600 dark:text-slate-300 w-full file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[#007AFF] file:text-white hover:file:bg-[#0062CC]">
+                       class="text-xs text-slate-600 dark:text-slate-300 w-full file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[#0284c7] file:text-white hover:file:bg-[#0062CC]">
             </div>
 
             <div>
@@ -1376,7 +1376,7 @@
                 <textarea name="raw_text" id="scanner_raw_text" rows="4" placeholder="Contoh:
 1. INDUSTRIAL SEWING MACHINE HEAVY DUTY 50 CTN 2500 KGS {{ $shipment->currency }} 12500 (HS: 8452.29.00)
 2. SPARE PARTS AND NEEDLES 100 BOX 5300 KGS {{ $shipment->currency }} 12500 (HS: 8452.90.00)" 
-                    class="w-full px-3.5 py-2.5 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white font-mono text-[11px] focus:ring-2 focus:ring-[#007AFF] focus:outline-none"></textarea>
+                    class="w-full px-3.5 py-2.5 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white font-mono text-[11px] focus:ring-2 focus:ring-[#0284c7] focus:outline-none"></textarea>
             </div>
 
             <div class="pt-3 border-t border-black/[0.06] dark:border-white/[0.06] flex items-center justify-end gap-2">
@@ -1409,7 +1409,7 @@
 
             <div>
                 <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Pilih Item Barang Terkait <span class="text-rose-500">*</span></label>
-                <select name="shipment_item_id" id="add_doc_item_id" required class="w-full px-3 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-slate-900 dark:text-white text-xs font-semibold focus:ring-2 focus:ring-[#007AFF]">
+                <select name="shipment_item_id" id="add_doc_item_id" required class="w-full px-3 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-slate-900 dark:text-white text-xs font-semibold focus:ring-2 focus:ring-[#0284c7]">
                     <option value="">-- Pilih Barang Manifes --</option>
                     @foreach($shipment->items as $it)
                         <option value="{{ $it->id }}">
@@ -1465,7 +1465,7 @@
             <div>
                 <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">Unggah Berkas Fisik (PDF / Gambar) <span class="text-slate-400 font-normal">(Opsional)</span></label>
                 <input type="file" name="document_file" accept=".pdf,.png,.jpg,.jpeg,.xlsx,.xls"
-                       class="text-xs text-slate-500 dark:text-slate-400 w-full file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-[11px] file:font-semibold file:bg-[#007AFF] file:text-white hover:file:bg-[#0062CC]">
+                       class="text-xs text-slate-500 dark:text-slate-400 w-full file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-[11px] file:font-semibold file:bg-[#0284c7] file:text-white hover:file:bg-[#0062CC]">
             </div>
 
             <div class="pt-3 border-t border-black/[0.06] dark:border-white/[0.06] flex items-center justify-end gap-2">
@@ -1643,7 +1643,7 @@
     <div class="max-w-lg w-full bg-white dark:bg-[#1C1C1E] rounded-[20px] border border-black/10 dark:border-white/10 shadow-2xl p-6 space-y-4 animate-in fade-in zoom-in duration-150">
         <div class="flex items-center justify-between pb-3 border-b border-black/5 dark:border-white/5">
             <div class="flex items-center space-x-2.5">
-                <div class="w-9 h-9 rounded-[10px] bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center">
+                <div class="w-9 h-9 rounded-[10px] bg-[#0284c7]/10 text-[#0284c7] flex items-center justify-center">
                     <i data-lucide="share-2" class="w-4 h-4"></i>
                 </div>
                 <div>
@@ -1721,7 +1721,7 @@
         <!-- Form Generate Token Baru & Atur Durasi Timer -->
         <div class="border-t border-black/5 dark:border-white/5 pt-3.5 space-y-2">
             <div class="text-[12px] font-bold text-black dark:text-white flex items-center gap-1.5">
-                <i data-lucide="clock" class="w-3.5 h-3.5 text-[#007AFF]"></i>
+                <i data-lucide="clock" class="w-3.5 h-3.5 text-[#0284c7]"></i>
                 <span>Atur Timer Kedaluwarsa & Terbitkan Link Baru</span>
             </div>
             <p class="text-[11px] text-black/50 dark:text-white/50">Pilih durasi masa aktif baru. Tautan lama otomatis kedaluwarsa digantikan tautan ini:</p>
@@ -1736,7 +1736,7 @@
                         <option value="14" {{ ($shipment->portal_duration_days ?? 7) == 14 ? 'selected' : '' }}>14 Hari (2 Minggu)</option>
                         <option value="30" {{ ($shipment->portal_duration_days ?? 7) == 30 ? 'selected' : '' }}>30 Hari (1 Bulan)</option>
                     </select>
-                    <button type="submit" class="btn-apple-gray !h-9 !px-3 text-[12px] font-semibold hover:!bg-[#007AFF] hover:!text-white shrink-0">
+                    <button type="submit" class="btn-apple-gray !h-9 !px-3 text-[12px] font-semibold hover:!bg-[#0284c7] hover:!text-white shrink-0">
                         <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
                         <span>Generate Link</span>
                     </button>
@@ -1771,7 +1771,7 @@
     <div @click.away="close()" class="bg-white dark:bg-[#1C1C1E] rounded-3xl border border-black/10 dark:border-white/15 shadow-2xl max-w-5xl w-full h-[85vh] flex flex-col overflow-hidden">
         <div class="px-5 py-3.5 bg-slate-50 dark:bg-white/[0.04] border-b border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between gap-3">
             <div class="flex items-center gap-2 min-w-0">
-                <i data-lucide="file-text" class="w-4 h-4 text-[#007AFF] shrink-0"></i>
+                <i data-lucide="file-text" class="w-4 h-4 text-[#0284c7] shrink-0"></i>
                 <span class="font-mono font-bold text-xs text-slate-800 dark:text-white truncate" x-text="previewTitle"></span>
             </div>
             <div class="flex items-center gap-2 shrink-0">

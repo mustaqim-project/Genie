@@ -138,7 +138,7 @@ class CrossDocumentValidationService
     protected function ruleV03InvoiceItemsSum(ImportDocument $doc, array $fields): array
     {
         $headerTotal = (float) ($fields['total_amount'] ?? $fields['invoice_total'] ?? 0);
-        $itemsTotal = $doc->items()->sum('cif_amount_idr') ?: $doc->items()->sum('fob_amount');
+        $itemsTotal = (float) $doc->items()->sum('total_price');
 
         if ($headerTotal > 0 && $itemsTotal > 0) {
             $diff = abs($headerTotal - $itemsTotal);

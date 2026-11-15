@@ -43,5 +43,9 @@ class AppServiceProvider extends ServiceProvider
 
         // Load Dynamic System Settings from Database into Laravel Config
         \App\Models\SystemSetting::loadIntoConfig();
+
+        // Accounting Lock Period Observers (Enforcing ISO 31000 Financial Integrity)
+        \App\Models\JournalEntry::observe(\App\Observers\JournalEntryObserver::class);
+        \App\Models\JournalLine::observe(\App\Observers\JournalLineObserver::class);
     }
 }

@@ -57,7 +57,7 @@
 
     <!-- Alert Edukasi Regulasi PMK 71/2022 -->
     <div class="mb-6 p-4 rounded-2xl bg-sky-50 dark:bg-sky-950/40 border border-sky-100 dark:border-sky-800/60 flex items-start gap-3 text-xs text-sky-900 dark:text-sky-300">
-        <i data-lucide="info" class="w-5 h-5 text-[#007AFF] flex-shrink-0 mt-0.5"></i>
+        <i data-lucide="info" class="w-5 h-5 text-[#0284c7] flex-shrink-0 mt-0.5"></i>
         <div class="space-y-1">
             <span class="font-bold">Ketentuan Perpajakan Forwarding & PPJK Sesuai Regulasi Indonesia:</span>
             <p class="text-sky-800 dark:text-sky-400 leading-relaxed">
@@ -74,7 +74,7 @@
         <div class="bg-white dark:bg-[#1C1C1E] p-5 rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-xs relative overflow-hidden group hover:border-slate-300 dark:hover:border-white/20 transition-all">
             <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-medium mb-2">
                 <span class="uppercase tracking-wider font-bold text-[10px] text-sky-700 dark:text-sky-400">PPN Keluaran (1.1%)</span>
-                <span class="p-1.5 rounded-lg bg-sky-50 dark:bg-sky-950/50 text-[#007AFF]">
+                <span class="p-1.5 rounded-lg bg-sky-50 dark:bg-sky-950/50 text-[#0284c7]">
                     <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
                 </span>
             </div>
@@ -83,7 +83,7 @@
             </div>
             <div class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between">
                 <span>DPP Jasa: Rp {{ number_format($totalDppJasa, 0, ',', '.') }}</span>
-                <span class="font-bold text-[#007AFF]">PMK 71/2022</span>
+                <span class="font-bold text-[#0284c7]">PMK 71/2022</span>
             </div>
         </div>
 
@@ -216,7 +216,7 @@
                         @endphp
                         <tr class="hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors">
                             <td class="py-3 px-4">
-                                <a href="{{ route('finance.invoices.show', $inv->id) }}" class="font-bold text-[#007AFF] hover:underline font-mono">
+                                <a href="{{ route('finance.invoices.show', $inv->id) }}" class="font-bold text-[#0284c7] hover:underline font-mono">
                                     {{ $inv->invoice_no }}
                                 </a>
                                 <div class="text-[11px] text-slate-400 dark:text-slate-500 tabular-nums">

@@ -61,15 +61,15 @@
     <!-- Header Waterfall Bar -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-black/[0.05] dark:border-white/[0.05] text-[11px]">
         <div class="flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full {{ $stage >= 6 ? 'bg-emerald-500' : 'bg-[#007AFF]' }} animate-pulse"></span>
+            <span class="w-2.5 h-2.5 rounded-full {{ $stage >= 6 ? 'bg-emerald-500' : 'bg-[#0284c7]' }} animate-pulse"></span>
             <span class="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wider">Skema Alur Waterfall Pabean &amp; Tracking Dokumen</span>
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono {{ $stage >= 6 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300' : 'bg-[#007AFF]/10 text-[#007AFF]' }}">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono {{ $stage >= 6 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300' : 'bg-[#0284c7]/10 text-[#0284c7]' }}">
                 Tahap {{ $stage }} dari 7
             </span>
         </div>
         <div class="flex flex-wrap items-center gap-2 text-[10px] text-slate-500 font-mono">
             @if($shp)
-                <span>Shipment: <a href="{{ route('core.document.show', $shp->id) }}" class="font-bold text-[#007AFF] hover:underline">{{ $shp->project_no ?? $shp->shipment_number }}</a></span>
+                <span>Shipment: <a href="{{ route('core.document.show', $shp->id) }}" class="font-bold text-[#0284c7] hover:underline">{{ $shp->project_no ?? $shp->shipment_number }}</a></span>
                 <span>&bull;</span>
             @endif
             @if($doc)
@@ -82,7 +82,7 @@
             <span>&bull;</span>
             <a href="{{ route('core.tracking.index', ['mode' => 'tracking_dok', 'search' => $shp?->project_no ?? $doc?->nomor_aju]) }}"
                target="_blank"
-               class="text-[#007AFF] hover:underline font-semibold flex items-center gap-0.5"
+               class="text-[#0284c7] hover:underline font-semibold flex items-center gap-0.5"
                title="Buka Cockpit Tracking Dokumen (11 Pos Operasional)">
                 <span>Mode Tracking Dok</span>
                 <i data-lucide="external-link" class="w-2.5 h-2.5"></i>
@@ -100,7 +100,7 @@
             @endphp
             <div class="p-2.5 rounded-xl border transition-all {{ 
                 $isCurrent 
-                    ? 'bg-sky-50 dark:bg-sky-950/40 border-[#007AFF]/50 text-[#007AFF] ring-2 ring-[#007AFF]/20 shadow-xs' 
+                    ? 'bg-sky-50 dark:bg-sky-950/40 border-[#0284c7]/50 text-[#0284c7] ring-2 ring-[#0284c7]/20 shadow-xs' 
                     : ($isPassed 
                         ? 'bg-emerald-50/80 dark:bg-emerald-950/25 border-emerald-200/80 dark:border-emerald-800/40 text-emerald-900 dark:text-emerald-200' 
                         : 'bg-slate-50/70 dark:bg-white/[0.03] border-black/[0.05] dark:border-white/[0.05] text-slate-500 dark:text-slate-400')
@@ -110,7 +110,7 @@
                     @if($isPassed)
                         <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0"></i>
                     @elseif($isCurrent)
-                        <span class="w-2 h-2 rounded-full bg-[#007AFF] shrink-0 animate-ping"></span>
+                        <span class="w-2 h-2 rounded-full bg-[#0284c7] shrink-0 animate-ping"></span>
                     @else
                         <i data-lucide="{{ $p['icon'] }}" class="w-3 h-3 text-slate-400 shrink-0"></i>
                     @endif

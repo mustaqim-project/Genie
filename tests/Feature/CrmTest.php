@@ -25,7 +25,7 @@ class CrmTest extends TestCase
 
         // Buat dummy CeisaDocument
         CeisaDocument::create([
-            'nomor_aju' => '040300-123456-20261020-000001',
+            'nomor_aju' => '04030012345620261020000001',
             'jenis_dokumen' => '20',
             'status' => 'BILLING',
             'status_description' => 'Billing Terbit',
@@ -35,7 +35,7 @@ class CrmTest extends TestCase
 
         $response = $this->get(route('crm.index'));
         $response->assertStatus(200);
-        $response->assertSee('040300-123456-20261020-000001');
+        $response->assertSee('04030012345620261020000001');
         $response->assertSee('Shanghai Electric Co');
         $response->assertSee('Billing Terbit');
     }

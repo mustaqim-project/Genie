@@ -551,9 +551,12 @@
                                 </td>
                                 <td class="px-4 py-3.5">
                                     @if($log->photo_url)
-                                        <button type="button" @click="activePhotoUrl = '{{ $log->photo_url }}'; showPhotoModal = true"
+                                        @php
+                                            $photoSrc = $log->secure_photo_url ?? (str_starts_with($log->photo_url, 'data:image') ? $log->photo_url : route('private.attendance-photo', $log->id));
+                                        @endphp
+                                        <button type="button" @click="activePhotoUrl = '{{ $photoSrc }}'; showPhotoModal = true"
                                                 class="w-8 h-8 rounded-lg overflow-hidden border border-slate-200 shadow-xs hover:scale-110 transition cursor-pointer">
-                                            <img src="{{ $log->photo_url }}" class="w-full h-full object-cover">
+                                            <img src="{{ $photoSrc }}" class="w-full h-full object-cover">
                                         </button>
                                     @else
                                         <span class="text-slate-400 text-[10px]">Tidak ada</span>

@@ -94,7 +94,7 @@
 
     <!-- Kebijakan Otorisasi Banner -->
     <div class="mb-6 p-4 rounded-2xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200/80 dark:border-sky-800/60 flex items-start gap-3.5 text-xs text-sky-900 dark:text-sky-300">
-        <i data-lucide="shield-alert" class="w-5 h-5 text-[#007AFF] flex-shrink-0 mt-0.5"></i>
+        <i data-lucide="shield-alert" class="w-5 h-5 text-[#0284c7] flex-shrink-0 mt-0.5"></i>
         <div>
             <strong class="font-bold">Standar Otorisasi Keuangan (limitAP Prototipe):</strong>
             <p class="text-sky-800 dark:text-sky-400 mt-0.5 leading-relaxed">
@@ -145,7 +145,7 @@
 
                 <div class="flex items-center gap-2 w-full sm:w-72">
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari No. Ref / Shipment..."
-                           class="w-full px-3 py-2 bg-slate-50 dark:bg-[#2C2C2E] border border-slate-200 dark:border-white/15 dark:text-white rounded-xl focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                           class="w-full px-3 py-2 bg-slate-50 dark:bg-[#2C2C2E] border border-slate-200 dark:border-white/15 dark:text-white rounded-xl focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
                     <button type="submit" class="btn-apple-filled !py-2">Cari</button>
                 </div>
             </form>
@@ -176,7 +176,7 @@
                                 </td>
                                 <td class="py-3 px-4">
                                     @if($b->shipment)
-                                        <a href="{{ route('core.document.show', $b->shipment->id) }}" class="font-mono font-bold text-[#007AFF] hover:underline block">
+                                        <a href="{{ route('core.document.show', $b->shipment->id) }}" class="font-mono font-bold text-[#0284c7] hover:underline block">
                                             {{ $b->shipment->project_no ?? $b->shipment->shipment_number }}
                                         </a>
                                         <span class="text-[10px] text-slate-400 dark:text-slate-500">BL: {{ $b->shipment->nomor_bl_awb ?? '-' }}</span>
@@ -402,7 +402,7 @@
                     <div>
                         <label for="vendor_type" class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kategori Tipe Vendor *</label>
                         <select name="vendor_type" id="vendor_type" required
-                                class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007AFF] transition-all font-medium">
+                                class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] transition-all font-medium">
                             <option value="SHIPPING_LINE">Pelayaran (THC, DO Fee, Demurrage)</option>
                             <option value="TRUCKING">Subkon Trucking Inland Transport</option>
                             <option value="TPS">Terminal Petikemas TPS (Lift On/Off)</option>
@@ -413,7 +413,7 @@
                     <div>
                         <label for="shipment_id" class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tautkan ke Shipment / Job Order (Opsional)</label>
                         <select name="shipment_id" id="shipment_id"
-                                class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007AFF] transition-all">
+                                class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] transition-all">
                             <option value="">-- Biaya Umum / Tanpa Kaitan Job --</option>
                             @foreach($activeShipments as $s)
                                 <option value="{{ $s->id }}">
@@ -426,21 +426,21 @@
                     <div>
                         <label for="ref_no" class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Referensi Tagihan / Invoice Vendor *</label>
                         <input type="text" name="ref_no" id="ref_no" required placeholder="Contoh: INV-WANHAI-81923"
-                               class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007AFF] transition-all font-mono">
+                               class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] transition-all font-mono">
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label for="amount" class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nominal Tagihan (IDR) *</label>
                             <input type="number" name="amount" id="amount" required min="1" step="0.01" placeholder="Contoh: 4500000"
-                                   class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007AFF] transition-all font-mono font-bold">
+                                   class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] transition-all font-mono font-bold">
                             <span class="text-[10px] text-slate-400 dark:text-slate-500 mt-1 block">&gt; Rp 10 Jt perlu approval Pimpinan</span>
                         </div>
 
                         <div>
                             <label for="due_date" class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jatuh Tempo *</label>
                             <input type="date" name="due_date" id="due_date" required value="{{ date('Y-m-d', strtotime('+14 days')) }}"
-                                   class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007AFF] transition-all">
+                                   class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] transition-all">
                         </div>
                     </div>
                 </div>
@@ -522,7 +522,7 @@
                     <div>
                         <label for="account_id" class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Rekening Kas / Bank Pengirim *</label>
                         <select name="account_id" id="account_id" required
-                                class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007AFF] transition-all font-medium">
+                                class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] transition-all font-medium">
                             @foreach($bankAccounts as $acc)
                                 <option value="{{ $acc->id }}">
                                     {{ $acc->name }} (Saldo: Rp {{ number_format($acc->current_balance, 0, ',', '.') }})
@@ -535,13 +535,13 @@
                     <div>
                         <label for="paid_at" class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Pencairan / Bayar *</label>
                         <input type="date" name="paid_at" id="paid_at" value="{{ date('Y-m-d') }}" required
-                               class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007AFF] transition-all">
+                               class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] transition-all">
                     </div>
 
                     <div>
                         <label for="payment_ref" class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Referensi Transfer / Bukti</label>
                         <input type="text" name="payment_ref" id="payment_ref" placeholder="Contoh: TRF-BCA-81923"
-                               class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007AFF] transition-all font-mono">
+                               class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] transition-all font-mono">
                     </div>
                 </div>
 
@@ -552,7 +552,7 @@
                         Batal
                     </button>
                     <button type="submit"
-                            class="btn-apple-tinted !bg-[#007AFF] !text-white hover:!bg-[#0062CC]">
+                            class="btn-apple-tinted !bg-[#0284c7] !text-white hover:!bg-[#0062CC]">
                         <i data-lucide="check" class="w-4 h-4"></i>
                         <span>Konfirmasi Pencairan</span>
                     </button>

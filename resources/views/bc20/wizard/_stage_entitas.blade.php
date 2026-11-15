@@ -64,7 +64,7 @@
                 <span class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-white/10 font-bold text-slate-800 dark:text-white">Pemilik Barang</span>
                 <div class="flex items-center gap-1.5">
                     <span class="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-300/60 font-semibold text-[10px]">&check; Cocok</span>
-                    <button type="button" @click="copyImportirTo('pemilik')" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-[#007AFF] hover:text-white dark:bg-white/10 text-slate-700 dark:text-slate-200 font-semibold text-[10px] transition-colors cursor-pointer">
+                    <button type="button" @click="copyImportirTo('pemilik')" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-[#0284c7] hover:text-white dark:bg-white/10 text-slate-700 dark:text-slate-200 font-semibold text-[10px] transition-colors cursor-pointer">
                         Salin Importir
                     </button>
                 </div>
@@ -111,7 +111,7 @@
                 <span class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-white/10 font-bold text-slate-800 dark:text-white">Pemusatan</span>
                 <div class="flex items-center gap-1.5">
                     <span class="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-300/60 font-semibold text-[10px]">&check; Cocok</span>
-                    <button type="button" @click="copyImportirTo('pemusatan')" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-[#007AFF] hover:text-white dark:bg-white/10 text-slate-700 dark:text-slate-200 font-semibold text-[10px] transition-colors cursor-pointer">
+                    <button type="button" @click="copyImportirTo('pemusatan')" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-[#0284c7] hover:text-white dark:bg-white/10 text-slate-700 dark:text-slate-200 font-semibold text-[10px] transition-colors cursor-pointer">
                         Salin Importir
                     </button>
                 </div>
@@ -176,7 +176,7 @@
         <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-4 border border-black/[0.08] dark:border-white/10 shadow-xs space-y-3">
             <div class="flex items-center justify-between gap-2 pb-2 border-b border-black/[0.06] dark:border-white/[0.06]">
                 <span class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-white/10 font-bold text-slate-800 dark:text-white">Penjual</span>
-                <button type="button" @click="copyPengirimToPenjual()" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-[#007AFF] hover:text-white dark:bg-white/10 text-slate-700 dark:text-slate-200 font-semibold text-[10px] transition-colors cursor-pointer">
+                <button type="button" @click="copyPengirimToPenjual()" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-[#0284c7] hover:text-white dark:bg-white/10 text-slate-700 dark:text-slate-200 font-semibold text-[10px] transition-colors cursor-pointer">
                     Salin Data Pengirim
                 </button>
             </div>

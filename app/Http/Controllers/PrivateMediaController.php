@@ -2,93 +2,132 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Employee;
 use App\Models\AttendanceLog;
+use App\Models\Employee;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\File;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\Response;
 
-class PrivateMediaController extends Controller
+class PrivateMediaController extends Controller implements HasMiddleware
 {
     /**
-     * Stream a private biometric face image if authenticated and valid signed URL.
+     * Daftarkan middleware proteksi RBAC level Controller
      */
-    public function showBiometric(Request $request, string $employeeId)
+    public static function middleware(): array
     {
-        // Enforce valid signature (or super admin / owner bypass if logged in)
-        if (! $request->hasValidSignature()) {
-            if (! auth()->check() || ! in_array(auth()->user()->role ?? '', ['R-OWN', 'R-MGR', 'R-SYS'])) {
-                abort(403, 'Akses gambar biometrik ditolak: Tautan kedaluwarsa atau tidak sah (UU PDP No. 27/2022).');
-            }
+        return [
+            // showAttendancePhoto dapat dibuka via signed URL atau user terotentikasi
+        ];
+    }
+    /**
+     * Sajikan foto absensi terenkripsi / privat hanya untuk yang berhak atau via signed URL.
+     * Sesuai ketentuan kepatuhan UU PDP No. 27/2022.
+     */
+    public function showAttendancePhoto(Request $request, string $attendanceLogId): Response
+    {
+        $log = AttendanceLog::findOrFail($attendanceLogId);
+
+        // Otorisasi akses
+        $hasValidSignature = $request->hasValidSignature();
+        $user = auth()->user();
+        $isAuthorizedUser = auth()->check() && (
+            $user->can('hrm.manage') ||
+            $user->can('setting.manage') ||
+            $user->hasRole(['R-HR', 'R-ADM', 'R-OWN']) ||
+            $user->employee?->id === $log->employee_id ||
+            $user->id === $log->employee?->user_id
+        );
+
+        if (!$hasValidSignature && !$isAuthorizedUser) {
+            abort(403, 'Akses ditolak: Anda tidak memiliki wewenang atau tautan telah kedaluwarsa sesuai UU PDP No. 27/2022.');
         }
 
-        $employee = Employee::findOrFail($employeeId);
-
-        // Security scoping: only owner, HR manager, or the employee himself can view
-        if (auth()->check()) {
-            $user = auth()->user();
-            $isSelf = ($employee->user_id === $user->id);
-            $isPrivileged = in_array($user->role ?? '', ['R-OWN', 'R-MGR', 'R-SYS']);
-            if (! $isSelf && ! $isPrivileged) {
-                abort(403, 'Akses dibatasi hanya untuk pemilik data atau staf kepatuhan.');
-            }
+        if (empty($log->photo_url)) {
+            abort(404, 'Foto presensi tidak tersedia.');
         }
 
-        $path = $employee->photo_url;
-        if (! $path || ! Storage::disk('local')->exists($path)) {
-            // Fallback: check if stored under private/biometrics/{employeeId}.jpg
-            $fallback = 'private/biometrics/' . $employee->id . '.jpg';
-            if (Storage::disk('local')->exists($fallback)) {
-                $path = $fallback;
-            } else {
-                abort(404, 'Berkas foto biometrik tidak ditemukan.');
-            }
+        // Jika foto_url berupa data URI base64
+        if (str_starts_with($log->photo_url, 'data:image')) {
+            $data = preg_replace('/^data:image\/\w+;base64,/', '', $log->photo_url);
+            $binary = base64_decode(str_replace(' ', '+', $data));
+            return response($binary, 200, [
+                'Content-Type' => 'image/jpeg',
+                'Cache-Control' => 'private, no-cache, no-store, must-revalidate',
+                'Pragma' => 'no-cache',
+                'Expires' => '0',
+            ]);
         }
 
-        $mimeType = Storage::disk('local')->mimeType($path) ?: 'image/jpeg';
+        // Ambil nama berkas
+        $filename = basename($log->photo_url);
+        $privatePath = storage_path('app/private/attendances/' . $filename);
+        $publicPath = public_path('uploads/attendances/' . $filename);
 
-        return response()->stream(function () use ($path) {
-            $stream = Storage::disk('local')->readStream($path);
-            fpassthru($stream);
-            if (is_resource($stream)) {
-                fclose($stream);
-            }
-        }, 200, [
+        $targetPath = null;
+        if (\Illuminate\Support\Facades\Storage::disk('private')->exists('attendances/' . $filename)) {
+            $targetPath = \Illuminate\Support\Facades\Storage::disk('private')->path('attendances/' . $filename);
+        } elseif (File::exists($privatePath)) {
+            $targetPath = $privatePath;
+        } elseif (File::exists($publicPath)) {
+            $targetPath = $publicPath;
+        }
+
+        if (!$targetPath) {
+            abort(404, 'Berkas fisik foto presensi tidak ditemukan di storage.');
+        }
+
+        $mimeType = File::mimeType($targetPath) ?: 'image/jpeg';
+
+        $response = response()->file($targetPath, [
             'Content-Type' => $mimeType,
-            'Content-Disposition' => 'inline; filename="biometric_' . $employee->nik . '.jpg"',
-            'Cache-Control' => 'no-cache, private, max-age=300',
+            'Pragma' => 'no-cache',
+            'Expires' => '0',
         ]);
+        $response->headers->set('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+
+        return $response;
     }
 
     /**
-     * Stream private attendance clock-in selfie.
+     * Sajikan foto/data biometrik wajah pegawai secara privat.
      */
-    public function showAttendancePhoto(Request $request, string $attendanceLogId)
+    public function showBiometric(Request $request, string $employeeId): Response
     {
-        if (! $request->hasValidSignature()) {
-            if (! auth()->check() || ! in_array(auth()->user()->role ?? '', ['R-OWN', 'R-MGR', 'R-SYS'])) {
-                abort(403, 'Tautan verifikasi presensi tidak sah.');
-            }
+        $employee = Employee::findOrFail($employeeId);
+
+        $hasValidSignature = $request->hasValidSignature();
+        $isAuthorizedUser = auth()->check() && (
+            auth()->user()->can('hrm.manage') ||
+            auth()->user()->can('setting.manage') ||
+            auth()->user()->employee?->id === $employee->id
+        );
+
+        if (!$hasValidSignature && !$isAuthorizedUser) {
+            abort(403, 'Akses ditolak: Memerlukan otorisasi HR atau Pimpinan sesuai ketentuan UU PDP.');
         }
 
-        $log = AttendanceLog::findOrFail($attendanceLogId);
-        $path = $log->photo_url;
-
-        if (! $path || ! Storage::disk('local')->exists($path)) {
-            abort(404, 'Foto presensi tidak ditemukan.');
+        if (empty($employee->photo_url)) {
+            abort(404, 'Foto profil pegawai tidak tersedia.');
         }
 
-        $mimeType = Storage::disk('local')->mimeType($path) ?: 'image/jpeg';
+        $filename = basename($employee->photo_url);
+        $privatePath = storage_path('app/private/biometrics/' . $filename);
+        $publicPath = public_path('uploads/avatars/' . $filename);
 
-        return response()->stream(function () use ($path) {
-            $stream = Storage::disk('local')->readStream($path);
-            fpassthru($stream);
-            if (is_resource($stream)) {
-                fclose($stream);
-            }
-        }, 200, [
+        $targetPath = File::exists($privatePath) ? $privatePath : (File::exists($publicPath) ? $publicPath : null);
+
+        if (!$targetPath) {
+            abort(404, 'Berkas foto profil biometrik tidak ditemukan.');
+        }
+
+        $mimeType = File::mimeType($targetPath) ?: 'image/jpeg';
+
+        return response()->file($targetPath, [
             'Content-Type' => $mimeType,
-            'Cache-Control' => 'no-cache, private, max-age=300',
+            'Cache-Control' => 'private, no-cache, no-store, must-revalidate',
         ]);
     }
 }

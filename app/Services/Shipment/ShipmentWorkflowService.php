@@ -16,6 +16,7 @@ use App\Models\ShipmentDocument;
 use App\Models\ShipmentItem;
 use App\Models\ShipmentItemDocument;
 use App\Models\ShippingVendor;
+use App\Models\SystemSetting;
 use App\Services\Ceisa\CeisaDocumentService;
 use App\Services\Ceisa\DocumentBC20Service;
 use App\Services\Ceisa\DocumentBC30Service;
@@ -736,14 +737,18 @@ class ShipmentWorkflowService
     public function sendVendorEmailForDo(Shipment $shipment, ?string $customNotes = null): array
     {
         $vendor = $shipment->vendor;
-        $recipient = $vendor ? $vendor->pic_email : 'import.documentation@maersk.com';
-        $vendorName = $vendor ? $vendor->name : 'MAERSK LINE INDONESIA';
+        $company = SystemSetting::get('company_profile', []);
+        $companyName = $company['name'] ?? 'PT AGUNG TRANS SOLUSINDO';
+        $companyPhone = $company['phone'] ?? '+62 21 5299 8000';
+
+        $recipient = $vendor?->pic_email ?? 'import.documentation@maersk.com';
+        $vendorName = $vendor?->name ?? 'Pelayaran / Shipping Line';
 
         // Format Konten Email Permintaan Invoice Pelayaran
         $subject = "URGENT: Permintaan Invoice THC & DO Release - BL No: {$shipment->nomor_bl_awb} - {$shipment->client->name}";
         $body = "Kepada Yth. Tim Finance & Rilis DO {$vendorName},\n\n"
               . "Dengan hormat,\n"
-              . "Kami dari PT Agung Trans Solusindo (PPJK Resmi) memohon rincian invoice tagihan pelayaran (Ocean Freight, THC, Cleaning, dan DO Fee) untuk pengapalan berikut:\n\n"
+              . "Kami dari {$companyName} (PPJK Resmi) memohon rincian invoice tagihan pelayaran (Ocean Freight, THC, Cleaning, dan DO Fee) untuk pengapalan berikut:\n\n"
               . "- No. B/L : {$shipment->nomor_bl_awb}\n"
               . "- Nama Kapal / Voyage : {$shipment->nama_kapal} / {$shipment->voyage_no}\n"
               . "- Consignee : {$shipment->client->name}\n"
@@ -753,8 +758,8 @@ class ShipmentWorkflowService
               . ($customNotes ? "Catatan Tambahan: {$customNotes}\n\n" : "")
               . "Terima kasih atas kerja samanya.\n\n"
               . "Salam,\n"
-              . "Tim Delivery Order (DO) - PT Agung Trans Solusindo\n"
-              . "Hotline Operasional: 021-43900012";
+              . "Tim Delivery Order (DO) - {$companyName}\n"
+              . "Hotline Operasional: {$companyPhone}";
 
         $shipment->update([
             'status_do' => 'EMAIL_SENT',
@@ -762,6 +767,13 @@ class ShipmentWorkflowService
             'do_email_recipient' => $recipient,
             'status_tahap' => 'DO_PROCESSING',
         ]);
+
+        // Kirim email riil via Mailable (FIX-10)
+        try {
+            \Illuminate\Support\Facades\Mail::to($recipient)->send(new \App\Mail\VendorDoRequestMail($shipment, $customNotes));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning("Gagal mengirim email permintaan DO ke vendor {$recipient}: " . $e->getMessage());
+        }
 
         return [
             'recipient' => $recipient,

@@ -8,11 +8,24 @@ use App\Models\ShipmentEvent;
 use App\Models\ShipmentOperationCost;
 use App\Services\Shipment\ShipmentWorkflowService;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 
-class TrafficWorkflowController extends Controller
+class TrafficWorkflowController extends Controller implements HasMiddleware
 {
+    /**
+     * Daftarkan middleware proteksi RBAC level Controller
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:traffic.view', only: ['index', 'show']),
+            new Middleware('permission:traffic.behandle|traffic.manage', only: ['recordInspection', 'uploadInspectionPhotos', 'behandle']),
+            new Middleware('permission:traffic.manage', except: ['index', 'show', 'recordInspection', 'uploadInspectionPhotos', 'behandle']),
+        ];
+    }
     protected ShipmentWorkflowService $workflowService;
 
     public function __construct(ShipmentWorkflowService $workflowService)

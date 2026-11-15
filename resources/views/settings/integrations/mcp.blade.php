@@ -48,7 +48,7 @@
     <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-5 sm:p-6 border border-black/[0.06] dark:border-white/[0.08] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
             <nav class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium mb-1.5" aria-label="Breadcrumb">
-                <a href="{{ route('dashboard') }}" class="hover:text-[#007AFF] transition-colors flex items-center gap-1">
+                <a href="{{ route('dashboard') }}" class="hover:text-[#0284c7] transition-colors flex items-center gap-1">
                     <i data-lucide="home" class="w-3.5 h-3.5"></i>
                     <span>Dashboard</span>
                 </a>
@@ -59,7 +59,7 @@
             </nav>
             <h1 class="text-xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
                 <span>MCP Server & Customs AI Agent Hub</span>
-                <span class="px-2 py-0.5 rounded-md bg-[#007AFF]/10 text-[#007AFF] text-[10px] font-mono font-semibold uppercase tracking-wider">v2.5.0</span>
+                <span class="px-2 py-0.5 rounded-md bg-[#0284c7]/10 text-[#0284c7] text-[10px] font-mono font-semibold uppercase tracking-wider">v2.5.0</span>
             </h1>
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-2xl leading-relaxed">
                 Pusat integrasi Model Context Protocol (MCP) resmi untuk menghubungkan AI Assistant eksternal (Claude Desktop, Cursor, Antigravity, skrip Python) ke database pos tarif BTKI 2022, ekstraksi Packing List otomatis, dan gateway pabean CEISA 4.0.
@@ -75,7 +75,7 @@
             <span class="text-slate-300 dark:text-slate-700">|</span>
             <span class="text-[11px] font-mono text-slate-500 dark:text-slate-400">Spec: 2024-11-05</span>
             <span class="text-slate-300 dark:text-slate-700">|</span>
-            <span class="text-[11px] font-mono text-[#007AFF] font-bold">{{ $activeTokensCount }} Token Aktif</span>
+            <span class="text-[11px] font-mono text-[#0284c7] font-bold">{{ $activeTokensCount }} Token Aktif</span>
             <span class="text-slate-300 dark:text-slate-700">|</span>
             <span class="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">{{ count($tools) }} Tools Aktif</span>
         </div>
@@ -85,7 +85,7 @@
     <div class="bg-black/[0.04] dark:bg-white/[0.04] p-1.5 rounded-2xl flex items-center gap-1.5 overflow-x-auto text-xs font-semibold">
         <button type="button" 
                 @click="activeTab = 'tester'" 
-                :class="activeTab === 'tester' ? 'bg-white dark:bg-[#1C1C1E] text-[#007AFF] shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                :class="activeTab === 'tester' ? 'bg-white dark:bg-[#1C1C1E] text-[#0284c7] shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
                 class="px-4 py-2 rounded-xl transition-all flex items-center gap-2 shrink-0 cursor-pointer">
             <i data-lucide="zap" class="w-3.5 h-3.5"></i>
             <span>Uji Cepat Deteksi HS & Packing List</span>
@@ -94,16 +94,16 @@
 
         <button type="button" 
                 @click="activeTab = 'tokens'" 
-                :class="activeTab === 'tokens' ? 'bg-white dark:bg-[#1C1C1E] text-[#007AFF] shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                :class="activeTab === 'tokens' ? 'bg-white dark:bg-[#1C1C1E] text-[#0284c7] shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
                 class="px-4 py-2 rounded-xl transition-all flex items-center gap-2 shrink-0 cursor-pointer">
             <i data-lucide="key" class="w-3.5 h-3.5"></i>
             <span>Kunci Akses AI (MCP Tokens)</span>
-            <span class="px-1.5 py-0.2 rounded-full text-[9px] bg-[#007AFF]/10 text-[#007AFF] font-bold">{{ $activeTokensCount }}</span>
+            <span class="px-1.5 py-0.2 rounded-full text-[9px] bg-[#0284c7]/10 text-[#0284c7] font-bold">{{ $activeTokensCount }}</span>
         </button>
 
         <button type="button" 
                 @click="activeTab = 'guide'" 
-                :class="activeTab === 'guide' ? 'bg-white dark:bg-[#1C1C1E] text-[#007AFF] shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                :class="activeTab === 'guide' ? 'bg-white dark:bg-[#1C1C1E] text-[#0284c7] shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
                 class="px-4 py-2 rounded-xl transition-all flex items-center gap-2 shrink-0 cursor-pointer">
             <i data-lucide="plug-2" class="w-3.5 h-3.5"></i>
             <span>Panduan Koneksi AI Client</span>
@@ -111,7 +111,7 @@
 
         <button type="button" 
                 @click="activeTab = 'tools'" 
-                :class="activeTab === 'tools' ? 'bg-white dark:bg-[#1C1C1E] text-[#007AFF] shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                :class="activeTab === 'tools' ? 'bg-white dark:bg-[#1C1C1E] text-[#0284c7] shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
                 class="px-4 py-2 rounded-xl transition-all flex items-center gap-2 shrink-0 cursor-pointer">
             <i data-lucide="wrench" class="w-3.5 h-3.5"></i>
             <span>Katalog Tool & Schema MCP</span>
@@ -126,7 +126,7 @@
             <div class="flex items-center justify-between pb-3 border-b border-black/[0.06] dark:border-white/[0.06] mb-4">
                 <div>
                     <h2 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                        <span class="w-6 h-6 rounded-lg bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center text-xs font-bold">1</span>
+                        <span class="w-6 h-6 rounded-lg bg-[#0284c7]/10 text-[#0284c7] flex items-center justify-center text-xs font-bold">1</span>
                         <span>Uji Deteksi Pos Tarif HS Code & Lartas (check_hs_code)</span>
                     </h2>
                     <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Ketik nama komoditas dalam bahasa Inggris atau Indonesia untuk melihat pencocokan pos tarif 8-digit BTKI, tarif BM/PPN/PPh, dan izin Lartas.</p>
@@ -167,10 +167,10 @@
                            x-model="testQuery" 
                            @keydown.enter="runCheckHs()"
                            placeholder="Masukkan nama komoditas atau nomor HS Code..." 
-                           class="w-full px-4 py-2.5 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white font-mono text-xs focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                           class="w-full px-4 py-2.5 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white font-mono text-xs focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
                 </div>
                 <div class="w-48">
-                    <select x-model="testDirection" class="w-full px-3 py-2.5 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-slate-900 dark:text-white text-xs font-semibold focus:ring-2 focus:ring-[#007AFF]">
+                    <select x-model="testDirection" class="w-full px-3 py-2.5 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-slate-900 dark:text-white text-xs font-semibold focus:ring-2 focus:ring-[#0284c7]">
                         <option value="IMPORT_BC20">Impor (PIB BC 2.0)</option>
                         <option value="EKSPORT_BC30">Ekspor (PEB BC 3.0)</option>
                     </select>
@@ -191,7 +191,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
                         <div class="p-3.5 bg-white dark:bg-[#1C1C1E] rounded-xl border border-black/[0.06] dark:border-white/[0.08] shadow-2xs">
                             <span class="text-slate-400 dark:text-slate-500 block font-medium">Pos Tarif (BTKI 2022)</span>
-                            <span class="text-base font-mono font-bold text-[#007AFF]" x-text="testResult.data.code"></span>
+                            <span class="text-base font-mono font-bold text-[#0284c7]" x-text="testResult.data.code"></span>
                             <div class="mt-1">
                                 <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/80" 
                                       x-text="Math.round((testResult.data.confidence_score || 1.0) * 100) + '% Akurasi'"></span>
@@ -241,12 +241,12 @@
                 <textarea x-model="batchText" 
                           rows="7" 
                           placeholder="Tempel isi Packing List di sini..." 
-                          class="w-full p-4 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white font-mono text-xs focus:ring-2 focus:ring-[#007AFF] focus:outline-none"></textarea>
+                          class="w-full p-4 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white font-mono text-xs focus:ring-2 focus:ring-[#0284c7] focus:outline-none"></textarea>
 
                 <div class="flex items-center justify-between">
                     <button type="button" 
                             @click="batchText = @json($samplePackingList)" 
-                            class="text-xs text-[#007AFF] hover:underline font-semibold cursor-pointer">
+                            class="text-xs text-[#0284c7] hover:underline font-semibold cursor-pointer">
                         &larr; Muat Ulang Contoh 17 Item Samarinda
                     </button>
                     <button type="button" 
@@ -266,7 +266,7 @@
                     <div>
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-xs font-bold text-slate-800 dark:text-white">
-                                Ditemukan <span class="text-[#007AFF]" x-text="batchResult.items.length"></span> Item Komoditas:
+                                Ditemukan <span class="text-[#0284c7]" x-text="batchResult.items.length"></span> Item Komoditas:
                             </span>
                             <span class="text-[11px] font-mono text-slate-500 dark:text-slate-400">
                                 Total Gross: <strong class="tabular-nums" x-text="batchResult.total_gross_weight"></strong> KGS
@@ -293,7 +293,7 @@
                                             <td class="p-3 text-slate-600 dark:text-slate-300 tabular-nums" x-text="(item.quantity || '-') + ' ' + (item.unit || '')"></td>
                                             <td class="p-3 text-slate-600 dark:text-slate-300 tabular-nums" x-text="(item.gross_weight || '-') + ' KGS'"></td>
                                             <td class="p-3">
-                                                <span class="font-bold text-[#007AFF] bg-[#007AFF]/10 px-2 py-0.5 rounded border border-[#007AFF]/20" x-text="item.suggested_hs_code"></span>
+                                                <span class="font-bold text-[#0284c7] bg-[#0284c7]/10 px-2 py-0.5 rounded border border-[#0284c7]/20" x-text="item.suggested_hs_code"></span>
                                             </td>
                                             <td class="p-3 text-slate-700 dark:text-slate-300 tabular-nums" x-text="(item.tariff_rates?.bm ?? 0) + '%'"></td>
                                             <td class="p-3">
@@ -320,7 +320,7 @@
         <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-6 border border-black/[0.06] dark:border-white/[0.08] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
                 <h2 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                    <i data-lucide="key" class="w-4 h-4 text-[#007AFF]"></i>
+                    <i data-lucide="key" class="w-4 h-4 text-[#0284c7]"></i>
                     <span>Daftar Kunci Akses MCP (API Bearer Tokens)</span>
                 </h2>
                 <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xl">
@@ -339,7 +339,7 @@
         <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl border border-black/[0.06] dark:border-white/[0.08] shadow-xs overflow-hidden">
             <div class="p-4 border-b border-black/[0.06] dark:border-white/[0.06] bg-black/[0.02] dark:bg-white/[0.02] flex items-center justify-between">
                 <span class="text-xs font-bold text-slate-800 dark:text-white">Token Terdaftar ({{ count($tokens) }})</span>
-                <span class="text-[11px] text-slate-500 dark:text-slate-400">Format: <code class="font-mono text-[#007AFF]">genie_mcp_live_...</code></span>
+                <span class="text-[11px] text-slate-500 dark:text-slate-400">Format: <code class="font-mono text-[#0284c7]">genie_mcp_live_...</code></span>
             </div>
 
             <div class="overflow-x-auto">
@@ -363,7 +363,7 @@
                                 <div class="mt-0.5">
                                     <span class="px-2 py-0.5 rounded text-[10px] font-mono uppercase font-bold
                                         @if($t->provider_hint === 'claude') bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200/80
-                                        @elseif($t->provider_hint === 'cursor') bg-[#007AFF]/10 text-[#007AFF] border border-[#007AFF]/20
+                                        @elseif($t->provider_hint === 'cursor') bg-[#0284c7]/10 text-[#0284c7] border border-[#0284c7]/20
                                         @elseif($t->provider_hint === 'antigravity') bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 border border-purple-200/80
                                         @else bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10 @endif">
                                         {{ $t->provider_hint }}
@@ -457,7 +457,7 @@
                         @forelse($logs as $log)
                         <tr class="hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
                             <td class="p-3 text-slate-500 dark:text-slate-400 whitespace-nowrap tabular-nums">{{ $log->created_at->format('d/m/Y H:i:s') }}</td>
-                            <td class="p-3 font-bold text-[#007AFF]">{{ $log->tool }}</td>
+                            <td class="p-3 font-bold text-[#0284c7]">{{ $log->tool }}</td>
                             <td class="p-3">
                                 <span class="px-2 py-0.5 rounded text-[10px] bg-black/5 dark:bg-white/10 text-slate-700 dark:text-slate-300">
                                     {{ $log->provider ?? 'unknown' }}
@@ -492,7 +492,7 @@
     <div x-show="activeTab === 'guide'" class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-6 border border-black/[0.06] dark:border-white/[0.08] shadow-xs space-y-6">
         <div>
             <h2 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <i data-lucide="plug-2" class="w-4 h-4 text-[#007AFF]"></i>
+                <i data-lucide="plug-2" class="w-4 h-4 text-[#0284c7]"></i>
                 <span>Cara Menghubungkan Klien AI ke GENIE MCP Server</span>
             </h2>
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Pilih platform AI yang Anda gunakan di bawah untuk melihat konfigurasi siap salin.</p>
@@ -507,7 +507,7 @@
                 <input type="text" 
                        x-model="customToken" 
                        placeholder="genie_mcp_live_... (atau buat baru di tab Kunci Akses)" 
-                       class="w-full px-3.5 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-slate-900 dark:text-white font-mono text-xs focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                       class="w-full px-3.5 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-slate-900 dark:text-white font-mono text-xs focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
             </div>
             <div class="shrink-0 flex items-end">
                 <button type="button" 
@@ -523,31 +523,31 @@
         <div class="flex border-b border-black/[0.06] dark:border-white/[0.06] gap-2 overflow-x-auto">
             <button type="button" 
                     @click="activeProvider = 'claude'" 
-                    :class="activeProvider === 'claude' ? 'border-[#007AFF] text-[#007AFF] font-bold' : 'border-transparent text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+                    :class="activeProvider === 'claude' ? 'border-[#0284c7] text-[#0284c7] font-bold' : 'border-transparent text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
                     class="px-3 py-2 text-xs border-b-2 font-medium cursor-pointer">
                 Claude Desktop
             </button>
             <button type="button" 
                     @click="activeProvider = 'cursor'" 
-                    :class="activeProvider === 'cursor' ? 'border-[#007AFF] text-[#007AFF] font-bold' : 'border-transparent text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+                    :class="activeProvider === 'cursor' ? 'border-[#0284c7] text-[#0284c7] font-bold' : 'border-transparent text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
                     class="px-3 py-2 text-xs border-b-2 font-medium cursor-pointer">
                 Cursor IDE
             </button>
             <button type="button" 
                     @click="activeProvider = 'antigravity'" 
-                    :class="activeProvider === 'antigravity' ? 'border-[#007AFF] text-[#007AFF] font-bold' : 'border-transparent text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+                    :class="activeProvider === 'antigravity' ? 'border-[#0284c7] text-[#0284c7] font-bold' : 'border-transparent text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
                     class="px-3 py-2 text-xs border-b-2 font-medium cursor-pointer">
                 Google Antigravity AI
             </button>
             <button type="button" 
                     @click="activeProvider = 'python'" 
-                    :class="activeProvider === 'python' ? 'border-[#007AFF] text-[#007AFF] font-bold' : 'border-transparent text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+                    :class="activeProvider === 'python' ? 'border-[#0284c7] text-[#0284c7] font-bold' : 'border-transparent text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
                     class="px-3 py-2 text-xs border-b-2 font-medium cursor-pointer">
                 Python Script
             </button>
             <button type="button" 
                     @click="activeProvider = 'curl'" 
-                    :class="activeProvider === 'curl' ? 'border-[#007AFF] text-[#007AFF] font-bold' : 'border-transparent text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+                    :class="activeProvider === 'curl' ? 'border-[#0284c7] text-[#0284c7] font-bold' : 'border-transparent text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
                     class="px-3 py-2 text-xs border-b-2 font-medium cursor-pointer">
                 cURL CLI
             </button>
@@ -620,7 +620,7 @@
                 <span x-text="'{{ $sseEndpoint }}?token=' + getToken()"></span>
                 <button type="button" 
                         @click="copyToClipboard('{{ $sseEndpoint }}?token=' + getToken())" 
-                        class="text-[#007AFF] hover:underline font-bold cursor-pointer">
+                        class="text-[#0284c7] hover:underline font-bold cursor-pointer">
                     Salin URL
                 </button>
             </div>
@@ -767,7 +767,7 @@ print('Hasil Deteksi Pos Tarif:', result['result']['structured_data'])`, 'Kode P
                 <input type="text" 
                        x-model="toolSearch" 
                        placeholder="Cari tool MCP..." 
-                       class="w-full px-3.5 py-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                       class="w-full px-3.5 py-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
             </div>
         </div>
 
@@ -779,10 +779,10 @@ print('Hasil Deteksi Pos Tarif:', result['result']['structured_data'])`, 'Kode P
                     $name = $tool['name'];
                 @endphp
                 <div x-show="(toolCategory === 'ALL' || toolCategory === '{{ $cat }}') && ('{{ strtolower($name) }}'.includes(toolSearch.toLowerCase()) || '{{ strtolower($tool['description']) }}'.includes(toolSearch.toLowerCase()))"
-                     class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-5 border border-black/[0.06] dark:border-white/[0.08] shadow-xs flex flex-col justify-between hover:border-[#007AFF]/40 transition-all">
+                     class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-5 border border-black/[0.06] dark:border-white/[0.08] shadow-xs flex flex-col justify-between hover:border-[#0284c7]/40 transition-all">
                     <div>
                         <div class="flex items-center justify-between mb-2">
-                            <span class="font-mono font-bold text-[#007AFF] text-sm bg-[#007AFF]/10 px-2.5 py-0.5 rounded-lg border border-[#007AFF]/20">
+                            <span class="font-mono font-bold text-[#0284c7] text-sm bg-[#0284c7]/10 px-2.5 py-0.5 rounded-lg border border-[#0284c7]/20">
                                 {{ $tool['name'] }}
                             </span>
                             <span class="text-[10px] px-2 py-0.5 rounded-md font-semibold bg-black/5 dark:bg-white/10 text-slate-600 dark:text-slate-400">
@@ -807,7 +807,7 @@ print('Hasil Deteksi Pos Tarif:', result['result']['structured_data'])`, 'Kode P
                         </div>
                         <button type="button" 
                                 @click="copyToClipboard('{{ $tool['name'] }}', 'Nama tool disalin!')" 
-                                class="text-[11px] text-[#007AFF] hover:underline font-semibold shrink-0 cursor-pointer">
+                                class="text-[11px] text-[#0284c7] hover:underline font-semibold shrink-0 cursor-pointer">
                             Salin Nama
                         </button>
                     </div>
@@ -832,7 +832,7 @@ print('Hasil Deteksi Pos Tarif:', result['result']['structured_data'])`, 'Kode P
             
             <div class="flex items-center justify-between pb-3 border-b border-black/[0.06] dark:border-white/[0.06]">
                 <div class="flex items-center gap-2.5">
-                    <div class="w-9 h-9 rounded-xl bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center text-base font-bold">
+                    <div class="w-9 h-9 rounded-xl bg-[#0284c7]/10 text-[#0284c7] flex items-center justify-center text-base font-bold">
                         <i data-lucide="key" class="w-4 h-4"></i>
                     </div>
                     <div>
@@ -857,7 +857,7 @@ print('Hasil Deteksi Pos Tarif:', result['result']['structured_data'])`, 'Kode P
                            name="name" 
                            required 
                            placeholder="Contoh: Claude Desktop - Impor Samarinda, Cursor IDE Tim AI, Production Agent"
-                           class="w-full px-3.5 py-2.5 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                           class="w-full px-3.5 py-2.5 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
                 </div>
 
                 <!-- Provider & Expiry Grid -->
@@ -866,7 +866,7 @@ print('Hasil Deteksi Pos Tarif:', result['result']['structured_data'])`, 'Kode P
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                             Aplikasi / Provider Hint
                         </label>
-                        <select name="provider_hint" class="w-full px-3 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-slate-900 dark:text-white text-xs font-semibold focus:ring-2 focus:ring-[#007AFF]">
+                        <select name="provider_hint" class="w-full px-3 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-slate-900 dark:text-white text-xs font-semibold focus:ring-2 focus:ring-[#0284c7]">
                             <option value="all">Universal (Semua Klien)</option>
                             <option value="claude">Claude Desktop</option>
                             <option value="cursor">Cursor IDE</option>
@@ -882,7 +882,7 @@ print('Hasil Deteksi Pos Tarif:', result['result']['structured_data'])`, 'Kode P
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                             Masa Berlaku Token
                         </label>
-                        <select name="expires_in" class="w-full px-3 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-slate-900 dark:text-white text-xs font-semibold focus:ring-2 focus:ring-[#007AFF]">
+                        <select name="expires_in" class="w-full px-3 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-slate-900 dark:text-white text-xs font-semibold focus:ring-2 focus:ring-[#0284c7]">
                             <option value="never">Permanen (Tidak Pernah Kedaluwarsa)</option>
                             <option value="30_days">30 Hari</option>
                             <option value="90_days">90 Hari</option>
@@ -938,9 +938,9 @@ print('Hasil Deteksi Pos Tarif:', result['result']['structured_data'])`, 'Kode P
                                        value="*" 
                                        :checked="selectedScopes.includes('*')"
                                        @change="toggleScope('*')"
-                                       class="rounded text-[#007AFF] focus:ring-[#007AFF] w-4 h-4">
+                                       class="rounded text-[#0284c7] focus:ring-[#0284c7] w-4 h-4">
                                 <span class="flex-1">
-                                    <span class="text-[#007AFF] font-bold">* (Akses Penuh Seluruh 27 Tools ERP, CRUD & Approvals)</span>
+                                    <span class="text-[#0284c7] font-bold">* (Akses Penuh Seluruh 27 Tools ERP, CRUD & Approvals)</span>
                                     <span class="block text-[10px] font-normal text-slate-500 dark:text-slate-400">Mencakup eksekusi instruksi apa pun yang didukung oleh server GENIE.</span>
                                 </span>
                             </label>
@@ -973,7 +973,7 @@ print('Hasil Deteksi Pos Tarif:', result['result']['structured_data'])`, 'Kode P
                                 <label class="flex items-start gap-2 cursor-pointer p-1.5 rounded-lg hover:bg-black/[0.02] dark:hover:bg-white/[0.04] transition-colors sm:col-span-2">
                                     <input type="checkbox" name="scope_roles[]" value="approval:read" 
                                            :checked="isScopeChecked('approval:read')" @change="toggleScope('approval:read')"
-                                           class="rounded text-[#007AFF] focus:ring-[#007AFF] mt-0.5">
+                                           class="rounded text-[#0284c7] focus:ring-[#0284c7] mt-0.5">
                                     <span class="text-[11px] text-slate-700 dark:text-slate-300">
                                         <strong class="text-slate-800 dark:text-white">approval:read</strong>
                                         <span class="block text-[10px] text-slate-500 dark:text-slate-400">Melihat daftar antrean yang menunggu persetujuan tim</span>
@@ -984,14 +984,14 @@ print('Hasil Deteksi Pos Tarif:', result['result']['structured_data'])`, 'Kode P
 
                         <!-- 2. Kepabeanan & CEISA 4.0 -->
                         <div class="space-y-1.5 pt-2 border-t border-black/[0.06] dark:border-white/[0.06]">
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-[#007AFF] flex items-center gap-1">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-[#0284c7] flex items-center gap-1">
                                 🛃 Kepabeanan & CEISA 4.0 (Customs)
                             </span>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                                 <label class="flex items-start gap-2 cursor-pointer p-1.5 rounded-lg hover:bg-black/[0.02] dark:hover:bg-white/[0.04] transition-colors">
                                     <input type="checkbox" name="scope_roles[]" value="customs:read" 
                                            :checked="isScopeChecked('customs:read')" @change="toggleScope('customs:read')"
-                                           class="rounded text-[#007AFF] focus:ring-[#007AFF] mt-0.5">
+                                           class="rounded text-[#0284c7] focus:ring-[#0284c7] mt-0.5">
                                     <span class="text-[11px] text-slate-700 dark:text-slate-300">
                                         <strong>customs:read</strong>
                                         <span class="block text-[10px] text-slate-500 dark:text-slate-400">Cek Pos Tarif BTKI, Kurs Pajak & Status CEISA</span>
@@ -1000,7 +1000,7 @@ print('Hasil Deteksi Pos Tarif:', result['result']['structured_data'])`, 'Kode P
                                 <label class="flex items-start gap-2 cursor-pointer p-1.5 rounded-lg hover:bg-black/[0.02] dark:hover:bg-white/[0.04] transition-colors">
                                     <input type="checkbox" name="scope_roles[]" value="customs:create" 
                                            :checked="isScopeChecked('customs:create')" @change="toggleScope('customs:create')"
-                                           class="rounded text-[#007AFF] focus:ring-[#007AFF] mt-0.5">
+                                           class="rounded text-[#0284c7] focus:ring-[#0284c7] mt-0.5">
                                     <span class="text-[11px] text-slate-700 dark:text-slate-300">
                                         <strong>customs:create</strong>
                                         <span class="block text-[10px] text-slate-500 dark:text-slate-400">Parse Packing List & Generate Draft Deklarasi PIB/PEB</span>

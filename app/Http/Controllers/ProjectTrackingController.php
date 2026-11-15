@@ -10,10 +10,22 @@ use App\Models\ShipmentPic;
 use App\Models\User;
 use App\Services\Shipment\ShipmentWorkflowService;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Gate;
 
-class ProjectTrackingController extends Controller
+class ProjectTrackingController extends Controller implements HasMiddleware
 {
+    /**
+     * Daftarkan middleware proteksi RBAC level Controller
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:document.view|traffic.view|do.view|dashboard.view', only: ['index', 'show']),
+            new Middleware('permission:document.edit|traffic.manage|do.manage|workflow.rollback_stage', except: ['index', 'show']),
+        ];
+    }
     protected ShipmentWorkflowService $workflowService;
 
     public function __construct(ShipmentWorkflowService $workflowService)

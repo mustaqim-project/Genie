@@ -5,11 +5,23 @@ namespace App\Http\Controllers;
 use App\Models\CashBankAccount;
 use App\Models\CashBankTransaction;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
-class CashBankController extends Controller
+class CashBankController extends Controller implements HasMiddleware
 {
+    /**
+     * Daftarkan middleware proteksi RBAC level Controller
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:finance.view|accounting.view', only: ['index', 'show']),
+            new Middleware('permission:finance.manage|accounting.manage', except: ['index', 'show']),
+        ];
+    }
     /**
      * Dashboard Buku Kas & Bank Real-Time
      * Hak Akses: finance.view

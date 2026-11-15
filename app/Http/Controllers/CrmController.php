@@ -429,4 +429,119 @@ class CrmController extends Controller implements HasMiddleware
 
         return back()->with('success', "Klien {$client->name} ({$client->code}) berhasil ditambahkan ke direktori.");
     }
+
+    /**
+     * Tampilkan detail klien (JSON atau detail modal).
+     */
+    public function showClient(string $id)
+    {
+        $client = Client::withCount(['shipments', 'quotations', 'invoices'])->findOrFail($id);
+
+        if (request()->wantsJson() || request()->ajax()) {
+            return response()->json([
+                'status' => 'success',
+                'data' => $client,
+            ]);
+        }
+
+        return redirect()->route('crm.index', ['tab' => 'pipeline', 'client_id' => $id]);
+    }
+
+    /**
+     * Perbarui data Master Klien.
+     */
+    public function updateClient(Request $request, string $id)
+    {
+        $client = Client::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'npwp' => 'nullable|string|max:35',
+            'nib' => 'nullable|string|max:35',
+            'pic_name' => 'nullable|string|max:100',
+            'phone' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:100',
+            'address' => 'nullable|string',
+            'surat_kuasa_expired_at' => 'nullable|date',
+            'is_active' => 'nullable|boolean',
+        ]);
+
+        $client->update([
+            'name' => trim($validated['name']),
+            'npwp' => $validated['npwp'] ?? null,
+            'nib' => $validated['nib'] ?? null,
+            'pic_name' => $validated['pic_name'] ?? null,
+            'phone' => $validated['phone'] ?? null,
+            'email' => $validated['email'] ?? null,
+            'address' => $validated['address'] ?? null,
+            'surat_kuasa_expired_at' => $validated['surat_kuasa_expired_at'] ?? null,
+            'is_active' => isset($validated['is_active']) ? (bool) $validated['is_active'] : $client->is_active,
+        ]);
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'status' => 'success',
+                'message' => "Profil Klien {$client->name} berhasil diperbarui.",
+                'data' => $client,
+            ]);
+        }
+
+        return back()->with('success', "Profil Klien {$client->name} ({$client->code}) berhasil diperbarui.");
+    }
+
+    /**
+     * Toggle status aktif/nonaktif Master Klien.
+     */
+    public function toggleClientStatus(Request $request, string $id)
+    {
+        $client = Client::findOrFail($id);
+        $client->is_active = !$client->is_active;
+        $client->save();
+
+        $statusStr = $client->is_active ? 'diaktifkan' : 'dinonaktifkan';
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'status' => 'success',
+                'message' => "Status Klien {$client->name} berhasil {$statusStr}.",
+                'is_active' => $client->is_active,
+            ]);
+        }
+
+        return back()->with('success', "Status Klien {$client->name} berhasil {$statusStr}.");
+    }
+
+    /**
+     * Unggah berkas legalitas klien (NIB, NPWP, Surat Kuasa PPJK PDF).
+     */
+    public function uploadClientLegal(Request $request, string $id)
+    {
+        $client = Client::findOrFail($id);
+
+        $validated = $request->validate([
+            'doc_type' => 'required|in:NIB,NPWP,SURAT_KUASA,LAINNYA',
+            'file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
+        ]);
+
+        $file = $request->file('file');
+        $extension = $file->getClientOriginalExtension();
+        $fileName = strtolower($validated['doc_type']) . '_' . time() . '.' . $extension;
+        $storageDir = storage_path("app/private/clients/{$client->id}");
+
+        if (!\Illuminate\Support\Facades\File::exists($storageDir)) {
+            \Illuminate\Support\Facades\File::makeDirectory($storageDir, 0750, true);
+        }
+
+        $file->move($storageDir, $fileName);
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'status' => 'success',
+                'message' => "Dokumen legalitas [{$validated['doc_type']}] untuk klien {$client->name} berhasil diunggah.",
+                'file_name' => $fileName,
+            ]);
+        }
+
+        return back()->with('success', "Dokumen legalitas [{$validated['doc_type']}] untuk klien {$client->name} berhasil diunggah ke repositori aman.");
+    }
 }

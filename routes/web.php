@@ -37,12 +37,19 @@ Route::middleware('guest')->group(function () {
 Route::get('/quick-login/{roleCode}', [AuthController::class, 'quickLogin'])->name('quick-login');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Portal Mandiri Klien (Dedicated Pelacakan Kargo Per Proyek & Upload Dokumen)
-Route::get('/portal', [\App\Http\Controllers\ClientPortalController::class, 'index'])->name('portal.index');
-Route::get('/portal/track/{token}', [\App\Http\Controllers\ClientPortalController::class, 'track'])->name('portal.track');
-Route::post('/portal/track/{token}/upload', [\App\Http\Controllers\ClientPortalController::class, 'uploadDocumentByToken'])->name('portal.upload-token');
-Route::post('/portal/{shipmentId}/upload', [\App\Http\Controllers\ClientPortalController::class, 'uploadDocument'])->name('portal.upload');
-Route::get('/portal/{token}', [\App\Http\Controllers\ClientPortalController::class, 'index']);
+// Portal Mandiri Klien (Dedicated Pelacakan Kargo Per Proyek & Upload Dokumen - Rate Limited)
+Route::middleware('throttle:60,1')->group(function () {
+    Route::get('/portal', [\App\Http\Controllers\ClientPortalController::class, 'index'])->name('portal.index');
+    Route::get('/portal/track/{token}', [\App\Http\Controllers\ClientPortalController::class, 'track'])->name('portal.track');
+    Route::post('/portal/track/{token}/upload', [\App\Http\Controllers\ClientPortalController::class, 'uploadDocumentByToken'])->name('portal.upload-token');
+    Route::post('/portal/{shipmentId}/upload', [\App\Http\Controllers\ClientPortalController::class, 'uploadDocument'])->name('portal.upload');
+    Route::get('/portal/{token}', [\App\Http\Controllers\ClientPortalController::class, 'index']);
+});
+
+// Media & Privasi Biometrik Aman (UU PDP No. 27/2022 - Terproteksi Otorisasi RBAC & Signed URL di Controller)
+Route::get('/private/biometrics/{employeeId}', [\App\Http\Controllers\PrivateMediaController::class, 'showBiometric'])->name('private.biometric');
+Route::get('/private/attendance/{attendanceLogId}', [\App\Http\Controllers\PrivateMediaController::class, 'showAttendancePhoto'])->name('private.attendance-photo');
+Route::get('/portal/attendances/photo/{attendanceId}', [\App\Http\Controllers\PrivateMediaController::class, 'showAttendancePhoto'])->name('portal.attendances.photo');
 
 // Protected Routes (Wajib Login & RBAC Active)
 Route::middleware('auth')->group(function () {
@@ -190,6 +197,20 @@ Route::middleware('auth')->group(function () {
     Route::prefix('crm')->name('crm.')->group(function () {
         Route::get('/', [CrmController::class, 'index'])->name('index');
         Route::post('/clients', [CrmController::class, 'storeClient'])->name('clients.store');
+        Route::get('/clients/{id}', [CrmController::class, 'showClient'])->name('clients.show');
+        Route::put('/clients/{id}', [CrmController::class, 'updateClient'])->name('clients.update');
+        Route::patch('/clients/{id}/toggle-status', [CrmController::class, 'toggleClientStatus'])->name('clients.toggle-status');
+        Route::post('/clients/{id}/upload-legal', [CrmController::class, 'uploadClientLegal'])->name('clients.upload-legal');
+    });
+
+    // 4.0 Master Vendor (Shipping Lines & Ekspedisi Logistik)
+    Route::prefix('vendors')->name('vendors.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\VendorController::class, 'index'])->name('index');
+        Route::post('/', [\App\Http\Controllers\VendorController::class, 'store'])->name('store');
+        Route::get('/{id}', [\App\Http\Controllers\VendorController::class, 'show'])->name('show');
+        Route::put('/{id}', [\App\Http\Controllers\VendorController::class, 'update'])->name('update');
+        Route::patch('/{id}/toggle-status', [\App\Http\Controllers\VendorController::class, 'toggleStatus'])->name('toggle-status');
+        Route::delete('/{id}', [\App\Http\Controllers\VendorController::class, 'destroy'])->name('destroy');
     });
 
     // 4.1 Kotak Masuk Terpadu (Unified Omnichannel Inbox: WhatsApp + Social Media)
@@ -276,6 +297,9 @@ Route::middleware('auth')->group(function () {
         // Kebijakan Keamanan Sesi 7 Hari (Reset Senin)
         Route::post('/session', [SettingController::class, 'updateSessionSettings'])->name('session.update');
         Route::post('/session/force-reset', [SettingController::class, 'forceResetSessions'])->name('session.force-reset');
+
+        // Parameterization Zero Hardcoding Management
+        Route::post('/parameters', [SettingController::class, 'updateSystemParameters'])->name('parameters.update');
     });
 
     Route::prefix('config')->name('config.')->group(function () {
@@ -428,12 +452,6 @@ Route::middleware('auth')->group(function () {
     });
 
     // ==========================================
-    // Media & Privasi Biometrik Aman (UU PDP)
-    // ==========================================
-    Route::get('/private/biometrics/{employeeId}', [\App\Http\Controllers\PrivateMediaController::class, 'showBiometric'])->name('private.biometric');
-    Route::get('/private/attendance/{attendanceLogId}', [\App\Http\Controllers\PrivateMediaController::class, 'showAttendancePhoto'])->name('private.attendance-photo');
-
-    // ==========================================
     // Template PDF & Cetak Resmi Routes
     // ==========================================
     Route::prefix('print')->name('pdf.')->group(function () {
@@ -443,5 +461,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/shipments/{id}/billing', [\App\Http\Controllers\PdfController::class, 'billingMpn'])->name('billing');
         Route::get('/invoices/{id}', [\App\Http\Controllers\PdfController::class, 'invoice'])->name('invoice');
         Route::get('/quotations/{id}', [\App\Http\Controllers\PdfController::class, 'quotation'])->name('quotation');
+        Route::get('/employees/{id}/form-1721-a1', [\App\Http\Controllers\PdfController::class, 'form1721A1'])->name('form-1721-a1');
     });
 });

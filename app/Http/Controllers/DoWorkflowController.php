@@ -6,10 +6,22 @@ use App\Models\Shipment;
 use App\Models\ShippingVendor;
 use App\Services\Shipment\ShipmentWorkflowService;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Gate;
 
-class DoWorkflowController extends Controller
+class DoWorkflowController extends Controller implements HasMiddleware
 {
+    /**
+     * Daftarkan middleware proteksi RBAC level Controller
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:do.view', only: ['index', 'show']),
+            new Middleware('permission:do.manage', except: ['index', 'show']),
+        ];
+    }
     protected ShipmentWorkflowService $workflowService;
 
     public function __construct(ShipmentWorkflowService $workflowService)

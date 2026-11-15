@@ -38,7 +38,7 @@
             @can('finance.manage')
             <button type="button" @click="showTransferModal = true"
                     class="btn-apple-gray">
-                <i data-lucide="arrow-left-right" class="w-4 h-4 text-[#007AFF]"></i>
+                <i data-lucide="arrow-left-right" class="w-4 h-4 text-[#0284c7]"></i>
                 <span>Pindah Buku</span>
             </button>
 
@@ -92,7 +92,7 @@
         <div class="bg-white dark:bg-[#1C1C1E] p-5 rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-xs">
             <span class="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block text-[10px] mb-1">Jumlah Rekening Kas/Bank</span>
             <span class="text-2xl font-black font-mono tabular-nums text-slate-900 dark:text-white">{{ $accounts->count() }} <span class="text-sm font-semibold text-slate-500 dark:text-slate-400">Rekening</span></span>
-            <div class="mt-2 text-[11px] text-[#007AFF] font-medium">
+            <div class="mt-2 text-[11px] text-[#0284c7] font-medium">
                 Bank Mandiri, BCA & Kas Kecil
             </div>
         </div>
@@ -166,7 +166,7 @@
 
                 <div class="flex items-center gap-2 w-full sm:w-72">
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari uraian transaksi / ref..."
-                           class="w-full px-3 py-2 bg-slate-50 dark:bg-[#2C2C2E] border border-slate-200 dark:border-white/15 dark:text-white rounded-xl focus:ring-2 focus:ring-[#007AFF] focus:outline-none">
+                           class="w-full px-3 py-2 bg-slate-50 dark:bg-[#2C2C2E] border border-slate-200 dark:border-white/15 dark:text-white rounded-xl focus:ring-2 focus:ring-[#0284c7] focus:outline-none">
                     <button type="submit" class="btn-apple-filled !py-2">Cari</button>
                 </div>
             </form>
@@ -369,7 +369,7 @@
                     <div>
                         <label for="account_id" class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Rekening Kas / Bank *</label>
                         <select name="account_id" id="account_id" required
-                                class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007AFF] transition-all font-medium">
+                                class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] transition-all font-medium">
                             @foreach($accounts as $acc)
                                 <option value="{{ $acc->id }}">
                                     {{ $acc->name }} (Saldo: Rp {{ number_format($acc->current_balance, 0, ',', '.') }})
@@ -395,19 +395,19 @@
                     <div>
                         <label for="amount" class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nominal (IDR) *</label>
                         <input type="number" name="amount" id="amount" required min="1" step="0.01" placeholder="Contoh: 1500000"
-                               class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007AFF] transition-all font-mono font-bold">
+                               class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] transition-all font-mono font-bold">
                     </div>
 
                     <div>
                         <label for="trx_date" class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Transaksi *</label>
                         <input type="date" name="trx_date" id="trx_date" value="{{ date('Y-m-d') }}" required
-                               class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007AFF] transition-all">
+                               class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] transition-all">
                     </div>
 
                     <div>
                         <label for="description" class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Uraian / Keterangan Mutasi *</label>
                         <input type="text" name="description" id="description" required placeholder="Contoh: Pengisian kembali kas kecil operasional"
-                               class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007AFF] transition-all">
+                               class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] transition-all">
                     </div>
                 </div>
 
@@ -476,7 +476,7 @@
                     <div>
                         <label for="from_account_id" class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Dari Rekening Asal *</label>
                         <select name="from_account_id" id="from_account_id" required
-                                class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007AFF] transition-all font-medium">
+                                class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] transition-all font-medium">
                             @foreach($accounts as $acc)
                                 <option value="{{ $acc->id }}">
                                     {{ $acc->name }} (Saldo: Rp {{ number_format($acc->current_balance, 0, ',', '.') }})
@@ -488,7 +488,7 @@
                     <div>
                         <label for="to_account_id" class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Ke Rekening Tujuan *</label>
                         <select name="to_account_id" id="to_account_id" required
-                                class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007AFF] transition-all font-medium">
+                                class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] transition-all font-medium">
                             @foreach($accounts as $acc)
                                 <option value="{{ $acc->id }}">
                                     {{ $acc->name }} (Saldo: Rp {{ number_format($acc->current_balance, 0, ',', '.') }})
@@ -500,19 +500,19 @@
                     <div>
                         <label for="amount" class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nominal Pindah Buku (IDR) *</label>
                         <input type="number" name="amount" id="amount" required min="1" step="0.01" placeholder="Contoh: 50000000"
-                               class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007AFF] transition-all font-mono font-bold">
+                               class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] transition-all font-mono font-bold">
                     </div>
 
                     <div>
                         <label for="transfer_date" class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Transfer *</label>
                         <input type="date" name="transfer_date" id="transfer_date" value="{{ date('Y-m-d') }}" required
-                               class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007AFF] transition-all">
+                               class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] transition-all">
                     </div>
 
                     <div>
                         <label for="notes" class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Catatan Pindah Buku</label>
                         <input type="text" name="notes" id="notes" placeholder="Contoh: Top-up saldo deposit MPN G3 Mandiri"
-                               class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007AFF] transition-all">
+                               class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] transition-all">
                     </div>
                 </div>
 
@@ -523,7 +523,7 @@
                         Batal
                     </button>
                     <button type="submit"
-                            class="btn-apple-tinted !bg-[#007AFF] !text-white hover:!bg-[#0062CC]">
+                            class="btn-apple-tinted !bg-[#0284c7] !text-white hover:!bg-[#0062CC]">
                         <i data-lucide="arrow-right" class="w-4 h-4"></i>
                         <span>Eksekusi Pindah Buku</span>
                     </button>
@@ -581,25 +581,25 @@
                     <div>
                         <label for="name" class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Rekening / Deskripsi *</label>
                         <input type="text" name="name" id="name" required placeholder="Contoh: Bank BNI Escrow Logistik"
-                               class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007AFF] transition-all">
+                               class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] transition-all">
                     </div>
 
                     <div>
                         <label for="bank" class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Bank / Institusi *</label>
                         <input type="text" name="bank" id="bank" required placeholder="Contoh: Bank Negara Indonesia (BNI)"
-                               class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007AFF] transition-all">
+                               class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] transition-all">
                     </div>
 
                     <div>
                         <label for="account_no" class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Rekening *</label>
                         <input type="text" name="account_no" id="account_no" required placeholder="Contoh: 0918-2831-928"
-                               class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007AFF] transition-all font-mono">
+                               class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] transition-all font-mono">
                     </div>
 
                     <div>
                         <label for="initial_balance" class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Saldo Awal Pembukaan (IDR)</label>
                         <input type="number" name="initial_balance" id="initial_balance" min="0" step="0.01" placeholder="0"
-                               class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007AFF] transition-all font-mono">
+                               class="w-full px-3.5 py-2.5 border border-slate-300 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white rounded-xl text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] transition-all font-mono">
                     </div>
                 </div>
 

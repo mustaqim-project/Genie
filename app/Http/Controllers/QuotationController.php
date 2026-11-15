@@ -8,11 +8,23 @@ use App\Models\QuotationLine;
 use App\Models\SalesOrder;
 use App\Services\Shipment\ShipmentWorkflowService;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
-class QuotationController extends Controller
+class QuotationController extends Controller implements HasMiddleware
 {
+    /**
+     * Daftarkan middleware proteksi RBAC level Controller
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:crm.view', only: ['index', 'show']),
+            new Middleware('permission:crm.manage', except: ['index', 'show']),
+        ];
+    }
     protected ShipmentWorkflowService $workflowService;
 
     public function __construct(ShipmentWorkflowService $workflowService)

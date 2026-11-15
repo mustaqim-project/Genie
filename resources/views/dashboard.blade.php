@@ -9,7 +9,7 @@
     <header class="rounded-[16px] backdrop-blur-md bg-white/75 dark:bg-[#1C1C1E]/75 border border-black/5 dark:border-white/10 px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
         <div>
             <nav class="flex items-center gap-1.5 text-[12px] text-black/50 dark:text-white/50 mb-1" aria-label="Breadcrumb">
-                <a href="{{ route('dashboard') }}" class="hover:text-[#007AFF] transition-colors">GENIE ERP</a>
+                <a href="{{ route('dashboard') }}" class="hover:text-[#0284c7] transition-colors">GENIE ERP</a>
                 <i data-lucide="chevron-right" class="w-3.5 h-3.5 opacity-40"></i>
                 <span class="text-black dark:text-white font-medium">Dashboard Operasional</span>
             </nav>
@@ -37,7 +37,7 @@
 
             <a href="{{ route('bc20.index') }}" 
                class="btn-apple-gray w-full sm:w-auto">
-                <i data-lucide="file-down" class="w-4 h-4 text-[#007AFF]"></i>
+                <i data-lucide="file-down" class="w-4 h-4 text-[#0284c7]"></i>
                 <span>BC 2.0 (PIB)</span>
             </a>
 
@@ -56,7 +56,7 @@
         <div class="rounded-[16px] bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/5 p-4 flex flex-col justify-between shadow-sm">
             <div class="flex items-center justify-between">
                 <span class="text-[11px] uppercase tracking-wider font-semibold text-black/45 dark:text-white/45">Proyek Pengapalan</span>
-                <div class="w-8 h-8 rounded-[10px] bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center">
+                <div class="w-8 h-8 rounded-[10px] bg-[#0284c7]/10 text-[#0284c7] flex items-center justify-center">
                     <i data-lucide="folder-kanban" class="w-4 h-4"></i>
                 </div>
             </div>
@@ -74,7 +74,7 @@
         <div class="rounded-[16px] bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/5 p-4 flex flex-col justify-between shadow-sm">
             <div class="flex items-center justify-between">
                 <span class="text-[11px] uppercase tracking-wider font-semibold text-black/45 dark:text-white/45">Impor (BC 2.0 PIB)</span>
-                <div class="w-8 h-8 rounded-[10px] bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center">
+                <div class="w-8 h-8 rounded-[10px] bg-[#0284c7]/10 text-[#0284c7] flex items-center justify-center">
                     <i data-lucide="arrow-down-left" class="w-4 h-4"></i>
                 </div>
             </div>
@@ -156,7 +156,7 @@
                         @forelse($recentShipments as $shp)
                             <tr class="hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
                                 <td class="py-3 px-4 font-mono font-semibold text-black dark:text-white">
-                                    <a href="{{ route('core.document.show', $shp->id) }}" class="text-[#007AFF] hover:underline">
+                                    <a href="{{ route('core.document.show', $shp->id) }}" class="text-[#0284c7] hover:underline">
                                         {{ $shp->shipment_number ?? $shp->project_no }}
                                     </a>
                                     <div class="text-[11px] text-black/40 dark:text-white/40 font-sans mt-0.5">
@@ -165,7 +165,7 @@
                                 </td>
                                 <td class="py-3 px-4">
                                     <div class="font-semibold text-black dark:text-white truncate max-w-[150px]">{{ $shp->client->name ?? '-' }}</div>
-                                    <span class="inline-block mt-0.5 px-2 py-0.5 rounded-[6px] text-[10px] font-bold font-mono {{ $shp->type === 'EXPORT' ? 'bg-[#FF9500]/12 text-[#B25E00] dark:text-[#FF9F0A]' : 'bg-[#007AFF]/12 text-[#007AFF]' }}">
+                                    <span class="inline-block mt-0.5 px-2 py-0.5 rounded-[6px] text-[10px] font-bold font-mono {{ $shp->type === 'EXPORT' ? 'bg-[#FF9500]/12 text-[#B25E00] dark:text-[#FF9F0A]' : 'bg-[#0284c7]/12 text-[#0284c7]' }}">
                                         {{ $shp->type === 'EXPORT' ? 'BC 3.0' : 'BC 2.0' }}
                                     </span>
                                 </td>
@@ -193,7 +193,7 @@
                         @empty
                             <tr>
                                 <td colspan="5" class="py-10 text-center text-black/40 dark:text-white/40">
-                                    Belum ada proyek shipment terdaftar. <a href="{{ route('core.document.index') }}" class="text-[#007AFF] font-bold hover:underline">Buka proyek baru &rarr;</a>
+                                    Belum ada proyek shipment terdaftar. <a href="{{ route('core.document.index') }}" class="text-[#0284c7] font-bold hover:underline">Buka proyek baru &rarr;</a>
                                 </td>
                             </tr>
                         @endforelse
@@ -219,7 +219,7 @@
                     <div class="p-3 rounded-[12px] border border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02] text-[12px] hover:border-black/10 dark:hover:border-white/10 transition-colors">
                         <div class="flex items-center justify-between mb-1.5">
                             <div class="flex items-center space-x-1.5 truncate">
-                                <span class="px-1.5 py-0.5 rounded-[6px] font-mono font-bold text-[10px] {{ $log->method === 'POST' ? 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158]' : 'bg-[#007AFF]/15 text-[#007AFF]' }}">
+                                <span class="px-1.5 py-0.5 rounded-[6px] font-mono font-bold text-[10px] {{ $log->method === 'POST' ? 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158]' : 'bg-[#0284c7]/15 text-[#0284c7]' }}">
                                     {{ $log->method }}
                                 </span>
                                 <span class="font-mono text-black/80 dark:text-white/80 truncate max-w-[140px] text-[11px]">{{ $log->endpoint }}</span>

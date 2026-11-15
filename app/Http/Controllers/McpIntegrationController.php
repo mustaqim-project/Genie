@@ -9,10 +9,22 @@ use App\Models\Shipment;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Gate;
 
-class McpIntegrationController extends Controller
+class McpIntegrationController extends Controller implements HasMiddleware
 {
+    /**
+     * Daftarkan middleware proteksi RBAC level Controller
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:ai.view|setting.view', only: ['index']),
+            new Middleware('permission:ai.approve|setting.manage', except: ['index']),
+        ];
+    }
     protected McpCustomsAgentController $agentController;
 
     public function __construct(McpCustomsAgentController $agentController)

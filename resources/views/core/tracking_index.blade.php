@@ -9,7 +9,7 @@
     <header class="rounded-[16px] backdrop-blur-md bg-white/75 dark:bg-[#1C1C1E]/75 border border-black/5 dark:border-white/10 px-4 sm:px-6 py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
         <div>
             <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-[10px] bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center font-bold">
+                <div class="w-8 h-8 rounded-[10px] bg-[#0284c7]/10 text-[#0284c7] flex items-center justify-center font-bold">
                     <i data-lucide="milestone" class="w-4 h-4"></i>
                 </div>
                 <h1 class="text-[20px] sm:text-[22px] font-bold text-black dark:text-white tracking-tight">
@@ -30,7 +30,7 @@
             <form action="{{ route('core.tracking.auto-assign-all') }}" method="POST" onsubmit="return confirm('Tugaskan PIC secara otomatis dengan beban kerja terendah untuk semua proyek yang belum lengkap?');">
                 @csrf
                 <button type="submit" 
-                        class="px-3 py-1.5 rounded-[9px] text-[12px] font-semibold bg-[#007AFF]/10 hover:bg-[#007AFF]/20 text-[#007AFF] transition-all flex items-center gap-1.5 active:scale-[0.98]">
+                        class="px-3 py-1.5 rounded-[9px] text-[12px] font-semibold bg-[#0284c7]/10 hover:bg-[#0284c7]/20 text-[#0284c7] transition-all flex items-center gap-1.5 active:scale-[0.98]">
                     <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
                     <span>Auto-Assign PIC ({{ $kpis['incomplete_pic_count'] }} Proyek)</span>
                 </button>
@@ -38,7 +38,7 @@
             @endif
 
             <a href="{{ route('core.document.index') }}" 
-               class="px-3.5 py-1.5 rounded-[9px] text-[12px] font-semibold bg-[#007AFF] text-white hover:bg-[#0062CC] transition-all flex items-center gap-1.5 shadow-[0_2px_8px_rgba(0,122,255,0.25)] active:scale-[0.98]">
+               class="px-3.5 py-1.5 rounded-[9px] text-[12px] font-semibold bg-[#0284c7] text-white hover:bg-[#0062CC] transition-all flex items-center gap-1.5 shadow-[0_2px_8px_rgba(0,122,255,0.25)] active:scale-[0.98]">
                 <i data-lucide="folder-plus" class="w-3.5 h-3.5"></i>
                 <span>Buka Proyek Baru</span>
             </a>
@@ -58,7 +58,7 @@
         <div class="rounded-[16px] bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/5 p-4 flex flex-col justify-between shadow-sm">
             <div class="flex items-center justify-between">
                 <span class="text-[11px] uppercase tracking-wider font-semibold text-black/45 dark:text-white/45">Project Aktif</span>
-                <div class="w-8 h-8 rounded-[10px] bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center">
+                <div class="w-8 h-8 rounded-[10px] bg-[#0284c7]/10 text-[#0284c7] flex items-center justify-center">
                     <i data-lucide="ship" class="w-4 h-4"></i>
                 </div>
             </div>
@@ -128,14 +128,14 @@
         <div class="p-4 border-b border-black/5 dark:border-white/5 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
             <div class="flex flex-wrap items-center gap-2">
                 <!-- View Mode Switcher: Tracking Dok Excel vs Matrix 11 Pos -->
-                <div class="inline-flex p-1 bg-[#007AFF]/10 rounded-[10px]">
+                <div class="inline-flex p-1 bg-[#0284c7]/10 rounded-[10px]">
                     <a href="{{ route('core.tracking.index', array_merge(request()->query(), ['mode' => 'tracking_dok'])) }}"
-                       class="px-3 py-1.5 rounded-[8px] text-[12px] font-semibold transition-all flex items-center gap-1.5 {{ $mode === 'tracking_dok' ? 'bg-white dark:bg-[#2C2C2E] text-[#007AFF] shadow-sm' : 'text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white' }}">
+                       class="px-3 py-1.5 rounded-[8px] text-[12px] font-semibold transition-all flex items-center gap-1.5 {{ $mode === 'tracking_dok' ? 'bg-white dark:bg-[#2C2C2E] text-[#0284c7] shadow-sm' : 'text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white' }}">
                         <i data-lucide="table-2" class="w-3.5 h-3.5"></i>
                         <span>Tracking Dok (Excel)</span>
                     </a>
                     <a href="{{ route('core.tracking.index', array_merge(request()->query(), ['mode' => 'matrix'])) }}"
-                       class="px-3 py-1.5 rounded-[8px] text-[12px] font-semibold transition-all flex items-center gap-1.5 {{ $mode === 'matrix' ? 'bg-white dark:bg-[#2C2C2E] text-[#007AFF] shadow-sm' : 'text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white' }}">
+                       class="px-3 py-1.5 rounded-[8px] text-[12px] font-semibold transition-all flex items-center gap-1.5 {{ $mode === 'matrix' ? 'bg-white dark:bg-[#2C2C2E] text-[#0284c7] shadow-sm' : 'text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white' }}">
                         <i data-lucide="kanban" class="w-3.5 h-3.5"></i>
                         <span>Matriks 11 Pos</span>
                     </a>
@@ -148,7 +148,7 @@
                         Semua
                     </a>
                     <a href="{{ route('core.tracking.index', array_merge(request()->query(), ['direction' => 'IMPORT'])) }}"
-                       class="px-2.5 py-1.5 rounded-[8px] text-[11px] font-semibold transition-all {{ $direction === 'IMPORT' ? 'bg-white dark:bg-[#2C2C2E] text-[#007AFF] shadow-sm' : 'text-black/60 dark:text-white/60' }}">
+                       class="px-2.5 py-1.5 rounded-[8px] text-[11px] font-semibold transition-all {{ $direction === 'IMPORT' ? 'bg-white dark:bg-[#2C2C2E] text-[#0284c7] shadow-sm' : 'text-black/60 dark:text-white/60' }}">
                         Impor
                     </a>
                     <a href="{{ route('core.tracking.index', array_merge(request()->query(), ['direction' => 'EXPORT'])) }}"
@@ -167,7 +167,7 @@
                        class="px-3 py-1.5 rounded-[8px] text-[11px] font-semibold transition-all flex items-center gap-1.5 {{ $filter === 'me' ? 'bg-white dark:bg-[#2C2C2E] text-black dark:text-white shadow-sm' : 'text-black/60 dark:text-white/60' }}">
                         <span>Tugas Saya</span>
                         @if($kpis['my_tasks_count'] > 0)
-                        <span class="w-4 h-4 rounded-full bg-[#007AFF] text-white text-[10px] flex items-center justify-center font-bold">
+                        <span class="w-4 h-4 rounded-full bg-[#0284c7] text-white text-[10px] flex items-center justify-center font-bold">
                             {{ $kpis['my_tasks_count'] }}
                         </span>
                         @endif
@@ -185,7 +185,7 @@
                        name="search" 
                        value="{{ $search }}" 
                        placeholder="Cari Project, B/L, Kontainer, ODOO, atau Klien..." 
-                       class="w-full pl-9 pr-8 py-1.5 rounded-[9px] bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 text-[12px] text-black dark:text-white placeholder:text-black/35 dark:placeholder:text-white/35 focus:outline-none focus:ring-1 focus:ring-[#007AFF]">
+                       class="w-full pl-9 pr-8 py-1.5 rounded-[9px] bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 text-[12px] text-black dark:text-white placeholder:text-black/35 dark:placeholder:text-white/35 focus:outline-none focus:ring-1 focus:ring-[#0284c7]">
                 @if($search)
                 <a href="{{ route('core.tracking.index', ['filter' => $filter, 'direction' => $direction, 'mode' => $mode]) }}" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white">
                     <i data-lucide="x" class="w-3.5 h-3.5"></i>
@@ -232,10 +232,10 @@
                         <td class="py-2.5 px-3 text-center font-mono text-black/45 dark:text-white/45">{{ $rowIdx + 1 }}</td>
                         <td class="py-2.5 px-3 sticky left-0 z-10 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-md">
                             <div class="flex items-center gap-1.5">
-                                <span class="px-1.5 py-0.2 rounded text-[9px] font-bold {{ $isExport ? 'bg-[#AF52DE]/15 text-[#AF52DE]' : 'bg-[#007AFF]/15 text-[#007AFF]' }}">
+                                <span class="px-1.5 py-0.2 rounded text-[9px] font-bold {{ $isExport ? 'bg-[#AF52DE]/15 text-[#AF52DE]' : 'bg-[#0284c7]/15 text-[#0284c7]' }}">
                                     {{ $isExport ? 'EXP' : 'IMP' }}
                                 </span>
-                                <a href="{{ route('core.document.show', $s->id) }}" class="font-bold text-black dark:text-white hover:text-[#007AFF] truncate max-w-[155px]">
+                                <a href="{{ route('core.document.show', $s->id) }}" class="font-bold text-black dark:text-white hover:text-[#0284c7] truncate max-w-[155px]">
                                     {{ $s->client?->name ?? 'N/A' }}
                                 </a>
                             </div>
@@ -260,7 +260,7 @@
                             <div class="font-semibold text-black dark:text-white truncate max-w-[145px]" title="{{ $s->commodity_summary }}">
                                 {{ $s->commodity_summary ?: '-' }}
                             </div>
-                            <div class="font-mono text-[10px] text-[#007AFF] truncate max-w-[145px]" title="{{ $s->nomor_bl_awb }}">
+                            <div class="font-mono text-[10px] text-[#0284c7] truncate max-w-[145px]" title="{{ $s->nomor_bl_awb }}">
                                 {{ $s->nomor_bl_awb ?: '-' }}
                             </div>
                         </td>
@@ -299,7 +299,7 @@
                             @if($ceisa)
                                 @if($ceisa->jenis_dokumen === '20')
                                     <a href="{{ route('bc20.edit', $ceisa->id) }}"
-                                       class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-[6px] text-[10px] font-bold bg-[#007AFF]/10 text-[#007AFF] hover:bg-[#007AFF] hover:text-white transition-colors"
+                                       class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-[6px] text-[10px] font-bold bg-[#0284c7]/10 text-[#0284c7] hover:bg-[#0284c7] hover:text-white transition-colors"
                                        title="Buka Form Edit BC 2.0 (PIB Impor)">
                                         <i data-lucide="edit-3" class="w-2.5 h-2.5"></i>
                                         <span>Edit BC 2.0</span>
@@ -340,7 +340,7 @@
                                 {{ $s->do_is_released ? ($s->nomor_do ?: 'DO Rilis') : 'DO Wait' }}
                             </div>
                             <a href="{{ route('core.document.show', $s->id) }}#tab-ops"
-                               class="inline-flex items-center gap-1 mt-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold {{ $photoCount > 0 ? 'bg-[#007AFF]/15 text-[#007AFF]' : 'bg-black/[0.04] dark:bg-white/[0.06] text-black/45 dark:text-white/45' }}">
+                               class="inline-flex items-center gap-1 mt-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold {{ $photoCount > 0 ? 'bg-[#0284c7]/15 text-[#0284c7]' : 'bg-black/[0.04] dark:bg-white/[0.06] text-black/45 dark:text-white/45' }}">
                                 <i data-lucide="camera" class="w-2.5 h-2.5"></i>
                                 <span>{{ $photoCount }} Foto {{ $s->new_seal_number ? '· ' . $s->new_seal_number : '' }}</span>
                             </a>
@@ -356,7 +356,7 @@
                         <td class="py-2.5 px-2.5">
                             <button type="button"
                                     onclick="toggleTrackingFlag('{{ $s->id }}', 'odoo_synced', this)"
-                                    class="px-1.5 py-0.5 rounded-[5px] text-[9px] font-bold cursor-pointer block {{ $s->odoo_synced ? 'bg-[#007AFF]/15 text-[#007AFF]' : 'bg-black/[0.04] dark:bg-white/[0.06] text-black/40 dark:text-white/40' }}">
+                                    class="px-1.5 py-0.5 rounded-[5px] text-[9px] font-bold cursor-pointer block {{ $s->odoo_synced ? 'bg-[#0284c7]/15 text-[#0284c7]' : 'bg-black/[0.04] dark:bg-white/[0.06] text-black/40 dark:text-white/40' }}">
                                 {{ $s->odoo_synced ? 'ODOO ✓' : 'ODOO -' }}
                             </button>
                             <button type="button"
@@ -392,7 +392,7 @@
                             <button type="button"
                                     data-tracking='@json($editPayload)'
                                     onclick="openTrackingEditModal(this)"
-                                    class="inline-flex items-center gap-1 px-2 py-1 rounded-[7px] text-[10px] font-semibold bg-[#007AFF]/10 text-[#007AFF] hover:bg-[#007AFF] hover:text-white transition-colors mr-1 cursor-pointer">
+                                    class="inline-flex items-center gap-1 px-2 py-1 rounded-[7px] text-[10px] font-semibold bg-[#0284c7]/10 text-[#0284c7] hover:bg-[#0284c7] hover:text-white transition-colors mr-1 cursor-pointer">
                                 Edit
                             </button>
                             <a href="{{ route('core.document.show', $s->id) }}"
@@ -445,7 +445,7 @@
                         <!-- Sticky Project Info -->
                         <td class="py-3 px-4 sticky left-0 z-10 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-md group-hover:bg-[#F9F9FA] dark:group-hover:bg-[#202022] transition-colors">
                             <div class="flex items-center gap-2">
-                                <a href="{{ route('core.document.show', $s->id) }}" class="font-bold text-black dark:text-white hover:text-[#007AFF] text-[13px] tracking-tight">
+                                <a href="{{ route('core.document.show', $s->id) }}" class="font-bold text-black dark:text-white hover:text-[#0284c7] text-[13px] tracking-tight">
                                     {{ $s->project_no }}
                                 </a>
                                 @if($s->tipe_layanan)
@@ -533,9 +533,9 @@
                                 @elseif($stgStatus === 'cur')
                                     <!-- Pos Sedang Aktif (Pulsing & Glow) -->
                                     <a href="{{ route('core.document.show', $s->id) }}#pos-assignment" 
-                                       class="relative inline-flex flex-col items-center p-1 rounded-[8px] bg-[#007AFF]/10 border border-[#007AFF]/30 text-[#007AFF] hover:bg-[#007AFF]/20 transition-all hover:scale-105"
+                                       class="relative inline-flex flex-col items-center p-1 rounded-[8px] bg-[#0284c7]/10 border border-[#0284c7]/30 text-[#0284c7] hover:bg-[#0284c7]/20 transition-all hover:scale-105"
                                        title="POS AKTIF: {{ $idx + 1 }}. {{ $stg['title'] }} — PIC: {{ $picName ?: 'Belum Ada PIC' }} (Target: {{ $stg['sla_hours'] ?? 8 }} Jam)">
-                                        <div class="relative flex items-center justify-center w-5 h-5 rounded-full bg-[#007AFF] text-white text-[10px] font-bold shadow-sm">
+                                        <div class="relative flex items-center justify-center w-5 h-5 rounded-full bg-[#0284c7] text-white text-[10px] font-bold shadow-sm">
                                             @if($picInitial)
                                                 <span>{{ $picInitial }}</span>
                                             @else
@@ -543,11 +543,11 @@
                                             @endif
                                             <!-- Ping pulse indicator -->
                                             <span class="absolute -top-0.5 -right-0.5 flex h-2 w-2">
-                                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#007AFF] opacity-75"></span>
-                                                <span class="relative inline-flex rounded-full h-2 w-2 bg-[#007AFF]"></span>
+                                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#0284c7] opacity-75"></span>
+                                                <span class="relative inline-flex rounded-full h-2 w-2 bg-[#0284c7]"></span>
                                             </span>
                                         </div>
-                                        <span class="text-[9px] font-bold text-[#007AFF] mt-0.5 leading-none">
+                                        <span class="text-[9px] font-bold text-[#0284c7] mt-0.5 leading-none">
                                             {{ $isMyTask ? 'Saya' : ($picInitial ?: '?') }}
                                         </span>
                                     </a>
@@ -581,7 +581,7 @@
                         <!-- Aksi -->
                         <td class="py-3 px-4 text-right align-middle">
                             <a href="{{ route('core.document.show', $s->id) }}" 
-                               class="inline-flex items-center gap-1 px-2.5 py-1 rounded-[7px] text-[11px] font-semibold bg-black/[0.04] dark:bg-white/[0.08] hover:bg-[#007AFF] hover:text-white transition-all text-black/75 dark:text-white/75 group/btn">
+                               class="inline-flex items-center gap-1 px-2.5 py-1 rounded-[7px] text-[11px] font-semibold bg-black/[0.04] dark:bg-white/[0.08] hover:bg-[#0284c7] hover:text-white transition-all text-black/75 dark:text-white/75 group/btn">
                                 <span>Buka</span>
                                 <i data-lucide="chevron-right" class="w-3 h-3 group-hover/btn:translate-x-0.5 transition-transform"></i>
                             </a>
@@ -613,7 +613,7 @@
                     <span>Selesai</span>
                 </div>
                 <div class="flex items-center gap-1.5">
-                    <span class="w-4 h-4 rounded-full bg-[#007AFF] text-white flex items-center justify-center text-[9px] font-bold">
+                    <span class="w-4 h-4 rounded-full bg-[#0284c7] text-white flex items-center justify-center text-[9px] font-bold">
                         1
                     </span>
                     <span>Pos Aktif (In-Progress)</span>
@@ -646,7 +646,7 @@
                     <h2 class="text-[16px] font-bold text-black dark:text-white tracking-tight">
                         Matriks Beban Kerja Staf Pelaksana
                     </h2>
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#007AFF]/10 text-[#007AFF]">
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#0284c7]/10 text-[#0284c7]">
                         {{ $workloads->count() }} Anggota Tim
                     </span>
                 </div>
@@ -681,14 +681,14 @@
                         <!-- Profil Karyawan -->
                         <td class="py-3 px-4">
                             <div class="flex items-center gap-2.5">
-                                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#007AFF]/20 to-[#5856D6]/20 border border-black/5 dark:border-white/10 flex items-center justify-center font-bold text-[#007AFF] text-[11px] shrink-0">
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#0284c7]/20 to-[#5856D6]/20 border border-black/5 dark:border-white/10 flex items-center justify-center font-bold text-[#0284c7] text-[11px] shrink-0">
                                     {{ strtoupper(substr($user->name, 0, 2)) }}
                                 </div>
                                 <div class="min-w-0">
                                     <div class="font-bold text-black dark:text-white truncate">
                                         {{ $user->name }}
                                         @if($user->id === auth()->id())
-                                        <span class="ml-1 text-[10px] text-[#007AFF] font-medium">(Anda)</span>
+                                        <span class="ml-1 text-[10px] text-[#0284c7] font-medium">(Anda)</span>
                                         @endif
                                     </div>
                                     <div class="text-[11px] text-black/40 dark:text-white/40 truncate">
@@ -708,7 +708,7 @@
                         <!-- Pos Berjalan -->
                         <td class="py-3 px-3 text-center">
                             @if($currentActive > 0)
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#007AFF]/10 text-[#007AFF]">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#0284c7]/10 text-[#0284c7]">
                                 {{ $currentActive }} Pos
                             </span>
                             @else

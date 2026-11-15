@@ -32,7 +32,7 @@
                 extend: {
                     colors: {
                         apple: {
-                            blue: '#007AFF',
+                            blue: '#0284c7',
                             green: '#34C759',
                             orange: '#FF9500',
                             red: '#FF3B30',
@@ -77,14 +77,14 @@
             
             <!-- Brand & Client Identity -->
             <div class="flex items-center space-x-3 min-w-0">
-                <div class="w-9 h-9 rounded-[11px] bg-gradient-to-tr from-[#007AFF] to-[#5856D6] flex items-center justify-center text-white font-bold shadow-[0_2px_8px_rgba(0,122,255,0.35)] flex-shrink-0">
+                <div class="w-9 h-9 rounded-[11px] bg-gradient-to-tr from-[#0284c7] to-[#5856D6] flex items-center justify-center text-white font-bold shadow-[0_2px_8px_rgba(0,122,255,0.35)] flex-shrink-0">
                     <i data-lucide="ship" class="w-4 h-4 text-white"></i>
                 </div>
                 <div class="min-w-0">
                     <div class="flex items-center space-x-1.5 leading-none">
                         <span class="font-bold text-[14px] text-slate-900 dark:text-white tracking-tight">GENIE PORTAL</span>
                         <span class="text-slate-300 dark:text-slate-600">&bull;</span>
-                        <span class="text-[12px] font-semibold text-[#007AFF] dark:text-[#0A84FF] truncate">{{ $client->nama_perusahaan ?? $client->name ?? 'Portal Pelacakan Kargo' }}</span>
+                        <span class="text-[12px] font-semibold text-[#0284c7] dark:text-[#0A84FF] truncate">{{ $client->nama_perusahaan ?? $client->name ?? 'Portal Pelacakan Kargo' }}</span>
                     </div>
                     <div class="text-[11px] text-slate-400 dark:text-slate-400 font-medium truncate mt-0.5">PT Agung Trans Solusindo &bull; Forwarding & Customs</div>
                 </div>
@@ -172,13 +172,13 @@
 
         <!-- Callout 1: Live Operational Update & Notes -->
         @if(!empty($shipment->catatan))
-        <div class="p-4 sm:p-5 rounded-[20px] bg-gradient-to-r from-blue-50/90 to-indigo-50/70 dark:from-[#007AFF]/10 dark:to-[#5856D6]/10 border border-[#007AFF]/20 shadow-xs flex items-start gap-4">
-            <div class="w-10 h-10 rounded-[12px] bg-[#007AFF] text-white flex items-center justify-center shrink-0 shadow-xs">
+        <div class="p-4 sm:p-5 rounded-[20px] bg-gradient-to-r from-blue-50/90 to-indigo-50/70 dark:from-[#0284c7]/10 dark:to-[#5856D6]/10 border border-[#0284c7]/20 shadow-xs flex items-start gap-4">
+            <div class="w-10 h-10 rounded-[12px] bg-[#0284c7] text-white flex items-center justify-center shrink-0 shadow-xs">
                 <i data-lucide="bell" class="w-5 h-5"></i>
             </div>
             <div class="min-w-0 flex-1">
                 <div class="flex items-center justify-between gap-2">
-                    <span class="text-[11px] font-bold uppercase tracking-wider text-[#007AFF] dark:text-[#0A84FF]">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-[#0284c7] dark:text-[#0A84FF]">
                         Laporan Terkini Tim Operasional
                     </span>
                     <span class="text-[11px] text-slate-400 font-mono">{{ $shipment->updated_at->format('d/m/Y H:i') }} WIB</span>
@@ -200,7 +200,7 @@
                         <h1 class="text-[22px] sm:text-[24px] font-bold text-slate-900 dark:text-white tracking-tight font-mono">
                             {{ $shipment->project_no }}
                         </h1>
-                        <span class="px-3 py-1 rounded-full text-[11px] font-bold font-mono tracking-wide {{ $shipment->jenis_layanan === 'EKSPORT_BC30' ? 'bg-[#FF9500]/15 text-[#FF9500]' : 'bg-[#007AFF]/15 text-[#007AFF] dark:text-[#0A84FF]' }}">
+                        <span class="px-3 py-1 rounded-full text-[11px] font-bold font-mono tracking-wide {{ $shipment->jenis_layanan === 'EKSPORT_BC30' ? 'bg-[#FF9500]/15 text-[#FF9500]' : 'bg-[#0284c7]/15 text-[#0284c7] dark:text-[#0A84FF]' }}">
                             {{ $shipment->jenis_layanan === 'EKSPORT_BC30' ? 'EKSPOR BC 3.0' : 'IMPOR BC 2.0' }}
                         </span>
                     </div>
@@ -243,7 +243,7 @@
                         ];
                         $cleanStatus = $statusLabels[$shipment->status_tahap] ?? str_replace('_', ' ', $shipment->status_tahap);
                     @endphp
-                    <span class="px-3.5 py-1.5 rounded-[12px] bg-[#007AFF]/10 text-[#007AFF] dark:bg-[#007AFF]/20 dark:text-[#0A84FF] text-[12px] font-bold font-mono">
+                    <span class="px-3.5 py-1.5 rounded-[12px] bg-[#0284c7]/10 text-[#0284c7] dark:bg-[#0284c7]/20 dark:text-[#0A84FF] text-[12px] font-bold font-mono">
                         {{ $cleanStatus }}
                     </span>
                 </div>
@@ -264,7 +264,7 @@
                     <div class="flex flex-col items-center justify-center space-y-1.5 px-4">
                         <div class="w-full flex items-center justify-center space-x-2 text-slate-300 dark:text-slate-600">
                             <span class="h-0.5 flex-1 bg-slate-200 dark:bg-white/10"></span>
-                            <span class="w-8 h-8 rounded-full bg-white dark:bg-[#2C2C2E] border border-black/[0.08] dark:border-white/[0.08] flex items-center justify-center text-[#007AFF] shadow-2xs">
+                            <span class="w-8 h-8 rounded-full bg-white dark:bg-[#2C2C2E] border border-black/[0.08] dark:border-white/[0.08] flex items-center justify-center text-[#0284c7] shadow-2xs">
                                 <i data-lucide="navigation" class="w-4 h-4 rotate-90"></i>
                             </span>
                             <span class="h-0.5 flex-1 bg-slate-200 dark:bg-white/10"></span>
@@ -272,7 +272,7 @@
                         <div class="text-[12px] font-bold text-slate-800 dark:text-slate-200 font-mono">
                             {{ $shipment->nama_kapal ?? 'MV WAN HAI 315' }} <span class="text-slate-400">&bull;</span> {{ $shipment->voyage_no ?? 'V.042N' }}
                         </div>
-                        <div class="text-[11px] text-[#007AFF] font-medium">
+                        <div class="text-[11px] text-[#0284c7] font-medium">
                             Pelayaran: {{ $shipment->shippingVendor->name ?? 'Ocean Carrier' }}
                         </div>
                     </div>
@@ -295,7 +295,7 @@
                 <!-- 1. Kontainer -->
                 <div class="p-3.5 sm:p-4 rounded-[16px] bg-slate-50 dark:bg-white/[0.03] border border-black/[0.04] dark:border-white/[0.06] space-y-1">
                     <div class="flex items-center space-x-2 text-slate-400 dark:text-slate-400 text-[11px]">
-                        <i data-lucide="container" class="w-3.5 h-3.5 text-[#007AFF]"></i>
+                        <i data-lucide="container" class="w-3.5 h-3.5 text-[#0284c7]"></i>
                         <span>Muatan Kontainer</span>
                     </div>
                     <div class="font-bold text-slate-900 dark:text-white font-mono text-[14px]">
@@ -357,13 +357,13 @@
             <div class="flex items-center justify-between pb-4 border-b border-black/[0.06] dark:border-white/[0.06]">
                 <div>
                     <h2 class="text-[16px] font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-                        <i data-lucide="route" class="w-4 h-4 text-[#007AFF]"></i>
+                        <i data-lucide="route" class="w-4 h-4 text-[#0284c7]"></i>
                         <span>Tahapan Perjalanan Kargo</span>
                     </h2>
                     <p class="text-[12px] text-slate-400 mt-0.5">Pantau kemajuan pengurusan kargo Anda dari pelabuhan hingga tiba di gudang tujuan.</p>
                 </div>
                 <div class="text-right">
-                    <span class="text-[11px] font-bold font-mono px-2.5 py-1 rounded-full bg-[#007AFF]/10 text-[#007AFF] dark:bg-[#007AFF]/20 dark:text-[#0A84FF]">
+                    <span class="text-[11px] font-bold font-mono px-2.5 py-1 rounded-full bg-[#0284c7]/10 text-[#0284c7] dark:bg-[#0284c7]/20 dark:text-[#0A84FF]">
                         Fase {{ $activePhase + 1 }} dari 6
                     </span>
                 </div>
@@ -411,11 +411,11 @@
                     $isDone = $pIdx < $activePhase;
                     $isCurrent = $pIdx === $activePhase;
                 @endphp
-                <div class="p-4 rounded-[16px] border transition-all flex flex-col justify-between {{ $isCurrent ? 'bg-[#007AFF]/8 border-[#007AFF]/35 shadow-xs' : ($isDone ? 'bg-slate-50/80 dark:bg-white/[0.02] border-black/[0.05] dark:border-white/[0.05]' : 'bg-transparent border-dashed border-black/[0.08] dark:border-white/[0.08] opacity-60') }}">
+                <div class="p-4 rounded-[16px] border transition-all flex flex-col justify-between {{ $isCurrent ? 'bg-[#0284c7]/8 border-[#0284c7]/35 shadow-xs' : ($isDone ? 'bg-slate-50/80 dark:bg-white/[0.02] border-black/[0.05] dark:border-white/[0.05]' : 'bg-transparent border-dashed border-black/[0.08] dark:border-white/[0.08] opacity-60') }}">
                     <div>
                         <!-- Top Icon & Step Number -->
                         <div class="flex items-center justify-between mb-2">
-                            <span class="w-7 h-7 rounded-[9px] flex items-center justify-center text-[12px] font-bold font-mono {{ $isCurrent ? 'bg-[#007AFF] text-white shadow-xs' : ($isDone ? 'bg-[#34C759] text-white' : 'bg-slate-200 dark:bg-white/10 text-slate-500 dark:text-slate-400') }}">
+                            <span class="w-7 h-7 rounded-[9px] flex items-center justify-center text-[12px] font-bold font-mono {{ $isCurrent ? 'bg-[#0284c7] text-white shadow-xs' : ($isDone ? 'bg-[#34C759] text-white' : 'bg-slate-200 dark:bg-white/10 text-slate-500 dark:text-slate-400') }}">
                                 @if($isDone)
                                     <i data-lucide="check" class="w-4 h-4"></i>
                                 @else
@@ -424,7 +424,7 @@
                             </span>
 
                             @if($isCurrent)
-                            <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-[#007AFF] text-white font-mono animate-pulse">
+                            <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-[#0284c7] text-white font-mono animate-pulse">
                                 AKTIF
                             </span>
                             @elseif($isDone)
@@ -447,7 +447,7 @@
 
                     <!-- Progress Bar Indicator inside Step -->
                     <div class="mt-3 pt-2 border-t border-black/[0.04] dark:border-white/[0.04]">
-                        <div class="h-1 rounded-full w-full {{ $isDone ? 'bg-[#34C759]' : ($isCurrent ? 'bg-[#007AFF]' : 'bg-slate-200 dark:bg-white/10') }}"></div>
+                        <div class="h-1 rounded-full w-full {{ $isDone ? 'bg-[#34C759]' : ($isCurrent ? 'bg-[#0284c7]' : 'bg-slate-200 dark:bg-white/10') }}"></div>
                     </div>
                 </div>
                 @endforeach
@@ -478,7 +478,7 @@
                 <div class="p-4 sm:p-5 rounded-[18px] bg-gradient-to-tr from-slate-900 to-slate-800 text-white shadow-md space-y-3">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-2">
-                            <span class="w-6 h-6 rounded-full bg-[#007AFF] text-white flex items-center justify-center text-[11px] font-bold">MPN</span>
+                            <span class="w-6 h-6 rounded-full bg-[#0284c7] text-white flex items-center justify-center text-[11px] font-bold">MPN</span>
                             <span class="text-[12px] font-semibold text-slate-200">KODE BILLING PABEAN G3</span>
                         </div>
                         <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-white/10 text-slate-300">
@@ -504,7 +504,7 @@
                             </button>
 
                             <a href="{{ route('pdf.billing', $shipment->id) }}" target="_blank" 
-                               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] bg-[#007AFF] hover:bg-[#0071E3] text-white text-[11px] font-semibold transition-all">
+                               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] bg-[#0284c7] hover:bg-[#0071E3] text-white text-[11px] font-semibold transition-all">
                                 <i data-lucide="download" class="w-3.5 h-3.5"></i>
                                 <span>PDF</span>
                             </a>
@@ -523,7 +523,7 @@
                     <!-- Dokumen 1: Pemberitahuan Pabean (PIB / PEB) -->
                     <div class="p-3.5 rounded-[14px] bg-slate-50 dark:bg-white/[0.03] border border-black/[0.05] dark:border-white/[0.06] flex items-center justify-between gap-3">
                         <div class="flex items-center space-x-3 min-w-0">
-                            <div class="w-9 h-9 rounded-[10px] bg-[#007AFF]/12 text-[#007AFF] flex items-center justify-center shrink-0">
+                            <div class="w-9 h-9 rounded-[10px] bg-[#0284c7]/12 text-[#0284c7] flex items-center justify-center shrink-0">
                                 <i data-lucide="file-text" class="w-4 h-4"></i>
                             </div>
                             <div class="min-w-0">
@@ -538,7 +538,7 @@
 
                         <a href="{{ $shipment->jenis_layanan === 'EKSPORT_BC30' ? route('pdf.peb', $shipment->id) : route('pdf.pib', $shipment->id) }}" 
                            target="_blank" 
-                           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] bg-white dark:bg-[#2C2C2E] border border-black/10 dark:border-white/10 text-[#007AFF] dark:text-[#0A84FF] hover:bg-[#007AFF] hover:text-white text-[11px] font-semibold transition-all">
+                           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] bg-white dark:bg-[#2C2C2E] border border-black/10 dark:border-white/10 text-[#0284c7] dark:text-[#0A84FF] hover:bg-[#0284c7] hover:text-white text-[11px] font-semibold transition-all">
                             <i data-lucide="printer" class="w-3.5 h-3.5"></i>
                             <span>Cetak PDF</span>
                         </a>
@@ -597,7 +597,7 @@
                 <div class="flex items-center justify-between pb-3 border-b border-black/[0.06] dark:border-white/[0.06]">
                     <div>
                         <h2 class="text-[16px] font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-                            <i data-lucide="upload-cloud" class="w-4 h-4 text-[#007AFF]"></i>
+                            <i data-lucide="upload-cloud" class="w-4 h-4 text-[#0284c7]"></i>
                             <span>Unggah Berkas Tambahan</span>
                         </h2>
                         <p class="text-[11px] text-slate-400 mt-0.5">Kirimkan revisi Invoice, Packing List, atau Form E ke sistem kami.</p>
@@ -611,7 +611,7 @@
                         <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                             Jenis Dokumen
                         </label>
-                        <select name="document_type" required class="w-full h-10 px-3 rounded-[10px] border border-black/10 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-[12px] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#007AFF]/25">
+                        <select name="document_type" required class="w-full h-10 px-3 rounded-[10px] border border-black/10 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-[12px] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#0284c7]/25">
                             <option value="PACKING_LIST">Packing List (Revisi)</option>
                             <option value="COMMERCIAL_INVOICE">Commercial Invoice (Revisi)</option>
                             <option value="CERTIFICATE_OF_ORIGIN">COO (Form E / Form D / AKFTA)</option>
@@ -625,11 +625,11 @@
                             Pilih Berkas (PDF, JPG, PNG, XLS, Maks 15MB)
                         </label>
                         <div class="p-3 rounded-[12px] border border-dashed border-black/15 dark:border-white/15 bg-slate-50 dark:bg-white/5 text-center">
-                            <input type="file" name="document_file" required class="w-full text-[12px] text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-[8px] file:border-0 file:text-[11px] file:font-semibold file:bg-[#007AFF] file:text-white file:cursor-pointer hover:file:bg-[#0071E3]">
+                            <input type="file" name="document_file" required class="w-full text-[12px] text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-[8px] file:border-0 file:text-[11px] file:font-semibold file:bg-[#0284c7] file:text-white file:cursor-pointer hover:file:bg-[#0071E3]">
                         </div>
                     </div>
 
-                    <button type="submit" class="w-full flex items-center justify-center gap-2 py-2.5 rounded-[12px] bg-[#007AFF] hover:bg-[#0071E3] text-white text-[12px] font-semibold transition-all shadow-xs active:scale-[0.98] cursor-pointer">
+                    <button type="submit" class="w-full flex items-center justify-center gap-2 py-2.5 rounded-[12px] bg-[#0284c7] hover:bg-[#0071E3] text-white text-[12px] font-semibold transition-all shadow-xs active:scale-[0.98] cursor-pointer">
                         <i data-lucide="send" class="w-4 h-4"></i>
                         <span>Kirim Berkas ke Tim Dokumen</span>
                     </button>

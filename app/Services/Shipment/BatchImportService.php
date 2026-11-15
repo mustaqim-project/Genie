@@ -147,6 +147,74 @@ class BatchImportService
     }
 
     /**
+     * Proses ekstraksi & OCR asinkron untuk berkas dari path fisik di storage / ZIP extraction (FIX-14).
+     */
+    public function processFileFromPath(ImportBatch $batch, string $filePath, string $origName): ImportFile
+    {
+        $fileSizeKb = round(\Illuminate\Support\Facades\File::size($filePath) / 1024);
+        $fileHash = hash_file('sha256', $filePath);
+        $mime = \Illuminate\Support\Facades\File::mimeType($filePath) ?: 'application/octet-stream';
+
+        $isDuplicate = ImportFile::where('file_hash', $fileHash)->exists();
+
+        $importFile = ImportFile::create([
+            'batch_id' => $batch->id,
+            'original_name' => $origName,
+            'file_path' => $filePath,
+            'file_size_kb' => $fileSizeKb,
+            'file_hash' => $fileHash,
+            'mime_type' => $mime,
+            'status' => $isDuplicate ? 'DUPLICATE' : 'UPLOADED',
+        ]);
+
+        if ($isDuplicate) {
+            $batch->increment('processed_files');
+            $importFile->update(['error_message' => 'Berkas identik (hash duplikat) sudah pernah diunggah sebelumnya.']);
+            return $importFile;
+        }
+
+        try {
+            $text = $this->extractionService->extractTextFromFile(new \Illuminate\Http\File($filePath));
+            $detectedType = $this->classifyDocumentType($origName, $text);
+
+            $importFile->update([
+                'detected_type' => $detectedType['type'],
+                'type_confidence' => $detectedType['confidence'],
+                'status' => 'EXTRACTED',
+            ]);
+
+            $doc = ImportDocument::create([
+                'file_id' => $importFile->id,
+                'batch_id' => $batch->id,
+                'document_type' => $detectedType['type'],
+                'page_range' => '1',
+                'language' => 'id',
+                'review_status' => 'PENDING',
+            ]);
+
+            $this->extractDocumentFields($doc, $text, $detectedType['type']);
+            $this->validateDocumentRules($doc);
+
+            $importFile->update(['status' => 'READY']);
+            $batch->increment('processed_files');
+            $batch->increment('success_count');
+        } catch (\Throwable $e) {
+            $importFile->update([
+                'status' => 'FAILED',
+                'error_message' => $e->getMessage(),
+            ]);
+            $batch->increment('processed_files');
+            $batch->increment('error_count');
+        }
+
+        if ($batch->processed_files >= $batch->total_files) {
+            $batch->update(['status' => 'COMPLETED']);
+        }
+
+        return $importFile;
+    }
+
+    /**
      * Klasifikasi Cerdas Jenis Dokumen Ekspor-Impor
      */
     protected function classifyDocumentType(string $filename, string $text): array

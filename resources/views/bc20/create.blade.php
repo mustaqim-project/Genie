@@ -21,11 +21,11 @@
             <!-- Tautan Terpadu ke Cockpit Tracking Dokumen (11 Pos Operasional) -->
             <a href="{{ route('core.tracking.index', ['mode' => 'tracking_dok']) }}"
                target="_blank"
-               class="px-3.5 py-1.5 rounded-xl border border-sky-200 dark:border-sky-800 bg-sky-50 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 text-[#007AFF] text-xs font-semibold inline-flex items-center gap-1.5 transition-colors shadow-xs"
+               class="px-3.5 py-1.5 rounded-xl border border-sky-200 dark:border-sky-800 bg-sky-50 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 text-[#0284c7] text-xs font-semibold inline-flex items-center gap-1.5 transition-colors shadow-xs"
                title="Buka Cockpit Tracking Dokumen (11 Pos Operasional)">
                 <i data-lucide="compass" class="w-3.5 h-3.5"></i>
                 <span>Tracking Dok</span>
-                <span class="px-1.5 py-0.2 rounded text-[10px] bg-[#007AFF]/15 text-[#007AFF] font-bold font-mono">11 Pos</span>
+                <span class="px-1.5 py-0.2 rounded text-[10px] bg-[#0284c7]/15 text-[#0284c7] font-bold font-mono">11 Pos</span>
             </a>
 
             <span class="text-xs font-mono tabular-nums bg-slate-100 dark:bg-white/10 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300">
@@ -47,7 +47,7 @@
                 @click="formMode = 'auto'" 
                 :class="formMode === 'auto' ? 'bg-white dark:bg-[#2C2C2E] text-slate-900 dark:text-white shadow-xs font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-black dark:hover:text-white'"
                 class="flex-1 py-2 px-4 rounded-[10px] transition-all flex items-center justify-center space-x-2 cursor-pointer">
-            <i data-lucide="sparkles" class="w-4 h-4 text-[#007AFF]"></i>
+            <i data-lucide="sparkles" class="w-4 h-4 text-[#0284c7]"></i>
             <span>Unggah Berkas & Ekstraksi Otomatis</span>
             <span class="px-2 py-0.5 bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158] font-bold text-[10px] rounded-full">Praktis</span>
         </button>
@@ -67,7 +67,7 @@
         <div class="bg-gradient-to-r from-sky-50 to-indigo-50 dark:from-sky-950/30 dark:to-indigo-950/30 rounded-2xl p-4 border border-sky-200/80 dark:border-sky-800/60 shadow-xs text-xs">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div class="flex items-center space-x-3">
-                    <i data-lucide="zap" class="w-6 h-6 text-[#007AFF] flex-shrink-0"></i>
+                    <i data-lucide="zap" class="w-6 h-6 text-[#0284c7] flex-shrink-0"></i>
                     <div>
                         <strong class="font-bold text-slate-900 dark:text-white">Import Otomatis dari Proyek Shipment</strong>
                         <p class="text-[11px] text-slate-600 dark:text-slate-300">Pilih proyek pengapalan aktif untuk mengisi seluruh data sarana pengangkut, valuasi CIF, dan pos tarif HS Code otomatis.</p>
@@ -75,7 +75,7 @@
                 </div>
                 <div class="w-full sm:w-72">
                     <select onchange="if(this.value) window.location.href='{{ route('bc20.create') }}?shipment_id=' + this.value; else window.location.href='{{ route('bc20.create') }}';" 
-                            class="w-full px-3 py-2 rounded-xl border border-sky-300 dark:border-sky-700 bg-white dark:bg-[#2C2C2E] font-semibold text-slate-800 dark:text-white focus:ring-2 focus:ring-[#007AFF]">
+                            class="w-full px-3 py-2 rounded-xl border border-sky-300 dark:border-sky-700 bg-white dark:bg-[#2C2C2E] font-semibold text-slate-800 dark:text-white focus:ring-2 focus:ring-[#0284c7]">
                         <option value="">-- Pilih Proyek Shipment --</option>
                         @foreach($shipments as $s)
                             <option value="{{ $s->id }}" {{ $selectedShipment?->id === $s->id ? 'selected' : '' }}>
@@ -98,7 +98,7 @@
             <div>
                 <div class="flex items-center justify-between">
                     <h3 class="text-[14px] font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                        <i data-lucide="file-up" class="w-4 h-4 text-[#007AFF]"></i>
+                        <i data-lucide="file-up" class="w-4 h-4 text-[#0284c7]"></i>
                         <span>Unggah Berkas Kargo untuk Ekstraksi Otomatis</span>
                     </h3>
                     <span class="text-[11px] text-slate-400">PDF, Excel, JPG &bull; Maks 15MB</span>
@@ -109,21 +109,21 @@
             <!-- 3 Dropzone Upload Dokumen Utama -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                 <!-- 1. Bill of Lading (B/L) -->
-                <div class="p-3.5 rounded-[14px] border-2 border-dashed border-[#007AFF]/30 hover:border-[#007AFF] bg-[#007AFF]/5 transition-colors flex flex-col justify-between">
+                <div class="p-3.5 rounded-[14px] border-2 border-dashed border-[#0284c7]/30 hover:border-[#0284c7] bg-[#0284c7]/5 transition-colors flex flex-col justify-between">
                     <div>
                         <div class="flex items-center justify-between mb-1">
                             <span class="font-bold text-slate-900 dark:text-white flex items-center space-x-1.5">
-                                <i data-lucide="ship" class="w-4 h-4 text-[#007AFF]"></i>
+                                <i data-lucide="ship" class="w-4 h-4 text-[#0284c7]"></i>
                                 <span>Bill of Lading (B/L)</span>
                             </span>
-                            <span class="text-[9px] px-1.5 py-0.5 rounded-[4px] bg-[#007AFF]/15 text-[#007AFF] font-bold">Wajib</span>
+                            <span class="text-[9px] px-1.5 py-0.5 rounded-[4px] bg-[#0284c7]/15 text-[#0284c7] font-bold">Wajib</span>
                         </div>
                         <p class="text-[11px] text-slate-500 mb-2">Diekstrak: No. BL, Kapal, Pelayaran, Kontainer, Bobot.</p>
                     </div>
                     <div>
                         <input type="file" id="bc20-bl-file" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx" class="hidden" @change="updateFileName('bl', $event)">
                         <button type="button" onclick="document.getElementById('bc20-bl-file').click()" 
-                                class="w-full py-1.5 px-2.5 rounded-[8px] border border-[#007AFF]/30 bg-white dark:bg-[#2C2C2E] text-[#007AFF] font-semibold text-[11px] truncate flex items-center justify-center space-x-1.5 cursor-pointer">
+                                class="w-full py-1.5 px-2.5 rounded-[8px] border border-[#0284c7]/30 bg-white dark:bg-[#2C2C2E] text-[#0284c7] font-semibold text-[11px] truncate flex items-center justify-center space-x-1.5 cursor-pointer">
                             <span x-text="fileNames.bl ? '✓ ' + fileNames.bl : '📂 Pilih File B/L'">📂 Pilih File B/L</span>
                         </button>
                     </div>
@@ -174,20 +174,20 @@
 
             <!-- Dokumen Pendukung Khusus (Accordion Opsional) -->
             <div x-data="{ openDocs: false }" class="border-t border-black/5 dark:border-white/5 pt-3 text-xs">
-                <button type="button" @click="openDocs = !openDocs" class="text-[12px] font-semibold text-[#007AFF] hover:underline flex items-center space-x-1 cursor-pointer">
+                <button type="button" @click="openDocs = !openDocs" class="text-[12px] font-semibold text-[#0284c7] hover:underline flex items-center space-x-1 cursor-pointer">
                     <i data-lucide="chevron-right" class="w-3.5 h-3.5 transition-transform" :class="openDocs ? 'rotate-90' : ''"></i>
                     <span>Dokumen Pendukung Khusus & Perizinan Lartas (COO Form E, Polis Asuransi, Izin K/L) - Opsional</span>
                 </button>
                 <div x-show="openDocs" x-collapse class="mt-3 p-3 rounded-[12px] bg-slate-50 dark:bg-[#2C2C2E] border border-black/5 dark:border-white/10 space-y-2">
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 text-[11px]">Unggah Berkas Pendukung Tambahan (PDF/JPG/PNG)</label>
-                    <input type="file" id="bc20-other-file" multiple class="w-full text-xs text-slate-500 file:mr-3 file:py-1 file:px-2.5 file:rounded-[6px] file:border-0 file:text-[11px] file:font-semibold file:bg-[#007AFF]/10 file:text-[#007AFF]">
+                    <input type="file" id="bc20-other-file" multiple class="w-full text-xs text-slate-500 file:mr-3 file:py-1 file:px-2.5 file:rounded-[6px] file:border-0 file:text-[11px] file:font-semibold file:bg-[#0284c7]/10 file:text-[#0284c7]">
                 </div>
             </div>
 
             <!-- Action Bar: Tombol Scan & Ekstraksi -->
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-black/5 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02] -mx-5 -mb-5 p-4 rounded-b-2xl">
                 <div class="flex items-center space-x-2.5 text-xs">
-                    <div class="w-8 h-8 rounded-[8px] bg-[#007AFF]/12 text-[#007AFF] flex items-center justify-center shrink-0">
+                    <div class="w-8 h-8 rounded-[8px] bg-[#0284c7]/12 text-[#0284c7] flex items-center justify-center shrink-0">
                         <i data-lucide="cpu" class="w-4 h-4"></i>
                     </div>
                     <div>
@@ -199,7 +199,7 @@
                 <div class="flex flex-col sm:flex-row sm:items-center gap-2">
                     <div class="flex items-center gap-1.5">
                         <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Model AI:</span>
-                        <select x-model="selectedModel" class="px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#1C1C1E] dark:text-white font-mono text-[11px] font-semibold focus:outline-none focus:ring-1 focus:ring-[#007AFF]">
+                        <select x-model="selectedModel" class="px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#1C1C1E] dark:text-white font-mono text-[11px] font-semibold focus:outline-none focus:ring-1 focus:ring-[#0284c7]">
                             <optgroup label="OpenAI Codex Astra (Rekomendasi)">
                                 <option value="cx/gpt-6-astra" selected>cx/gpt-6-astra (Rekomendasi)</option>
                                 <option value="cx/gpt-6-astra-xhigh">cx/gpt-6-astra-xhigh</option>
@@ -227,7 +227,7 @@
                     <button type="button" 
                             @click="scanAndExtractFiles()" 
                             :disabled="scanning" 
-                            class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-[12px] bg-[#007AFF] hover:bg-[#0071E3] text-white text-[12px] font-semibold transition-all shadow-xs active:scale-[0.98] disabled:opacity-50 cursor-pointer shrink-0">
+                            class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-[12px] bg-[#0284c7] hover:bg-[#0071E3] text-white text-[12px] font-semibold transition-all shadow-xs active:scale-[0.98] disabled:opacity-50 cursor-pointer shrink-0">
                         <template x-if="scanning">
                             <span class="inline-flex items-center gap-2">
                                 <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
@@ -258,7 +258,7 @@
 
     <!-- PANEL 2: NOTIFIKASI JIKA DALAM MODE MANUAL -->
     <div x-show="formMode === 'manual'" class="p-3.5 rounded-xl bg-slate-100 dark:bg-white/[0.04] border border-black/5 dark:border-white/10 text-xs text-slate-600 dark:text-slate-300 flex items-center gap-2.5 mb-6">
-        <i data-lucide="info" class="w-4 h-4 text-[#007AFF] shrink-0"></i>
+        <i data-lucide="info" class="w-4 h-4 text-[#0284c7] shrink-0"></i>
         <span><strong>Mode Input Manual Aktif</strong> — Anda dapat mengisi atau merevisi seluruh 10 seksi formulir kepabeanan BC 2.0 di bawah secara mandiri.</span>
     </div>
 
@@ -271,13 +271,13 @@
         <!-- 1. Header & Kantor Pabean -->
         <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-6 border border-slate-200/80 dark:border-white/10 shadow-xs">
             <div class="flex items-center space-x-2 text-slate-800 dark:text-white font-bold text-sm mb-4 pb-2 border-b border-slate-100 dark:border-white/10">
-                <span class="w-6 h-6 rounded-lg bg-sky-100 dark:bg-sky-950/50 text-[#007AFF] flex items-center justify-center text-xs font-bold">1</span>
+                <span class="w-6 h-6 rounded-lg bg-sky-100 dark:bg-sky-950/50 text-[#0284c7] flex items-center justify-center text-xs font-bold">1</span>
                 <span>Kantor Pabean & Jenis Transaksi</span>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
                 <div>
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kantor Pabean Bongkar / Tujuan</label>
-                    <select name="kode_kantor" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF]">
+                    <select name="kode_kantor" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#0284c7]">
                         @foreach($kantorList as $code => $name)
                             <option value="{{ $code }}" {{ $code === '040300' ? 'selected' : '' }}>{{ $code }} - {{ $name }}</option>
                         @endforeach
@@ -297,13 +297,13 @@
         <!-- 2. Data Entitas Stakeholder -->
         <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-6 border border-slate-200/80 dark:border-white/10 shadow-xs">
             <div class="flex items-center space-x-2 text-slate-800 dark:text-white font-bold text-sm mb-4 pb-2 border-b border-slate-100 dark:border-white/10">
-                <span class="w-6 h-6 rounded-lg bg-sky-100 dark:bg-sky-950/50 text-[#007AFF] flex items-center justify-center text-xs font-bold">2</span>
+                <span class="w-6 h-6 rounded-lg bg-sky-100 dark:bg-sky-950/50 text-[#0284c7] flex items-center justify-center text-xs font-bold">2</span>
                 <span>Entitas Kepabeanan</span>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs">
                 <!-- Importir (Lokal) -->
                 <div class="p-4 rounded-xl bg-slate-50/70 dark:bg-[#2C2C2E]/60 border border-slate-200 dark:border-white/10">
-                    <span class="inline-block px-2 py-0.5 rounded bg-sky-100 dark:bg-sky-950/50 text-[#007AFF] font-bold text-[10px] mb-2">IMPORTIR (KODE 1)</span>
+                    <span class="inline-block px-2 py-0.5 rounded bg-sky-100 dark:bg-sky-950/50 text-[#0284c7] font-bold text-[10px] mb-2">IMPORTIR (KODE 1)</span>
                     <div class="space-y-2">
                         <div>
                             <label class="block text-slate-500 dark:text-slate-400 font-medium">Nama Perusahaan Importir</label>
@@ -330,11 +330,11 @@
                             <label class="block text-slate-600 dark:text-slate-300 font-semibold mb-1">Nama Supplier Luar Negeri *</label>
                             <input type="text" name="supplier_nama" 
                                    value="{{ old('supplier_nama', $selectedShipment ? ($selectedShipment->client->name . ' OVERSEAS CO., LTD') : 'SHENZHEN ELECTRONICS TRADING CO., LTD.') }}" 
-                                   class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white focus:ring-2 focus:ring-[#007AFF]" required>
+                                   class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white focus:ring-2 focus:ring-[#0284c7]" required>
                         </div>
                         <div>
                             <label class="block text-slate-600 dark:text-slate-300 font-semibold mb-1">Negara Asal Supplier *</label>
-                            <select name="supplier_negara" class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white focus:ring-2 focus:ring-[#007AFF]" required>
+                            <select name="supplier_negara" class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white focus:ring-2 focus:ring-[#0284c7]" required>
                                 <option value="CN" selected>CN - Tiongkok (China)</option>
                                 <option value="SG">SG - Singapura</option>
                                 <option value="JP">JP - Jepang</option>
@@ -351,7 +351,7 @@
         <!-- 3. Transportasi & Dokumen Pelengkap -->
         <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-6 border border-slate-200/80 dark:border-white/10 shadow-xs">
             <div class="flex items-center space-x-2 text-slate-800 dark:text-white font-bold text-sm mb-4 pb-2 border-b border-slate-100 dark:border-white/10">
-                <span class="w-6 h-6 rounded-lg bg-sky-100 dark:bg-sky-950/50 text-[#007AFF] flex items-center justify-center text-xs font-bold">3</span>
+                <span class="w-6 h-6 rounded-lg bg-sky-100 dark:bg-sky-950/50 text-[#0284c7] flex items-center justify-center text-xs font-bold">3</span>
                 <span>Pengangkutan & Dokumen Pelengkap</span>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs mb-4">
@@ -359,7 +359,7 @@
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Sarana Pengangkut (Vessel / Kapal) *</label>
                     <input type="text" name="nama_sarana_pengangkut" 
                            value="{{ old('nama_sarana_pengangkut', $selectedShipment ? ($selectedShipment->vessel_name . ' VOY. ' . $selectedShipment->voyage_number) : 'COSCO SHIPPING TAURUS VOY. 021E') }}" 
-                           class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#007AFF]" required>
+                           class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#0284c7]" required>
                 </div>
                 <div>
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Pelabuhan Muat *</label>
@@ -447,7 +447,7 @@
         <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-6 border border-slate-200/80 dark:border-white/10 shadow-xs">
             <div class="flex items-center justify-between pb-2 mb-4 border-b border-slate-100 dark:border-white/10">
                 <div class="flex items-center space-x-2 text-slate-800 dark:text-white font-bold text-sm">
-                    <span class="w-6 h-6 rounded-lg bg-sky-100 dark:bg-sky-950/50 text-[#007AFF] flex items-center justify-center text-xs font-bold">4</span>
+                    <span class="w-6 h-6 rounded-lg bg-sky-100 dark:bg-sky-950/50 text-[#0284c7] flex items-center justify-center text-xs font-bold">4</span>
                     <span>Valuasi Pabean & Kurs NDBM (KMK)</span>
                 </div>
                 <div class="flex items-center space-x-2 text-[11px] text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-[#2C2C2E] px-2.5 py-1 rounded-lg border border-slate-200 dark:border-white/10">
@@ -460,7 +460,7 @@
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs mb-4">
                 <div>
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Valuta Asing</label>
-                    <select name="kode_valuta" id="kode_valuta" onchange="fetchKurs(this.value)" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white font-mono font-bold focus:ring-2 focus:ring-[#007AFF]">
+                    <select name="kode_valuta" id="kode_valuta" onchange="fetchKurs(this.value)" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white font-mono font-bold focus:ring-2 focus:ring-[#0284c7]">
                         <option value="USD" {{ ($selectedShipment->currency ?? 'USD') === 'USD' ? 'selected' : '' }}>USD (US Dollar)</option>
                         <option value="EUR" {{ ($selectedShipment->currency ?? '') === 'EUR' ? 'selected' : '' }}>EUR (Euro)</option>
                         <option value="CNY" {{ ($selectedShipment->currency ?? '') === 'CNY' ? 'selected' : '' }}>CNY (Chinese Yuan)</option>
@@ -472,7 +472,7 @@
                 <div>
                     <div class="flex items-center justify-between mb-1">
                         <label class="font-semibold text-slate-700 dark:text-slate-300">Kurs KMK (NDPBM) Rp *</label>
-                        <button type="button" onclick="fetchKurs(document.getElementById('kode_valuta').value)" class="text-[10px] text-[#007AFF] hover:underline font-bold">Refresh Kurs</button>
+                        <button type="button" onclick="fetchKurs(document.getElementById('kode_valuta').value)" class="text-[10px] text-[#0284c7] hover:underline font-bold">Refresh Kurs</button>
                     </div>
                     <input type="number" step="0.01" name="ndbm_kurs" id="ndbm_kurs" 
                            value="{{ old('ndbm_kurs', $activeKurs['nilai_kurs'] ?? ($selectedShipment->ndbm_kurs ?? 15850.00)) }}" 
@@ -482,7 +482,7 @@
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nilai FOB *</label>
                     <input type="number" step="0.01" name="fob" id="fob" 
                            value="{{ old('fob', $selectedShipment->total_cif ?? 25000.00) }}" 
-                           class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] font-mono font-bold text-[#007AFF] tabular-nums" required oninput="calculateCif()">
+                           class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] font-mono font-bold text-[#0284c7] tabular-nums" required oninput="calculateCif()">
                 </div>
                 <div>
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Freight *</label>
@@ -508,7 +508,7 @@
                            class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] font-mono text-slate-800 dark:text-white tabular-nums" required>
                 </div>
                 <div class="p-3 rounded-xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800/60">
-                    <span class="block text-[10px] font-bold text-[#007AFF] uppercase">Total CIF Pabean</span>
+                    <span class="block text-[10px] font-bold text-[#0284c7] uppercase">Total CIF Pabean</span>
                     <span id="cifDisplay" class="font-mono font-black text-sm text-sky-900 dark:text-sky-200 tabular-nums">{{ $selectedShipment->currency ?? 'USD' }} {{ number_format(($selectedShipment->total_nilai_valuta ?? 26350.00), 2, ',', '.') }}</span>
                     <div id="cifIdrDisplay" class="text-[10px] text-sky-700 dark:text-sky-400 font-medium tabular-nums">Rp {{ number_format(($selectedShipment->total_nilai_idr ?? 426870000), 0, ',', '.') }}</div>
                 </div>
@@ -519,7 +519,7 @@
         <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-6 border border-slate-200/80 dark:border-white/10 shadow-xs">
             <div class="flex items-center justify-between text-slate-800 dark:text-white font-bold text-sm mb-4 pb-2 border-b border-slate-100 dark:border-white/10">
                 <div class="flex items-center space-x-2">
-                    <span class="w-6 h-6 rounded-lg bg-sky-100 dark:bg-sky-950/50 text-[#007AFF] flex items-center justify-center text-xs font-bold">5</span>
+                    <span class="w-6 h-6 rounded-lg bg-sky-100 dark:bg-sky-950/50 text-[#0284c7] flex items-center justify-center text-xs font-bold">5</span>
                     <span>Rincian Barang & Pos Tarif BTKI (BM, PPN 11%, PPh 22)</span>
                 </div>
                 <div class="text-[11px] text-slate-400 font-mono" id="barang_count_badge_bc20">1 Barang</div>
@@ -611,7 +611,7 @@
         <!-- 6. Kontainer & Segel -->
         <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-6 border border-slate-200/80 dark:border-white/10 shadow-xs">
             <div class="flex items-center space-x-2 text-slate-800 dark:text-white font-bold text-sm mb-4 pb-2 border-b border-slate-100 dark:border-white/10">
-                <span class="w-6 h-6 rounded-lg bg-sky-100 dark:bg-sky-950/50 text-[#007AFF] flex items-center justify-center text-xs font-bold">6</span>
+                <span class="w-6 h-6 rounded-lg bg-sky-100 dark:bg-sky-950/50 text-[#0284c7] flex items-center justify-center text-xs font-bold">6</span>
                 <span>Petikemas (Kontainer) & Segel Pengaman</span>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
@@ -739,7 +739,7 @@
 
         const originalText = btn.innerHTML;
         btn.disabled = true;
-        btn.innerHTML = `<span class="inline-flex items-center gap-1"><svg class="animate-spin h-3 w-3 text-[#007AFF]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> AI Menganalisa...</span>`;
+        btn.innerHTML = `<span class="inline-flex items-center gap-1"><svg class="animate-spin h-3 w-3 text-[#0284c7]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> AI Menganalisa...</span>`;
 
         try {
             const res = await fetch('{{ route('ai.classify-hs') }}', {
@@ -923,7 +923,7 @@
                             const pph = parseFloat(item.tarif_pph_persen ?? item.tarif_pph ?? 2.5).toFixed(1);
 
                             const rowHtml = `
-                                <div class="p-4 rounded-xl bg-slate-50 dark:bg-[#2C2C2E]/60 border border-slate-200 dark:border-white/10 mb-4 transition-all hover:border-[#007AFF]/40">
+                                <div class="p-4 rounded-xl bg-slate-50 dark:bg-[#2C2C2E]/60 border border-slate-200 dark:border-white/10 mb-4 transition-all hover:border-[#0284c7]/40">
                                     <div class="flex items-center justify-between mb-2">
                                         <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300 font-mono">Barang #${idx + 1}</span>
                                         <span class="px-2 py-0.5 rounded bg-sky-100 text-sky-800 text-[9px] font-bold font-mono">AI MATCHED</span>
@@ -932,7 +932,7 @@
                                         <div>
                                             <div class="flex items-center justify-between mb-1">
                                                 <label class="block font-semibold text-slate-700 dark:text-slate-300">HS Code (BTKI) *</label>
-                                                <button type="button" onclick="quickAiHsLookupBc20(this, ${idx})" class="text-[10px] text-[#007AFF] font-bold hover:underline cursor-pointer">✨ Cek AI</button>
+                                                <button type="button" onclick="quickAiHsLookupBc20(this, ${idx})" class="text-[10px] text-[#0284c7] font-bold hover:underline cursor-pointer">✨ Cek AI</button>
                                             </div>
                                             <input type="text" name="barang[${idx}][hs_code]" 
                                                    value="${cleanHs}" 
@@ -1004,10 +1004,60 @@
                 if (typeof calculateCif === 'function') {
                     calculateCif();
                 }
+            },
+
+            // Auto-Save Draft & Dirty Form Guard (FIX-23)
+            initAutoSaveDraft() {
+                const ajuId = '{{ $defaultNomorAju }}';
+                const form = document.querySelector('form');
+                if (!form) return;
+
+                // Load existing draft if present
+                const saved = localStorage.getItem('bc20_draft_' + ajuId);
+                if (saved) {
+                    try {
+                        const parsed = JSON.parse(saved);
+                        if (confirm('Ditemukan draft pengajuan tersimpan otomatis sebelumnya. Pulihkan data draft?')) {
+                            Object.keys(parsed).forEach(k => {
+                                const el = form.elements[k];
+                                if (el && el.type !== 'file' && el.type !== 'hidden') {
+                                    el.value = parsed[k];
+                                }
+                            });
+                        }
+                    } catch (e) {}
+                }
+
+                form.addEventListener('input', () => {
+                    window.isFormDirty = true;
+                    const data = {};
+                    Array.from(form.elements).forEach(el => {
+                        if (el.name && el.type !== 'file' && el.type !== 'password') {
+                            data[el.name] = el.value;
+                        }
+                    });
+                    localStorage.setItem('bc20_draft_' + ajuId, JSON.stringify(data));
+                });
+
+                form.addEventListener('submit', () => {
+                    window.isSubmitting = true;
+                    localStorage.removeItem('bc20_draft_' + ajuId);
+                });
+
+                window.addEventListener('beforeunload', (e) => {
+                    if (window.isFormDirty && !window.isSubmitting) {
+                        e.preventDefault();
+                        e.returnValue = 'Terdapat perubahan formulir pabean yang belum disimpan.';
+                    }
+                });
             }
         };
     }
 
-    document.addEventListener('DOMContentLoaded', calculateCif);
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof calculateCif === 'function') calculateCif();
+        const manager = bc20FormManager();
+        if (manager && manager.initAutoSaveDraft) manager.initAutoSaveDraft();
+    });
 </script>
 @endsection
