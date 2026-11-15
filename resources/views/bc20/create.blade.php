@@ -3,6 +3,278 @@
 @section('title', 'Form Pengajuan BC 2.0 (PIB)')
 
 @section('content')
+<script>
+window.bc20FormManager = function bc20FormManager() {
+    return {
+        formMode: '{{ $selectedShipment ? "auto" : "auto" }}',
+        selectedModel: 'cx/gpt-6-astra',
+        scanning: false,
+        scanned: false,
+        fileNames: { bl: '', invoice: '', pl: '', other: '' },
+        updateFileName(type, event) {
+            const files = event.target.files;
+            if (files && files[0]) {
+                this.fileNames[type] = files[0].name;
+            }
+        },
+        async scanAndExtractFiles() {
+            const blInput = document.getElementById('bc20-bl-file');
+            const invInput = document.getElementById('bc20-inv-file');
+            const plInput = document.getElementById('bc20-pl-file');
+
+            if (!blInput?.files?.length && !invInput?.files?.length && !plInput?.files?.length) {
+                alert('Silakan pilih minimal 1 berkas dokumen (B/L, Commercial Invoice, atau Packing List) untuk dipindai.');
+                return;
+            }
+
+            this.scanning = true;
+
+            const formData = new FormData();
+            if (blInput?.files?.[0]) formData.append('bl_file', blInput.files[0]);
+            if (invInput?.files?.[0]) formData.append('invoice_file', invInput.files[0]);
+            if (plInput?.files?.[0]) formData.append('packing_list_file', plInput.files[0]);
+            formData.append('ai_model', this.selectedModel || 'cx/gpt-6-astra');
+
+            try {
+                const response = await fetch('{{ route('core.document.parse-documents') }}', {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    body: formData
+                });
+                const res = await response.json();
+                if (res.status === 'success' && res.data) {
+                    this.applyExtractedData(res.data);
+                    this.scanned = true;
+                    setTimeout(() => {
+                        document.getElementById('bc20Form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 250);
+                } else {
+                    alert(res.message || 'Gagal memindai dokumen.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Terjadi kesalahan koneksi saat memindai dokumen.');
+            } finally {
+                this.scanning = false;
+            }
+        },
+        applyExtractedData(d) {
+            if (d.vessel_name) {
+                const el = document.querySelector('[name="nama_sarana_pengangkut"]');
+                if (el) el.value = d.vessel_name + (d.voyage_number ? ' VOY. ' + d.voyage_number : '');
+            }
+            if (d.bl_number) {
+                const el = document.querySelector('[name="bl_no"]');
+                if (el) el.value = d.bl_number;
+            }
+            if (d.invoice_number) {
+                const el = document.querySelector('[name="invoice_no"]');
+                if (el) el.value = d.invoice_number;
+            }
+            if (d.invoice_date) {
+                const el = document.querySelector('[name="invoice_date"]');
+                if (el) el.value = d.invoice_date;
+            }
+            if (d.port_of_loading) {
+                const el = document.querySelector('[name="pelabuhan_muat"]');
+                if (el) el.value = d.port_of_loading;
+            }
+            if (d.port_of_discharge) {
+                const el = document.querySelector('[name="pelabuhan_bongkar"]');
+                if (el) el.value = d.port_of_discharge;
+            }
+            if (d.supplier_name) {
+                const el = document.querySelector('[name="supplier_nama"]');
+                if (el) el.value = d.supplier_name;
+            }
+            if (d.supplier_country) {
+                const el = document.querySelector('[name="supplier_negara"]');
+                if (el) el.value = d.supplier_country;
+            }
+            if (d.currency) {
+                const el = document.querySelector('[name="kode_valuta"]');
+                if (el) el.value = d.currency;
+            }
+            if (d.ndbm_kurs) {
+                const el = document.getElementById('ndbm_kurs');
+                if (el) el.value = parseFloat(d.ndbm_kurs).toFixed(2);
+            }
+            if (d.total_fob) {
+                const el = document.getElementById('fob');
+                if (el) el.value = parseFloat(d.total_fob).toFixed(2);
+            }
+            if (d.freight) {
+                const el = document.getElementById('freight');
+                if (el) el.value = parseFloat(d.freight).toFixed(2);
+            }
+            if (d.asuransi) {
+                const el = document.getElementById('asuransi');
+                if (el) el.value = parseFloat(d.asuransi).toFixed(2);
+            }
+            if (d.total_bruto) {
+                const el = document.querySelector('[name="bruto"]');
+                if (el) el.value = parseFloat(d.total_bruto).toFixed(2);
+            }
+            if (d.total_netto) {
+                const el = document.querySelector('[name="netto"]');
+                if (el) el.value = parseFloat(d.total_netto).toFixed(2);
+            }
+
+            // Populate seluruh HS code & item barang hasil ekstraksi AI
+            if (d.items && d.items.length > 0) {
+                const container = document.getElementById('barang_container_bc20');
+                if (container) {
+                    container.innerHTML = '';
+                    d.items.forEach((item, idx) => {
+                        const cleanHs = (item.kode_hs || item.hs_code || '').replace(/[^0-9]/g, '');
+                        const desc = item.uraian_barang || item.description || item.uraian || 'KOMODITAS IMPOR';
+                        const qty = item.jumlah_kemasan || item.qty || 1;
+                        const kemasan = item.jenis_kemasan || item.kemasan || 'CTN';
+                        const fob = parseFloat(item.nilai_fob || item.fob || item.cif_price || 0).toFixed(2);
+                        const bm = parseFloat(item.tarif_bm_persen ?? item.tarif_bm ?? 5.0).toFixed(1);
+                        const ppn = parseFloat(item.tarif_ppn_persen ?? item.tarif_ppn ?? 11.0).toFixed(1);
+                        const pph = parseFloat(item.tarif_pph_persen ?? item.tarif_pph ?? 2.5).toFixed(1);
+
+                        const rowHtml = `
+                            <div class="p-4 rounded-xl bg-slate-50 dark:bg-[#2C2C2E]/60 border border-slate-200 dark:border-white/10 mb-4 transition-all hover:border-[#0284c7]/40">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300 font-mono">Barang #${idx + 1}</span>
+                                    <span class="px-2 py-0.5 rounded bg-sky-100 text-sky-800 text-[9px] font-bold font-mono">AI MATCHED</span>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs mb-3">
+                                    <div>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <label class="block font-semibold text-slate-700 dark:text-slate-300">HS Code (BTKI) *</label>
+                                            <button type="button" onclick="quickAiHsLookupBc20(this, ${idx})" class="text-[10px] text-[#0284c7] font-bold hover:underline cursor-pointer">✨ Cek AI</button>
+                                        </div>
+                                        <input type="text" name="barang[${idx}][hs_code]" 
+                                               value="${cleanHs}" 
+                                               onchange="lookupHsRow(this, ${idx})"
+                                               class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white font-mono font-bold" required>
+                                        <div id="hs_badge_${idx}" class="mt-1 p-1.5 rounded-lg text-[10px] ${item.has_lartas ? 'bg-amber-50 border border-amber-200 text-amber-800' : 'bg-emerald-50 border border-emerald-200 text-emerald-800'}">
+                                            ${item.has_lartas ? '⚠️ <strong>Lartas:</strong> ' + (item.lartas_info || 'Wajib Izin') : '✓ Bebas Lartas (Non-Lartas)'}
+                                        </div>
+                                    </div>
+                                    <div class="sm:col-span-2">
+                                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Uraian Komoditas *</label>
+                                        <input type="text" name="barang[${idx}][uraian]" 
+                                               value="${desc}" 
+                                               class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white" required>
+                                    </div>
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Merek & Tipe</label>
+                                        <input type="text" name="barang[${idx}][merk]" value="${item.merk || 'STANDARD'}" class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white">
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 sm:grid-cols-6 gap-3 text-xs">
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jumlah</label>
+                                        <input type="number" name="barang[${idx}][jumlah]" 
+                                               value="${qty}" 
+                                               class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white font-mono tabular-nums" required>
+                                    </div>
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kemasan</label>
+                                        <input type="text" name="barang[${idx}][kemasan]" 
+                                               value="${kemasan}" 
+                                               class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white font-mono" required>
+                                    </div>
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">FOB Valas *</label>
+                                        <input type="number" step="0.01" name="barang[${idx}][fob]" 
+                                               value="${fob}" 
+                                               class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white font-mono tabular-nums" required>
+                                    </div>
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">BM (%) *</label>
+                                        <input type="number" step="0.1" name="barang[${idx}][tarif_bm]" 
+                                               value="${bm}" 
+                                               class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white font-mono tabular-nums" required>
+                                    </div>
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">PPN (%) *</label>
+                                        <input type="number" step="0.1" name="barang[${idx}][tarif_ppn]" 
+                                               value="${ppn}" 
+                                               class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white font-mono tabular-nums" required>
+                                    </div>
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">PPh 22 (%) *</label>
+                                        <input type="number" step="0.1" name="barang[${idx}][tarif_pph]" 
+                                               value="${pph}" 
+                                               class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white font-mono tabular-nums" required>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        container.insertAdjacentHTML('beforeend', rowHtml);
+                    });
+                    const badgeCount = document.getElementById('barang_count_badge_bc20');
+                    if (badgeCount) badgeCount.textContent = `${d.items.length} Barang`;
+                }
+            }
+
+            if (typeof calculateCif === 'function') {
+                calculateCif();
+            }
+        },
+
+        initAutoSaveDraft() {
+            const ajuId = '{{ $defaultNomorAju }}';
+            const form = document.querySelector('form');
+            if (!form) return;
+
+            const saved = localStorage.getItem('bc20_draft_' + ajuId);
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    if (confirm('Ditemukan draft pengajuan tersimpan otomatis sebelumnya. Pulihkan data draft?')) {
+                        Object.keys(parsed).forEach(k => {
+                            const el = form.elements[k];
+                            if (el && el.type !== 'file' && el.type !== 'hidden') {
+                                el.value = parsed[k];
+                            }
+                        });
+                    }
+                } catch (e) {}
+            }
+
+            form.addEventListener('input', () => {
+                window.isFormDirty = true;
+                const data = {};
+                Array.from(form.elements).forEach(el => {
+                    if (el.name && el.type !== 'file' && el.type !== 'password') {
+                        data[el.name] = el.value;
+                    }
+                });
+                localStorage.setItem('bc20_draft_' + ajuId, JSON.stringify(data));
+            });
+
+            form.addEventListener('submit', () => {
+                window.isSubmitting = true;
+                localStorage.removeItem('bc20_draft_' + ajuId);
+            });
+
+            window.addEventListener('beforeunload', (e) => {
+                if (window.isFormDirty && !window.isSubmitting) {
+                    e.preventDefault();
+                    e.returnValue = 'Terdapat perubahan formulir pabean yang belum disimpan.';
+                }
+            });
+        }
+    };
+};
+
+document.addEventListener('alpine:init', () => {
+    if (window.Alpine && typeof window.Alpine.data === 'function') {
+        window.Alpine.data('bc20FormManager', window.bc20FormManager);
+    }
+});
+if (window.Alpine && typeof window.Alpine.data === 'function') {
+    window.Alpine.data('bc20FormManager', window.bc20FormManager);
+}
+</script>
+
 <div class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12" x-data="bc20FormManager()">
     <!-- Breadcrumb -->
     <x-breadcrumb :items="[
@@ -18,6 +290,15 @@
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Pemberitahuan Impor Barang untuk Dipakai (Host-to-Host CEISA 4.0 DJBC)</p>
         </div>
         <div class="flex items-center space-x-2">
+            <!-- Tombol Buka Modal Ekstraksi Cerdas (Sama seperti Tim Document) -->
+            <button type="button" 
+               onclick="document.getElementById('modal-create-bc20-page').classList.remove('hidden')"
+               class="btn-apple-filled !h-8.5 !px-3 text-xs flex items-center gap-1.5 cursor-pointer shadow-xs"
+               title="Buka Modal Ekstraksi Bundle Cerdas (Sama seperti Tim Document)">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                <span>Unggah Cerdas (Modal Tim Document)</span>
+            </button>
+
             <!-- Tautan Terpadu ke Cockpit Tracking Dokumen (11 Pos Operasional) -->
             <a href="{{ route('core.tracking.index', ['mode' => 'tracking_dok']) }}"
                target="_blank"
@@ -791,273 +1072,23 @@
         }
     }
 
-    function bc20FormManager() {
-        return {
-            formMode: '{{ $selectedShipment ? "auto" : "auto" }}',
-            selectedModel: 'cx/gpt-6-astra',
-            scanning: false,
-            scanned: false,
-            fileNames: { bl: '', invoice: '', pl: '', other: '' },
-            updateFileName(type, event) {
-                const files = event.target.files;
-                if (files && files[0]) {
-                    this.fileNames[type] = files[0].name;
-                }
-            },
-            async scanAndExtractFiles() {
-                const blInput = document.getElementById('bc20-bl-file');
-                const invInput = document.getElementById('bc20-inv-file');
-                const plInput = document.getElementById('bc20-pl-file');
-
-                if (!blInput?.files?.length && !invInput?.files?.length && !plInput?.files?.length) {
-                    alert('Silakan pilih minimal 1 berkas dokumen (B/L, Commercial Invoice, atau Packing List) untuk dipindai.');
-                    return;
-                }
-
-                this.scanning = true;
-
-                const formData = new FormData();
-                if (blInput?.files?.[0]) formData.append('bl_file', blInput.files[0]);
-                if (invInput?.files?.[0]) formData.append('invoice_file', invInput.files[0]);
-                if (plInput?.files?.[0]) formData.append('packing_list_file', plInput.files[0]);
-                formData.append('ai_model', this.selectedModel || 'cx/gpt-6-astra');
-
-                try {
-                    const response = await fetch('{{ route('core.document.parse-documents') }}', {
-                        method: 'POST',
-                        headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                        body: formData
-                    });
-                    const res = await response.json();
-                    if (res.status === 'success' && res.data) {
-                        this.applyExtractedData(res.data);
-                        this.scanned = true;
-                        setTimeout(() => {
-                            document.getElementById('bc20Form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }, 250);
-                    } else {
-                        alert(res.message || 'Gagal memindai dokumen.');
-                    }
-                } catch (err) {
-                    console.error(err);
-                    alert('Terjadi kesalahan koneksi saat memindai dokumen.');
-                } finally {
-                    this.scanning = false;
-                }
-            },
-            applyExtractedData(d) {
-                if (d.vessel_name) {
-                    const el = document.querySelector('[name="nama_sarana_pengangkut"]');
-                    if (el) el.value = d.vessel_name + (d.voyage_number ? ' VOY. ' + d.voyage_number : '');
-                }
-                if (d.bl_number) {
-                    const el = document.querySelector('[name="bl_no"]');
-                    if (el) el.value = d.bl_number;
-                }
-                if (d.invoice_number) {
-                    const el = document.querySelector('[name="invoice_no"]');
-                    if (el) el.value = d.invoice_number;
-                }
-                if (d.invoice_date) {
-                    const el = document.querySelector('[name="invoice_date"]');
-                    if (el) el.value = d.invoice_date;
-                }
-                if (d.port_of_loading) {
-                    const el = document.querySelector('[name="pelabuhan_muat"]');
-                    if (el) el.value = d.port_of_loading;
-                }
-                if (d.port_of_discharge) {
-                    const el = document.querySelector('[name="pelabuhan_bongkar"]');
-                    if (el) el.value = d.port_of_discharge;
-                }
-                if (d.supplier_name) {
-                    const el = document.querySelector('[name="supplier_nama"]');
-                    if (el) el.value = d.supplier_name;
-                }
-                if (d.supplier_country) {
-                    const el = document.querySelector('[name="supplier_negara"]');
-                    if (el) el.value = d.supplier_country;
-                }
-                if (d.currency) {
-                    const el = document.querySelector('[name="kode_valuta"]');
-                    if (el) el.value = d.currency;
-                }
-                if (d.ndbm_kurs) {
-                    const el = document.getElementById('ndbm_kurs');
-                    if (el) el.value = parseFloat(d.ndbm_kurs).toFixed(2);
-                }
-                if (d.total_fob) {
-                    const el = document.getElementById('fob');
-                    if (el) el.value = parseFloat(d.total_fob).toFixed(2);
-                }
-                if (d.freight) {
-                    const el = document.getElementById('freight');
-                    if (el) el.value = parseFloat(d.freight).toFixed(2);
-                }
-                if (d.asuransi) {
-                    const el = document.getElementById('asuransi');
-                    if (el) el.value = parseFloat(d.asuransi).toFixed(2);
-                }
-                if (d.total_bruto) {
-                    const el = document.querySelector('[name="bruto"]');
-                    if (el) el.value = parseFloat(d.total_bruto).toFixed(2);
-                }
-                if (d.total_netto) {
-                    const el = document.querySelector('[name="netto"]');
-                    if (el) el.value = parseFloat(d.total_netto).toFixed(2);
-                }
-
-                // Populate seluruh HS code & item barang hasil ekstraksi AI
-                if (d.items && d.items.length > 0) {
-                    const container = document.getElementById('barang_container_bc20');
-                    if (container) {
-                        container.innerHTML = '';
-                        d.items.forEach((item, idx) => {
-                            const cleanHs = (item.kode_hs || item.hs_code || '').replace(/[^0-9]/g, '');
-                            const desc = item.uraian_barang || item.description || item.uraian || 'KOMODITAS IMPOR';
-                            const qty = item.jumlah_kemasan || item.qty || 1;
-                            const kemasan = item.jenis_kemasan || item.kemasan || 'CTN';
-                            const fob = parseFloat(item.nilai_fob || item.fob || item.cif_price || 0).toFixed(2);
-                            const bm = parseFloat(item.tarif_bm_persen ?? item.tarif_bm ?? 5.0).toFixed(1);
-                            const ppn = parseFloat(item.tarif_ppn_persen ?? item.tarif_ppn ?? 11.0).toFixed(1);
-                            const pph = parseFloat(item.tarif_pph_persen ?? item.tarif_pph ?? 2.5).toFixed(1);
-
-                            const rowHtml = `
-                                <div class="p-4 rounded-xl bg-slate-50 dark:bg-[#2C2C2E]/60 border border-slate-200 dark:border-white/10 mb-4 transition-all hover:border-[#0284c7]/40">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300 font-mono">Barang #${idx + 1}</span>
-                                        <span class="px-2 py-0.5 rounded bg-sky-100 text-sky-800 text-[9px] font-bold font-mono">AI MATCHED</span>
-                                    </div>
-                                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs mb-3">
-                                        <div>
-                                            <div class="flex items-center justify-between mb-1">
-                                                <label class="block font-semibold text-slate-700 dark:text-slate-300">HS Code (BTKI) *</label>
-                                                <button type="button" onclick="quickAiHsLookupBc20(this, ${idx})" class="text-[10px] text-[#0284c7] font-bold hover:underline cursor-pointer">✨ Cek AI</button>
-                                            </div>
-                                            <input type="text" name="barang[${idx}][hs_code]" 
-                                                   value="${cleanHs}" 
-                                                   onchange="lookupHsRow(this, ${idx})"
-                                                   class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white font-mono font-bold" required>
-                                            <div id="hs_badge_${idx}" class="mt-1 p-1.5 rounded-lg text-[10px] ${item.has_lartas ? 'bg-amber-50 border border-amber-200 text-amber-800' : 'bg-emerald-50 border border-emerald-200 text-emerald-800'}">
-                                                ${item.has_lartas ? '⚠️ <strong>Lartas:</strong> ' + (item.lartas_info || 'Wajib Izin') : '✓ Bebas Lartas (Non-Lartas)'}
-                                            </div>
-                                        </div>
-                                        <div class="sm:col-span-2">
-                                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Uraian Komoditas *</label>
-                                            <input type="text" name="barang[${idx}][uraian]" 
-                                                   value="${desc}" 
-                                                   class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white" required>
-                                        </div>
-                                        <div>
-                                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Merek & Tipe</label>
-                                            <input type="text" name="barang[${idx}][merk]" value="${item.merk || 'STANDARD'}" class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white">
-                                        </div>
-                                    </div>
-
-                                    <div class="grid grid-cols-2 sm:grid-cols-6 gap-3 text-xs">
-                                        <div>
-                                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jumlah</label>
-                                            <input type="number" name="barang[${idx}][jumlah]" 
-                                                   value="${qty}" 
-                                                   class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white font-mono tabular-nums" required>
-                                        </div>
-                                        <div>
-                                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kemasan</label>
-                                            <input type="text" name="barang[${idx}][kemasan]" 
-                                                   value="${kemasan}" 
-                                                   class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white font-mono" required>
-                                        </div>
-                                        <div>
-                                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">FOB Valas *</label>
-                                            <input type="number" step="0.01" name="barang[${idx}][fob]" 
-                                                   value="${fob}" 
-                                                   class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white font-mono tabular-nums" required>
-                                        </div>
-                                        <div>
-                                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">BM (%) *</label>
-                                            <input type="number" step="0.1" name="barang[${idx}][tarif_bm]" 
-                                                   value="${bm}" 
-                                                   class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white font-mono tabular-nums" required>
-                                        </div>
-                                        <div>
-                                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">PPN (%) *</label>
-                                            <input type="number" step="0.1" name="barang[${idx}][tarif_ppn]" 
-                                                   value="${ppn}" 
-                                                   class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white font-mono tabular-nums" required>
-                                        </div>
-                                        <div>
-                                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">PPh 22 (%) *</label>
-                                            <input type="number" step="0.1" name="barang[${idx}][tarif_pph]" 
-                                                   value="${pph}" 
-                                                   class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white font-mono tabular-nums" required>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                            container.insertAdjacentHTML('beforeend', rowHtml);
-                        });
-                        const badgeCount = document.getElementById('barang_count_badge_bc20');
-                        if (badgeCount) badgeCount.textContent = `${d.items.length} Barang`;
-                    }
-                }
-
-                if (typeof calculateCif === 'function') {
-                    calculateCif();
-                }
-            },
-
-            // Auto-Save Draft & Dirty Form Guard (FIX-23)
-            initAutoSaveDraft() {
-                const ajuId = '{{ $defaultNomorAju }}';
-                const form = document.querySelector('form');
-                if (!form) return;
-
-                // Load existing draft if present
-                const saved = localStorage.getItem('bc20_draft_' + ajuId);
-                if (saved) {
-                    try {
-                        const parsed = JSON.parse(saved);
-                        if (confirm('Ditemukan draft pengajuan tersimpan otomatis sebelumnya. Pulihkan data draft?')) {
-                            Object.keys(parsed).forEach(k => {
-                                const el = form.elements[k];
-                                if (el && el.type !== 'file' && el.type !== 'hidden') {
-                                    el.value = parsed[k];
-                                }
-                            });
-                        }
-                    } catch (e) {}
-                }
-
-                form.addEventListener('input', () => {
-                    window.isFormDirty = true;
-                    const data = {};
-                    Array.from(form.elements).forEach(el => {
-                        if (el.name && el.type !== 'file' && el.type !== 'password') {
-                            data[el.name] = el.value;
-                        }
-                    });
-                    localStorage.setItem('bc20_draft_' + ajuId, JSON.stringify(data));
-                });
-
-                form.addEventListener('submit', () => {
-                    window.isSubmitting = true;
-                    localStorage.removeItem('bc20_draft_' + ajuId);
-                });
-
-                window.addEventListener('beforeunload', (e) => {
-                    if (window.isFormDirty && !window.isSubmitting) {
-                        e.preventDefault();
-                        e.returnValue = 'Terdapat perubahan formulir pabean yang belum disimpan.';
-                    }
-                });
-            }
-        };
-    }
-
     document.addEventListener('DOMContentLoaded', () => {
         if (typeof calculateCif === 'function') calculateCif();
-        const manager = bc20FormManager();
+        const manager = window.bc20FormManager ? window.bc20FormManager() : null;
         if (manager && manager.initAutoSaveDraft) manager.initAutoSaveDraft();
     });
 </script>
+
+<!-- Modal Form Buat Pengajuan BC 2.0 (PIB) Cerdas (Sama seperti Tim Document) -->
+@include('core.components.smart_document_create_modal', [
+    'modalId' => 'modal-create-bc20-page',
+    'pfx' => 'bc20_pg_',
+    'defaultType' => 'IMPORT',
+    'lockType' => true,
+    'defaultAfterAction' => 'fill_bc_form',
+    'title' => 'Buat Pengajuan Impor BC 2.0 (PIB)',
+    'subtitle' => 'Unggah berkas kargo (B/L, Commercial Invoice, Packing List). Sistem mengekstrak informasi dan membuat draft dokumen PIB BC 2.0 secara otomatis.',
+    'clients' => $clients,
+    'vendors' => $vendors
+])
 @endsection

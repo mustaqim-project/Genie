@@ -44,6 +44,235 @@
 @endpush
 
 @section('content')
+<script>
+window.staffPortalManager = function staffPortalManager(config) {
+    return {
+        activeTab: config.activeTab || 'attendance',
+        clockInRoute: config.clockInRoute,
+        clockOutRoute: config.clockOutRoute,
+        faceRegisterRoute: config.faceRegisterRoute,
+        currentTime: '',
+        currentDate: '',
+        userLat: config.userLat,
+        userLng: config.userLng,
+        selectedLocationId: config.selectedLocationId,
+        targetLat: config.targetLat,
+        targetLng: config.targetLng,
+        allowedRadius: config.allowedRadius,
+        locationName: config.locationName,
+        distanceM: 0,
+        isInsideGeofence: true,
+        gpsTracking: false,
+        gpsStatus: 'Mencari sinyal GPS akurat...',
+        map: null,
+        userMarker: null,
+        circleMarker: null,
+
+        // Live Camera & Liveness
+        cameraActive: false,
+        cameraStream: null,
+        capturedPhoto: null,
+        isPoseVerified: false,
+        livenessStatusText: 'Arahkan wajah tegak lurus ke kamera',
+
+        // Modals
+        showCorrectionModal: false,
+        showFaceRegisterModal: false,
+        showLeaveModal: false,
+        showKasbonModal: false,
+
+        init() {
+            this.updateClock();
+            setInterval(() => this.updateClock(), 1000);
+            this.$nextTick(() => {
+                this.initMap();
+                this.trackLocation();
+            });
+        },
+
+        updateClock() {
+            const now = new Date();
+            this.currentTime = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) + ' WIB';
+            this.currentDate = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        },
+
+        initMap() {
+            const mapContainer = document.getElementById('portalGeofenceMap');
+            if (!mapContainer || typeof L === 'undefined') return;
+
+            if (this.map) {
+                this.map.remove();
+                this.map = null;
+            }
+
+            this.map = L.map('portalGeofenceMap', {
+                center: [this.targetLat, this.targetLng],
+                zoom: 16,
+                zoomControl: false
+            });
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(this.map);
+
+            L.control.zoom({ position: 'bottomright' }).addTo(this.map);
+
+            // Radius Circle
+            this.circleMarker = L.circle([this.targetLat, this.targetLng], {
+                color: '#0284c7',
+                fillColor: '#38bdf8',
+                fillOpacity: 0.2,
+                radius: this.allowedRadius
+            }).addTo(this.map);
+
+            // Target Office Marker
+            L.marker([this.targetLat, this.targetLng]).addTo(this.map)
+                .bindPopup('<b>' + this.locationName + '</b><br>Radius Geofence: ' + this.allowedRadius + ' meter')
+                .openPopup();
+        },
+
+        trackLocation() {
+            if (navigator.geolocation) {
+                this.gpsTracking = true;
+                this.gpsStatus = 'Mengunci koordinat satelit GPS...';
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        this.userLat = pos.coords.latitude;
+                        this.userLng = pos.coords.longitude;
+                        this.gpsTracking = false;
+                        this.calculateDistance();
+                        this.updateUserMarker();
+                    },
+                    (err) => {
+                        this.gpsTracking = false;
+                        this.gpsStatus = 'Izin GPS ditolak atau tidak ada sinyal. Gunakan titik default kantor.';
+                        this.calculateDistance();
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
+            } else {
+                this.gpsStatus = 'Browser tidak mendukung Geolocation GPS.';
+            }
+        },
+
+        calculateDistance() {
+            const R = 6371e3; // meters
+            const phi1 = this.userLat * Math.PI / 180;
+            const phi2 = this.targetLat * Math.PI / 180;
+            const deltaPhi = (this.targetLat - this.userLat) * Math.PI / 180;
+            const deltaLambda = (this.targetLng - this.userLng) * Math.PI / 180;
+
+            const a = Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
+                      Math.cos(phi1) * Math.cos(phi2) *
+                      Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            this.distanceM = Math.round(R * c);
+
+            this.isInsideGeofence = (this.distanceM <= this.allowedRadius);
+            this.gpsStatus = this.isInsideGeofence 
+                ? 'Valid: Berada di dalam radius ' + this.locationName + ' (' + this.distanceM + 'm)'
+                : 'Peringatan: Berada ' + this.distanceM + 'm dari titik geofence (Radius max ' + this.allowedRadius + 'm)';
+        },
+
+        updateUserMarker() {
+            if (!this.map || typeof L === 'undefined') return;
+
+            if (this.userMarker) {
+                this.userMarker.setLatLng([this.userLat, this.userLng]);
+            } else {
+                const userIcon = L.divIcon({
+                    className: 'custom-user-dot',
+                    html: '<div class="custom-user-dot-pulse"></div><div class="custom-user-dot-core"></div>',
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
+                });
+                this.userMarker = L.marker([this.userLat, this.userLng], { icon: userIcon }).addTo(this.map);
+            }
+
+            try {
+                const bounds = L.latLngBounds([
+                    [this.userLat, this.userLng],
+                    [this.targetLat, this.targetLng]
+                ]);
+                this.map.fitBounds(bounds, { padding: [50, 50], maxZoom: 17 });
+            } catch(e) {}
+        },
+
+        switchLocation(loc) {
+            this.selectedLocationId = loc.id;
+            this.targetLat = parseFloat(loc.lat);
+            this.targetLng = parseFloat(loc.lng);
+            this.allowedRadius = parseInt(loc.radius_m) || 250;
+            this.locationName = loc.name;
+            this.initMap();
+            this.calculateDistance();
+            this.updateUserMarker();
+        },
+
+        startCamera(isRegister = false) {
+            this.cameraActive = true;
+            this.capturedPhoto = null;
+            this.isPoseVerified = false;
+            this.livenessStatusText = 'Mendeteksi kontur wajah & anti-spoofing...';
+
+            navigator.mediaDevices.getUserMedia({
+                video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' }
+            })
+            .then(stream => {
+                this.cameraStream = stream;
+                setTimeout(() => {
+                    const videoId = isRegister ? 'portalVideoReg' : 'portalVideo';
+                    const video = document.getElementById(videoId) || document.getElementById('portalVideo');
+                    if (video) {
+                        video.srcObject = stream;
+                        video.play();
+                    }
+                }, 100);
+
+                setTimeout(() => {
+                    this.isPoseVerified = true;
+                    this.livenessStatusText = 'Wajah Sah Terverifikasi (Skor: 94%)';
+                }, 1200);
+            })
+            .catch(err => {
+                this.livenessStatusText = 'Kamera tidak dapat diakses: ' + err.message;
+            });
+        },
+
+        stopCamera() {
+            if (this.cameraStream) {
+                this.cameraStream.getTracks().forEach(t => t.stop());
+                this.cameraStream = null;
+            }
+            this.cameraActive = false;
+        },
+
+        snapPhoto() {
+            const video = document.getElementById('portalVideo') || document.getElementById('portalVideoReg');
+            const canvas = document.getElementById('portalCanvas') || document.getElementById('portalCanvasReg');
+            if (video && canvas) {
+                canvas.width = video.videoWidth || 640;
+                canvas.height = video.videoHeight || 480;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                this.capturedPhoto = canvas.toDataURL('image/jpeg', 0.85);
+                this.stopCamera();
+            }
+        }
+    };
+};
+
+document.addEventListener('alpine:init', () => {
+    if (window.Alpine && typeof window.Alpine.data === 'function') {
+        window.Alpine.data('staffPortalManager', window.staffPortalManager);
+    }
+});
+if (window.Alpine && typeof window.Alpine.data === 'function') {
+    window.Alpine.data('staffPortalManager', window.staffPortalManager);
+}
+</script>
+
 <div class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12"
      x-data="staffPortalManager({
         activeTab: '{{ $activeTab ?? 'attendance' }}',
@@ -891,228 +1120,4 @@
 
 @push('scripts')
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script>
-function staffPortalManager(config) {
-    return {
-        activeTab: config.activeTab || 'attendance',
-        clockInRoute: config.clockInRoute,
-        clockOutRoute: config.clockOutRoute,
-        faceRegisterRoute: config.faceRegisterRoute,
-        currentTime: '',
-        currentDate: '',
-        userLat: config.userLat,
-        userLng: config.userLng,
-        selectedLocationId: config.selectedLocationId,
-        targetLat: config.targetLat,
-        targetLng: config.targetLng,
-        allowedRadius: config.allowedRadius,
-        locationName: config.locationName,
-        distanceM: 0,
-        isInsideGeofence: true,
-        gpsTracking: false,
-        gpsStatus: 'Mencari sinyal GPS akurat...',
-        map: null,
-        userMarker: null,
-        circleMarker: null,
-
-        // Live Camera & Liveness
-        cameraActive: false,
-        cameraStream: null,
-        capturedPhoto: null,
-        isPoseVerified: false,
-        livenessStatusText: 'Arahkan wajah tegak lurus ke kamera',
-
-        // Modals
-        showCorrectionModal: false,
-        showFaceRegisterModal: false,
-        showLeaveModal: false,
-        showKasbonModal: false,
-
-        init() {
-            this.updateClock();
-            setInterval(() => this.updateClock(), 1000);
-            this.$nextTick(() => {
-                this.initMap();
-                this.trackLocation();
-            });
-        },
-
-        updateClock() {
-            const now = new Date();
-            this.currentTime = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) + ' WIB';
-            this.currentDate = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-        },
-
-        initMap() {
-            const mapContainer = document.getElementById('portalGeofenceMap');
-            if (!mapContainer || typeof L === 'undefined') return;
-
-            if (this.map) {
-                this.map.remove();
-                this.map = null;
-            }
-
-            this.map = L.map('portalGeofenceMap', {
-                center: [this.targetLat, this.targetLng],
-                zoom: 16,
-                zoomControl: false
-            });
-
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors',
-                maxZoom: 19
-            }).addTo(this.map);
-
-            L.control.zoom({ position: 'bottomright' }).addTo(this.map);
-
-            // Radius Circle
-            this.circleMarker = L.circle([this.targetLat, this.targetLng], {
-                color: '#0284c7',
-                fillColor: '#38bdf8',
-                fillOpacity: 0.2,
-                radius: this.allowedRadius
-            }).addTo(this.map);
-
-            // Target Office Marker
-            L.marker([this.targetLat, this.targetLng]).addTo(this.map)
-                .bindPopup('<b>' + this.locationName + '</b><br>Radius Geofence: ' + this.allowedRadius + ' meter')
-                .openPopup();
-        },
-
-        trackLocation() {
-            if (navigator.geolocation) {
-                this.gpsTracking = true;
-                this.gpsStatus = 'Mengunci koordinat satelit GPS...';
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                        this.userLat = pos.coords.latitude;
-                        this.userLng = pos.coords.longitude;
-                        this.gpsTracking = false;
-                        this.calculateDistance();
-                        this.updateUserMarker();
-                    },
-                    (err) => {
-                        this.gpsTracking = false;
-                        this.gpsStatus = 'Izin GPS ditolak atau tidak ada sinyal. Gunakan titik default kantor.';
-                        this.calculateDistance();
-                    },
-                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-                );
-            } else {
-                this.gpsStatus = 'Browser tidak mendukung Geolocation GPS.';
-            }
-        },
-
-        calculateDistance() {
-            const R = 6371e3; // meters
-            const phi1 = this.userLat * Math.PI / 180;
-            const phi2 = this.targetLat * Math.PI / 180;
-            const deltaPhi = (this.targetLat - this.userLat) * Math.PI / 180;
-            const deltaLambda = (this.targetLng - this.userLng) * Math.PI / 180;
-
-            const a = Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
-                      Math.cos(phi1) * Math.cos(phi2) *
-                      Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            this.distanceM = Math.round(R * c);
-
-            this.isInsideGeofence = (this.distanceM <= this.allowedRadius);
-            this.gpsStatus = this.isInsideGeofence 
-                ? 'Valid: Berada di dalam radius ' + this.locationName + ' (' + this.distanceM + 'm)'
-                : 'Peringatan: Berada ' + this.distanceM + 'm dari titik geofence (Radius max ' + this.allowedRadius + 'm)';
-        },
-
-        updateUserMarker() {
-            if (!this.map || typeof L === 'undefined') return;
-
-            if (this.userMarker) {
-                this.userMarker.setLatLng([this.userLat, this.userLng]);
-            } else {
-                const userIcon = L.divIcon({
-                    className: 'custom-user-dot',
-                    html: '<div class="custom-user-dot-pulse"></div><div class="custom-user-dot-core"></div>',
-                    iconSize: [24, 24],
-                    iconAnchor: [12, 12]
-                });
-                this.userMarker = L.marker([this.userLat, this.userLng], { icon: userIcon }).addTo(this.map);
-            }
-
-            try {
-                const bounds = L.latLngBounds([
-                    [this.userLat, this.userLng],
-                    [this.targetLat, this.targetLng]
-                ]);
-                this.map.fitBounds(bounds, { padding: [50, 50], maxZoom: 17 });
-            } catch(e) {}
-        },
-
-        switchLocation(loc) {
-            this.selectedLocationId = loc.id;
-            this.targetLat = parseFloat(loc.lat);
-            this.targetLng = parseFloat(loc.lng);
-            this.allowedRadius = parseInt(loc.radius_m) || 250;
-            this.locationName = loc.name;
-            this.initMap();
-            this.calculateDistance();
-            this.updateUserMarker();
-        },
-
-        startCamera(isRegister = false) {
-            this.cameraActive = true;
-            this.capturedPhoto = null;
-            this.isPoseVerified = false;
-            this.livenessStatusText = 'Mendeteksi kontur wajah & anti-spoofing...';
-
-            navigator.mediaDevices.getUserMedia({
-                video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' }
-            })
-            .then(stream => {
-                this.cameraStream = stream;
-                setTimeout(() => {
-                    const videoId = isRegister ? 'portalVideoReg' : 'portalVideo';
-                    const video = document.getElementById(videoId) || document.getElementById('portalVideo');
-                    if (video) {
-                        video.srcObject = stream;
-                        video.play();
-                    }
-                }, 100);
-
-                setTimeout(() => {
-                    this.isPoseVerified = true;
-                    this.livenessStatusText = 'Wajah Sah Terverifikasi (Skor: 94%)';
-                }, 1200);
-            })
-            .catch(err => {
-                this.livenessStatusText = 'Kamera tidak dapat diakses: ' + err.message;
-            });
-        },
-
-        stopCamera() {
-            if (this.cameraStream) {
-                this.cameraStream.getTracks().forEach(t => t.stop());
-                this.cameraStream = null;
-            }
-            this.cameraActive = false;
-        },
-
-        snapPhoto() {
-            const video = document.getElementById('portalVideo') || document.getElementById('portalVideoReg');
-            const canvas = document.getElementById('portalCanvas') || document.getElementById('portalCanvasReg');
-            if (video && canvas) {
-                canvas.width = video.videoWidth || 640;
-                canvas.height = video.videoHeight || 480;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                this.capturedPhoto = canvas.toDataURL('image/jpeg', 0.85);
-                this.stopCamera();
-            }
-        }
-    };
-}
-
-window.staffPortalManager = staffPortalManager;
-document.addEventListener('alpine:init', () => {
-    Alpine.data('staffPortalManager', staffPortalManager);
-});
-</script>
 @endpush

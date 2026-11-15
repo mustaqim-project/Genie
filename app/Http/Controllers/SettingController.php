@@ -32,25 +32,13 @@ class SettingController extends Controller implements HasMiddleware
         $config = config('ceisa');
         $logs = CeisaApiLog::latest()->take(10)->get();
 
-        $waSetting = \App\Models\WhatsappSetting::first() ?? \App\Models\WhatsappSetting::create([
-            'waba_id' => '104928374829103',
-            'phone_number_id' => '109283746501928',
-            'display_phone_number' => '+62 812-9000-8888',
-            'verified_name' => 'PT AGUNG TRANS LOGISTICS',
-            'quality_rating' => 'GREEN',
-            'messaging_limit_tier' => 'TIER_10K',
-            'is_connected' => true,
-            'auto_send_sppb' => true,
-            'auto_send_npe' => true,
-            'auto_send_do' => true,
-            'auto_send_billing' => true,
-        ]);
+        $waSetting = \App\Models\WhatsappSetting::current();
 
         $socialAccounts = \App\Models\SocialMediaAccount::all();
         $kantorList = config('ceisa.kantor_pabean', []);
         $settings = \App\Models\SystemSetting::getAllGrouped();
 
-        return view('setting.index', compact('users', 'roles', 'permissions', 'config', 'logs', 'waSetting', 'socialAccounts', 'kantorList', 'settings'));
+        return view('settings.index', compact('users', 'roles', 'permissions', 'config', 'logs', 'waSetting', 'socialAccounts', 'kantorList', 'settings'));
     }
 
     public function storeUser(Request $request)
@@ -349,7 +337,7 @@ class SettingController extends Controller implements HasMiddleware
     public function updateSystemParameters(Request $request)
     {
         $validated = $request->validate([
-            'group' => 'required|string|in:ceisa,accounting,shipment,tax,crm,company',
+            'group' => 'required|string|in:ceisa,accounting,shipment,tax,crm,company,template,document,security',
             'key' => 'required|string',
             'value' => 'required',
             'description' => 'nullable|string',

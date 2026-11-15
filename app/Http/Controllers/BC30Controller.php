@@ -132,7 +132,10 @@ class BC30Controller extends Controller implements HasMiddleware
             'non_lartas_docs' => $nonLartasDocsCount,
         ];
 
-        return view('bc30.index', compact('documents', 'stats'));
+        $clients = \App\Models\Client::orderBy('name')->get();
+        $vendors = \App\Models\ShippingVendor::orderBy('name')->get();
+
+        return view('bc30.index', compact('documents', 'stats', 'clients', 'vendors'));
     }
 
     public function create(Request $request)
@@ -168,7 +171,10 @@ class BC30Controller extends Controller implements HasMiddleware
                 ]
             ];
 
-        return view('bc30.create', compact('defaultNomorAju', 'kantorList', 'shipments', 'selectedShipment', 'activeKurs', 'itemList'));
+        $clients = \App\Models\Client::orderBy('name')->get();
+        $vendors = \App\Models\ShippingVendor::orderBy('name')->get();
+
+        return view('bc30.create', compact('defaultNomorAju', 'kantorList', 'shipments', 'selectedShipment', 'activeKurs', 'itemList', 'clients', 'vendors'));
     }
 
     public function store(Request $request)

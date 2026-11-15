@@ -175,6 +175,31 @@ class SystemSettingSeeder extends Seeder
                     'kode_kantor_default' => '040300',
                 ],
             ],
+
+            // 11. Template Surat Permohonan Rilis Delivery Order (DO) Pelayaran
+            [
+                'key' => 'template_do_request',
+                'group' => 'template',
+                'description' => 'Template kop, perihal, dan kalimat surat resmi permohonan rilis DO pelayaran',
+                'value' => [
+                    'company_name' => 'PT AGUNG TRANS SOLUSINDO',
+                    'company_subtitle' => "International Freight Forwarder & Customs Brokerage (PPJK)\nJl. Enggano Raya No. 45, Tanjung Priok, Jakarta Utara 14310 | Telp: (021) 4390-8821\nEmail: do-desk@agungtrans.co.id | NPWP: 03.882.910.4-041.000",
+                    'letter_prefix' => 'ATS/DO-REQ',
+                    'lampiran' => 'Copy Bill of Lading & Bukti Pembayaran Resmi',
+                    'perihal' => 'Permohonan Penerbitan dan Rilis Delivery Order (DO) Online',
+                    'salam_pembuka' => 'Dengan hormat,',
+                    'paragraf_pembuka' => 'Sehubungan dengan kedatangan sarana pengangkut kargo impor di Pelabuhan Tanjung Priok, bersama ini kami bertindak atas kuasa pemilik barang (Consignee) mengajukan permohonan penerbitan dan rilis berkas Delivery Order (DO) atas pengiriman dengan rincian data sebagai berikut:',
+                    'lampiran_items' => [
+                        'Salinan (Copy) Bill of Lading (B/L) yang telah di-endorse sah oleh importir.',
+                        'Bukti transfer pelunasan biaya lokal pelayaran (Ocean Freight, THC, DO Admin Fee).',
+                        'Surat Kuasa Pengurusan DO dari Consignee kepada perusahaan kami.',
+                    ],
+                    'instruksi_rilis' => 'Mohon berkas Delivery Order (DO) tersebut dapat segera dirilis melalui sistem DO Online / portal pelayaran atau dikirimkan ke alamat email operasional kami: do-desk@agungtrans.co.id.',
+                    'paragraf_penutup' => 'Demikian surat permohonan ini kami sampaikan. Atas kerja sama dan bantuan yang diberikan, kami ucapkan terima kasih.',
+                    'signer_name' => 'RENDI SAPUTRA',
+                    'signer_title' => 'Head of Shipping Line & DO Clearance',
+                ],
+            ],
         ];
 
         foreach ($settings as $setting) {

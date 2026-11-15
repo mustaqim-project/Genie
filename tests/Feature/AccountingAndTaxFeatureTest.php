@@ -49,11 +49,12 @@ class AccountingAndTaxFeatureTest extends TestCase
     {
         // Kunci periode buku bulan Januari 2026
         AccountingPeriod::create([
-            'year' => 2026,
-            'month' => 1,
-            'status' => 'CLOSED',
+            'name' => 'Periode Januari 2026',
+            'start_date' => '2026-01-01',
+            'end_date' => '2026-01-31',
+            'is_closed' => true,
             'closed_at' => now(),
-            'notes' => 'Periode audit Januari dikunci',
+            'closing_notes' => 'Periode audit Januari dikunci',
         ]);
 
         $this->assertTrue(AccountingPeriod::isDateLocked('2026-01-15'));
@@ -123,9 +124,15 @@ class AccountingAndTaxFeatureTest extends TestCase
         $similarity = $bioService->calculateCosineSimilarity($vecA, $vecB);
         $this->assertEqualsWithDelta(1.0, $similarity, 0.001);
 
-        // Uji vektor ortogonal / berlawanan
+        // Uji vektor berlawanan arah -> Cosine similarity = -1.0
         $vecOpposite = array_fill(0, 128, -0.5);
         $simOpposite = $bioService->calculateCosineSimilarity($vecA, $vecOpposite);
-        $this->assertEqualsWithDelta(0.0, $simOpposite, 0.001);
+        $this->assertEqualsWithDelta(-1.0, $simOpposite, 0.001);
+
+        // Uji vektor ortogonal (tegak lurus) -> Cosine similarity = 0.0
+        $vecOrthoA = array_merge(array_fill(0, 64, 1.0), array_fill(0, 64, 0.0));
+        $vecOrthoB = array_merge(array_fill(0, 64, 0.0), array_fill(0, 64, 1.0));
+        $simOrtho = $bioService->calculateCosineSimilarity($vecOrthoA, $vecOrthoB);
+        $this->assertEqualsWithDelta(0.0, $simOrtho, 0.001);
     }
 }

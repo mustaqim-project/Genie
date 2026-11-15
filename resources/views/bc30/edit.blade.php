@@ -3,6 +3,98 @@
 @section('title', 'Edit Dokumen BC 3.0 (PEB) - ' . $bc30->nomor_aju)
 
 @section('content')
+<script>
+window.bc30EditManager = function bc30EditManager() {
+    return {
+        valuta: '{{ $valuta }}',
+        ndbmKurs: {{ $kurs }},
+        fob: {{ $fobVal }},
+        items: [
+            @if(!empty($barangList))
+                @foreach($barangList as $b)
+                    {
+                        hs_code: '{{ $b['kodeHs'] ?? $b['hs_code'] ?? '09011110' }}',
+                        uraian: '{{ addslashes($b['uraian'] ?? $b['uraianBarang'] ?? '') }}',
+                        merk: '{{ addslashes($b['merk'] ?? '') }}',
+                        jumlah: {{ $b['jumlahKemasan'] ?? $b['jumlah'] ?? 100 }},
+                        kemasan: '{{ $b['jenisKemasan'] ?? $b['kemasan'] ?? 'BAG' }}',
+                        fob: {{ (float) ($b['fob'] ?? $b['cif'] ?? 1000) }},
+                        tarif_bk: {{ (float) ($b['tarifBk'] ?? $b['tarif_bk'] ?? 0.0) }}
+                    },
+                @endforeach
+            @else
+                {
+                    hs_code: '09011110',
+                    uraian: 'BIJI KOPI ARABIKA GAYO GRADE 1 (EXPORT QUALITY)',
+                    merk: 'GAYO HIGHLAND GRADE 1',
+                    jumlah: 200,
+                    kemasan: 'BAG',
+                    fob: {{ $fobVal }},
+                    tarif_bk: 0.0
+                }
+            @endif
+        ],
+
+        addItem() {
+            this.items.push({
+                hs_code: '09011110',
+                uraian: 'KOMODITAS EKSPOR INDONESIA',
+                merk: '',
+                jumlah: 1,
+                kemasan: 'BAG',
+                fob: 100.0,
+                tarif_bk: 0.0
+            });
+            this.recalcFobFromItems();
+        },
+
+        removeItem(index) {
+            if (this.items.length > 1) {
+                this.items.splice(index, 1);
+                this.recalcFobFromItems();
+            }
+        },
+
+        recalcFobFromItems() {
+            let total = 0;
+            this.items.forEach(it => {
+                total += parseFloat(it.fob || 0);
+            });
+            if (total > 0) {
+                this.fob = Math.round(total * 100) / 100;
+            }
+        },
+
+        formatNumber(num) {
+            return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num);
+        },
+
+        async updateKurs() {
+            try {
+                const res = await fetch('/ceisa/kurs/' + this.valuta);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.nilai_kurs) {
+                        this.ndbmKurs = parseFloat(data.nilai_kurs);
+                    }
+                }
+            } catch (err) {
+                console.warn('Gagal ambil kurs terkini:', err);
+            }
+        }
+    };
+};
+
+document.addEventListener('alpine:init', () => {
+    if (window.Alpine && typeof window.Alpine.data === 'function') {
+        window.Alpine.data('bc30EditManager', window.bc30EditManager);
+    }
+});
+if (window.Alpine && typeof window.Alpine.data === 'function') {
+    window.Alpine.data('bc30EditManager', window.bc30EditManager);
+}
+</script>
+
 <div class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12" x-data="bc30EditManager()">
     <!-- Breadcrumb -->
     <x-breadcrumb :items="[
@@ -404,89 +496,4 @@
         </div>
     </form>
 </div>
-
-@push('scripts')
-<script>
-function bc30EditManager() {
-    return {
-        valuta: '{{ $valuta }}',
-        ndbmKurs: {{ $kurs }},
-        fob: {{ $fobVal }},
-        items: [
-            @if(!empty($barangList))
-                @foreach($barangList as $b)
-                    {
-                        hs_code: '{{ $b['kodeHs'] ?? $b['hs_code'] ?? '09011110' }}',
-                        uraian: '{{ addslashes($b['uraian'] ?? $b['uraianBarang'] ?? '') }}',
-                        merk: '{{ addslashes($b['merk'] ?? '') }}',
-                        jumlah: {{ $b['jumlahKemasan'] ?? $b['jumlah'] ?? 100 }},
-                        kemasan: '{{ $b['jenisKemasan'] ?? $b['kemasan'] ?? 'BAG' }}',
-                        fob: {{ (float) ($b['fob'] ?? $b['cif'] ?? 1000) }},
-                        tarif_bk: {{ (float) ($b['tarifBk'] ?? $b['tarif_bk'] ?? 0.0) }}
-                    },
-                @endforeach
-            @else
-                {
-                    hs_code: '09011110',
-                    uraian: 'BIJI KOPI ARABIKA GAYO GRADE 1 (EXPORT QUALITY)',
-                    merk: 'GAYO HIGHLAND GRADE 1',
-                    jumlah: 200,
-                    kemasan: 'BAG',
-                    fob: {{ $fobVal }},
-                    tarif_bk: 0.0
-                }
-            @endif
-        ],
-
-        addItem() {
-            this.items.push({
-                hs_code: '09011110',
-                uraian: 'KOMODITAS EKSPOR INDONESIA',
-                merk: '',
-                jumlah: 1,
-                kemasan: 'BAG',
-                fob: 100.0,
-                tarif_bk: 0.0
-            });
-            this.recalcFobFromItems();
-        },
-
-        removeItem(index) {
-            if (this.items.length > 1) {
-                this.items.splice(index, 1);
-                this.recalcFobFromItems();
-            }
-        },
-
-        recalcFobFromItems() {
-            let total = 0;
-            this.items.forEach(it => {
-                total += parseFloat(it.fob || 0);
-            });
-            if (total > 0) {
-                this.fob = Math.round(total * 100) / 100;
-            }
-        },
-
-        formatNumber(num) {
-            return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num);
-        },
-
-        async updateKurs() {
-            try {
-                const res = await fetch('/ceisa/kurs/' + this.valuta);
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.nilai_kurs) {
-                        this.ndbmKurs = parseFloat(data.nilai_kurs);
-                    }
-                }
-            } catch (err) {
-                console.warn('Gagal ambil kurs terkini:', err);
-            }
-        }
-    };
-}
-</script>
-@endpush
 @endsection

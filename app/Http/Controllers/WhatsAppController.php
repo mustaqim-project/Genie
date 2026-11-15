@@ -30,22 +30,7 @@ class WhatsAppController extends Controller implements HasMiddleware
     {
         $currentTab = $request->query('tab', 'broadcasts');
 
-        $waSetting = WhatsappSetting::first();
-        if (!$waSetting) {
-            $waSetting = WhatsappSetting::create([
-                'waba_id' => '104928374829103',
-                'phone_number_id' => '109283746501928',
-                'display_phone_number' => '+62 812-9000-8888',
-                'verified_name' => 'PT AGUNG TRANS LOGISTICS',
-                'quality_rating' => 'GREEN',
-                'messaging_limit_tier' => 'TIER_10K',
-                'is_connected' => true,
-                'auto_send_sppb' => true,
-                'auto_send_npe' => true,
-                'auto_send_do' => true,
-                'auto_send_billing' => true,
-            ]);
-        }
+        $waSetting = WhatsappSetting::current();
 
         $broadcasts = WhatsappBroadcastCampaign::with('recipients')->latest()->paginate(10, ['*'], 'broadcast_page');
         $templates = CrmTemplate::latest()->get();

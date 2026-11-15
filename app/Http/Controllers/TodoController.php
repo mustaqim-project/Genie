@@ -60,7 +60,7 @@ class TodoController extends Controller implements HasMiddleware
         ];
 
         $users = User::where('is_active', true)->orderBy('name')->get();
-        $shipments = Shipment::where('status', 'ACTIVE')->orderBy('nomor_aju')->limit(50)->get();
+        $shipments = Shipment::with('ceisaDocument')->whereNull('closed_at')->orderBy('project_no')->limit(50)->get();
 
         return view('core.todos.index', compact('todos', 'kanban', 'users', 'shipments', 'viewScope'));
     }

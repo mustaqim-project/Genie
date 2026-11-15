@@ -317,7 +317,7 @@ Route::middleware('auth')->group(function () {
     // ==========================================
     // Core Bisnis End-to-End Workflow Routes
     // ==========================================
-    // F15 & F16: Import Massal Cerdas & Lompat Tahap Historis
+    // Import Massal Cerdas & Lompat Tahap Operasional
     Route::prefix('core/import')->name('core.import.')->group(function () {
         Route::get('/', [\App\Http\Controllers\BatchImportController::class, 'index'])->name('index');
         Route::post('/store', [\App\Http\Controllers\BatchImportController::class, 'store'])->name('store');
@@ -327,6 +327,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/doc/{docId}', [\App\Http\Controllers\BatchImportController::class, 'destroyDocument'])->name('doc.destroy');
         Route::post('/fields/{fieldId}/update', [\App\Http\Controllers\BatchImportController::class, 'updateField'])->name('fields.update');
         Route::post('/apply/{docId}', [\App\Http\Controllers\BatchImportController::class, 'applyToShipment'])->name('apply');
+        Route::post('/doc/{docId}/apply', [\App\Http\Controllers\BatchImportController::class, 'applyToShipment'])->name('doc.apply');
         Route::post('/jump/{shipmentId}', [\App\Http\Controllers\BatchImportController::class, 'jumpStage'])->name('jump');
     });
 

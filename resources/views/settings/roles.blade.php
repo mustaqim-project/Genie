@@ -3,6 +3,93 @@
 @section('title', 'Manajemen Peran & Hak Akses (RBAC)')
 
 @section('content')
+<script>
+window.roleCockpitApp = function roleCockpitApp() {
+    return {
+        activeTab: 'roles',
+        showGuide: true,
+        showCreateModal: false,
+        showMemberRoleModal: false,
+        showAddMemberModal: false,
+        
+        editingRole: null,
+        editFormAction: '{{ route('settings.roles.store') }}',
+        formRoleName: '',
+        formRoleCode: '',
+        formRoleDesc: '',
+        
+        searchPermission: '',
+        selectedPermissions: [],
+        
+        editingMember: null,
+        memberRoleAction: '',
+        memberSelectedRoleId: '',
+
+        openCreateModal() {
+            this.editingRole = null;
+            this.editFormAction = '{{ route('settings.roles.store') }}';
+            this.formRoleName = '';
+            this.formRoleCode = '';
+            this.formRoleDesc = '';
+            this.selectedPermissions = [];
+            this.showCreateModal = true;
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
+        openEditModal(role, actionUrl, permIds) {
+            this.editingRole = role;
+            this.editFormAction = actionUrl;
+            this.formRoleName = role.name;
+            this.formRoleCode = role.code;
+            this.formRoleDesc = role.description || '';
+            this.selectedPermissions = permIds.map(String);
+            this.showCreateModal = true;
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
+        openChangeRoleModal(member, actionUrl, currentRoleId) {
+            this.editingMember = member;
+            this.memberRoleAction = actionUrl;
+            this.memberSelectedRoleId = currentRoleId;
+            this.showMemberRoleModal = true;
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
+        toggleSinglePermission(id) {
+            const strId = String(id);
+            if (this.selectedPermissions.includes(strId)) {
+                this.selectedPermissions = this.selectedPermissions.filter(i => i !== strId);
+            } else {
+                this.selectedPermissions.push(strId);
+            }
+        },
+
+        toggleCategory(categoryIds) {
+            const strIds = categoryIds.map(String);
+            const allSelected = strIds.every(id => this.selectedPermissions.includes(id));
+            if (allSelected) {
+                this.selectedPermissions = this.selectedPermissions.filter(id => !strIds.includes(id));
+            } else {
+                strIds.forEach(id => {
+                    if (!this.selectedPermissions.includes(id)) {
+                        this.selectedPermissions.push(id);
+                    }
+                });
+            }
+        }
+    };
+};
+
+document.addEventListener('alpine:init', () => {
+    if (window.Alpine && typeof window.Alpine.data === 'function') {
+        window.Alpine.data('roleCockpitApp', window.roleCockpitApp);
+    }
+});
+if (window.Alpine && typeof window.Alpine.data === 'function') {
+    window.Alpine.data('roleCockpitApp', window.roleCockpitApp);
+}
+</script>
+
 <div class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12" x-data="roleCockpitApp()">
 
     <!-- ===================================================== -->
@@ -663,84 +750,4 @@
     </div>
 
 </div>
-
-@push('scripts')
-<script>
-function roleCockpitApp() {
-    return {
-        activeTab: 'roles',
-        showGuide: true,
-        showCreateModal: false,
-        showMemberRoleModal: false,
-        showAddMemberModal: false,
-        
-        editingRole: null,
-        editFormAction: '{{ route('settings.roles.store') }}',
-        formRoleName: '',
-        formRoleCode: '',
-        formRoleDesc: '',
-        
-        searchPermission: '',
-        selectedPermissions: [],
-        
-        editingMember: null,
-        memberRoleAction: '',
-        memberSelectedRoleId: '',
-
-        openCreateModal() {
-            this.editingRole = null;
-            this.editFormAction = '{{ route('settings.roles.store') }}';
-            this.formRoleName = '';
-            this.formRoleCode = '';
-            this.formRoleDesc = '';
-            this.selectedPermissions = [];
-            this.showCreateModal = true;
-            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
-        },
-
-        openEditModal(role, actionUrl, permIds) {
-            this.editingRole = role;
-            this.editFormAction = actionUrl;
-            this.formRoleName = role.name;
-            this.formRoleCode = role.code;
-            this.formRoleDesc = role.description || '';
-            this.selectedPermissions = permIds.map(String);
-            this.showCreateModal = true;
-            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
-        },
-
-        openChangeRoleModal(member, actionUrl, currentRoleId) {
-            this.editingMember = member;
-            this.memberRoleAction = actionUrl;
-            this.memberSelectedRoleId = currentRoleId;
-            this.showMemberRoleModal = true;
-            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
-        },
-
-        toggleSinglePermission(id) {
-            const strId = String(id);
-            if (this.selectedPermissions.includes(strId)) {
-                this.selectedPermissions = this.selectedPermissions.filter(i => i !== strId);
-            } else {
-                this.selectedPermissions.push(strId);
-            }
-        },
-
-        toggleCategory(categoryIds) {
-            const strIds = categoryIds.map(String);
-            const allSelected = strIds.every(id => this.selectedPermissions.includes(id));
-            if (allSelected) {
-                this.selectedPermissions = this.selectedPermissions.filter(id => !strIds.includes(id));
-            } else {
-                strIds.forEach(id => {
-                    if (!this.selectedPermissions.includes(id)) {
-                        this.selectedPermissions.push(id);
-                    }
-                });
-            }
-        }
-    };
-}
-</script>
-@endpush
 @endsection

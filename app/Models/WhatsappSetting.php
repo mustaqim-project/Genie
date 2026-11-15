@@ -36,4 +36,27 @@ class WhatsappSetting extends Model
         'auto_send_do' => 'boolean',
         'auto_send_billing' => 'boolean',
     ];
+
+    /**
+     * Pengambilan Pengaturan Terpusat (AUDIT-MED-04 Centralized Settings)
+     */
+    public static function current(): self
+    {
+        return self::firstOrCreate(
+            [],
+            [
+                'display_phone_number' => config('services.whatsapp.display_phone', '+62 812-9000-8888'),
+                'verified_name' => config('services.whatsapp.verified_name', 'PT AGUNG TRANS LOGISTICS'),
+                'phone_number_id' => config('services.whatsapp.phone_number_id', '109283746501928'),
+                'waba_id' => config('services.whatsapp.waba_id', '104928374829103'),
+                'quality_rating' => 'GREEN',
+                'messaging_limit_tier' => 'TIER_10K',
+                'is_connected' => false,
+                'auto_send_sppb' => true,
+                'auto_send_npe' => true,
+                'auto_send_do' => true,
+                'auto_send_billing' => true,
+            ]
+        );
+    }
 }

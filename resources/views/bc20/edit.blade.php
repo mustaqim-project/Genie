@@ -3,401 +3,6 @@
 @section('title', 'Wizard Edit BC 2.0 (PIB) - ' . $bc20->nomor_aju)
 
 @section('content')
-<div class="max-w-[1600px] mx-auto px-4 sm:px-6 space-y-4 pt-4 pb-28" x-data="bc20WizardManager()">
-    <!-- Top Compact Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#1C1C1E] rounded-2xl px-5 py-3.5 border border-black/[0.06] dark:border-white/[0.08] shadow-xs">
-        <div class="flex flex-wrap items-center gap-3">
-            <a href="{{ route('bc20.show', $bc20->id) }}" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-slate-200 transition-colors" title="Kembali ke Ringkasan BC 2.0">
-                <i data-lucide="arrow-left" class="w-4 h-4"></i>
-            </a>
-            <div>
-                <div class="flex flex-wrap items-center gap-2">
-                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#0284c7]/10 text-[#0284c7] border border-[#0284c7]/20">BC 2.0 (PIB IMPOR)</span>
-                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold {{ $bc20->status_badge_class }}">{{ $bc20->status }}</span>
-                    @if($shipment)
-                        <a href="{{ route('core.document.show', $shipment->id) }}" class="text-[11px] font-mono font-bold text-[#0284c7] hover:underline">
-                            {{ $shipment->project_no }}
-                        </a>
-                    @endif
-                </div>
-                <h1 class="text-base sm:text-lg font-bold font-mono text-slate-900 dark:text-white tracking-tight mt-0.5">
-                    {{ $bc20->nomor_aju }}
-                </h1>
-            </div>
-        </div>
-
-        <div class="flex items-center gap-1.5">
-            <!-- Toast / Save Status -->
-            <template x-if="saveToast.message">
-                <div :class="saveToast.type === 'error' ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'"
-                     class="px-2.5 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5">
-                    <span x-text="saveToast.message"></span>
-                </div>
-            </template>
-
-            <!-- Tautan Terpadu ke Cockpit Tracking Dokumen (11 Pos Operasional) -->
-            <a href="{{ route('core.tracking.index', ['mode' => 'tracking_dok', 'search' => $shipment?->project_no ?? $bc20->nomor_aju]) }}"
-               target="_blank"
-               class="w-9 h-9 rounded-xl border border-sky-200 dark:border-sky-800 bg-sky-50/80 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 text-[#0284c7] inline-flex items-center justify-center transition-colors cursor-pointer shadow-2xs"
-               title="Cockpit Tracking Dokumen (11 Pos Operasional)"
-               aria-label="Cockpit Tracking Dokumen (11 Pos Operasional)">
-                <i data-lucide="compass" class="w-4 h-4"></i>
-            </a>
-
-            <!-- Tombol Cerdas: Sinkron Ulang dari Berkas PDF / Dokumen Fisik -->
-            <button type="button" @click="resyncFromDocuments()" :disabled="resyncing"
-                    class="w-9 h-9 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50/80 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 inline-flex items-center justify-center transition-colors cursor-pointer shadow-2xs"
-                    title="Sinkron Ulang dari Berkas PDF / Dokumen Fisik"
-                    aria-label="Sinkron Ulang dari Berkas PDF / Dokumen Fisik">
-                <template x-if="!resyncing">
-                    <i data-lucide="sparkles" class="w-4 h-4 text-indigo-500"></i>
-                </template>
-                <template x-if="resyncing">
-                    <div class="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-                </template>
-            </button>
-
-            <!-- Tombol Simpan Draft -->
-            <button type="button" @click="saveDraftAjax()" :disabled="saving"
-                    class="w-9 h-9 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 inline-flex items-center justify-center transition-colors cursor-pointer shadow-2xs"
-                    title="Simpan Draft"
-                    aria-label="Simpan Draft">
-                <template x-if="!saving">
-                    <i data-lucide="save" class="w-4 h-4 text-[#0284c7]"></i>
-                </template>
-                <template x-if="saving">
-                    <div class="w-4 h-4 border-2 border-[#0284c7] border-t-transparent rounded-full animate-spin"></div>
-                </template>
-            </button>
-
-            <!-- Tombol Toggle Preview PDF / Dokumen Fisik -->
-            <button type="button" @click="togglePreview()"
-                    :class="showPreview ? 'bg-[#0284c7]/10 text-[#0284c7] border-[#0284c7]/30' : 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-white/10 dark:text-slate-200 dark:border-white/15'"
-                    class="w-9 h-9 rounded-xl border inline-flex items-center justify-center transition-colors cursor-pointer shadow-2xs"
-                    :title="showPreview ? 'Tutup Panel Preview Berkas' : 'Buka Panel Preview Berkas (' + previewFiles.length + ')'"
-                    :aria-label="showPreview ? 'Tutup Panel Preview Berkas' : 'Buka Panel Preview Berkas'">
-                <i data-lucide="panel-left" class="w-4 h-4"></i>
-            </button>
-        </div>
-    </div>
-
-    <!-- Skema Alur Waterfall Pabean & Tracking Dokumen Terpadu (Sinergi Create-Edit-Detail) -->
-    @include('bc20.components.waterfall_stepper', [
-        'activeStage' => 4,
-        'bc20' => $bc20,
-        'shipment' => $shipment,
-    ])
-
-    <!-- Mode Revisi Notice if not DRAFT -->
-    @if(!$isDraft)
-        <div class="p-3.5 rounded-2xl bg-amber-50/90 dark:bg-amber-950/40 border border-amber-300/80 dark:border-amber-800/60 text-amber-950 dark:text-amber-200 text-xs flex items-center gap-3">
-            <i data-lucide="shield-alert" class="w-4 h-4 text-amber-600 shrink-0"></i>
-            <span><strong>Mode Revisi Pasca-Kirim CEISA:</strong> Perubahan akan tercatat di Audit Trail dan mereset validasi skema untuk pengecekan ulang.</span>
-        </div>
-    @endif
-
-    <!-- Main Split-Screen Workspace -->
-    <form action="{{ route('bc20.update', $bc20->id) }}" method="POST" id="bc20WizardForm" @submit="prepareFormSubmit($event)">
-        @csrf
-        @method('PUT')
-        <input type="hidden" name="wizard_payload" x-ref="wizardPayloadInput">
-
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-            <!-- LEFT PANE: LIVE DOCUMENT PREVIEW (PDF / IMAGE) -->
-            <div x-show="showPreview" x-cloak class="lg:col-span-5 lg:sticky lg:top-4">
-                <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl border border-black/[0.08] dark:border-white/[0.1] shadow-sm overflow-hidden flex flex-col h-[720px]">
-                    <!-- Preview Header Bar -->
-                    <div class="px-4 py-2.5 bg-slate-50 dark:bg-white/[0.03] border-b border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between gap-2">
-                        <div class="flex items-center gap-2 min-w-0">
-                            <i data-lucide="file-text" class="w-4 h-4 text-rose-500 shrink-0"></i>
-                            <span class="font-mono font-bold text-xs text-slate-800 dark:text-white truncate"
-                                  x-text="activePreviewFile ? activePreviewFile.nama_file : 'Belum ada berkas terunggah'"></span>
-                        </div>
-                        <template x-if="activePreviewFile">
-                            <div class="flex items-center gap-1 shrink-0">
-                                <template x-if="!activePreviewFile.is_image && activePreviewFile.is_previewable">
-                                    <button type="button" @click="togglePdfMode()"
-                                            :title="pdfMode === 'canvas' ? 'Beralih ke Viewer Browser (Embed)' : 'Beralih ke Viewer Canvas (PDF.js)'"
-                                            class="px-2 py-1 rounded-lg border text-[10px] font-semibold flex items-center gap-1 cursor-pointer"
-                                            :class="pdfMode === 'canvas' ? 'bg-[#0284c7]/10 text-[#0284c7] border-[#0284c7]/30' : 'bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/15'">
-                                        <i data-lucide="layers" class="w-3 h-3"></i>
-                                        <span x-text="pdfMode === 'canvas' ? 'Canvas' : 'Embed'"></span>
-                                    </button>
-                                </template>
-                                <a :href="activePreviewFile.download_url" target="_blank" title="Unduh berkas"
-                                   class="p-1.5 rounded-lg hover:bg-slate-200/70 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300">
-                                    <i data-lucide="download" class="w-3.5 h-3.5"></i>
-                                </a>
-                                <a :href="activePreviewFile.preview_url" target="_blank" title="Buka di tab baru"
-                                   class="p-1.5 rounded-lg hover:bg-slate-200/70 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300">
-                                    <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-                                </a>
-                            </div>
-                        </template>
-                    </div>
-
-                    <!-- Preview Navigation & Zoom Controls -->
-                    <div class="px-3 py-2 bg-white dark:bg-[#1C1C1E] border-b border-black/[0.06] dark:border-white/[0.06] flex items-center justify-between gap-1.5 text-xs flex-wrap">
-                        <!-- Doc Pager -->
-                        <div class="flex items-center gap-1">
-                            <button type="button" @click="prevPreviewDoc()" :disabled="previewFiles.length <= 1"
-                                    class="p-1 rounded-lg border border-slate-200 dark:border-white/15 hover:bg-slate-100 dark:hover:bg-white/10 disabled:opacity-40 cursor-pointer">
-                                <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
-                            </button>
-                            <span class="font-mono font-semibold text-slate-700 dark:text-slate-200 px-1 text-[11px]"
-                                  x-text="previewFiles.length > 0 ? ((activePreviewIndex + 1) + '/' + previewFiles.length) : '0/0'"></span>
-                            <button type="button" @click="nextPreviewDoc()" :disabled="previewFiles.length <= 1"
-                                    class="p-1 rounded-lg border border-slate-200 dark:border-white/15 hover:bg-slate-100 dark:hover:bg-white/10 disabled:opacity-40 cursor-pointer">
-                                <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
-                            </button>
-                        </div>
-
-                        <!-- Doc Selector Dropdown -->
-                        <div class="flex items-center gap-1 flex-1 min-w-[120px] max-w-[200px]">
-                            <select x-show="previewFiles.length > 0" @change="setPreviewIndex(parseInt($event.target.value, 10))" :value="activePreviewIndex"
-                                    class="w-full px-2 py-1 rounded-lg border border-slate-200 dark:border-white/15 bg-slate-50 dark:bg-[#2C2C2E] text-[11px] font-medium truncate">
-                                <template x-for="(pf, pIdx) in previewFiles" :key="pf.id">
-                                    <option :value="pIdx" x-text="(pIdx + 1) + '. ' + pf.nama_file"></option>
-                                </template>
-                            </select>
-                        </div>
-
-                        <!-- Image Zoom Controls -->
-                        <template x-if="activePreviewFile && activePreviewFile.is_image">
-                            <div class="flex items-center gap-1">
-                                <button type="button" @click="previewZoom = Math.max(50, previewZoom - 15)" class="px-1.5 py-0.5 rounded border border-slate-200 dark:border-white/15 text-[11px] cursor-pointer hover:bg-slate-100 dark:hover:bg-white/10">-</button>
-                                <span class="font-mono text-[11px] w-9 text-center" x-text="previewZoom + '%'"></span>
-                                <button type="button" @click="previewZoom = Math.min(200, previewZoom + 15)" class="px-1.5 py-0.5 rounded border border-slate-200 dark:border-white/15 text-[11px] cursor-pointer hover:bg-slate-100 dark:hover:bg-white/10">+</button>
-                            </div>
-                        </template>
-
-                        <!-- PDF Multi-Page & Zoom Controls (Canvas Mode) -->
-                        <template x-if="activePreviewFile && !activePreviewFile.is_image && activePreviewFile.is_previewable && pdfMode === 'canvas'">
-                            <div class="flex items-center gap-1">
-                                <!-- PDF Page Nav -->
-                                <button type="button" @click="prevPdfPage()" :disabled="pdfPageNum <= 1 || pdfLoading"
-                                        class="p-0.5 px-1 rounded border border-slate-200 dark:border-white/15 text-[11px] hover:bg-slate-100 dark:hover:bg-white/10 disabled:opacity-40 cursor-pointer">
-                                    &lsaquo;
-                                </button>
-                                <span class="font-mono text-[11px] text-slate-700 dark:text-slate-200 px-0.5 whitespace-nowrap"
-                                      x-text="'Hal ' + pdfPageNum + '/' + (pdfTotalPages || 1)"></span>
-                                <button type="button" @click="nextPdfPage()" :disabled="pdfPageNum >= pdfTotalPages || pdfLoading"
-                                        class="p-0.5 px-1 rounded border border-slate-200 dark:border-white/15 text-[11px] hover:bg-slate-100 dark:hover:bg-white/10 disabled:opacity-40 cursor-pointer">
-                                    &rsaquo;
-                                </button>
-
-                                <!-- PDF Zoom -->
-                                <button type="button" @click="zoomPdf(-0.2)" :disabled="pdfLoading"
-                                        class="p-0.5 px-1.5 rounded border border-slate-200 dark:border-white/15 text-[11px] hover:bg-slate-100 dark:hover:bg-white/10 cursor-pointer">-</button>
-                                <span class="font-mono text-[11px] w-9 text-center" x-text="Math.round(pdfScale * 100) + '%'"></span>
-                                <button type="button" @click="zoomPdf(0.2)" :disabled="pdfLoading"
-                                        class="p-0.5 px-1.5 rounded border border-slate-200 dark:border-white/15 text-[11px] hover:bg-slate-100 dark:hover:bg-white/10 cursor-pointer">+</button>
-                                <button type="button" @click="rotatePdf()" :disabled="pdfLoading" title="Putar 90 derajat"
-                                        class="p-1 rounded border border-slate-200 dark:border-white/15 text-[11px] hover:bg-slate-100 dark:hover:bg-white/10 cursor-pointer">
-                                    <i data-lucide="rotate-cw" class="w-3 h-3"></i>
-                                </button>
-                            </div>
-                        </template>
-                    </div>
-
-                    <!-- Preview Canvas Area -->
-                    <div class="flex-1 bg-slate-100 dark:bg-[#111113] overflow-auto relative flex flex-col items-center justify-start min-h-[580px]">
-                        <template x-if="!activePreviewFile">
-                            <div class="text-center p-6 space-y-3 my-auto">
-                                <div class="w-12 h-12 rounded-2xl bg-slate-200/70 dark:bg-white/10 text-slate-400 mx-auto flex items-center justify-center">
-                                    <i data-lucide="file-search" class="w-6 h-6"></i>
-                                </div>
-                                <div class="text-xs font-semibold text-slate-600 dark:text-slate-300">Belum ada file PDF / Gambar yang diunggah</div>
-                                <p class="text-[11px] text-slate-400 max-w-xs mx-auto">Unggah Invoice, Packing List, B/L, atau e-COO pada tab Dokumen untuk langsung melihat preview di sini.</p>
-                            </div>
-                        </template>
-
-                        <!-- Image Viewer -->
-                        <template x-if="activePreviewFile && activePreviewFile.is_image">
-                            <div class="w-full h-full overflow-auto p-3 flex items-start justify-center">
-                                <img :src="activePreviewFile.preview_url" :alt="activePreviewFile.nama_file"
-                                     :style="'width: ' + previewZoom + '%; max-width: none;'"
-                                     class="rounded-lg shadow-md transition-all">
-                            </div>
-                        </template>
-
-                        <!-- PDF Viewer: Canvas Mode (PDF.js) -->
-                        <template x-if="activePreviewFile && !activePreviewFile.is_image && activePreviewFile.is_previewable && pdfMode === 'canvas'">
-                            <div class="w-full h-full flex flex-col overflow-hidden relative">
-                                <!-- Loading overlay -->
-                                <div x-show="pdfLoading" class="absolute inset-0 bg-white/85 dark:bg-[#1C1C1E]/85 flex flex-col items-center justify-center gap-2.5 z-20">
-                                    <div class="w-6 h-6 border-2 border-[#0284c7] border-t-transparent rounded-full animate-spin"></div>
-                                    <span class="text-xs font-semibold text-slate-700 dark:text-slate-200">Memuat halaman PDF...</span>
-                                </div>
-
-                                <!-- Error Alert if canvas failed -->
-                                <div x-show="pdfError" class="p-3 bg-amber-50 dark:bg-amber-950/40 border-b border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 text-xs flex items-center justify-between gap-2">
-                                    <span x-text="pdfError"></span>
-                                    <button type="button" @click="pdfMode = 'native'" class="font-bold underline cursor-pointer">Beralih ke Embed</button>
-                                </div>
-
-                                <!-- Scrollable Canvas Container -->
-                                <div class="flex-1 overflow-auto p-3 flex flex-col items-center justify-start bg-slate-200/50 dark:bg-black/40">
-                                    <canvas id="pdfCanvasViewer" class="shadow-xl rounded-lg bg-white my-auto max-w-full"></canvas>
-                                </div>
-                            </div>
-                        </template>
-
-                        <!-- PDF Viewer: Native Browser Embed Mode (Object / Iframe Fallback) -->
-                        <template x-if="activePreviewFile && !activePreviewFile.is_image && activePreviewFile.is_previewable && pdfMode === 'native'">
-                            <div class="w-full h-full flex flex-col">
-                                <object :data="activePreviewFile.preview_url + '#toolbar=1'" type="application/pdf" class="w-full flex-1 border-0 bg-white">
-                                    <iframe :src="activePreviewFile.preview_url" class="w-full h-full border-0 bg-white">
-                                        <div class="p-6 text-center space-y-2">
-                                            <p class="text-xs text-slate-600">Browser Anda tidak mendukung preview langsung.</p>
-                                            <a :href="activePreviewFile.download_url" class="btn-apple-filled text-xs px-3 py-1.5 inline-flex items-center gap-1">
-                                                <span>Unduh Berkas</span>
-                                            </a>
-                                        </div>
-                                    </iframe>
-                                </object>
-                                <div class="px-3 py-1.5 bg-slate-50 dark:bg-white/[0.04] border-t border-black/[0.06] flex items-center justify-between text-[11px] text-slate-500">
-                                    <span>Viewer Browser Embed</span>
-                                    <button type="button" @click="togglePdfMode()" class="text-[#0284c7] hover:underline font-semibold cursor-pointer">
-                                        Beralih ke Canvas PDF.js
-                                    </button>
-                                </div>
-                            </div>
-                        </template>
-
-                        <!-- Unsupported File Format -->
-                        <template x-if="activePreviewFile && !activePreviewFile.is_previewable">
-                            <div class="text-center p-6 space-y-3 my-auto">
-                                <p class="text-xs font-semibold text-slate-700 dark:text-slate-200" x-text="'Format ' + activePreviewFile.ext + ' tidak didukung untuk preview langsung.'"></p>
-                                <a :href="activePreviewFile.download_url" class="btn-apple-filled text-xs px-4 py-2 inline-flex items-center gap-1.5">
-                                    <i data-lucide="download" class="w-3.5 h-3.5"></i>
-                                    <span>Unduh Berkas</span>
-                                </a>
-                            </div>
-                        </template>
-                    </div>
-                </div>
-            </div>
-
-            <!-- RIGHT PANE: 9-STAGE PIB WIZARD -->
-            <div :class="showPreview ? 'lg:col-span-7' : 'lg:col-span-12'" class="space-y-4">
-                <!-- 9-Stage Horizontal Stepper -->
-                <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-2 border border-black/[0.06] dark:border-white/[0.08] shadow-xs overflow-x-auto">
-                    <div class="flex items-center gap-1 min-w-max">
-                        <template x-for="st in steps" :key="st.id">
-                            <button type="button" @click="goToStep(st.id)"
-                                    :class="activeStep === st.id
-                                        ? 'bg-[#0284c7]/10 border-[#0284c7]/40 text-[#0284c7] font-bold shadow-xs'
-                                        : 'border-transparent text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04] font-medium'"
-                                    class="px-3 py-2 rounded-xl border text-xs flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer">
-                                <span :class="activeStep === st.id
-                                        ? 'bg-[#0284c7] text-white border-[#0284c7]'
-                                        : (isStepComplete(st.id) ? 'bg-emerald-50 border-emerald-500 text-emerald-600' : 'bg-slate-100 dark:bg-white/10 border-slate-300 dark:border-white/20 text-slate-500')"
-                                      class="w-5 h-5 rounded-full border text-[10px] font-bold flex items-center justify-center shrink-0">
-                                    <span x-show="isStepComplete(st.id) && activeStep !== st.id">&check;</span>
-                                    <span x-show="!isStepComplete(st.id) || activeStep === st.id" x-text="st.id"></span>
-                                </span>
-                                <span x-text="st.label"></span>
-                            </button>
-                        </template>
-                    </div>
-                </div>
-
-                <!-- Stage Contents -->
-                <div x-show="activeStep === 1" x-cloak>@include('bc20.wizard._stage_header')</div>
-                <div x-show="activeStep === 2" x-cloak>@include('bc20.wizard._stage_entitas')</div>
-                <div x-show="activeStep === 3" x-cloak>@include('bc20.wizard._stage_dokumen')</div>
-                <div x-show="activeStep === 4" x-cloak>@include('bc20.wizard._stage_pengangkut')</div>
-                <div x-show="activeStep === 5" x-cloak>@include('bc20.wizard._stage_kemasan')</div>
-                <div x-show="activeStep === 6" x-cloak>@include('bc20.wizard._stage_transaksi')</div>
-                <div x-show="activeStep === 7" x-cloak>@include('bc20.wizard._stage_barang')</div>
-                <div x-show="activeStep === 8" x-cloak>@include('bc20.wizard._stage_pungutan')</div>
-                <div x-show="activeStep === 9" x-cloak>@include('bc20.wizard._stage_pernyataan')</div>
-            </div>
-        </div>
-
-        <!-- Sticky Bottom Wizard Navigation Bar (Optimasi User Experience) -->
-        <div class="fixed bottom-0 inset-x-0 z-30 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-md border-t border-black/[0.08] dark:border-white/[0.1] px-4 sm:px-8 py-3 shadow-lg">
-            <div class="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
-                <!-- Left: Stage Status & Quick Info -->
-                <div class="flex items-center gap-3">
-                    <div class="flex items-center gap-2">
-                        <span class="px-2.5 py-1 rounded-lg bg-[#0284c7] text-white font-bold font-mono text-[11px]"
-                              x-text="'Tahap ' + activeStep + ' / 9'"></span>
-                        <span class="font-bold text-slate-800 dark:text-white" x-text="steps.find(s => s.id === activeStep)?.label"></span>
-                    </div>
-
-                    <!-- Jump Dots (Desktop) -->
-                    <div class="hidden xl:flex items-center gap-1.5 ml-2">
-                        <template x-for="st in steps" :key="st.id">
-                            <button type="button" @click="goToStep(st.id)"
-                                    :class="st.id === activeStep ? 'w-6 bg-[#0284c7]' : (isStepComplete(st.id) ? 'w-2 bg-emerald-500' : 'w-2 bg-slate-300 dark:bg-white/20')"
-                                    :title="'Tahap ' + st.id + ': ' + st.label"
-                                    class="h-2 rounded-full transition-all cursor-pointer"></button>
-                        </template>
-                    </div>
-
-                    <!-- Inline Save Toast -->
-                    <template x-if="saveToast.message">
-                        <span :class="saveToast.type === 'error' ? 'text-rose-600' : 'text-emerald-600'"
-                              class="text-[11px] font-semibold flex items-center gap-1 animate-pulse ml-2">
-                            <i data-lucide="check" class="w-3.5 h-3.5"></i>
-                            <span x-text="saveToast.message"></span>
-                        </span>
-                    </template>
-                </div>
-
-                <!-- Right: Action & Navigation Buttons -->
-                <div class="flex items-center gap-2">
-                    <!-- Toggle Preview PDF -->
-                    <button type="button" @click="togglePreview()"
-                            :class="showPreview ? 'bg-[#0284c7]/10 text-[#0284c7] border-[#0284c7]/30' : 'border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] text-slate-700 dark:text-slate-200'"
-                            class="px-3.5 py-2 rounded-xl border text-xs font-semibold inline-flex items-center gap-1.5 transition-colors cursor-pointer">
-                        <i data-lucide="panel-left" class="w-3.5 h-3.5"></i>
-                        <span x-text="showPreview ? 'Tutup PDF' : 'Buka PDF (' + previewFiles.length + ')'"></span>
-                    </button>
-
-                    <!-- Simpan Draft Ajax Langsung di Bottom Bar -->
-                    <button type="button" @click="saveDraftAjax()" :disabled="saving"
-                            class="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] hover:bg-slate-50 text-slate-700 dark:text-slate-200 font-semibold inline-flex items-center gap-1.5 cursor-pointer">
-                        <template x-if="!saving">
-                            <i data-lucide="save" class="w-3.5 h-3.5 text-[#0284c7]"></i>
-                        </template>
-                        <template x-if="saving">
-                            <div class="w-3.5 h-3.5 border-2 border-[#0284c7] border-t-transparent rounded-full animate-spin"></div>
-                        </template>
-                        <span x-text="saving ? 'Menyimpan...' : 'Simpan Draft'"></span>
-                    </button>
-
-                    <!-- Tombol Sebelumnya -->
-                    <button type="button" @click="prevStep()" :disabled="activeStep <= 1"
-                            class="px-4 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] text-xs font-semibold text-slate-700 dark:text-slate-200 disabled:opacity-40 inline-flex items-center gap-1.5 cursor-pointer">
-                        <i data-lucide="chevron-left" class="w-4 h-4"></i>
-                        <span>Sebelumnya</span>
-                    </button>
-
-                    <!-- Tombol Selanjutnya / Selesai -->
-                    <template x-if="activeStep < 9">
-                        <button type="button" @click="nextStep()"
-                                class="px-5 py-2 rounded-xl bg-[#0284c7] hover:bg-[#0066D6] text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-sm cursor-pointer transition-colors">
-                            <span>Selanjutnya</span>
-                            <i data-lucide="chevron-right" class="w-4 h-4"></i>
-                        </button>
-                    </template>
-                    <template x-if="activeStep === 9">
-                        <button type="submit"
-                                class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-sm cursor-pointer transition-colors">
-                            <i data-lucide="check-circle" class="w-4 h-4"></i>
-                            <span>Simpan &amp; Selesai</span>
-                        </button>
-                    </template>
-                </div>
-            </div>
-        </div>
-    </form>
-</div>
-
-@push('scripts')
 <script>
 window.bc20WizardManager = function bc20WizardManager() {
     const initialWizard = @json($wizardState);
@@ -1440,6 +1045,401 @@ if (window.Alpine && typeof window.Alpine.data === 'function') {
 }
 </script>
 
+<div class="max-w-[1600px] mx-auto px-4 sm:px-6 space-y-4 pt-4 pb-28" x-data="bc20WizardManager()">
+    <!-- Top Compact Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#1C1C1E] rounded-2xl px-5 py-3.5 border border-black/[0.06] dark:border-white/[0.08] shadow-xs">
+        <div class="flex flex-wrap items-center gap-3">
+            <a href="{{ route('bc20.show', $bc20->id) }}" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-slate-200 transition-colors" title="Kembali ke Ringkasan BC 2.0">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            </a>
+            <div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#0284c7]/10 text-[#0284c7] border border-[#0284c7]/20">BC 2.0 (PIB IMPOR)</span>
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold {{ $bc20->status_badge_class }}">{{ $bc20->status }}</span>
+                    @if($shipment)
+                        <a href="{{ route('core.document.show', $shipment->id) }}" class="text-[11px] font-mono font-bold text-[#0284c7] hover:underline">
+                            {{ $shipment->project_no }}
+                        </a>
+                    @endif
+                </div>
+                <h1 class="text-base sm:text-lg font-bold font-mono text-slate-900 dark:text-white tracking-tight mt-0.5">
+                    {{ $bc20->nomor_aju }}
+                </h1>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+            <!-- Toast / Save Status -->
+            <template x-if="saveToast.message">
+                <div :class="saveToast.type === 'error' ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'"
+                     class="px-2.5 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5">
+                    <span x-text="saveToast.message"></span>
+                </div>
+            </template>
+
+            <!-- Tautan Terpadu ke Cockpit Tracking Dokumen (11 Pos Operasional) -->
+            <a href="{{ route('core.tracking.index', ['mode' => 'tracking_dok', 'search' => $shipment?->project_no ?? $bc20->nomor_aju]) }}"
+               target="_blank"
+               class="w-9 h-9 rounded-xl border border-sky-200 dark:border-sky-800 bg-sky-50/80 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 text-[#0284c7] inline-flex items-center justify-center transition-colors cursor-pointer shadow-2xs"
+               title="Cockpit Tracking Dokumen (11 Pos Operasional)"
+               aria-label="Cockpit Tracking Dokumen (11 Pos Operasional)">
+                <i data-lucide="compass" class="w-4 h-4"></i>
+            </a>
+
+            <!-- Tombol Cerdas: Sinkron Ulang dari Berkas PDF / Dokumen Fisik -->
+            <button type="button" @click="resyncFromDocuments()" :disabled="resyncing"
+                    class="w-9 h-9 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50/80 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 inline-flex items-center justify-center transition-colors cursor-pointer shadow-2xs"
+                    title="Sinkron Ulang dari Berkas PDF / Dokumen Fisik"
+                    aria-label="Sinkron Ulang dari Berkas PDF / Dokumen Fisik">
+                <template x-if="!resyncing">
+                    <i data-lucide="sparkles" class="w-4 h-4 text-indigo-500"></i>
+                </template>
+                <template x-if="resyncing">
+                    <div class="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                </template>
+            </button>
+
+            <!-- Tombol Simpan Draft -->
+            <button type="button" @click="saveDraftAjax()" :disabled="saving"
+                    class="w-9 h-9 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 inline-flex items-center justify-center transition-colors cursor-pointer shadow-2xs"
+                    title="Simpan Draft"
+                    aria-label="Simpan Draft">
+                <template x-if="!saving">
+                    <i data-lucide="save" class="w-4 h-4 text-[#0284c7]"></i>
+                </template>
+                <template x-if="saving">
+                    <div class="w-4 h-4 border-2 border-[#0284c7] border-t-transparent rounded-full animate-spin"></div>
+                </template>
+            </button>
+
+            <!-- Tombol Toggle Preview PDF / Dokumen Fisik -->
+            <button type="button" @click="togglePreview()"
+                    :class="showPreview ? 'bg-[#0284c7]/10 text-[#0284c7] border-[#0284c7]/30' : 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-white/10 dark:text-slate-200 dark:border-white/15'"
+                    class="w-9 h-9 rounded-xl border inline-flex items-center justify-center transition-colors cursor-pointer shadow-2xs"
+                    :title="showPreview ? 'Tutup Panel Preview Berkas' : 'Buka Panel Preview Berkas (' + previewFiles.length + ')'"
+                    :aria-label="showPreview ? 'Tutup Panel Preview Berkas' : 'Buka Panel Preview Berkas'">
+                <i data-lucide="panel-left" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Skema Alur Waterfall Pabean & Tracking Dokumen Terpadu (Sinergi Create-Edit-Detail) -->
+    @include('bc20.components.waterfall_stepper', [
+        'activeStage' => 4,
+        'bc20' => $bc20,
+        'shipment' => $shipment,
+    ])
+
+    <!-- Mode Revisi Notice if not DRAFT -->
+    @if(!$isDraft)
+        <div class="p-3.5 rounded-2xl bg-amber-50/90 dark:bg-amber-950/40 border border-amber-300/80 dark:border-amber-800/60 text-amber-950 dark:text-amber-200 text-xs flex items-center gap-3">
+            <i data-lucide="shield-alert" class="w-4 h-4 text-amber-600 shrink-0"></i>
+            <span><strong>Mode Revisi Pasca-Kirim CEISA:</strong> Perubahan akan tercatat di Audit Trail dan mereset validasi skema untuk pengecekan ulang.</span>
+        </div>
+    @endif
+
+    <!-- Main Split-Screen Workspace -->
+    <form action="{{ route('bc20.update', $bc20->id) }}" method="POST" id="bc20WizardForm" @submit="prepareFormSubmit($event)">
+        @csrf
+        @method('PUT')
+        <input type="hidden" name="wizard_payload" x-ref="wizardPayloadInput">
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+            <!-- LEFT PANE: LIVE DOCUMENT PREVIEW (PDF / IMAGE) -->
+            <div x-show="showPreview" x-cloak class="lg:col-span-5 lg:sticky lg:top-4">
+                <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl border border-black/[0.08] dark:border-white/[0.1] shadow-sm overflow-hidden flex flex-col h-[720px]">
+                    <!-- Preview Header Bar -->
+                    <div class="px-4 py-2.5 bg-slate-50 dark:bg-white/[0.03] border-b border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <i data-lucide="file-text" class="w-4 h-4 text-rose-500 shrink-0"></i>
+                            <span class="font-mono font-bold text-xs text-slate-800 dark:text-white truncate"
+                                  x-text="activePreviewFile ? activePreviewFile.nama_file : 'Belum ada berkas terunggah'"></span>
+                        </div>
+                        <template x-if="activePreviewFile">
+                            <div class="flex items-center gap-1 shrink-0">
+                                <template x-if="!activePreviewFile.is_image && activePreviewFile.is_previewable">
+                                    <button type="button" @click="togglePdfMode()"
+                                            :title="pdfMode === 'canvas' ? 'Beralih ke Viewer Browser (Embed)' : 'Beralih ke Viewer Canvas (PDF.js)'"
+                                            class="px-2 py-1 rounded-lg border text-[10px] font-semibold flex items-center gap-1 cursor-pointer"
+                                            :class="pdfMode === 'canvas' ? 'bg-[#0284c7]/10 text-[#0284c7] border-[#0284c7]/30' : 'bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/15'">
+                                        <i data-lucide="layers" class="w-3 h-3"></i>
+                                        <span x-text="pdfMode === 'canvas' ? 'Canvas' : 'Embed'"></span>
+                                    </button>
+                                </template>
+                                <a :href="activePreviewFile.download_url" target="_blank" title="Unduh berkas"
+                                   class="p-1.5 rounded-lg hover:bg-slate-200/70 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300">
+                                    <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                                </a>
+                                <a :href="activePreviewFile.preview_url" target="_blank" title="Buka di tab baru"
+                                   class="p-1.5 rounded-lg hover:bg-slate-200/70 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300">
+                                    <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                                </a>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Preview Navigation & Zoom Controls -->
+                    <div class="px-3 py-2 bg-white dark:bg-[#1C1C1E] border-b border-black/[0.06] dark:border-white/[0.06] flex items-center justify-between gap-1.5 text-xs flex-wrap">
+                        <!-- Doc Pager -->
+                        <div class="flex items-center gap-1">
+                            <button type="button" @click="prevPreviewDoc()" :disabled="previewFiles.length <= 1"
+                                    class="p-1 rounded-lg border border-slate-200 dark:border-white/15 hover:bg-slate-100 dark:hover:bg-white/10 disabled:opacity-40 cursor-pointer">
+                                <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <span class="font-mono font-semibold text-slate-700 dark:text-slate-200 px-1 text-[11px]"
+                                  x-text="previewFiles.length > 0 ? ((activePreviewIndex + 1) + '/' + previewFiles.length) : '0/0'"></span>
+                            <button type="button" @click="nextPreviewDoc()" :disabled="previewFiles.length <= 1"
+                                    class="p-1 rounded-lg border border-slate-200 dark:border-white/15 hover:bg-slate-100 dark:hover:bg-white/10 disabled:opacity-40 cursor-pointer">
+                                <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+
+                        <!-- Doc Selector Dropdown -->
+                        <div class="flex items-center gap-1 flex-1 min-w-[120px] max-w-[200px]">
+                            <select x-show="previewFiles.length > 0" @change="setPreviewIndex(parseInt($event.target.value, 10))" :value="activePreviewIndex"
+                                    class="w-full px-2 py-1 rounded-lg border border-slate-200 dark:border-white/15 bg-slate-50 dark:bg-[#2C2C2E] text-[11px] font-medium truncate">
+                                <template x-for="(pf, pIdx) in previewFiles" :key="pf.id">
+                                    <option :value="pIdx" x-text="(pIdx + 1) + '. ' + pf.nama_file"></option>
+                                </template>
+                            </select>
+                        </div>
+
+                        <!-- Image Zoom Controls -->
+                        <template x-if="activePreviewFile && activePreviewFile.is_image">
+                            <div class="flex items-center gap-1">
+                                <button type="button" @click="previewZoom = Math.max(50, previewZoom - 15)" class="px-1.5 py-0.5 rounded border border-slate-200 dark:border-white/15 text-[11px] cursor-pointer hover:bg-slate-100 dark:hover:bg-white/10">-</button>
+                                <span class="font-mono text-[11px] w-9 text-center" x-text="previewZoom + '%'"></span>
+                                <button type="button" @click="previewZoom = Math.min(200, previewZoom + 15)" class="px-1.5 py-0.5 rounded border border-slate-200 dark:border-white/15 text-[11px] cursor-pointer hover:bg-slate-100 dark:hover:bg-white/10">+</button>
+                            </div>
+                        </template>
+
+                        <!-- PDF Multi-Page & Zoom Controls (Canvas Mode) -->
+                        <template x-if="activePreviewFile && !activePreviewFile.is_image && activePreviewFile.is_previewable && pdfMode === 'canvas'">
+                            <div class="flex items-center gap-1">
+                                <!-- PDF Page Nav -->
+                                <button type="button" @click="prevPdfPage()" :disabled="pdfPageNum <= 1 || pdfLoading"
+                                        class="p-0.5 px-1 rounded border border-slate-200 dark:border-white/15 text-[11px] hover:bg-slate-100 dark:hover:bg-white/10 disabled:opacity-40 cursor-pointer">
+                                    &lsaquo;
+                                </button>
+                                <span class="font-mono text-[11px] text-slate-700 dark:text-slate-200 px-0.5 whitespace-nowrap"
+                                      x-text="'Hal ' + pdfPageNum + '/' + (pdfTotalPages || 1)"></span>
+                                <button type="button" @click="nextPdfPage()" :disabled="pdfPageNum >= pdfTotalPages || pdfLoading"
+                                        class="p-0.5 px-1 rounded border border-slate-200 dark:border-white/15 text-[11px] hover:bg-slate-100 dark:hover:bg-white/10 disabled:opacity-40 cursor-pointer">
+                                    &rsaquo;
+                                </button>
+
+                                <!-- PDF Zoom -->
+                                <button type="button" @click="zoomPdf(-0.2)" :disabled="pdfLoading"
+                                        class="p-0.5 px-1.5 rounded border border-slate-200 dark:border-white/15 text-[11px] hover:bg-slate-100 dark:hover:bg-white/10 cursor-pointer">-</button>
+                                <span class="font-mono text-[11px] w-9 text-center" x-text="Math.round(pdfScale * 100) + '%'"></span>
+                                <button type="button" @click="zoomPdf(0.2)" :disabled="pdfLoading"
+                                        class="p-0.5 px-1.5 rounded border border-slate-200 dark:border-white/15 text-[11px] hover:bg-slate-100 dark:hover:bg-white/10 cursor-pointer">+</button>
+                                <button type="button" @click="rotatePdf()" :disabled="pdfLoading" title="Putar 90 derajat"
+                                        class="p-1 rounded border border-slate-200 dark:border-white/15 text-[11px] hover:bg-slate-100 dark:hover:bg-white/10 cursor-pointer">
+                                    <i data-lucide="rotate-cw" class="w-3 h-3"></i>
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Preview Canvas Area -->
+                    <div class="flex-1 bg-slate-100 dark:bg-[#111113] overflow-auto relative flex flex-col items-center justify-start min-h-[580px]">
+                        <template x-if="!activePreviewFile">
+                            <div class="text-center p-6 space-y-3 my-auto">
+                                <div class="w-12 h-12 rounded-2xl bg-slate-200/70 dark:bg-white/10 text-slate-400 mx-auto flex items-center justify-center">
+                                    <i data-lucide="file-search" class="w-6 h-6"></i>
+                                </div>
+                                <div class="text-xs font-semibold text-slate-600 dark:text-slate-300">Belum ada file PDF / Gambar yang diunggah</div>
+                                <p class="text-[11px] text-slate-400 max-w-xs mx-auto">Unggah Invoice, Packing List, B/L, atau e-COO pada tab Dokumen untuk langsung melihat preview di sini.</p>
+                            </div>
+                        </template>
+
+                        <!-- Image Viewer -->
+                        <template x-if="activePreviewFile && activePreviewFile.is_image">
+                            <div class="w-full h-full overflow-auto p-3 flex items-start justify-center">
+                                <img :src="activePreviewFile.preview_url" :alt="activePreviewFile.nama_file"
+                                     :style="'width: ' + previewZoom + '%; max-width: none;'"
+                                     class="rounded-lg shadow-md transition-all">
+                            </div>
+                        </template>
+
+                        <!-- PDF Viewer: Canvas Mode (PDF.js) -->
+                        <template x-if="activePreviewFile && !activePreviewFile.is_image && activePreviewFile.is_previewable && pdfMode === 'canvas'">
+                            <div class="w-full h-full flex flex-col overflow-hidden relative">
+                                <!-- Loading overlay -->
+                                <div x-show="pdfLoading" class="absolute inset-0 bg-white/85 dark:bg-[#1C1C1E]/85 flex flex-col items-center justify-center gap-2.5 z-20">
+                                    <div class="w-6 h-6 border-2 border-[#0284c7] border-t-transparent rounded-full animate-spin"></div>
+                                    <span class="text-xs font-semibold text-slate-700 dark:text-slate-200">Memuat halaman PDF...</span>
+                                </div>
+
+                                <!-- Error Alert if canvas failed -->
+                                <div x-show="pdfError" class="p-3 bg-amber-50 dark:bg-amber-950/40 border-b border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 text-xs flex items-center justify-between gap-2">
+                                    <span x-text="pdfError"></span>
+                                    <button type="button" @click="pdfMode = 'native'" class="font-bold underline cursor-pointer">Beralih ke Embed</button>
+                                </div>
+
+                                <!-- Scrollable Canvas Container -->
+                                <div class="flex-1 overflow-auto p-3 flex flex-col items-center justify-start bg-slate-200/50 dark:bg-black/40">
+                                    <canvas id="pdfCanvasViewer" class="shadow-xl rounded-lg bg-white my-auto max-w-full"></canvas>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- PDF Viewer: Native Browser Embed Mode (Object / Iframe Fallback) -->
+                        <template x-if="activePreviewFile && !activePreviewFile.is_image && activePreviewFile.is_previewable && pdfMode === 'native'">
+                            <div class="w-full h-full flex flex-col">
+                                <object :data="activePreviewFile.preview_url + '#toolbar=1'" type="application/pdf" class="w-full flex-1 border-0 bg-white">
+                                    <iframe :src="activePreviewFile.preview_url" class="w-full h-full border-0 bg-white">
+                                        <div class="p-6 text-center space-y-2">
+                                            <p class="text-xs text-slate-600">Browser Anda tidak mendukung preview langsung.</p>
+                                            <a :href="activePreviewFile.download_url" class="btn-apple-filled text-xs px-3 py-1.5 inline-flex items-center gap-1">
+                                                <span>Unduh Berkas</span>
+                                            </a>
+                                        </div>
+                                    </iframe>
+                                </object>
+                                <div class="px-3 py-1.5 bg-slate-50 dark:bg-white/[0.04] border-t border-black/[0.06] flex items-center justify-between text-[11px] text-slate-500">
+                                    <span>Viewer Browser Embed</span>
+                                    <button type="button" @click="togglePdfMode()" class="text-[#0284c7] hover:underline font-semibold cursor-pointer">
+                                        Beralih ke Canvas PDF.js
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Unsupported File Format -->
+                        <template x-if="activePreviewFile && !activePreviewFile.is_previewable">
+                            <div class="text-center p-6 space-y-3 my-auto">
+                                <p class="text-xs font-semibold text-slate-700 dark:text-slate-200" x-text="'Format ' + activePreviewFile.ext + ' tidak didukung untuk preview langsung.'"></p>
+                                <a :href="activePreviewFile.download_url" class="btn-apple-filled text-xs px-4 py-2 inline-flex items-center gap-1.5">
+                                    <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                                    <span>Unduh Berkas</span>
+                                </a>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT PANE: 9-STAGE PIB WIZARD -->
+            <div :class="showPreview ? 'lg:col-span-7' : 'lg:col-span-12'" class="space-y-4">
+                <!-- 9-Stage Horizontal Stepper -->
+                <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-2 border border-black/[0.06] dark:border-white/[0.08] shadow-xs overflow-x-auto">
+                    <div class="flex items-center gap-1 min-w-max">
+                        <template x-for="st in steps" :key="st.id">
+                            <button type="button" @click="goToStep(st.id)"
+                                    :class="activeStep === st.id
+                                        ? 'bg-[#0284c7]/10 border-[#0284c7]/40 text-[#0284c7] font-bold shadow-xs'
+                                        : 'border-transparent text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04] font-medium'"
+                                    class="px-3 py-2 rounded-xl border text-xs flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer">
+                                <span :class="activeStep === st.id
+                                        ? 'bg-[#0284c7] text-white border-[#0284c7]'
+                                        : (isStepComplete(st.id) ? 'bg-emerald-50 border-emerald-500 text-emerald-600' : 'bg-slate-100 dark:bg-white/10 border-slate-300 dark:border-white/20 text-slate-500')"
+                                      class="w-5 h-5 rounded-full border text-[10px] font-bold flex items-center justify-center shrink-0">
+                                    <span x-show="isStepComplete(st.id) && activeStep !== st.id">&check;</span>
+                                    <span x-show="!isStepComplete(st.id) || activeStep === st.id" x-text="st.id"></span>
+                                </span>
+                                <span x-text="st.label"></span>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Stage Contents -->
+                <div x-show="activeStep === 1" x-cloak>@include('bc20.wizard._stage_header')</div>
+                <div x-show="activeStep === 2" x-cloak>@include('bc20.wizard._stage_entitas')</div>
+                <div x-show="activeStep === 3" x-cloak>@include('bc20.wizard._stage_dokumen')</div>
+                <div x-show="activeStep === 4" x-cloak>@include('bc20.wizard._stage_pengangkut')</div>
+                <div x-show="activeStep === 5" x-cloak>@include('bc20.wizard._stage_kemasan')</div>
+                <div x-show="activeStep === 6" x-cloak>@include('bc20.wizard._stage_transaksi')</div>
+                <div x-show="activeStep === 7" x-cloak>@include('bc20.wizard._stage_barang')</div>
+                <div x-show="activeStep === 8" x-cloak>@include('bc20.wizard._stage_pungutan')</div>
+                <div x-show="activeStep === 9" x-cloak>@include('bc20.wizard._stage_pernyataan')</div>
+            </div>
+        </div>
+
+        <!-- Sticky Bottom Wizard Navigation Bar (Optimasi User Experience) -->
+        <div class="fixed bottom-0 inset-x-0 z-30 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-md border-t border-black/[0.08] dark:border-white/[0.1] px-4 sm:px-8 py-3 shadow-lg">
+            <div class="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
+                <!-- Left: Stage Status & Quick Info -->
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-2">
+                        <span class="px-2.5 py-1 rounded-lg bg-[#0284c7] text-white font-bold font-mono text-[11px]"
+                              x-text="'Tahap ' + activeStep + ' / 9'"></span>
+                        <span class="font-bold text-slate-800 dark:text-white" x-text="steps.find(s => s.id === activeStep)?.label"></span>
+                    </div>
+
+                    <!-- Jump Dots (Desktop) -->
+                    <div class="hidden xl:flex items-center gap-1.5 ml-2">
+                        <template x-for="st in steps" :key="st.id">
+                            <button type="button" @click="goToStep(st.id)"
+                                    :class="st.id === activeStep ? 'w-6 bg-[#0284c7]' : (isStepComplete(st.id) ? 'w-2 bg-emerald-500' : 'w-2 bg-slate-300 dark:bg-white/20')"
+                                    :title="'Tahap ' + st.id + ': ' + st.label"
+                                    class="h-2 rounded-full transition-all cursor-pointer"></button>
+                        </template>
+                    </div>
+
+                    <!-- Inline Save Toast -->
+                    <template x-if="saveToast.message">
+                        <span :class="saveToast.type === 'error' ? 'text-rose-600' : 'text-emerald-600'"
+                              class="text-[11px] font-semibold flex items-center gap-1 animate-pulse ml-2">
+                            <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                            <span x-text="saveToast.message"></span>
+                        </span>
+                    </template>
+                </div>
+
+                <!-- Right: Action & Navigation Buttons -->
+                <div class="flex items-center gap-2">
+                    <!-- Toggle Preview PDF -->
+                    <button type="button" @click="togglePreview()"
+                            :class="showPreview ? 'bg-[#0284c7]/10 text-[#0284c7] border-[#0284c7]/30' : 'border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] text-slate-700 dark:text-slate-200'"
+                            class="px-3.5 py-2 rounded-xl border text-xs font-semibold inline-flex items-center gap-1.5 transition-colors cursor-pointer">
+                        <i data-lucide="panel-left" class="w-3.5 h-3.5"></i>
+                        <span x-text="showPreview ? 'Tutup PDF' : 'Buka PDF (' + previewFiles.length + ')'"></span>
+                    </button>
+
+                    <!-- Simpan Draft Ajax Langsung di Bottom Bar -->
+                    <button type="button" @click="saveDraftAjax()" :disabled="saving"
+                            class="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] hover:bg-slate-50 text-slate-700 dark:text-slate-200 font-semibold inline-flex items-center gap-1.5 cursor-pointer">
+                        <template x-if="!saving">
+                            <i data-lucide="save" class="w-3.5 h-3.5 text-[#0284c7]"></i>
+                        </template>
+                        <template x-if="saving">
+                            <div class="w-3.5 h-3.5 border-2 border-[#0284c7] border-t-transparent rounded-full animate-spin"></div>
+                        </template>
+                        <span x-text="saving ? 'Menyimpan...' : 'Simpan Draft'"></span>
+                    </button>
+
+                    <!-- Tombol Sebelumnya -->
+                    <button type="button" @click="prevStep()" :disabled="activeStep <= 1"
+                            class="px-4 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] text-xs font-semibold text-slate-700 dark:text-slate-200 disabled:opacity-40 inline-flex items-center gap-1.5 cursor-pointer">
+                        <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                        <span>Sebelumnya</span>
+                    </button>
+
+                    <!-- Tombol Selanjutnya / Selesai -->
+                    <template x-if="activeStep < 9">
+                        <button type="button" @click="nextStep()"
+                                class="px-5 py-2 rounded-xl bg-[#0284c7] hover:bg-[#0066D6] text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-sm cursor-pointer transition-colors">
+                            <span>Selanjutnya</span>
+                            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                        </button>
+                    </template>
+                    <template x-if="activeStep === 9">
+                        <button type="submit"
+                                class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-sm cursor-pointer transition-colors">
+                            <i data-lucide="check-circle" class="w-4 h-4"></i>
+                            <span>Simpan &amp; Selesai</span>
+                        </button>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@push('scripts')
 <!-- PDF.js Engine di-load setelah bc20WizardManager siap untuk mencegah race condition -->
 <script src="{{ asset('vendor/pdfjs/pdf.min.js') }}"></script>
 <script>

@@ -41,6 +41,13 @@ class PrivateMediaController extends Controller implements HasMiddleware
             $user->id === $log->employee?->user_id
         );
 
+        if (!$hasValidSignature && !auth()->check()) {
+            if ($request->expectsJson()) {
+                abort(401, 'Unauthenticated.');
+            }
+            return redirect()->guest(route('login'));
+        }
+
         if (!$hasValidSignature && !$isAuthorizedUser) {
             abort(403, 'Akses ditolak: Anda tidak memiliki wewenang atau tautan telah kedaluwarsa sesuai UU PDP No. 27/2022.');
         }
@@ -104,6 +111,13 @@ class PrivateMediaController extends Controller implements HasMiddleware
             auth()->user()->can('setting.manage') ||
             auth()->user()->employee?->id === $employee->id
         );
+
+        if (!$hasValidSignature && !auth()->check()) {
+            if ($request->expectsJson()) {
+                abort(401, 'Unauthenticated.');
+            }
+            return redirect()->guest(route('login'));
+        }
 
         if (!$hasValidSignature && !$isAuthorizedUser) {
             abort(403, 'Akses ditolak: Memerlukan otorisasi HR atau Pimpinan sesuai ketentuan UU PDP.');

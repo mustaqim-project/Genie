@@ -87,12 +87,13 @@
             </button>
 
             @can('document.create')
-            <a href="{{ route('bc20.create') }}" 
+            <button type="button" 
+               onclick="document.getElementById('modal-create-bc20').classList.remove('hidden')"
                class="btn-apple-filled !w-9 !h-9 !p-0 inline-flex items-center justify-center rounded-xl shadow-xs cursor-pointer"
                title="Buat Pengajuan BC 2.0 (PIB) Baru"
                aria-label="Buat Pengajuan BC 2.0 Baru">
                 <i data-lucide="plus" class="w-4.5 h-4.5"></i>
-            </a>
+            </button>
             @endcan
         </div>
     </div>
@@ -559,4 +560,17 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Form Buat Pengajuan BC 2.0 (PIB) Cerdas (Sama seperti Tim Document) -->
+@include('core.components.smart_document_create_modal', [
+    'modalId' => 'modal-create-bc20',
+    'pfx' => 'bc20_idx_',
+    'defaultType' => 'IMPORT',
+    'lockType' => true,
+    'defaultAfterAction' => 'fill_bc_form',
+    'title' => 'Buat Pengajuan Impor BC 2.0 (PIB)',
+    'subtitle' => 'Unggah berkas kargo (B/L, Commercial Invoice, Packing List). Sistem mengekstrak informasi dan membuat draft dokumen PIB BC 2.0 secara otomatis.',
+    'clients' => $clients,
+    'vendors' => $vendors
+])
 @endsection

@@ -437,10 +437,10 @@ class ShipmentProjectController extends Controller implements HasMiddleware
                 $shipment->refresh()->load(['documents', 'items', 'client', 'vendor']);
             }
             $ceisaDoc = $hsCodeService->generatePibOrPebFromPackingList($shipment);
-            $canEditBc20 = auth()->user()?->isSuperAdmin() || auth()->user()?->hasAnyPermission(['document.edit', 'document.edit_after_ceisa']);
+            $canEditBc = auth()->user()?->isSuperAdmin() || auth()->user()?->hasAnyPermission(['document.edit', 'document.edit_after_ceisa']);
             $routeName = ($ceisaDoc->jenis_dokumen === '30')
-                ? 'bc30.show'
-                : ($canEditBc20 ? 'bc20.edit' : 'bc20.show');
+                ? ($canEditBc ? 'bc30.edit' : 'bc30.show')
+                : ($canEditBc ? 'bc20.edit' : 'bc20.show');
 
             // Semua proses unggah dokumen massal (bulk upload) wajib tersimpan sebagai DRAFT untuk ditinjau terlebih dahulu
             if ($isBulkOrFileUpload) {

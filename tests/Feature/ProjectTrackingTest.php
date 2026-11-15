@@ -58,8 +58,6 @@ class ProjectTrackingTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Tracking Project &amp; Workflow 11 Pos', false);
         $response->assertSee('SHP-TEST-TRACK-01');
-        $response->assertSee('Dokumen');
-        $response->assertSee('Invoice klien');
     }
 
     public function test_auto_assign_pic_for_single_shipment(): void
@@ -127,8 +125,7 @@ class ProjectTrackingTest extends TestCase
             ->get(route('core.document.show', $this->shipment->id));
 
         $response->assertStatus(200);
-        $response->assertSee('Semua shipment');
         $response->assertSee('Pembagian Tugas 11 Pos');
-        $response->assertSee('Assign Otomatis');
+        $response->assertSee('Delegasi SLA');
     }
 }

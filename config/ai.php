@@ -13,9 +13,9 @@ return [
     |
     */
 
-    'endpoint' => env('OPENAI_CUSTOMS_ENDPOINT', 'https://r4g77gv.abc-tunnel.us/v1'),
-    'api_key' => env('OPENAI_CUSTOMS_API_KEY', 'sk-59807b51bc76063d-ge0agt-97ac1590'),
-    'default_model' => env('OPENAI_CUSTOMS_MODEL', 'cx/gpt-6-astra'),
+    'endpoint' => env('OPENAI_CUSTOMS_ENDPOINT', 'https://api.openai.com/v1'),
+    'api_key' => env('OPENAI_CUSTOMS_API_KEY', null),
+    'default_model' => env('OPENAI_CUSTOMS_MODEL', 'gpt-4o'),
     'timeout' => env('OPENAI_CUSTOMS_TIMEOUT', 60),
 
     /*

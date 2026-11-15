@@ -3,6 +3,61 @@
 @section('title', 'Review Layar Terbagi — ' . $document->file?->original_name)
 
 @section('content')
+<script>
+window.splitScreenReview = function splitScreenReview() {
+    return {
+        showJumpModal: false,
+        activeFieldId: null,
+        activeBoundingBox: null,
+
+        setActiveField(fieldId, box) {
+            this.activeFieldId = fieldId;
+            this.activeBoundingBox = box;
+        },
+
+        getBoxStyle() {
+            if (!this.activeBoundingBox) return '';
+            const b = this.activeBoundingBox;
+            return `left: ${b.x}px; top: ${b.y}px; width: ${b.width}px; height: ${b.height}px;`;
+        },
+
+        async saveField(fieldId) {
+            const inputEl = this.$refs['field_' + fieldId];
+            if (!inputEl) return;
+
+            const val = inputEl.value;
+
+            try {
+                const res = await fetch(`/core/import/fields/${fieldId}/update`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ corrected_value: val })
+                });
+
+                const data = await res.json();
+                if (data.status === 'success') {
+                    alert('Koreksi berhasil disimpan!');
+                }
+            } catch (err) {
+                alert('Gagal menyimpan koreksi field.');
+            }
+        }
+    };
+};
+
+document.addEventListener('alpine:init', () => {
+    if (window.Alpine && typeof window.Alpine.data === 'function') {
+        window.Alpine.data('splitScreenReview', window.splitScreenReview);
+    }
+});
+if (window.Alpine && typeof window.Alpine.data === 'function') {
+    window.Alpine.data('splitScreenReview', window.splitScreenReview);
+}
+</script>
+
 <div x-data="splitScreenReview()" class="max-w-[1560px] mx-auto px-4 sm:px-6 space-y-4 pt-3 pb-20">
 
     <!-- Header Toolbar -->
@@ -227,50 +282,4 @@
     </div>
 
 </div>
-
-<script>
-function splitScreenReview() {
-    return {
-        showJumpModal: false,
-        activeFieldId: null,
-        activeBoundingBox: null,
-
-        setActiveField(fieldId, box) {
-            this.activeFieldId = fieldId;
-            this.activeBoundingBox = box;
-        },
-
-        getBoxStyle() {
-            if (!this.activeBoundingBox) return '';
-            const b = this.activeBoundingBox;
-            return `left: ${b.x}px; top: ${b.y}px; width: ${b.width}px; height: ${b.height}px;`;
-        },
-
-        async saveField(fieldId) {
-            const inputEl = this.$refs['field_' + fieldId];
-            if (!inputEl) return;
-
-            const val = inputEl.value;
-
-            try {
-                const res = await fetch(`/core/import/fields/${fieldId}/update`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({ corrected_value: val })
-                });
-
-                const data = await res.json();
-                if (data.status === 'success') {
-                    alert('Koreksi berhasil disimpan!');
-                }
-            } catch (err) {
-                alert('Gagal menyimpan koreksi field.');
-            }
-        }
-    }
-}
-</script>
 @endsection

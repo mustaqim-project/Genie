@@ -733,29 +733,48 @@ class ShipmentWorkflowService
 
     /**
      * 7. TIM DO: Kirim Permintaan Invoice Pelayaran Otomatis via Email
+     * AUDIT-HIGH-02: Mendukung pemanggilan fleksibel (email eksplisit & catatan permohonan)
      */
-    public function sendVendorEmailForDo(Shipment $shipment, ?string $customNotes = null): array
+    public function sendVendorEmailForDo(Shipment $shipment, ?string $recipientOrNotes = null, ?string $customNotes = null): array
     {
-        $vendor = $shipment->vendor;
+        $vendor = $shipment->vendor ?? $shipment->shippingVendor;
         $company = SystemSetting::get('company_profile', []);
         $companyName = $company['name'] ?? 'PT AGUNG TRANS SOLUSINDO';
         $companyPhone = $company['phone'] ?? '+62 21 5299 8000';
 
-        $recipient = $vendor?->pic_email ?? 'import.documentation@maersk.com';
+        // Penanganan fleksibilitas argumen:
+        // Pola A: sendVendorEmailForDo($shipment, 'vendor@line.com', 'Catatan')
+        // Pola B: sendVendorEmailForDo($shipment, 'Catatan')
+        $recipient = null;
+        $notes = null;
+
+        if ($customNotes !== null) {
+            $recipient = $recipientOrNotes;
+            $notes = $customNotes;
+        } elseif ($recipientOrNotes !== null && filter_var($recipientOrNotes, FILTER_VALIDATE_EMAIL)) {
+            $recipient = $recipientOrNotes;
+        } else {
+            $notes = $recipientOrNotes;
+        }
+
+        if (empty($recipient)) {
+            $recipient = $vendor?->pic_email ?? 'import.documentation@maersk.com';
+        }
         $vendorName = $vendor?->name ?? 'Pelayaran / Shipping Line';
+        $clientName = $shipment->client?->name ?? 'Klien';
 
         // Format Konten Email Permintaan Invoice Pelayaran
-        $subject = "URGENT: Permintaan Invoice THC & DO Release - BL No: {$shipment->nomor_bl_awb} - {$shipment->client->name}";
+        $subject = "URGENT: Permintaan Invoice THC & DO Release - BL No: {$shipment->nomor_bl_awb} - {$clientName}";
         $body = "Kepada Yth. Tim Finance & Rilis DO {$vendorName},\n\n"
               . "Dengan hormat,\n"
               . "Kami dari {$companyName} (PPJK Resmi) memohon rincian invoice tagihan pelayaran (Ocean Freight, THC, Cleaning, dan DO Fee) untuk pengapalan berikut:\n\n"
               . "- No. B/L : {$shipment->nomor_bl_awb}\n"
               . "- Nama Kapal / Voyage : {$shipment->nama_kapal} / {$shipment->voyage_no}\n"
-              . "- Consignee : {$shipment->client->name}\n"
+              . "- Consignee : {$clientName}\n"
               . "- No. Kontainer : {$shipment->nomor_kontainer}\n"
               . "- Estimasi Tiba (ETA) : " . ($shipment->eta_date ? $shipment->eta_date->format('d/m/Y H:i') : '-') . "\n\n"
               . "Mohon dapat mengirimkan invoice beserta nomor rekening resmi pelayaran agar kami dapat segera melakukan pelunasan sebelum masa Free Time berakhir.\n\n"
-              . ($customNotes ? "Catatan Tambahan: {$customNotes}\n\n" : "")
+              . ($notes ? "Catatan Tambahan: {$notes}\n\n" : "")
               . "Terima kasih atas kerja samanya.\n\n"
               . "Salam,\n"
               . "Tim Delivery Order (DO) - {$companyName}\n"
@@ -770,7 +789,7 @@ class ShipmentWorkflowService
 
         // Kirim email riil via Mailable (FIX-10)
         try {
-            \Illuminate\Support\Facades\Mail::to($recipient)->send(new \App\Mail\VendorDoRequestMail($shipment, $customNotes));
+            \Illuminate\Support\Facades\Mail::to($recipient)->send(new \App\Mail\VendorDoRequestMail($shipment, $notes));
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning("Gagal mengirim email permintaan DO ke vendor {$recipient}: " . $e->getMessage());
         }

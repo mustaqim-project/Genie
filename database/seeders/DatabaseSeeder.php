@@ -43,37 +43,44 @@ class DatabaseSeeder extends Seeder
             $roles[$r['code']] = Role::updateOrCreate(['code' => $r['code']], $r);
         }
 
-        // 2. SEED PERMISSIONS PER 8 KELOMPOK MENU
+        // 2. SEED PERMISSIONS PER KELOMPOK MENU
         $permissionsData = [
             // Dashboard
             ['code' => 'dashboard.view', 'name' => 'Melihat Dashboard', 'module' => 'Dashboard'],
             ['code' => 'dashboard.financial', 'name' => 'Melihat Metrik Finansial Dashboard', 'module' => 'Dashboard'],
             
             // Core Bisnis - Document
-            ['code' => 'document.view', 'name' => 'Melihat Dokumen Pabean', 'module' => 'Core Bisnis - Document'],
+            ['code' => 'document.view', 'name' => 'Melihat Dokumen Pabean & Proyek', 'module' => 'Core Bisnis - Document'],
             ['code' => 'document.create', 'name' => 'Membuat Dokumen PIB/PEB', 'module' => 'Core Bisnis - Document'],
             ['code' => 'document.edit', 'name' => 'Mengedit Dokumen Pabean (Draft)', 'module' => 'Core Bisnis - Document'],
             ['code' => 'document.edit_after_ceisa', 'name' => 'Mengedit Dokumen Pabean Pasca-CEISA', 'module' => 'Core Bisnis - Document'],
             ['code' => 'document.approve', 'name' => 'Menyetujui Dokumen Pabean', 'module' => 'Core Bisnis - Document'],
-            ['code' => 'ceisa.submit', 'name' => 'Mengirim Dokumen ke CEISA 4.0', 'module' => 'Core Bisnis - Document'],
+            ['code' => 'document.verify', 'name' => 'Memverifikasi Berkas Dokumen (OCR Split)', 'module' => 'Core Bisnis - Document'],
+            ['code' => 'document.submit', 'name' => 'Mengirim Dokumen ke CEISA 4.0', 'module' => 'Core Bisnis - Document'],
+            ['code' => 'ceisa.submit', 'name' => 'Mengirim Dokumen ke CEISA 4.0 (API)', 'module' => 'Core Bisnis - Document'],
             ['code' => 'workflow.rollback_stage', 'name' => 'Membuka & Mengembalikan Pos Alur Sebelumnya', 'module' => 'Core Bisnis - Document'],
 
             // Core Bisnis - DO
             ['code' => 'do.view', 'name' => 'Melihat Data Delivery Order', 'module' => 'Core Bisnis - DO'],
             ['code' => 'do.manage', 'name' => 'Mengelola DO & Pelayaran', 'module' => 'Core Bisnis - DO'],
+            ['code' => 'do.process', 'name' => 'Memproses Penebusan DO Pelayaran', 'module' => 'Core Bisnis - DO'],
+            ['code' => 'do.release', 'name' => 'Validasi Rilis DO & SP2', 'module' => 'Core Bisnis - DO'],
 
             // Core Bisnis - Traffic
-            ['code' => 'traffic.view', 'name' => 'Melihat Data Traffic', 'module' => 'Core Bisnis - Traffic'],
+            ['code' => 'traffic.view', 'name' => 'Melihat Data Traffic & Pelabuhan', 'module' => 'Core Bisnis - Traffic'],
             ['code' => 'traffic.manage', 'name' => 'Mengelola Gate Out & Vendor Trucking', 'module' => 'Core Bisnis - Traffic'],
+            ['code' => 'traffic.process', 'name' => 'Memproses Surat Jalan & Jadwal Pengiriman', 'module' => 'Core Bisnis - Traffic'],
             ['code' => 'traffic.behandle', 'name' => 'Eksekusi Pemeriksaan Lapangan (Behandle)', 'module' => 'Core Bisnis - Traffic'],
+            ['code' => 'traffic.gateout', 'name' => 'Perekaman Gate Out TPS & Bukti Serah Terima (POD)', 'module' => 'Core Bisnis - Traffic'],
 
             // HRM
             ['code' => 'hrm.view', 'name' => 'Melihat Data Karyawan & Absensi', 'module' => 'HRM'],
             ['code' => 'hrm.manage', 'name' => 'Mengelola Pegawai, Cuti & Payroll', 'module' => 'HRM'],
 
             // CRM
-            ['code' => 'crm.view', 'name' => 'Melihat CRM & Inbox WhatsApp', 'module' => 'CRM'],
-            ['code' => 'crm.manage', 'name' => 'Membalas Pesan & Kelola Pipeline', 'module' => 'CRM'],
+            ['code' => 'crm.view', 'name' => 'Melihat CRM, Klien & Kotak Masuk', 'module' => 'CRM'],
+            ['code' => 'crm.manage', 'name' => 'Membalas Pesan, Kelola Klien & Media Sosial', 'module' => 'CRM'],
+            ['code' => 'crm.deal', 'name' => 'Menyetujui Penawaran & Konversi ke Sales Order', 'module' => 'CRM'],
 
             // Finance
             ['code' => 'finance.view', 'name' => 'Melihat Tagihan & Pembayaran', 'module' => 'Finance'],
@@ -84,11 +91,11 @@ class DatabaseSeeder extends Seeder
             ['code' => 'finance.ap_approve', 'name' => 'Menyetujui Tagihan Hutang Vendor (AP Approval)', 'module' => 'Finance'],
 
             // Accounting
-            ['code' => 'accounting.view', 'name' => 'Melihat Laporan Laba Rugi & Neraca', 'module' => 'Accounting'],
+            ['code' => 'accounting.view', 'name' => 'Melihat Laporan Laba Rugi, Neraca & GL', 'module' => 'Accounting'],
             ['code' => 'accounting.manage', 'name' => 'Mengelola COA & Jurnal Manual', 'module' => 'Accounting'],
 
             // AI Agent
-            ['code' => 'ai.view', 'name' => 'Melihat Laporan Proaktif AI', 'module' => 'AI Agent'],
+            ['code' => 'ai.view', 'name' => 'Melihat Laporan Proaktif AI & Asisten HS', 'module' => 'AI Agent'],
             ['code' => 'ai.approve', 'name' => 'Menyetujui Usulan Aksi AI Agent', 'module' => 'AI Agent'],
 
             // Setting
@@ -113,6 +120,7 @@ class DatabaseSeeder extends Seeder
             $permissions['document.view']->id,
             $permissions['document.create']->id,
             $permissions['document.edit']->id,
+            $permissions['document.verify']->id,
         ]);
         $roles['R-DOC-SPV']->permissions()->sync([
             $permissions['dashboard.view']->id,
@@ -121,6 +129,8 @@ class DatabaseSeeder extends Seeder
             $permissions['document.edit']->id,
             $permissions['document.edit_after_ceisa']->id,
             $permissions['document.approve']->id,
+            $permissions['document.verify']->id,
+            $permissions['document.submit']->id,
             $permissions['ceisa.submit']->id,
             $permissions['workflow.rollback_stage']->id,
         ]);
@@ -130,6 +140,8 @@ class DatabaseSeeder extends Seeder
             $permissions['dashboard.view']->id,
             $permissions['do.view']->id,
             $permissions['do.manage']->id,
+            $permissions['do.process']->id,
+            $permissions['do.release']->id,
         ]);
 
         // R-TRF & R-FLD
@@ -137,10 +149,13 @@ class DatabaseSeeder extends Seeder
             $permissions['dashboard.view']->id,
             $permissions['traffic.view']->id,
             $permissions['traffic.manage']->id,
+            $permissions['traffic.process']->id,
+            $permissions['traffic.gateout']->id,
         ]);
         $roles['R-FLD']->permissions()->sync([
             $permissions['traffic.view']->id,
             $permissions['traffic.behandle']->id,
+            $permissions['traffic.gateout']->id,
         ]);
 
         // R-FIN
@@ -152,6 +167,7 @@ class DatabaseSeeder extends Seeder
             $permissions['finance.invoice']->id,
             $permissions['finance.pay']->id,
             $permissions['finance.bill']->id,
+            $permissions['finance.ap_approve']->id,
             $permissions['accounting.view']->id,
             $permissions['accounting.manage']->id,
         ]);
@@ -174,7 +190,25 @@ class DatabaseSeeder extends Seeder
             $permissions['document.view']->id,
             $permissions['crm.view']->id,
             $permissions['crm.manage']->id,
+            $permissions['crm.deal']->id,
         ]);
+
+        if (isset($roles['R-MGR'])) {
+            $roles['R-MGR']->permissions()->sync([
+                $permissions['dashboard.view']->id,
+                $permissions['dashboard.financial']->id,
+                $permissions['document.view']->id,
+                $permissions['document.approve']->id,
+                $permissions['do.view']->id,
+                $permissions['traffic.view']->id,
+                $permissions['hrm.view']->id,
+                $permissions['crm.view']->id,
+                $permissions['finance.view']->id,
+                $permissions['finance.ap_approve']->id,
+                $permissions['accounting.view']->id,
+                $permissions['ai.view']->id,
+            ]);
+        }
 
         // 3. SEED AKUN PENGGUNA RESMI PER PERAN
         $usersData = [

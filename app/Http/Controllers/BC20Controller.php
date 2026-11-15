@@ -134,7 +134,10 @@ class BC20Controller extends Controller implements HasMiddleware
             'non_lartas_docs' => $nonLartasDocsCount,
         ];
 
-        return view('bc20.index', compact('documents', 'stats'));
+        $clients = \App\Models\Client::orderBy('name')->get();
+        $vendors = \App\Models\ShippingVendor::orderBy('name')->get();
+
+        return view('bc20.index', compact('documents', 'stats', 'clients', 'vendors'));
     }
 
     public function create(Request $request)
@@ -156,7 +159,10 @@ class BC20Controller extends Controller implements HasMiddleware
         $activeValuta = $selectedShipment->currency ?? 'USD';
         $activeKurs = $this->kursService->getActiveKurs($activeValuta);
 
-        return view('bc20.create', compact('defaultNomorAju', 'kantorList', 'shipments', 'selectedShipment', 'activeKurs'));
+        $clients = \App\Models\Client::orderBy('name')->get();
+        $vendors = \App\Models\ShippingVendor::orderBy('name')->get();
+
+        return view('bc20.create', compact('defaultNomorAju', 'kantorList', 'shipments', 'selectedShipment', 'activeKurs', 'clients', 'vendors'));
     }
 
     public function store(Request $request)

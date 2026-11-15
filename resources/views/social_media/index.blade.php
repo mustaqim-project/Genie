@@ -1,8 +1,115 @@
 @extends('layouts.app')
 
-@section('title', 'Media Sosial Multi-Channel - PT Agung Trans Logistics')
+@section('title', 'Media Sosial Multi-Channel - ' . (\App\Models\SystemSetting::get('company_profile')['brand_name'] ?? 'GENIE ERP'))
 
 @section('content')
+<script>
+window.socialComposerManager = function socialComposerManager() {
+    return {
+        openComposerModal: false,
+        selectedAccounts: [
+            @foreach($accounts as $acc)
+                '{{ $acc->id }}',
+            @endforeach
+        ],
+        allAccountIds: [
+            @foreach($accounts as $acc)
+                '{{ $acc->id }}',
+            @endforeach
+        ],
+        selectedFormat: 'photo',
+        aspectRatio: '4:5',
+        mediaFitMode: 'cover',
+        previewPlatform: 'linkedin',
+        captionText: '🚢 Update Jadwal Kapal Langsung (Direct Service) Pelayaran Shanghai - Tanjung Priok.\n\nTersedia space kontainer FCL 20ft & 40ft HC dengan transit time 7 hari. Hubungi tim kepabeanan dan freight forwarder kami untuk booking slot minggu ini!\n\n#CustomsClearance #FreightForwarding #BeaCukai #EksporImpor #Logistics',
+        isScheduled: false,
+        scheduledAt: '',
+        isDragging: false,
+        filePreviewUrl: null,
+        fileName: '',
+        fileSize: '',
+        fileType: 'image',
+
+        get currentPlatformLimit() {
+            const limits = {
+                linkedin: 3000,
+                instagram: 2200,
+                facebook: 5000,
+                tiktok: 2200
+            };
+            return limits[this.previewPlatform] || 3000;
+        },
+
+        get isCaptionExceeded() {
+            return this.captionText.length > this.currentPlatformLimit;
+        },
+
+        toggleSelectAll() {
+            if (this.selectedAccounts.length === this.allAccountIds.length) {
+                this.selectedAccounts = [];
+            } else {
+                this.selectedAccounts = [...this.allAccountIds];
+            }
+        },
+
+        addHashtag(tag) {
+            if (!this.captionText.includes(tag)) {
+                this.captionText = this.captionText.trim() + ' ' + tag;
+            }
+        },
+
+        handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                this.processFile(file);
+            }
+        },
+
+        handleFileDrop(event) {
+            this.isDragging = false;
+            const file = event.dataTransfer.files[0];
+            if (file) {
+                const input = document.getElementById('media_file_input');
+                if (input) {
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    input.files = dataTransfer.files;
+                }
+                this.processFile(file);
+            }
+        },
+
+        processFile(file) {
+            this.fileName = file.name;
+            this.fileSize = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+            this.fileType = file.type.startsWith('video/') ? 'video' : 'image';
+            this.filePreviewUrl = URL.createObjectURL(file);
+            if (this.fileType === 'video') {
+                this.selectedFormat = 'video';
+                this.aspectRatio = '16:9';
+            }
+        },
+
+        clearUploadedFile() {
+            this.filePreviewUrl = null;
+            this.fileName = '';
+            this.fileSize = '';
+            const input = document.getElementById('media_file_input');
+            if (input) input.value = '';
+        }
+    };
+};
+
+document.addEventListener('alpine:init', () => {
+    if (window.Alpine && typeof window.Alpine.data === 'function') {
+        window.Alpine.data('socialComposerManager', window.socialComposerManager);
+    }
+});
+if (window.Alpine && typeof window.Alpine.data === 'function') {
+    window.Alpine.data('socialComposerManager', window.socialComposerManager);
+}
+</script>
+
 <div class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12" x-data="socialComposerManager()">
 
     <!-- 1. BENTO HEADER -->
@@ -570,103 +677,4 @@
     </div>
 
 </div>
-
-<!-- Alpine JS Component Logic -->
-<script>
-function socialComposerManager() {
-    return {
-        openComposerModal: false,
-        selectedAccounts: [
-            @foreach($accounts as $acc)
-                '{{ $acc->id }}',
-            @endforeach
-        ],
-        allAccountIds: [
-            @foreach($accounts as $acc)
-                '{{ $acc->id }}',
-            @endforeach
-        ],
-        selectedFormat: 'photo',
-        aspectRatio: '4:5',
-        mediaFitMode: 'cover',
-        previewPlatform: 'linkedin',
-        captionText: '🚢 Update Jadwal Kapal Langsung (Direct Service) Pelayaran Shanghai - Tanjung Priok.\n\nTersedia space kontainer FCL 20ft & 40ft HC dengan transit time 7 hari. Hubungi tim kepabeanan dan freight forwarder kami untuk booking slot minggu ini!\n\n#CustomsClearance #FreightForwarding #BeaCukai #EksporImpor #AgungTransLogistics',
-        isScheduled: false,
-        scheduledAt: '',
-        isDragging: false,
-        filePreviewUrl: null,
-        fileName: '',
-        fileSize: '',
-        fileType: 'image',
-
-        get currentPlatformLimit() {
-            const limits = {
-                linkedin: 3000,
-                instagram: 2200,
-                facebook: 5000,
-                tiktok: 2200
-            };
-            return limits[this.previewPlatform] || 3000;
-        },
-
-        get isCaptionExceeded() {
-            return this.captionText.length > this.currentPlatformLimit;
-        },
-
-        toggleSelectAll() {
-            if (this.selectedAccounts.length === this.allAccountIds.length) {
-                this.selectedAccounts = [];
-            } else {
-                this.selectedAccounts = [...this.allAccountIds];
-            }
-        },
-
-        addHashtag(tag) {
-            if (!this.captionText.includes(tag)) {
-                this.captionText = this.captionText.trim() + ' ' + tag;
-            }
-        },
-
-        handleFileSelect(event) {
-            const file = event.target.files[0];
-            if (file) {
-                this.processFile(file);
-            }
-        },
-
-        handleFileDrop(event) {
-            this.isDragging = false;
-            const file = event.dataTransfer.files[0];
-            if (file) {
-                const input = document.getElementById('media_file_input');
-                if (input) {
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(file);
-                    input.files = dataTransfer.files;
-                }
-                this.processFile(file);
-            }
-        },
-
-        processFile(file) {
-            this.fileName = file.name;
-            this.fileSize = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
-            this.fileType = file.type.startsWith('video/') ? 'video' : 'image';
-            this.filePreviewUrl = URL.createObjectURL(file);
-            if (this.fileType === 'video') {
-                this.selectedFormat = 'video';
-                this.aspectRatio = '16:9';
-            }
-        },
-
-        clearUploadedFile() {
-            this.filePreviewUrl = null;
-            this.fileName = '';
-            this.fileSize = '';
-            const input = document.getElementById('media_file_input');
-            if (input) input.value = '';
-        }
-    }
-}
-</script>
 @endsection

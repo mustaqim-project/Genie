@@ -274,6 +274,14 @@ class DocumentExtractionService
 
         // 3. PDF Parsing via Smalot\PdfParser (Professional CMap & Font glyph handler)
         if ($ext === 'pdf' || str_contains($mime, 'pdf')) {
+            // Enterprise Hardening: Validasi keberadaan file dan batasan ukuran
+            if (!file_exists($path) || filesize($path) === 0) {
+                return "FILENAME: {$origName} (Empty or non-existent file)";
+            }
+            if (filesize($path) > 25 * 1024 * 1024) {
+                return "FILENAME: {$origName} (File exceeds 25MB limit)";
+            }
+
             try {
                 if (class_exists(\Smalot\PdfParser\Parser::class)) {
                     $parser = new \Smalot\PdfParser\Parser();
@@ -287,17 +295,28 @@ class DocumentExtractionService
                 // Fallback to internal extractor
             }
 
-            // Fallback: Direct stream extraction
-            $content = (string) file_get_contents($path);
+            // Fallback: Direct stream extraction dengan verifikasi magic header %PDF-
+            $header = (string) @file_get_contents($path, false, null, 0, 1024);
+            if (!str_contains($header, '%PDF-')) {
+                return "FILENAME: {$origName} (Invalid PDF Header)";
+            }
+
+            // Batasi buffer file ke 10MB untuk cegah Memory / DoS Exhaustion
+            $content = (string) file_get_contents($path, false, null, 0, 10 * 1024 * 1024);
             $plainText = '';
 
-            if (preg_match_all('/stream[\r\n]+(.*?)[\r\n]+endstream/s', $content, $matches)) {
+            // Perlindungan Catastrophic Regex Backtracking (AUDIT-CRIT-02)
+            $previousLimit = ini_get('pcre.backtrack_limit');
+            @ini_set('pcre.backtrack_limit', '1000000');
+
+            if (preg_match_all('/stream[\r\n]+([^\r\n]{0,2000000}?)[\r\n]+endstream/s', $content, $matches)) {
                 foreach ($matches[1] as $stream) {
                     $uncompressed = @gzuncompress($stream);
                     if ($uncompressed === false) {
                         $uncompressed = @gzinflate($stream);
                     }
                     if ($uncompressed !== false) {
+                        $uncompressed = substr($uncompressed, 0, 500000);
                         if (preg_match_all('/\((.*?)\)\s*Tj/s', $uncompressed, $subMatches)) {
                             $plainText .= implode(' ', $subMatches[1]) . ' ';
                         } elseif (preg_match_all('/\[(.*?)\]\s*TJ/s', $uncompressed, $tjMatches)) {
@@ -306,6 +325,7 @@ class DocumentExtractionService
                     }
                 }
             }
+            @ini_set('pcre.backtrack_limit', $previousLimit ?: '1000000');
 
             if (!empty(trim($plainText))) {
                 return $plainText;

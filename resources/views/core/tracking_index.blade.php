@@ -198,28 +198,27 @@
         <!-- ============================================================== -->
         <!-- MODE 1: TRACKING DOK (TAMPILAN EXCEL OPERASIONAL ATRANS)      -->
         <!-- ============================================================== -->
-        <div class="overflow-x-auto custom-scrollbar">
-            <table class="w-full text-left border-collapse min-w-[1620px] text-[11px]">
+        <div class="overflow-x-auto custom-scrollbar relative">
+            <table class="w-full text-left border-separate border-spacing-0 min-w-max text-[11px] whitespace-nowrap">
                 <thead>
-                    <tr class="border-b border-black/5 dark:border-white/5 bg-black/[0.025] dark:bg-white/[0.03] text-[10px] font-bold uppercase tracking-wider text-black/55 dark:text-white/55">
-                        <th class="py-2.5 px-3 w-[44px] text-center">No</th>
-                        <th class="py-2.5 px-3 w-[210px] sticky left-0 z-10 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-md">Importir / Eksportir</th>
-                        <th class="py-2.5 px-2.5 text-center">Tgl Terima</th>
-                        <th class="py-2.5 px-2.5">Kelengkapan Dokumen</th>
-                        <th class="py-2.5 px-2.5 w-[150px]">Komoditi &amp; No BL</th>
-                        <th class="py-2.5 px-2.5">Vessel / Pelayaran</th>
-                        <th class="py-2.5 px-2.5">POL / POD</th>
-                        <th class="py-2.5 px-2.5">Vol &amp; Kontainer</th>
-                        <th class="py-2.5 px-2.5 text-center">ETA / ETD</th>
-                        <th class="py-2.5 px-2.5">AJU &amp; NOPEN</th>
-                        <th class="py-2.5 px-2.5 text-center">Respon (SPJM / SPPB / NPD / DNP / NHI)</th>
-                        <th class="py-2.5 px-2.5 text-center">DO &amp; Foto SPJM/Segel</th>
-                        <th class="py-2.5 px-2.5">Trucking &amp; Delv</th>
-                        <th class="py-2.5 px-2.5">ODOO / Fisik</th>
-                        <th class="py-2.5 px-3 text-right">Aksi</th>
+                    <tr class="bg-black/[0.025] dark:bg-white/[0.03] text-[10px] font-bold uppercase tracking-wider text-black/55 dark:text-white/55 whitespace-nowrap">
+                        <th class="py-2.5 px-3 min-w-[260px] sticky left-0 z-30 bg-white dark:bg-[#1C1C1E] border-b border-r border-black/10 dark:border-white/10 shadow-[4px_0_8px_rgba(0,0,0,0.04)] whitespace-nowrap">No &amp; Importir / Eksportir</th>
+                        <th class="py-2.5 px-3 text-center border-b border-black/10 dark:border-white/10 whitespace-nowrap">Tgl Terima</th>
+                        <th class="py-2.5 px-3 border-b border-black/10 dark:border-white/10 whitespace-nowrap">Kelengkapan Dokumen</th>
+                        <th class="py-2.5 px-3 border-b border-black/10 dark:border-white/10 whitespace-nowrap min-w-[160px]">Komoditi &amp; No BL</th>
+                        <th class="py-2.5 px-3 border-b border-black/10 dark:border-white/10 whitespace-nowrap min-w-[170px]">Vessel / Pelayaran</th>
+                        <th class="py-2.5 px-3 border-b border-black/10 dark:border-white/10 whitespace-nowrap min-w-[160px]">POL / POD</th>
+                        <th class="py-2.5 px-3 border-b border-black/10 dark:border-white/10 whitespace-nowrap min-w-[160px]">Vol &amp; Kontainer</th>
+                        <th class="py-2.5 px-3 text-center border-b border-black/10 dark:border-white/10 whitespace-nowrap">ETA / ETD</th>
+                        <th class="py-2.5 px-3 border-b border-black/10 dark:border-white/10 whitespace-nowrap min-w-[130px]">AJU &amp; NOPEN</th>
+                        <th class="py-2.5 px-3 text-center border-b border-black/10 dark:border-white/10 whitespace-nowrap">Respon (SPJM / SPPB / NPD / DNP / NHI)</th>
+                        <th class="py-2.5 px-3 text-center border-b border-black/10 dark:border-white/10 whitespace-nowrap">DO &amp; Foto SPJM/Segel</th>
+                        <th class="py-2.5 px-3 border-b border-black/10 dark:border-white/10 whitespace-nowrap min-w-[140px]">Trucking &amp; Delv</th>
+                        <th class="py-2.5 px-3 text-center border-b border-black/10 dark:border-white/10 whitespace-nowrap">ODOO / Fisik</th>
+                        <th class="py-2.5 px-3 text-right sticky right-0 z-30 bg-white dark:bg-[#1C1C1E] border-b border-l border-black/10 dark:border-white/10 shadow-[-6px_0_12px_rgba(0,0,0,0.06)] whitespace-nowrap min-w-[140px]">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-black/5 dark:divide-white/5">
+                <tbody class="divide-y-0">
                     @forelse($shipments as $rowIdx => $s)
                     @php
                         $checklist = $s->tracking_checklist;
@@ -228,85 +227,85 @@
                         $photoCount = $s->inspectionPhotos->count();
                         $ceisa = $s->ceisaDocument;
                     @endphp
-                    <tr class="hover:bg-black/[0.015] dark:hover:bg-white/[0.02] transition-colors">
-                        <td class="py-2.5 px-3 text-center font-mono text-black/45 dark:text-white/45">{{ $rowIdx + 1 }}</td>
-                        <td class="py-2.5 px-3 sticky left-0 z-10 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-md">
-                            <div class="flex items-center gap-1.5">
-                                <span class="px-1.5 py-0.2 rounded text-[9px] font-bold {{ $isExport ? 'bg-[#AF52DE]/15 text-[#AF52DE]' : 'bg-[#0284c7]/15 text-[#0284c7]' }}">
+                    <tr class="hover:bg-black/[0.015] dark:hover:bg-white/[0.02] transition-colors whitespace-nowrap group">
+                        <td class="py-2.5 px-3 sticky left-0 z-20 bg-white dark:bg-[#1C1C1E] group-hover:bg-[#F9F9FA] dark:group-hover:bg-[#202022] border-b border-r border-black/5 dark:border-white/5 shadow-[4px_0_8px_rgba(0,0,0,0.04)] whitespace-nowrap">
+                            <div class="flex items-center gap-2 whitespace-nowrap">
+                                <span class="text-[10px] font-mono text-black/40 dark:text-white/40 w-4 text-center shrink-0">{{ $rowIdx + 1 }}</span>
+                                <span class="px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0 {{ $isExport ? 'bg-[#AF52DE]/15 text-[#AF52DE]' : 'bg-[#0284c7]/15 text-[#0284c7]' }}">
                                     {{ $isExport ? 'EXP' : 'IMP' }}
                                 </span>
-                                <a href="{{ route('core.document.show', $s->id) }}" class="font-bold text-black dark:text-white hover:text-[#0284c7] truncate max-w-[155px]">
+                                <a href="{{ route('core.document.show', $s->id) }}" class="font-bold text-black dark:text-white hover:text-[#0284c7] whitespace-nowrap">
                                     {{ $s->client?->name ?? 'N/A' }}
                                 </a>
                             </div>
-                            <div class="text-[10px] font-mono text-black/50 dark:text-white/50 mt-0.5">{{ $s->project_no }}</div>
+                            <div class="text-[10px] font-mono text-black/50 dark:text-white/50 mt-0.5 pl-6 whitespace-nowrap">{{ $s->project_no }}</div>
                         </td>
-                        <td class="py-2.5 px-2.5 text-center font-mono whitespace-nowrap">
+                        <td class="py-2.5 px-3 text-center font-mono border-b border-black/5 dark:border-white/5 whitespace-nowrap">
                             {{ ($s->doc_received_at ?? $s->created_at)?->format('d/m/y') }}
                         </td>
-                        <td class="py-2.5 px-2.5">
-                            <div class="flex flex-wrap gap-1 max-w-[205px]">
+                        <td class="py-2.5 px-3 border-b border-black/5 dark:border-white/5 whitespace-nowrap">
+                            <div class="flex items-center gap-1 whitespace-nowrap">
                                 @foreach($checklist as $code => $chk)
                                 @php $ok = !empty($chk['checked']); @endphp
                                 <a href="{{ route('core.document.show', $s->id) }}#tab-docs"
-                                   class="px-1.5 py-0.5 rounded-[5px] text-[9px] font-bold border transition-colors {{ $ok ? 'bg-[#34C759]/15 border-[#34C759]/30 text-[#248A3D] dark:text-[#30D158]' : 'bg-black/[0.03] dark:bg-white/[0.04] border-black/10 dark:border-white/10 text-black/35 dark:text-white/35' }}"
+                                   class="px-1.5 py-0.5 rounded-[5px] text-[9px] font-bold border transition-colors whitespace-nowrap {{ $ok ? 'bg-[#34C759]/15 border-[#34C759]/30 text-[#248A3D] dark:text-[#30D158]' : 'bg-black/[0.03] dark:bg-white/[0.04] border-black/10 dark:border-white/10 text-black/35 dark:text-white/35' }}"
                                    title="{{ $chk['label'] ?? $code }}: {{ $chk['status'] ?? ($ok ? 'UPLOADED' : 'MISSING') }}">
                                     {{ $chk['label'] ?? $code }}
                                 </a>
                                 @endforeach
                             </div>
                         </td>
-                        <td class="py-2.5 px-2.5">
-                            <div class="font-semibold text-black dark:text-white truncate max-w-[145px]" title="{{ $s->commodity_summary }}">
+                        <td class="py-2.5 px-3 border-b border-black/5 dark:border-white/5 whitespace-nowrap">
+                            <div class="font-semibold text-black dark:text-white whitespace-nowrap" title="{{ $s->commodity_summary }}">
                                 {{ $s->commodity_summary ?: '-' }}
                             </div>
-                            <div class="font-mono text-[10px] text-[#0284c7] truncate max-w-[145px]" title="{{ $s->nomor_bl_awb }}">
+                            <div class="font-mono text-[10px] text-[#0284c7] whitespace-nowrap" title="{{ $s->nomor_bl_awb }}">
                                 {{ $s->nomor_bl_awb ?: '-' }}
                             </div>
                         </td>
-                        <td class="py-2.5 px-2.5">
-                            <div class="font-medium text-black dark:text-white truncate max-w-[130px]">{{ $s->nama_kapal ?: '-' }}</div>
-                            <div class="text-[10px] text-black/50 dark:text-white/50 truncate max-w-[130px]">
+                        <td class="py-2.5 px-3 border-b border-black/5 dark:border-white/5 whitespace-nowrap">
+                            <div class="font-medium text-black dark:text-white whitespace-nowrap">{{ $s->nama_kapal ?: '-' }}</div>
+                            <div class="text-[10px] text-black/50 dark:text-white/50 whitespace-nowrap">
                                 {{ $s->shippingVendor?->name ?? '-' }} {{ $s->voyage_no ? '· ' . $s->voyage_no : '' }}
                             </div>
                         </td>
-                        <td class="py-2.5 px-2.5">
-                            <div class="text-[10px] text-black/70 dark:text-white/70 truncate max-w-[125px]">{{ $s->pelabuhan_muat ?: '-' }}</div>
-                            <div class="text-[10px] font-semibold text-black dark:text-white truncate max-w-[125px]">→ {{ $s->pelabuhan_bongkar ?: '-' }}</div>
+                        <td class="py-2.5 px-3 border-b border-black/5 dark:border-white/5 whitespace-nowrap">
+                            <div class="text-[10px] text-black/70 dark:text-white/70 whitespace-nowrap">{{ $s->pelabuhan_muat ?: '-' }}</div>
+                            <div class="text-[10px] font-semibold text-black dark:text-white whitespace-nowrap">→ {{ $s->pelabuhan_bongkar ?: '-' }}</div>
                         </td>
-                        <td class="py-2.5 px-2.5">
-                            <div class="font-mono font-semibold text-black dark:text-white">
+                        <td class="py-2.5 px-3 border-b border-black/5 dark:border-white/5 whitespace-nowrap">
+                            <div class="font-mono font-semibold text-black dark:text-white whitespace-nowrap">
                                 {{ $s->total_kontainer ?? 1 }} Ctr · {{ number_format((float) $s->total_bruto, 0) }} KG
                             </div>
-                            <div class="font-mono text-[10px] text-black/50 dark:text-white/50 truncate max-w-[140px]" title="{{ $s->nomor_kontainer }}">
+                            <div class="font-mono text-[10px] text-black/50 dark:text-white/50 whitespace-nowrap" title="{{ $s->nomor_kontainer }}">
                                 {{ $s->nomor_kontainer ?: '-' }}
                             </div>
                         </td>
-                        <td class="py-2.5 px-2.5 text-center font-mono whitespace-nowrap">
+                        <td class="py-2.5 px-3 text-center font-mono border-b border-black/5 dark:border-white/5 whitespace-nowrap">
                             <div>{{ $s->eta_date?->format('d/m/y') ?: '-' }}</div>
                             @if($s->etd_date)
-                            <div class="text-[9px] text-black/45 dark:text-white/45">ETD {{ $s->etd_date->format('d/m/y') }}</div>
+                            <div class="text-[9px] text-black/45 dark:text-white/45 whitespace-nowrap">ETD {{ $s->etd_date->format('d/m/y') }}</div>
                             @endif
                         </td>
-                        <td class="py-2.5 px-2.5">
-                            <div class="font-mono text-[10px] font-semibold text-black dark:text-white">
+                        <td class="py-2.5 px-3 border-b border-black/5 dark:border-white/5 whitespace-nowrap">
+                            <div class="font-mono text-[10px] font-semibold text-black dark:text-white whitespace-nowrap">
                                 {{ $ceisa?->nomor_aju ? substr($ceisa->nomor_aju, -8) : 'Belum AJU' }}
                             </div>
-                            <div class="font-mono text-[10px] text-black/55 dark:text-white/55">
+                            <div class="font-mono text-[10px] text-black/55 dark:text-white/55 whitespace-nowrap">
                                 {{ $ceisa?->nomor_daftar ? 'Nopen ' . $ceisa->nomor_daftar : '-' }}
                                 {{ $ceisa?->tanggal_daftar ? ' (' . \Carbon\Carbon::parse($ceisa->tanggal_daftar)->format('d/m') . ')' : '' }}
                             </div>
                             @if($ceisa)
                                 @if($ceisa->jenis_dokumen === '20')
                                     <a href="{{ route('bc20.edit', $ceisa->id) }}"
-                                       class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-[6px] text-[10px] font-bold bg-[#0284c7]/10 text-[#0284c7] hover:bg-[#0284c7] hover:text-white transition-colors"
+                                       class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-[6px] text-[10px] font-bold bg-[#0284c7]/10 text-[#0284c7] hover:bg-[#0284c7] hover:text-white transition-colors whitespace-nowrap"
                                        title="Buka Form Edit BC 2.0 (PIB Impor)">
                                         <i data-lucide="edit-3" class="w-2.5 h-2.5"></i>
                                         <span>Edit BC 2.0</span>
                                     </a>
                                 @else
                                     <a href="{{ route('bc30.show', $ceisa->id) }}"
-                                       class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-[6px] text-[10px] font-bold bg-[#AF52DE]/10 text-[#AF52DE] hover:bg-[#AF52DE] hover:text-white transition-colors"
+                                       class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-[6px] text-[10px] font-bold bg-[#AF52DE]/10 text-[#AF52DE] hover:bg-[#AF52DE] hover:text-white transition-colors whitespace-nowrap"
                                        title="Buka Dokumen BC 3.0 (PEB Ekspor)">
                                         <i data-lucide="file-text" class="w-2.5 h-2.5"></i>
                                         <span>BC 3.0</span>
@@ -314,8 +313,8 @@
                                 @endif
                             @endif
                         </td>
-                        <td class="py-2.5 px-2.5">
-                            <div class="flex flex-wrap items-center justify-center gap-1">
+                        <td class="py-2.5 px-3 whitespace-nowrap text-center border-b border-black/5 dark:border-white/5">
+                            <div class="inline-flex items-center justify-center gap-1 whitespace-nowrap">
                                 @foreach(['spjm' => 'SPJM', 'sppb' => 'SPPB', 'npd' => 'NPD', 'dnp' => 'DNP', 'nhi' => 'NHI'] as $flagKey => $flagLabel)
                                 @php
                                     $isOn = !empty($responses[strtoupper($flagKey)]);
@@ -328,44 +327,46 @@
                                 @endphp
                                 <button type="button"
                                         onclick="toggleTrackingFlag('{{ $s->id }}', '{{ $flagKey }}', this)"
-                                        class="px-1.5 py-0.5 rounded-[5px] text-[9px] font-bold transition-all cursor-pointer {{ $isOn ? $onClass : 'bg-black/[0.04] dark:bg-white/[0.06] text-black/35 dark:text-white/35 hover:text-black' }}"
+                                        class="px-1.5 py-0.5 rounded-[5px] text-[9px] font-bold transition-all cursor-pointer whitespace-nowrap {{ $isOn ? $onClass : 'bg-black/[0.04] dark:bg-white/[0.06] text-black/35 dark:text-white/35 hover:text-black' }}"
                                         title="Klik untuk toggle status {{ $flagLabel }}">
                                     {{ $flagLabel }}
                                 </button>
                                 @endforeach
                             </div>
                         </td>
-                        <td class="py-2.5 px-2.5 text-center">
-                            <div class="text-[10px] font-semibold {{ $s->do_is_released ? 'text-[#248A3D] dark:text-[#30D158]' : 'text-black/45 dark:text-white/45' }}">
+                        <td class="py-2.5 px-3 text-center border-b border-black/5 dark:border-white/5 whitespace-nowrap">
+                            <div class="text-[10px] font-semibold whitespace-nowrap {{ $s->do_is_released ? 'text-[#248A3D] dark:text-[#30D158]' : 'text-black/45 dark:text-white/45' }}">
                                 {{ $s->do_is_released ? ($s->nomor_do ?: 'DO Rilis') : 'DO Wait' }}
                             </div>
                             <a href="{{ route('core.document.show', $s->id) }}#tab-ops"
-                               class="inline-flex items-center gap-1 mt-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold {{ $photoCount > 0 ? 'bg-[#0284c7]/15 text-[#0284c7]' : 'bg-black/[0.04] dark:bg-white/[0.06] text-black/45 dark:text-white/45' }}">
+                               class="inline-flex items-center gap-1 mt-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold whitespace-nowrap {{ $photoCount > 0 ? 'bg-[#0284c7]/15 text-[#0284c7]' : 'bg-black/[0.04] dark:bg-white/[0.06] text-black/45 dark:text-white/45' }}">
                                 <i data-lucide="camera" class="w-2.5 h-2.5"></i>
                                 <span>{{ $photoCount }} Foto {{ $s->new_seal_number ? '· ' . $s->new_seal_number : '' }}</span>
                             </a>
                         </td>
-                        <td class="py-2.5 px-2.5">
-                            <div class="font-medium text-black dark:text-white truncate max-w-[125px]">
+                        <td class="py-2.5 px-3 border-b border-black/5 dark:border-white/5 whitespace-nowrap">
+                            <div class="font-medium text-black dark:text-white whitespace-nowrap">
                                 {{ $s->trucking_vendor_name ?: '-' }}
                             </div>
-                            <div class="font-mono text-[10px] text-black/50 dark:text-white/50">
+                            <div class="font-mono text-[10px] text-black/50 dark:text-white/50 whitespace-nowrap">
                                 {{ $s->delivery_date ? 'Delv ' . $s->delivery_date->format('d/m/y') : ($s->pod_signed_at ? 'POD ' . $s->pod_signed_at->format('d/m/y') : 'Belum Delv') }}
                             </div>
                         </td>
-                        <td class="py-2.5 px-2.5">
-                            <button type="button"
-                                    onclick="toggleTrackingFlag('{{ $s->id }}', 'odoo_synced', this)"
-                                    class="px-1.5 py-0.5 rounded-[5px] text-[9px] font-bold cursor-pointer block {{ $s->odoo_synced ? 'bg-[#0284c7]/15 text-[#0284c7]' : 'bg-black/[0.04] dark:bg-white/[0.06] text-black/40 dark:text-white/40' }}">
-                                {{ $s->odoo_synced ? 'ODOO ✓' : 'ODOO -' }}
-                            </button>
-                            <button type="button"
-                                    onclick="toggleTrackingFlag('{{ $s->id }}', 'rekap_fisik', this)"
-                                    class="mt-0.5 px-1.5 py-0.5 rounded-[5px] text-[9px] font-bold cursor-pointer {{ $s->physical_doc_archived ? 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158]' : 'bg-black/[0.04] dark:bg-white/[0.06] text-black/40 dark:text-white/40' }}">
-                                {{ $s->physical_doc_archived ? 'Fisik ✓' : 'Fisik Wait' }}
-                            </button>
+                        <td class="py-2.5 px-3 text-center border-b border-black/5 dark:border-white/5 whitespace-nowrap">
+                            <div class="inline-flex items-center gap-1 whitespace-nowrap">
+                                <button type="button"
+                                        onclick="toggleTrackingFlag('{{ $s->id }}', 'odoo_synced', this)"
+                                        class="px-1.5 py-0.5 rounded-[5px] text-[9px] font-bold cursor-pointer whitespace-nowrap {{ $s->odoo_synced ? 'bg-[#0284c7]/15 text-[#0284c7]' : 'bg-black/[0.04] dark:bg-white/[0.06] text-black/40 dark:text-white/40' }}">
+                                    {{ $s->odoo_synced ? 'ODOO ✓' : 'ODOO -' }}
+                                </button>
+                                <button type="button"
+                                        onclick="toggleTrackingFlag('{{ $s->id }}', 'rekap_fisik', this)"
+                                        class="px-1.5 py-0.5 rounded-[5px] text-[9px] font-bold cursor-pointer whitespace-nowrap {{ $s->physical_doc_archived ? 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158]' : 'bg-black/[0.04] dark:bg-white/[0.06] text-black/40 dark:text-white/40' }}">
+                                    {{ $s->physical_doc_archived ? 'Fisik ✓' : 'Fisik Wait' }}
+                                </button>
+                            </div>
                         </td>
-                        <td class="py-2.5 px-3 text-right whitespace-nowrap">
+                        <td class="py-2.5 px-3 text-right sticky right-0 z-20 bg-white dark:bg-[#1C1C1E] group-hover:bg-[#F9F9FA] dark:group-hover:bg-[#202022] border-b border-l border-black/5 dark:border-white/5 shadow-[-6px_0_12px_rgba(0,0,0,0.06)] whitespace-nowrap min-w-[140px]">
                             @php
                                 $editPayload = [
                                     'id' => $s->id,
@@ -383,7 +384,7 @@
                             @endphp
                             @if($ceisa && $ceisa->jenis_dokumen === '20')
                             <a href="{{ route('bc20.edit', $ceisa->id) }}"
-                               class="inline-flex items-center gap-1 px-2 py-1 rounded-[7px] text-[10px] font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white transition-colors mr-1"
+                               class="inline-flex items-center gap-1 px-2 py-1 rounded-[7px] text-[10px] font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white transition-colors mr-1 whitespace-nowrap"
                                title="Buka Form Wizard BC 2.0">
                                 <i data-lucide="file-edit" class="w-3 h-3"></i>
                                 <span>BC 2.0</span>
@@ -392,11 +393,11 @@
                             <button type="button"
                                     data-tracking='@json($editPayload)'
                                     onclick="openTrackingEditModal(this)"
-                                    class="inline-flex items-center gap-1 px-2 py-1 rounded-[7px] text-[10px] font-semibold bg-[#0284c7]/10 text-[#0284c7] hover:bg-[#0284c7] hover:text-white transition-colors mr-1 cursor-pointer">
+                                    class="inline-flex items-center gap-1 px-2 py-1 rounded-[7px] text-[10px] font-semibold bg-[#0284c7]/10 text-[#0284c7] hover:bg-[#0284c7] hover:text-white transition-colors mr-1 cursor-pointer whitespace-nowrap">
                                 Edit
                             </button>
                             <a href="{{ route('core.document.show', $s->id) }}"
-                               class="inline-flex items-center gap-0.5 px-2 py-1 rounded-[7px] text-[10px] font-semibold bg-black/[0.04] dark:bg-white/[0.08] hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors text-black/75 dark:text-white/75">
+                               class="inline-flex items-center gap-0.5 px-2 py-1 rounded-[7px] text-[10px] font-semibold bg-black/[0.04] dark:bg-white/[0.08] hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors text-black/75 dark:text-white/75 whitespace-nowrap">
                                 Buka
                             </a>
                         </td>
@@ -416,22 +417,22 @@
         <!-- MODE 2: MATRIKS 11 POS WORKFLOW                                -->
         <!-- ============================================================== -->
         <!-- Matrix Table -->
-        <div class="overflow-x-auto custom-scrollbar">
-            <table class="w-full text-left border-collapse min-w-[1200px]">
+        <div class="overflow-x-auto custom-scrollbar relative">
+            <table class="w-full text-left border-separate border-spacing-0 min-w-max whitespace-nowrap">
                 <thead>
-                    <tr class="border-b border-black/5 dark:border-white/5 bg-black/[0.015] dark:bg-white/[0.02] text-[11px] font-bold uppercase tracking-wider text-black/45 dark:text-white/45">
-                        <th class="py-3 px-4 w-[230px] sticky left-0 z-10 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-md">Proyek & Klien</th>
-                        <th class="py-3 px-3 w-[110px] text-center">Status / SLA</th>
+                    <tr class="bg-black/[0.015] dark:bg-white/[0.02] text-[11px] font-bold uppercase tracking-wider text-black/45 dark:text-white/45 whitespace-nowrap">
+                        <th class="py-3 px-4 w-[240px] sticky left-0 z-30 bg-white dark:bg-[#1C1C1E] border-b border-r border-black/10 dark:border-white/10 shadow-[4px_0_8px_rgba(0,0,0,0.03)] whitespace-nowrap">Proyek &amp; Klien</th>
+                        <th class="py-3 px-3 w-[110px] text-center border-b border-black/10 dark:border-white/10 whitespace-nowrap">Status / SLA</th>
                         @foreach($stages as $idx => $stg)
-                        <th class="py-3 px-2 text-center w-[78px] font-medium" title="{{ $stg['title'] }} ({{ $stg['role'] }})">
+                        <th class="py-3 px-2 text-center w-[85px] font-medium border-b border-black/10 dark:border-white/10 whitespace-nowrap" title="{{ $stg['title'] }} ({{ $stg['role'] }})">
                             <div class="text-[10px] leading-tight font-bold text-black/70 dark:text-white/70">{{ $idx + 1 }}</div>
-                            <div class="text-[9px] truncate tracking-normal font-normal text-black/40 dark:text-white/40" style="max-width: 72px;">{{ $stg['title'] }}</div>
+                            <div class="text-[9px] tracking-normal font-normal text-black/40 dark:text-white/40">{{ $stg['title'] }}</div>
                         </th>
                         @endforeach
-                        <th class="py-3 px-4 w-[90px] text-right">Aksi</th>
+                        <th class="py-3 px-4 w-[100px] text-right sticky right-0 z-30 bg-white dark:bg-[#1C1C1E] border-b border-l border-black/10 dark:border-white/10 shadow-[-6px_0_12px_rgba(0,0,0,0.06)] whitespace-nowrap">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-black/5 dark:divide-white/5 text-[12px]">
+                <tbody class="divide-y-0 text-[12px]">
                     @forelse($shipments as $s)
                     @php
                         $currMeta = $s->current_stage_meta;
@@ -443,21 +444,21 @@
                     <tr class="hover:bg-black/[0.015] dark:hover:bg-white/[0.02] transition-colors group">
                         
                         <!-- Sticky Project Info -->
-                        <td class="py-3 px-4 sticky left-0 z-10 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-md group-hover:bg-[#F9F9FA] dark:group-hover:bg-[#202022] transition-colors">
-                            <div class="flex items-center gap-2">
-                                <a href="{{ route('core.document.show', $s->id) }}" class="font-bold text-black dark:text-white hover:text-[#0284c7] text-[13px] tracking-tight">
+                        <td class="py-3 px-4 sticky left-0 z-20 bg-white dark:bg-[#1C1C1E] group-hover:bg-[#F9F9FA] dark:group-hover:bg-[#202022] border-b border-r border-black/5 dark:border-white/5 shadow-[4px_0_8px_rgba(0,0,0,0.03)] transition-colors whitespace-nowrap">
+                            <div class="flex items-center gap-2 whitespace-nowrap">
+                                <a href="{{ route('core.document.show', $s->id) }}" class="font-bold text-black dark:text-white hover:text-[#0284c7] text-[13px] tracking-tight whitespace-nowrap">
                                     {{ $s->project_no }}
                                 </a>
                                 @if($s->tipe_layanan)
-                                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-black/[0.05] dark:bg-white/[0.08] text-black/70 dark:text-white/70 uppercase">
+                                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-black/[0.05] dark:bg-white/[0.08] text-black/70 dark:text-white/70 uppercase shrink-0">
                                     {{ $s->tipe_layanan }}
                                 </span>
                                 @endif
                             </div>
-                            <div class="text-[11px] text-black/60 dark:text-white/60 truncate max-w-[210px] font-medium mt-0.5">
+                            <div class="text-[11px] text-black/60 dark:text-white/60 font-medium mt-0.5 whitespace-nowrap">
                                 {{ $s->client?->name ?? 'Klien Umum' }}
                             </div>
-                            <div class="text-[10px] text-black/40 dark:text-white/40 mt-0.5 flex items-center gap-2">
+                            <div class="text-[10px] text-black/40 dark:text-white/40 mt-0.5 flex items-center gap-2 whitespace-nowrap">
                                 <span>B/L: {{ $s->nomor_bl_awb ?: '-' }}</span>
                                 @if($s->eta)
                                 <span>• ETA {{ \Carbon\Carbon::parse($s->eta)->format('d/m') }}</span>
@@ -466,7 +467,7 @@
                         </td>
 
                         <!-- SLA & Jalur Badge -->
-                        <td class="py-3 px-3 text-center align-middle">
+                        <td class="py-3 px-3 text-center align-middle border-b border-black/5 dark:border-white/5 whitespace-nowrap">
                             <div class="flex flex-col items-center gap-1">
                                 <!-- Jalur Kepabeanan Badge -->
                                 @if(stripos($customsChannel, 'HIJAU') !== false)
@@ -518,7 +519,7 @@
                             $picInitial = $picName ? collect(explode(' ', $picName))->map(fn($w) => strtoupper(substr($w, 0, 1)))->take(2)->join('') : null;
                             $isMyTask = $picUser && $picUser->id === auth()->id();
                         @endphp
-                        <td class="py-3 px-1 text-center align-middle">
+                        <td class="py-3 px-1 text-center align-middle border-b border-black/5 dark:border-white/5 whitespace-nowrap">
                             <div class="flex flex-col items-center justify-center">
                                 @if($stgStatus === 'done')
                                     <!-- Pos Selesai -->
@@ -578,10 +579,10 @@
                         </td>
                         @endforeach
 
-                        <!-- Aksi -->
-                        <td class="py-3 px-4 text-right align-middle">
+                        <!-- Aksi (FROZEN / STICKY RIGHT) -->
+                        <td class="py-3 px-4 text-right align-middle sticky right-0 z-20 bg-white dark:bg-[#1C1C1E] border-b border-l border-black/5 dark:border-white/5 shadow-[-6px_0_12px_rgba(0,0,0,0.06)] whitespace-nowrap group-hover:bg-[#F9F9FA] dark:group-hover:bg-[#202022]">
                             <a href="{{ route('core.document.show', $s->id) }}" 
-                               class="inline-flex items-center gap-1 px-2.5 py-1 rounded-[7px] text-[11px] font-semibold bg-black/[0.04] dark:bg-white/[0.08] hover:bg-[#0284c7] hover:text-white transition-all text-black/75 dark:text-white/75 group/btn">
+                               class="inline-flex items-center gap-1 px-2.5 py-1 rounded-[7px] text-[11px] font-semibold bg-black/[0.04] dark:bg-white/[0.08] hover:bg-[#0284c7] hover:text-white transition-all text-black/75 dark:text-white/75 group/btn whitespace-nowrap">
                                 <span>Buka</span>
                                 <i data-lucide="chevron-right" class="w-3 h-3 group-hover/btn:translate-x-0.5 transition-transform"></i>
                             </a>

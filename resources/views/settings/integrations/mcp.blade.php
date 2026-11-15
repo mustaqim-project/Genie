@@ -3,6 +3,167 @@
 @section('title', 'MCP Server & Integrasi AI Kepabeanan')
 
 @section('content')
+<script>
+window.mcpIntegrationApp = function mcpIntegrationApp() {
+    return {
+        activeTab: @json(session('plain_token') ? 'tokens' : 'tester'),
+        activeProvider: 'claude',
+        showTokenModal: false,
+        customToken: @json(session('plain_token') ?? ''),
+        toolCategory: 'ALL',
+        toolSearch: '',
+        
+        testQuery: 'HYDRAULIC BREAKER DYB800 STRAIGHT TYPE',
+        testDirection: 'IMPORT_BC20',
+        testLoading: false,
+        testResult: null,
+        
+        batchText: @json($samplePackingList),
+        batchLoading: false,
+        batchResult: null,
+        
+        copyToast: false,
+        copyMsg: '',
+
+        selectedScopes: ['*'],
+        scopePresets: {
+            admin: ['*'],
+            ops: ['customs:read', 'customs:create', 'shipment:read', 'shipment:create', 'shipment:update', 'do:manage', 'traffic:read', 'traffic:update', 'crm:read', 'crm:communicate'],
+            finance: ['finance:read', 'finance:create', 'finance:approve', 'accounting:read', 'tax:read', 'approval:read'],
+            readonly: ['customs:read', 'shipment:read', 'traffic:read', 'finance:read', 'accounting:read', 'tax:read', 'crm:read', 'hrm:read', 'approval:read']
+        },
+
+        setScopePreset(preset) {
+            if (preset === 'admin') {
+                this.selectedScopes = ['*'];
+            } else if (this.scopePresets[preset]) {
+                this.selectedScopes = [...this.scopePresets[preset]];
+            }
+        },
+
+        toggleScope(scope) {
+            if (scope === '*') {
+                if (this.selectedScopes.includes('*')) {
+                    this.selectedScopes = [];
+                } else {
+                    this.selectedScopes = ['*'];
+                }
+                return;
+            }
+            this.selectedScopes = this.selectedScopes.filter(s => s !== '*');
+            if (this.selectedScopes.includes(scope)) {
+                this.selectedScopes = this.selectedScopes.filter(s => s !== scope);
+            } else {
+                this.selectedScopes.push(scope);
+            }
+            if (this.selectedScopes.length === 0) {
+                this.selectedScopes = ['customs:read'];
+            }
+        },
+
+        isScopeChecked(scope) {
+            return this.selectedScopes.includes('*') || this.selectedScopes.includes(scope);
+        },
+
+        getToken() {
+            if (this.customToken && this.customToken.trim().length > 0) {
+                return this.customToken.trim();
+            }
+            return 'genie_mcp_YOUR_TOKEN';
+        },
+
+        copyToClipboard(text, msg = 'Tersalin ke clipboard!') {
+            navigator.clipboard.writeText(text).then(() => {
+                this.copyMsg = msg;
+                this.copyToast = true;
+                setTimeout(() => { this.copyToast = false; }, 2200);
+            });
+        },
+
+        async runCheckHs() {
+            if (!this.testQuery.trim()) return;
+            this.testLoading = true;
+            this.testResult = null;
+            try {
+                const headers = { 'Content-Type': 'application/json' };
+                if (this.customToken && this.customToken.trim().length > 0) {
+                    headers['Authorization'] = 'Bearer ' + this.customToken.trim();
+                }
+
+                const res = await fetch('{{ route('api.mcp.execute') }}', {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({
+                        jsonrpc: '2.0',
+                        id: Date.now(),
+                        method: 'tools/call',
+                        params: {
+                            name: 'check_hs_code',
+                            arguments: {
+                                query: this.testQuery,
+                                direction: this.testDirection
+                            }
+                        }
+                    })
+                });
+                const data = await res.json();
+                this.testResult = data.result?.structured_data || data;
+            } catch (e) {
+                this.testResult = { error: 'Gagal terhubung ke MCP Server: ' + e.message };
+            } finally {
+                this.testLoading = false;
+                if (window.lucide) { lucide.createIcons(); }
+            }
+        },
+
+        async runBatchPackingList() {
+            if (!this.batchText.trim()) return;
+            this.batchLoading = true;
+            this.batchResult = null;
+            try {
+                const headers = { 'Content-Type': 'application/json' };
+                if (this.customToken && this.customToken.trim().length > 0) {
+                    headers['Authorization'] = 'Bearer ' + this.customToken.trim();
+                }
+
+                const res = await fetch('{{ route('api.mcp.execute') }}', {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({
+                        jsonrpc: '2.0',
+                        id: Date.now(),
+                        method: 'tools/call',
+                        params: {
+                            name: 'parse_packing_list',
+                            arguments: {
+                                raw_text: this.batchText,
+                                direction: 'IMPORT_BC20'
+                            }
+                        }
+                    })
+                });
+                const data = await res.json();
+                this.batchResult = data.result?.structured_data || data;
+            } catch (e) {
+                this.batchResult = { error: 'Gagal memproses parsing packing list: ' + e.message };
+            } finally {
+                this.batchLoading = false;
+                if (window.lucide) { lucide.createIcons(); }
+            }
+        }
+    };
+};
+
+document.addEventListener('alpine:init', () => {
+    if (window.Alpine && typeof window.Alpine.data === 'function') {
+        window.Alpine.data('mcpIntegrationApp', window.mcpIntegrationApp);
+    }
+});
+if (window.Alpine && typeof window.Alpine.data === 'function') {
+    window.Alpine.data('mcpIntegrationApp', window.mcpIntegrationApp);
+}
+</script>
+
 <div class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12" x-data="mcpIntegrationApp()">
 
     <!-- Toast Notifikasi Copy -->
@@ -1226,158 +1387,4 @@ print('Hasil Deteksi Pos Tarif:', result['result']['structured_data'])`, 'Kode P
     </div>
 
 </div>
-
-@push('scripts')
-<script>
-function mcpIntegrationApp() {
-    return {
-        activeTab: @json(session('plain_token') ? 'tokens' : 'tester'),
-        activeProvider: 'claude',
-        showTokenModal: false,
-        customToken: @json(session('plain_token') ?? ''),
-        toolCategory: 'ALL',
-        toolSearch: '',
-        
-        testQuery: 'HYDRAULIC BREAKER DYB800 STRAIGHT TYPE',
-        testDirection: 'IMPORT_BC20',
-        testLoading: false,
-        testResult: null,
-        
-        batchText: @json($samplePackingList),
-        batchLoading: false,
-        batchResult: null,
-        
-        copyToast: false,
-        copyMsg: '',
-
-        selectedScopes: ['*'],
-        scopePresets: {
-            admin: ['*'],
-            ops: ['customs:read', 'customs:create', 'shipment:read', 'shipment:create', 'shipment:update', 'do:manage', 'traffic:read', 'traffic:update', 'crm:read', 'crm:communicate'],
-            finance: ['finance:read', 'finance:create', 'finance:approve', 'accounting:read', 'tax:read', 'approval:read'],
-            readonly: ['customs:read', 'shipment:read', 'traffic:read', 'finance:read', 'accounting:read', 'tax:read', 'crm:read', 'hrm:read', 'approval:read']
-        },
-
-        setScopePreset(preset) {
-            if (preset === 'admin') {
-                this.selectedScopes = ['*'];
-            } else if (this.scopePresets[preset]) {
-                this.selectedScopes = [...this.scopePresets[preset]];
-            }
-        },
-
-        toggleScope(scope) {
-            if (scope === '*') {
-                if (this.selectedScopes.includes('*')) {
-                    this.selectedScopes = [];
-                } else {
-                    this.selectedScopes = ['*'];
-                }
-                return;
-            }
-            this.selectedScopes = this.selectedScopes.filter(s => s !== '*');
-            if (this.selectedScopes.includes(scope)) {
-                this.selectedScopes = this.selectedScopes.filter(s => s !== scope);
-            } else {
-                this.selectedScopes.push(scope);
-            }
-            if (this.selectedScopes.length === 0) {
-                this.selectedScopes = ['customs:read'];
-            }
-        },
-
-        isScopeChecked(scope) {
-            return this.selectedScopes.includes('*') || this.selectedScopes.includes(scope);
-        },
-
-        getToken() {
-            if (this.customToken && this.customToken.trim().length > 0) {
-                return this.customToken.trim();
-            }
-            return 'genie_mcp_YOUR_TOKEN';
-        },
-
-        copyToClipboard(text, msg = 'Tersalin ke clipboard!') {
-            navigator.clipboard.writeText(text).then(() => {
-                this.copyMsg = msg;
-                this.copyToast = true;
-                setTimeout(() => { this.copyToast = false; }, 2200);
-            });
-        },
-
-        async runCheckHs() {
-            if (!this.testQuery.trim()) return;
-            this.testLoading = true;
-            this.testResult = null;
-            try {
-                const headers = { 'Content-Type': 'application/json' };
-                if (this.customToken && this.customToken.trim().length > 0) {
-                    headers['Authorization'] = 'Bearer ' + this.customToken.trim();
-                }
-
-                const res = await fetch('{{ route('api.mcp.execute') }}', {
-                    method: 'POST',
-                    headers: headers,
-                    body: JSON.stringify({
-                        jsonrpc: '2.0',
-                        id: Date.now(),
-                        method: 'tools/call',
-                        params: {
-                            name: 'check_hs_code',
-                            arguments: {
-                                query: this.testQuery,
-                                direction: this.testDirection
-                            }
-                        }
-                    })
-                });
-                const data = await res.json();
-                this.testResult = data.result?.structured_data || data;
-            } catch (e) {
-                this.testResult = { error: 'Gagal terhubung ke MCP Server: ' + e.message };
-            } finally {
-                this.testLoading = false;
-                if (window.lucide) { lucide.createIcons(); }
-            }
-        },
-
-        async runBatchPackingList() {
-            if (!this.batchText.trim()) return;
-            this.batchLoading = true;
-            this.batchResult = null;
-            try {
-                const headers = { 'Content-Type': 'application/json' };
-                if (this.customToken && this.customToken.trim().length > 0) {
-                    headers['Authorization'] = 'Bearer ' + this.customToken.trim();
-                }
-
-                const res = await fetch('{{ route('api.mcp.execute') }}', {
-                    method: 'POST',
-                    headers: headers,
-                    body: JSON.stringify({
-                        jsonrpc: '2.0',
-                        id: Date.now(),
-                        method: 'tools/call',
-                        params: {
-                            name: 'parse_packing_list',
-                            arguments: {
-                                raw_text: this.batchText,
-                                direction: 'IMPORT_BC20'
-                            }
-                        }
-                    })
-                });
-                const data = await res.json();
-                this.batchResult = data.result?.structured_data || data;
-            } catch (e) {
-                this.batchResult = { error: 'Gagal memproses parsing packing list: ' + e.message };
-            } finally {
-                this.batchLoading = false;
-                if (window.lucide) { lucide.createIcons(); }
-            }
-        }
-    };
-}
-</script>
-@endpush
 @endsection

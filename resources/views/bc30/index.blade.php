@@ -86,11 +86,12 @@
             </button>
 
             @can('document.create')
-            <a href="{{ route('bc30.create') }}" 
-               class="btn-apple-filled px-4 py-2.5 text-xs inline-flex items-center gap-2">
+            <button type="button" 
+               onclick="document.getElementById('modal-create-bc30').classList.remove('hidden')"
+               class="btn-apple-filled px-4 py-2.5 text-xs inline-flex items-center gap-2 cursor-pointer">
                 <i data-lucide="plus" class="w-4 h-4"></i>
                 <span>Buat Pengajuan BC 3.0 Baru</span>
-            </a>
+            </button>
             @endcan
         </div>
     </div>
@@ -534,4 +535,17 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Form Buat Pengajuan BC 3.0 (PEB) Cerdas (Sama seperti Tim Document) -->
+@include('core.components.smart_document_create_modal', [
+    'modalId' => 'modal-create-bc30',
+    'pfx' => 'bc30_idx_',
+    'defaultType' => 'EXPORT',
+    'lockType' => true,
+    'defaultAfterAction' => 'fill_bc_form',
+    'title' => 'Buat Pengajuan Ekspor BC 3.0 (PEB)',
+    'subtitle' => 'Unggah berkas kargo (Booking Confirmation, Commercial Invoice, Packing List). Sistem mengekstrak informasi dan membuat draft dokumen PEB BC 3.0 secara otomatis.',
+    'clients' => $clients,
+    'vendors' => $vendors
+])
 @endsection

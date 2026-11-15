@@ -67,14 +67,16 @@ class CheckDemurrageAlertsCommand extends Command
                         Todo::firstOrCreate(
                             [
                                 'title' => "ALERT DEMURRAGE: {$shipment->nomor_kontainer} ({$statusText})",
-                                'user_id' => $opsManager->id,
+                                'assigned_to_user_id' => $opsManager->id,
+                                'shipment_id' => $shipment->id,
                             ],
                             [
                                 'description' => "Kontainer {$shipment->nomor_kontainer} (BL: {$shipment->nomor_bl_awb}) mendekati batas Free Time ({$shipment->free_time_expired_at->format('d/m/Y')}). Segera selesaikan penebusan DO dan penarikan armada trucking.",
                                 'due_date' => $shipment->free_time_expired_at->toDateString(),
                                 'priority' => $urgency === 'CRITICAL' ? 'URGENT' : 'HIGH',
-                                'status' => 'PENDING',
+                                'status' => 'TODO',
                                 'category' => 'DO_OPERATIONS',
+                                'created_by_user_id' => $opsManager->id,
                             ]
                         );
                     }
