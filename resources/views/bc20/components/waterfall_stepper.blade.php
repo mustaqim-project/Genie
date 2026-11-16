@@ -8,8 +8,11 @@
      * @param \App\Models\Shipment|null $shipment
      */
     $stage = $activeStage ?? 4;
-    $doc = $bc20 ?? null;
+    $doc = $bc20 ?? ($bc30 ?? null);
     $shp = $shipment ?? ($doc?->shipment ?? null);
+    $isExp = ($doc?->jenis_dokumen === '30');
+    $editRoute = $isExp ? 'bc30.edit' : 'bc20.edit';
+    $showRoute = $isExp ? 'bc30.show' : 'bc20.show';
 
     $pipeline = [
         [
@@ -17,42 +20,51 @@
             'title' => '1. Unggah Dokumen',
             'desc' => 'DRAFT Aman & PDF Terarsip',
             'icon' => 'file-up',
+            'wizard_step' => 3,
         ],
         [
             'num' => 2,
             'title' => '2. Ekstraksi OCR/AI',
-            'desc' => 'Inv, PL, B/L & e-COO',
+            'desc' => $isExp ? 'Inv, PL & PEB Draft' : 'Inv, PL, B/L & e-COO',
             'icon' => 'scan-text',
+            'wizard_step' => 3,
         ],
         [
             'num' => 3,
             'title' => '3. Rekomendasi HS',
-            'desc' => 'BTKI 2022 & Skrining Lartas',
+            'desc' => $isExp ? 'BTKI 2022 & Bea Keluar' : 'BTKI 2022 & Skrining Lartas',
             'icon' => 'sparkles',
+            'wizard_step' => 7,
         ],
         [
             'num' => 4,
-            'title' => '4. Wizard BC 2.0',
-            'desc' => '9 Tahap & Sync BC 1.1',
+            'title' => $isExp ? '4. Wizard BC 3.0' : '4. Wizard BC 2.0',
+            'desc' => $isExp ? '9 Tahap PEB & Ekspor' : '9 Tahap & Sync BC 1.1',
             'icon' => 'edit-3',
+            'wizard_step' => 1,
         ],
         [
             'num' => 5,
             'title' => '5. Pre-Check CEISA',
             'desc' => 'Validasi Skema JSON 4.0',
             'icon' => 'shield-check',
+            'wizard_step' => 9,
         ],
         [
             'num' => 6,
             'title' => '6. Submit & Billing',
-            'desc' => 'Kode MPN G3 / Respon DJBC',
+            'desc' => $isExp ? 'Kode MPN G3 / NPE' : 'Kode MPN G3 / Respon DJBC',
             'icon' => 'credit-card',
+            'wizard_step' => null,
+            'anchor' => '#billing-card',
         ],
         [
             'num' => 7,
             'title' => '7. Tracking Dok',
             'desc' => '11 Pos Operasional Atrans',
             'icon' => 'compass',
+            'wizard_step' => null,
+            'url' => route('core.tracking.index', ['mode' => 'tracking_dok', 'search' => $shp?->project_no ?? $doc?->nomor_aju]),
         ],
     ];
 @endphp
@@ -97,22 +109,39 @@
                 $isPassed = $stage > $p['num'];
                 $isCurrent = $stage === $p['num'];
                 $isUpcoming = $stage < $p['num'];
+                $targetUrl = '#';
+                if (!empty($p['url'])) {
+                    $targetUrl = $p['url'];
+                } elseif ($doc) {
+                    if (!empty($p['anchor'])) {
+                        $targetUrl = route($showRoute, $doc->id) . $p['anchor'];
+                    } elseif (!empty($p['wizard_step'])) {
+                        $targetUrl = route($editRoute, $doc->id) . '#step-' . $p['wizard_step'];
+                    } else {
+                        $targetUrl = route($editRoute, $doc->id);
+                    }
+                }
             @endphp
-            <div class="p-2.5 rounded-xl border transition-all {{ 
+            <a href="{{ $targetUrl }}"
+               @if(!empty($p['wizard_step']))
+                   @click="if (typeof activeStep !== 'undefined') { activeStep = {{ $p['wizard_step'] }}; $event.preventDefault(); window.scrollTo({ top: 320, behavior: 'smooth' }); }"
+               @endif
+               class="p-2.5 rounded-xl border transition-all block group hover:shadow-xs {{ 
                 $isCurrent 
                     ? 'bg-sky-50 dark:bg-sky-950/40 border-[#0284c7]/50 text-[#0284c7] ring-2 ring-[#0284c7]/20 shadow-xs' 
                     : ($isPassed 
-                        ? 'bg-emerald-50/80 dark:bg-emerald-950/25 border-emerald-200/80 dark:border-emerald-800/40 text-emerald-900 dark:text-emerald-200' 
-                        : 'bg-slate-50/70 dark:bg-white/[0.03] border-black/[0.05] dark:border-white/[0.05] text-slate-500 dark:text-slate-400')
-            }}">
+                        ? 'bg-emerald-50/80 dark:bg-emerald-950/25 border-emerald-200/80 dark:border-emerald-800/40 text-emerald-900 dark:text-emerald-200 hover:border-emerald-400' 
+                        : 'bg-slate-50/70 dark:bg-white/[0.03] border-black/[0.05] dark:border-white/[0.05] text-slate-500 dark:text-slate-400 hover:border-[#0284c7]/40 hover:text-slate-700 dark:hover:text-slate-200')
+               }}"
+               title="{{ $p['title'] }} — Klik untuk navigasi ke tahapan ini">
                 <div class="font-bold flex items-center justify-between gap-1">
-                    <span class="truncate">{{ $p['title'] }}</span>
+                    <span class="truncate group-hover:underline">{{ $p['title'] }}</span>
                     @if($isPassed)
                         <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0"></i>
                     @elseif($isCurrent)
                         <span class="w-2 h-2 rounded-full bg-[#0284c7] shrink-0 animate-ping"></span>
                     @else
-                        <i data-lucide="{{ $p['icon'] }}" class="w-3 h-3 text-slate-400 shrink-0"></i>
+                        <i data-lucide="{{ $p['icon'] }}" class="w-3 h-3 text-slate-400 shrink-0 group-hover:text-[#0284c7]"></i>
                     @endif
                 </div>
                 <div class="text-[9px] mt-0.5 truncate {{ 
@@ -124,7 +153,7 @@
                 }}">
                     {{ $p['desc'] }}
                 </div>
-            </div>
+            </a>
         @endforeach
     </div>
 </div>

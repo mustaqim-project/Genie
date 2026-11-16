@@ -15,6 +15,10 @@ window.bc20WizardManager = function bc20WizardManager() {
 
     return {
         activeStep: 1,
+        isReadOnly: {{ $isReadOnly ? 'true' : 'false' }},
+        canSubmitCeisa: {{ $canSubmitCeisa ? 'true' : 'false' }},
+        isBillingLocked: {{ $isBillingLocked ? 'true' : 'false' }},
+        isFromCeisaPull: {{ $isFromCeisaPull ? 'true' : 'false' }},
         steps: [
             { id: 1, label: 'Header' },
             { id: 2, label: 'Entitas' },
@@ -1001,6 +1005,10 @@ window.bc20WizardManager = function bc20WizardManager() {
 
         // Saving
         async saveDraftAjax() {
+            if (this.isReadOnly) {
+                this.showToast('Dokumen dalam Mode Inspeksi (Read-Only). Perubahan tidak dapat disimpan ke CEISA.', 'warning');
+                return;
+            }
             this.saving = true;
             try {
                 const res = await fetch('{{ route("bc20.update", $bc20->id) }}', {
@@ -1024,6 +1032,11 @@ window.bc20WizardManager = function bc20WizardManager() {
         },
 
         prepareFormSubmit(event) {
+            if (this.isReadOnly) {
+                event.preventDefault();
+                window.location.href = '{{ route("bc20.show", $bc20->id) }}';
+                return;
+            }
             this.$refs.wizardPayloadInput.value = JSON.stringify(this.w);
         },
 
@@ -1115,8 +1128,9 @@ if (window.Alpine && typeof window.Alpine.data === 'function') {
                 </template>
             </button>
 
-            <!-- Tombol Simpan Draft -->
-            <button type="button" @click="saveDraftAjax()" :disabled="saving"
+            <!-- Tombol Simpan Draft (Nonaktif jika Mode Inspeksi Read-Only) -->
+            <button type="button" @click="saveDraftAjax()" :disabled="saving || isReadOnly"
+                    x-show="!isReadOnly"
                     class="w-9 h-9 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 inline-flex items-center justify-center transition-colors cursor-pointer shadow-2xs"
                     title="Simpan Draft"
                     aria-label="Simpan Draft">
@@ -1146,8 +1160,30 @@ if (window.Alpine && typeof window.Alpine.data === 'function') {
         'shipment' => $shipment,
     ])
 
-    <!-- Mode Revisi Notice if not DRAFT -->
-    @if(!$isDraft)
+    <!-- Mode Notice Banners -->
+    @if($isReadOnly)
+        <div class="p-4 rounded-2xl bg-amber-50/90 dark:bg-amber-950/40 border border-amber-300/80 dark:border-amber-800/60 text-amber-950 dark:text-amber-200 text-xs flex items-center justify-between gap-3 shadow-xs">
+            <div class="flex items-center gap-3">
+                <i data-lucide="lock" class="w-5 h-5 text-amber-600 shrink-0"></i>
+                <div>
+                    <strong class="font-bold text-sm">Mode Inspeksi &amp; Arsip Dokumen Pabean (Read-Only)</strong>
+                    <p class="text-[11px] text-amber-800 dark:text-amber-300 mt-0.5">Dokumen telah berstatus Billing / Respon Resmi di CEISA DJBC (Kode Billing: <span class="font-mono font-bold">{{ $bc20->kode_billing ?? '-' }}</span>). Seluruh 9 tahapan pabean dan berkas dokumen dapat ditinjau secara transparan. Pengubahan data pabean dinonaktifkan, namun Anda tetap dapat mengunggah berkas fisik pelengkap.</p>
+                </div>
+            </div>
+            <span class="px-2.5 py-1 rounded-lg bg-amber-200/80 dark:bg-amber-900/60 font-bold font-mono text-[10px] uppercase shrink-0">Terkunci Fiskal</span>
+        </div>
+    @elseif($isBillingLocked && $isFromCeisaPull)
+        <div class="p-4 rounded-2xl bg-sky-50/90 dark:bg-sky-950/40 border border-sky-300/80 dark:border-sky-800/60 text-sky-950 dark:text-sky-200 text-xs flex items-center justify-between gap-3 shadow-xs">
+            <div class="flex items-center gap-3">
+                <i data-lucide="info" class="w-5 h-5 text-[#0284c7] shrink-0"></i>
+                <div>
+                    <strong class="font-bold text-sm">Data Hasil Tarikan CEISA 4.0 — Mode Penyesuaian Operasional &amp; DO</strong>
+                    <p class="text-[11px] text-sky-800 dark:text-sky-300 mt-0.5">Dokumen ini ditarik langsung dari CEISA DJBC. Anda dapat melengkapi rincian kontainer, kemasan, dokumen pelengkap, dan mengunggah berkas fisik untuk kebutuhan internal &amp; pengurusan Delivery Order (DO) di GENIE. Pengiriman ulang ke CEISA dinonaktifkan karena respon resmi telah terbit.</p>
+                </div>
+            </div>
+            <span class="px-2.5 py-1 rounded-lg bg-sky-200/80 dark:bg-sky-900/60 font-bold font-mono text-[10px] uppercase shrink-0">Data Tarikan CEISA</span>
+        </div>
+    @elseif(!$isDraft)
         <div class="p-3.5 rounded-2xl bg-amber-50/90 dark:bg-amber-950/40 border border-amber-300/80 dark:border-amber-800/60 text-amber-950 dark:text-amber-200 text-xs flex items-center gap-3">
             <i data-lucide="shield-alert" class="w-4 h-4 text-amber-600 shrink-0"></i>
             <span><strong>Mode Revisi Pasca-Kirim CEISA:</strong> Perubahan akan tercatat di Audit Trail dan mereset validasi skema untuk pengecekan ulang.</span>
@@ -1415,17 +1451,19 @@ if (window.Alpine && typeof window.Alpine.data === 'function') {
                         <span x-text="showPreview ? 'Tutup PDF' : 'Buka PDF (' + previewFiles.length + ')'"></span>
                     </button>
 
-                    <!-- Simpan Draft Ajax Langsung di Bottom Bar -->
-                    <button type="button" @click="saveDraftAjax()" :disabled="saving"
-                            class="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] hover:bg-slate-50 text-slate-700 dark:text-slate-200 font-semibold inline-flex items-center gap-1.5 cursor-pointer">
-                        <template x-if="!saving">
-                            <i data-lucide="save" class="w-3.5 h-3.5 text-[#0284c7]"></i>
-                        </template>
-                        <template x-if="saving">
-                            <div class="w-3.5 h-3.5 border-2 border-[#0284c7] border-t-transparent rounded-full animate-spin"></div>
-                        </template>
-                        <span x-text="saving ? 'Menyimpan...' : 'Simpan Draft'"></span>
-                    </button>
+                    <!-- Simpan Draft Ajax Langsung di Bottom Bar (Disembunyikan jika Mode Inspeksi) -->
+                    <template x-if="!isReadOnly">
+                        <button type="button" @click="saveDraftAjax()" :disabled="saving"
+                                class="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] hover:bg-slate-50 text-slate-700 dark:text-slate-200 font-semibold inline-flex items-center gap-1.5 cursor-pointer">
+                            <template x-if="!saving">
+                                <i data-lucide="save" class="w-3.5 h-3.5 text-[#0284c7]"></i>
+                            </template>
+                            <template x-if="saving">
+                                <div class="w-3.5 h-3.5 border-2 border-[#0284c7] border-t-transparent rounded-full animate-spin"></div>
+                            </template>
+                            <span x-text="saving ? 'Menyimpan...' : 'Simpan Draft'"></span>
+                        </button>
+                    </template>
 
                     <!-- Tombol Sebelumnya -->
                     <button type="button" @click="prevStep()" :disabled="activeStep <= 1"
@@ -1442,12 +1480,19 @@ if (window.Alpine && typeof window.Alpine.data === 'function') {
                             <i data-lucide="chevron-right" class="w-4 h-4"></i>
                         </button>
                     </template>
-                    <template x-if="activeStep === 9">
+                    <template x-if="activeStep === 9 && !isReadOnly">
                         <button type="submit"
                                 class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-sm cursor-pointer transition-colors">
                             <i data-lucide="check-circle" class="w-4 h-4"></i>
                             <span>Simpan &amp; Selesai</span>
                         </button>
+                    </template>
+                    <template x-if="activeStep === 9 && isReadOnly">
+                        <a href="{{ route('bc20.show', $bc20->id) }}"
+                           class="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-sm cursor-pointer transition-colors">
+                            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                            <span>Selesai Meninjau (Kembali)</span>
+                        </a>
                     </template>
                 </div>
             </div>

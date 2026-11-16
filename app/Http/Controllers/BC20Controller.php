@@ -296,6 +296,10 @@ class BC20Controller extends Controller implements HasMiddleware
 
     public function submit(CeisaDocument $bc20)
     {
+        if (!$bc20->canSubmitCeisa()) {
+            return back()->with('error', "Dokumen tidak dapat disubmit ulang ke CEISA karena Kode Billing / SPPB resmi telah diterbitkan oleh DJBC.");
+        }
+
         try {
             $result = $this->documentService->submit($bc20);
             if (!($result['success'] ?? false)) {
@@ -336,11 +340,26 @@ class BC20Controller extends Controller implements HasMiddleware
      */
     public function edit(CeisaDocument $bc20)
     {
-        if ($redirect = $this->guardEditable($bc20)) {
-            return $redirect;
+        $isBillingLocked = $bc20->isBillingLocked();
+        $isFromCeisaPull = $bc20->isFromCeisaPull();
+        $canEditData = $bc20->canEditData();
+        $canSubmitCeisa = $bc20->canSubmitCeisa();
+        $isReadOnly = !$canEditData;
+        $isDraft = ($bc20->status === 'DRAFT');
+
+        $user = auth()->user();
+        if ($canEditData && $user) {
+            if ($isDraft) {
+                if (!$user->isSuperAdmin() && !$user->hasAnyPermission(['document.edit', 'document.edit_after_ceisa'])) {
+                    abort(403, 'Akses Ditolak: Anda memerlukan hak akses izin "document.edit" untuk mengubah draft dokumen ini.');
+                }
+            } else {
+                if (!$user->isSuperAdmin() && !$user->hasPermission('document.edit_after_ceisa') && !$isFromCeisaPull) {
+                    abort(403, 'Dokumen telah diajukan ke CEISA 4.0. Anda memerlukan hak akses izin "document.edit_after_ceisa" untuk merevisi data dokumen yang sudah terkirim.');
+                }
+            }
         }
 
-        $isDraft = ($bc20->status === 'DRAFT');
         $kantorList = config('ceisa.kantor_pabean', []);
         $activeValuta = $bc20->kode_valuta ?? 'USD';
         $activeKurs = $this->kursService->getActiveKurs($activeValuta);
@@ -364,6 +383,11 @@ class BC20Controller extends Controller implements HasMiddleware
             'barangList',
             'shipment',
             'isDraft',
+            'isBillingLocked',
+            'isFromCeisaPull',
+            'canEditData',
+            'canSubmitCeisa',
+            'isReadOnly',
             'refOptions',
             'previewFiles',
             'wizardState'
@@ -375,8 +399,12 @@ class BC20Controller extends Controller implements HasMiddleware
      */
     public function update(Request $request, CeisaDocument $bc20)
     {
-        if ($redirect = $this->guardEditable($bc20)) {
-            return $redirect;
+        if (!$bc20->canEditData()) {
+            $msg = "Dokumen BC 2.0 (Nomor Aju: {$bc20->nomor_aju}) telah berstatus Billing / Respon Resmi dan terkunci permanen untuk menjaga integritas data pabean.";
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => $msg], 403);
+            }
+            return redirect()->route('bc20.show', $bc20->id)->with('error', $msg);
         }
 
         $user = auth()->user();
@@ -515,12 +543,6 @@ class BC20Controller extends Controller implements HasMiddleware
      */
     public function uploadWizardDocument(Request $request, CeisaDocument $bc20)
     {
-        if ($redirect = $this->guardEditable($bc20)) {
-            return $request->wantsJson()
-                ? response()->json(['success' => false, 'message' => 'Dokumen terkunci dan tidak dapat diubah.'], 403)
-                : $redirect;
-        }
-
         $validated = $request->validate([
             'file' => 'required|file|mimes:pdf,jpg,jpeg,png,webp,txt,csv|max:10240',
             'kode_dokumen' => 'nullable|string|max:10',
@@ -578,8 +600,8 @@ class BC20Controller extends Controller implements HasMiddleware
      */
     public function resyncExtraction(CeisaDocument $bc20, Request $request, \App\Services\Shipment\DocumentExtractionService $extractionService)
     {
-        if ($redirect = $this->guardEditable($bc20)) {
-            return response()->json(['success' => false, 'message' => 'Dokumen terkunci atau tidak dapat diedit.'], 403);
+        if (!$bc20->canEditData()) {
+            return response()->json(['success' => false, 'message' => 'Dokumen telah terbit Billing/SPPB resmi di CEISA dan terkunci permanen.'], 403);
         }
 
         $shipment = $bc20->shipment ?? $this->workflowService->ensureShipmentForCeisaDocument($bc20);

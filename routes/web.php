@@ -88,6 +88,8 @@ Route::middleware('auth')->group(function () {
         Route::put('/{bc30}', [BC30Controller::class, 'update'])->name('update');
         Route::delete('/{bc30}', [BC30Controller::class, 'destroy'])->name('destroy');
         Route::post('/{bc30}/reopen-draft', [BC30Controller::class, 'reopenDraft'])->name('reopen-draft');
+        Route::post('/{bc30}/upload-document', [BC30Controller::class, 'uploadWizardDocument'])->name('upload-document');
+        Route::post('/{bc30}/resync-extraction', [BC30Controller::class, 'resyncExtraction'])->name('resync-extraction');
         Route::post('/{bc30}/check-schema', [BC30Controller::class, 'checkSchema'])->name('check-schema');
         Route::post('/{bc30}/submit', [BC30Controller::class, 'submit'])->name('submit');
         Route::post('/{bc30}/check-status', [BC30Controller::class, 'checkStatus'])->name('check-status');
