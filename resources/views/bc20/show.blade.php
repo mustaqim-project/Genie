@@ -3,6 +3,10 @@
 @section('title', 'Detail Dokumen BC 2.0 - ' . $bc20->nomor_aju)
 
 @section('content')
+@php
+    $isBillingLocked = $isBillingLocked ?? $bc20->isBillingLocked();
+    $isFromCeisaPull = $isFromCeisaPull ?? $bc20->isFromCeisaPull();
+@endphp
 <div class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12">
 
     <!-- Alert Demurrage & Free Time Warning (Jika Ada Pada Proyek Pengapalan) -->
@@ -112,7 +116,7 @@
                 </a>
 
                 @php
-                    $isBillingLocked = $bc20->isBillingLocked();
+                    $isBillingLocked = $isBillingLocked ?? $bc20->isBillingLocked();
                     $canEditDraft = auth()->user()->isSuperAdmin() || auth()->user()->hasAnyPermission(['document.edit', 'document.edit_after_ceisa']);
                     $canEditAfterCeisa = auth()->user()->isSuperAdmin() || auth()->user()->hasPermission('document.edit_after_ceisa');
                 @endphp
@@ -602,7 +606,7 @@
             </button>
         </div>
 
-        <form id="form-upload-pelengkap-bc20" action="{{ route('bc20.upload-wizard-document', $bc20->id) }}" method="POST" enctype="multipart/form-data" class="space-y-3.5 text-xs">
+        <form id="form-upload-pelengkap-bc20" action="{{ route('bc20.upload-document', $bc20->id) }}" method="POST" enctype="multipart/form-data" class="space-y-3.5 text-xs">
             @csrf
             <div>
                 <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jenis Dokumen <span class="text-rose-500">*</span></label>

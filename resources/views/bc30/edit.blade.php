@@ -1,499 +1,923 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Dokumen BC 3.0 (PEB) - ' . $bc30->nomor_aju)
+@section('title', 'Wizard Edit Dokumen BC 3.0 (PEB) - ' . $bc30->nomor_aju)
 
 @section('content')
 <script>
-window.bc30EditManager = function bc30EditManager() {
+window.bc30WizardManager = function bc30WizardManager() {
+    const initialWizard = @json($wizardState);
+    const initialFiles = @json($previewFiles);
+    const docLabels = @json($refOptions['kode_dokumen']);
+
+    let rawPdfDoc = null;
+    let currentRenderTask = null;
+
     return {
-        valuta: '{{ $valuta }}',
-        ndbmKurs: {{ $kurs }},
-        fob: {{ $fobVal }},
-        items: [
-            @if(!empty($barangList))
-                @foreach($barangList as $b)
-                    {
-                        hs_code: '{{ $b['kodeHs'] ?? $b['hs_code'] ?? '09011110' }}',
-                        uraian: '{{ addslashes($b['uraian'] ?? $b['uraianBarang'] ?? '') }}',
-                        merk: '{{ addslashes($b['merk'] ?? '') }}',
-                        jumlah: {{ $b['jumlahKemasan'] ?? $b['jumlah'] ?? 100 }},
-                        kemasan: '{{ $b['jenisKemasan'] ?? $b['kemasan'] ?? 'BAG' }}',
-                        fob: {{ (float) ($b['fob'] ?? $b['cif'] ?? 1000) }},
-                        tarif_bk: {{ (float) ($b['tarifBk'] ?? $b['tarif_bk'] ?? 0.0) }}
-                    },
-                @endforeach
-            @else
-                {
-                    hs_code: '09011110',
-                    uraian: 'BIJI KOPI ARABIKA GAYO GRADE 1 (EXPORT QUALITY)',
-                    merk: 'GAYO HIGHLAND GRADE 1',
-                    jumlah: 200,
-                    kemasan: 'BAG',
-                    fob: {{ $fobVal }},
-                    tarif_bk: 0.0
-                }
-            @endif
+        activeStep: 1,
+        isReadOnly: {{ $isReadOnly ? 'true' : 'false' }},
+        canSubmitCeisa: {{ $canSubmitCeisa ? 'true' : 'false' }},
+        isBillingLocked: {{ $isBillingLocked ? 'true' : 'false' }},
+        isFromCeisaPull: {{ $isFromCeisaPull ? 'true' : 'false' }},
+        steps: [
+            { id: 1, label: 'Header' },
+            { id: 2, label: 'Entitas' },
+            { id: 3, label: 'Dokumen' },
+            { id: 4, label: 'Pengangkut' },
+            { id: 5, label: 'Kemasan & Peti Kemas' },
+            { id: 6, label: 'Transaksi' },
+            { id: 7, label: 'Barang' },
+            { id: 8, label: 'Pungutan' },
+            { id: 9, label: 'Pernyataan' },
         ],
+        w: initialWizard,
+        previewFiles: initialFiles,
+        showPreview: initialFiles.length > 0,
+        activePreviewIndex: 0,
+        previewZoom: 100,
+        saving: false,
+        resyncing: false,
+        saveToast: { type: 'success', message: '' },
 
-        addItem() {
-            this.items.push({
-                hs_code: '09011110',
-                uraian: 'KOMODITAS EKSPOR INDONESIA',
-                merk: '',
-                jumlah: 1,
-                kemasan: 'BAG',
-                fob: 100.0,
-                tarif_bk: 0.0
-            });
-            this.recalcFobFromItems();
+        // PDF.js Canvas Viewer State
+        pdfDoc: null,
+        pdfPageNum: 1,
+        pdfTotalPages: 0,
+        pdfRendering: false,
+        pdfPagePending: null,
+        pdfScale: 1.15,
+        pdfRotate: 0,
+        pdfMode: 'canvas',
+        pdfError: null,
+        pdfLoading: false,
+
+        getRawPdfDoc() {
+            if (rawPdfDoc) return rawPdfDoc;
+            if (window.__currentPdfDoc) return window.__currentPdfDoc;
+            return null;
         },
 
-        removeItem(index) {
-            if (this.items.length > 1) {
-                this.items.splice(index, 1);
-                this.recalcFobFromItems();
+        // Dokumen modal state
+        docModalOpen: false,
+        editingDocIndex: null,
+        docForm: { kodeDokumen: '380', nomorDokumen: '', tanggalDokumen: '', shipmentDocumentId: '' },
+
+        // Barang search & modal state
+        barangSearch: '',
+        barangModalOpen: false,
+        editingBarangIndex: null,
+        barangForm: {},
+
+        // BTKI Database Search State
+        btkiSearchInput: '',
+        btkiSearchOpen: false,
+        btkiSearchLoading: false,
+        btkiSearchResults: [],
+
+        init() {
+            this.recalculatePungutan();
+
+            if (this.previewFiles && this.previewFiles.length > 0) {
+                this.$nextTick(() => {
+                    this.loadActivePreviewFile();
+                });
+            }
+
+            this.$watch('activePreviewIndex', () => {
+                this.loadActivePreviewFile();
+            });
+
+            this.$watch('showPreview', (val) => {
+                if (val && !this.getRawPdfDoc() && this.activePreviewFile?.is_pdf) {
+                    this.$nextTick(() => this.loadActivePreviewFile());
+                }
+            });
+        },
+
+        get activePreviewFile() {
+            return this.previewFiles[this.activePreviewIndex] || null;
+        },
+
+        togglePreview() {
+            this.showPreview = !this.showPreview;
+        },
+
+        nextPreviewDoc() {
+            if (this.previewFiles.length === 0) return;
+            this.activePreviewIndex = (this.activePreviewIndex + 1) % this.previewFiles.length;
+        },
+
+        prevPreviewDoc() {
+            if (this.previewFiles.length === 0) return;
+            this.activePreviewIndex = (this.activePreviewIndex - 1 + this.previewFiles.length) % this.previewFiles.length;
+        },
+
+        selectDocForPreview(doc) {
+            if (!this.previewFiles || this.previewFiles.length === 0) return;
+            if (doc.shipmentDocumentId) {
+                const foundIdx = this.previewFiles.findIndex(f => f.id === doc.shipmentDocumentId);
+                if (foundIdx !== -1) {
+                    this.activePreviewIndex = foundIdx;
+                    this.showPreview = true;
+                    return;
+                }
+            }
+            this.showPreview = true;
+        },
+
+        isDocActiveInPreview(doc) {
+            if (!this.activePreviewFile) return false;
+            return doc.shipmentDocumentId === this.activePreviewFile.id;
+        },
+
+        loadActivePreviewFile() {
+            const file = this.activePreviewFile;
+            if (!file) return;
+
+            this.pdfError = null;
+            this.pdfPageNum = 1;
+            this.pdfTotalPages = 0;
+            this.pdfRotate = 0;
+            this.previewZoom = 100;
+
+            if (file.is_pdf && this.pdfMode === 'canvas') {
+                this.initPdfJsCanvas(file.preview_url);
             }
         },
 
-        recalcFobFromItems() {
+        async initPdfJsCanvas(url) {
+            const canvas = document.getElementById('bc30PdfCanvas');
+            if (!canvas) {
+                setTimeout(() => this.initPdfJsCanvas(url), 120);
+                return;
+            }
+
+            if (typeof pdfjsLib === 'undefined') {
+                this.pdfMode = 'native';
+                return;
+            }
+
+            pdfjsLib.GlobalWorkerOptions.workerSrc = '{{ asset("vendor/pdfjs/pdf.worker.min.js") }}';
+
+            this.pdfLoading = true;
+            this.pdfError = null;
+
+            if (currentRenderTask) {
+                try { currentRenderTask.cancel(); } catch (e) {}
+                currentRenderTask = null;
+            }
+
+            try {
+                const loadingTask = pdfjsLib.getDocument({
+                    url: url,
+                    cMapUrl: '{{ asset("vendor/pdfjs/cmaps/") }}/',
+                    cMapPacked: true,
+                });
+                rawPdfDoc = await loadingTask.promise;
+                window.__currentPdfDoc = rawPdfDoc;
+                this.pdfTotalPages = rawPdfDoc.numPages;
+                this.pdfPageNum = 1;
+                this.pdfLoading = false;
+                this.renderPdfPage(1);
+            } catch (err) {
+                if (err?.name === 'RenderingCancelledException') return;
+                console.warn('PDF.js Canvas error, fallback ke native:', err);
+                this.pdfLoading = false;
+                this.pdfError = 'Pratinjau canvas gagal dimuat: ' + (err.message || 'Format tidak didukung');
+                this.pdfMode = 'native';
+            }
+        },
+
+        async renderPdfPage(num) {
+            const pdf = this.getRawPdfDoc();
+            if (!pdf) return;
+
+            const canvas = document.getElementById('bc30PdfCanvas');
+            if (!canvas) return;
+
+            if (currentRenderTask) {
+                try { currentRenderTask.cancel(); } catch (e) {}
+                currentRenderTask = null;
+            }
+
+            this.pdfRendering = true;
+            try {
+                const page = await pdf.getPage(num);
+                const viewport = page.getViewport({ scale: this.pdfScale, rotation: this.pdfRotate });
+                const ctx = canvas.getContext('2d');
+
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                const renderContext = { canvasContext: ctx, viewport: viewport };
+                currentRenderTask = page.render(renderContext);
+                await currentRenderTask.promise;
+                currentRenderTask = null;
+                this.pdfRendering = false;
+
+                if (this.pdfPagePending !== null) {
+                    const p = this.pdfPagePending;
+                    this.pdfPagePending = null;
+                    this.renderPdfPage(p);
+                }
+            } catch (err) {
+                if (err?.name === 'RenderingCancelledException') return;
+                this.pdfRendering = false;
+            }
+        },
+
+        prevPdfPage() {
+            if (this.pdfPageNum <= 1) return;
+            this.pdfPageNum--;
+            this.renderPdfPage(this.pdfPageNum);
+        },
+
+        nextPdfPage() {
+            if (this.pdfPageNum >= this.pdfTotalPages) return;
+            this.pdfPageNum++;
+            this.renderPdfPage(this.pdfPageNum);
+        },
+
+        zoomPdf(delta) {
+            const newScale = Math.max(0.6, Math.min(2.5, this.pdfScale + delta));
+            this.pdfScale = Math.round(newScale * 100) / 100;
+            this.renderPdfPage(this.pdfPageNum);
+        },
+
+        rotatePdf() {
+            this.pdfRotate = (this.pdfRotate + 90) % 360;
+            this.renderPdfPage(this.pdfPageNum);
+        },
+
+        // Upload berkas fisik dokumen langsung dari wizard
+        async handleWizardDocUpload(event, purpose = 'dokumen') {
+            const file = event.target.files?.[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('purpose', purpose);
+            formData.append('kode_dokumen', purpose === 'dokumen' ? '380' : '705');
+            formData.append('nomor_dokumen', file.name.replace(/\.[^/.]+$/, ''));
+            formData.append('tanggal_dokumen', new Date().toISOString().slice(0, 10));
+
+            try {
+                const res = await fetch('{{ route("bc30.upload-document", $bc30->id) }}', {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    body: formData
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    this.previewFiles.unshift(data.preview_file);
+                    this.activePreviewIndex = 0;
+                    this.showPreview = true;
+                    if (data.doc_entry) {
+                        this.w.dokumen.push(data.doc_entry);
+                        this.sortDocumentsAuto();
+                    }
+                    this.showToast('Dokumen berhasil diunggah.');
+                } else {
+                    throw new Error(data.message || 'Gagal mengunggah dokumen.');
+                }
+            } catch (err) {
+                this.showToast(err.message || 'Gagal mengunggah dokumen.', 'error');
+            } finally {
+                event.target.value = '';
+            }
+        },
+
+        // Navigasi langkah wizard (1 - 9)
+        setStep(step) {
+            if (step >= 1 && step <= 9) {
+                this.activeStep = step;
+                window.scrollTo({ top: 320, behavior: 'smooth' });
+            }
+        },
+
+        nextStep() {
+            if (this.activeStep < 9) this.setStep(this.activeStep + 1);
+        },
+
+        prevStep() {
+            if (this.activeStep > 1) this.setStep(this.activeStep - 1);
+        },
+
+        // BTKI Database Autocomplete
+        async onBtkiSearchInput() {
+            const query = (this.btkiSearchInput || '').trim();
+            if (query.length < 2) {
+                this.btkiSearchResults = [];
+                this.btkiSearchOpen = false;
+                return;
+            }
+            this.btkiSearchLoading = true;
+            this.btkiSearchOpen = true;
+            try {
+                const res = await fetch('{{ route("bc20.recommend-hs") }}?query=' + encodeURIComponent(query));
+                const data = await res.json();
+                this.btkiSearchResults = data.data || [];
+            } catch (err) {
+                this.btkiSearchResults = [];
+            } finally {
+                this.btkiSearchLoading = false;
+            }
+        },
+
+        selectBtkiSearchItem(item) {
+            this.btkiSearchOpen = false;
+            this.openNewBarangModal({
+                hs_code: item.code,
+                uraian: item.description,
+                tarif_bk: 0.0,
+            });
+        },
+
+        // Kalkulasi Keuangan Ekspor
+        computedFobRupiah() {
+            const fob = parseFloat(this.w.transaksi.fob) || 0;
+            const kurs = parseFloat(this.w.transaksi.ndbm_kurs) || 0;
+            return Math.round(fob * kurs);
+        },
+
+        computedTotalBk() {
             let total = 0;
-            this.items.forEach(it => {
-                total += parseFloat(it.fob || 0);
+            const kurs = parseFloat(this.w.transaksi.ndbm_kurs) || 0;
+            this.w.barang.forEach(b => {
+                const itemFobRupiah = (parseFloat(b.fob) || 0) * kurs;
+                const tarifBk = parseFloat(b.tarif_bk) || 0;
+                total += Math.round((tarifBk / 100) * itemFobRupiah);
             });
-            if (total > 0) {
-                this.fob = Math.round(total * 100) / 100;
+            return total;
+        },
+
+        recalculatePungutan() {
+            let totalFob = 0;
+            this.w.barang.forEach(b => {
+                totalFob += parseFloat(b.fob) || 0;
+            });
+            if (totalFob > 0 && (!this.w.transaksi.fob || this.w.transaksi.fob === 0)) {
+                this.w.transaksi.fob = Math.round(totalFob * 100) / 100;
             }
+        },
+
+        // Modal Barang
+        openNewBarangModal(prefill = {}) {
+            this.editingBarangIndex = null;
+            this.barangForm = {
+                seri: this.w.barang.length + 1,
+                hs_code: prefill.hs_code || '09011110',
+                uraian: prefill.uraian || '',
+                merk: 'INDONESIAN ORIGIN',
+                tipe: 'GRADE A',
+                jumlah: 1,
+                satuan: 'KGM',
+                jumlah_kemasan: 1,
+                kemasan: 'BG',
+                netto: 1,
+                fob: 100,
+                tarif_bk: prefill.tarif_bk || 0.0,
+            };
+            this.barangModalOpen = true;
+        },
+
+        editBarangModal(index) {
+            this.editingBarangIndex = index;
+            this.barangForm = JSON.parse(JSON.stringify(this.w.barang[index]));
+            this.barangModalOpen = true;
+        },
+
+        saveBarangModal() {
+            if (this.editingBarangIndex !== null) {
+                this.w.barang[this.editingBarangIndex] = JSON.parse(JSON.stringify(this.barangForm));
+            } else {
+                this.w.barang.push(JSON.parse(JSON.stringify(this.barangForm)));
+            }
+            this.barangModalOpen = false;
+            this.recalculatePungutan();
+            this.showToast('Data barang berhasil disimpan.');
+        },
+
+        removeBarang(index) {
+            if (this.w.barang.length > 1) {
+                this.w.barang.splice(index, 1);
+                this.recalculatePungutan();
+                this.showToast('Barang berhasil dihapus.');
+            }
+        },
+
+        // Modal Dokumen
+        openNewDocModal() {
+            this.editingDocIndex = null;
+            this.docForm = {
+                kodeDokumen: '380',
+                nomorDokumen: '',
+                tanggalDokumen: new Date().toISOString().slice(0, 10),
+                shipmentDocumentId: ''
+            };
+            this.docModalOpen = true;
+        },
+
+        editDocModal(index) {
+            this.editingDocIndex = index;
+            this.docForm = JSON.parse(JSON.stringify(this.w.dokumen[index]));
+            this.docModalOpen = true;
+        },
+
+        saveDocModal() {
+            if (this.editingDocIndex !== null) {
+                this.w.dokumen[this.editingDocIndex] = JSON.parse(JSON.stringify(this.docForm));
+            } else {
+                this.docForm.seriDokumen = this.w.dokumen.length + 1;
+                this.w.dokumen.push(JSON.parse(JSON.stringify(this.docForm)));
+            }
+            this.docModalOpen = false;
+            this.showToast('Dokumen berhasil disimpan.');
+        },
+
+        removeDoc(index) {
+            this.w.dokumen.splice(index, 1);
+            this.showToast('Dokumen berhasil dihapus.');
+        },
+
+        sortDocumentsAuto() {
+            const priority = { '380': 1, '217': 2, '705': 3, '861': 4, '430': 5 };
+            this.w.dokumen.sort((a, b) => (priority[a.kodeDokumen] || 99) - (priority[b.kodeDokumen] || 99));
+            this.w.dokumen.forEach((d, i) => d.seriDokumen = i + 1);
+            this.showToast('Dokumen pelengkap diurutkan otomatis.');
+        },
+
+        copyEksportirToPemilik() {
+            this.w.entitas.pemilik_npwp = this.w.entitas.eksportir_npwp;
+            this.w.entitas.pemilik_nama = this.w.entitas.eksportir_nama;
+            this.w.entitas.pemilik_alamat = this.w.entitas.eksportir_alamat;
+            this.showToast('Data Pemilik disamakan dengan Eksportir.');
+        },
+
+        syncPernyataan() {
+            this.w.pernyataan.nama_ttd = this.w.entitas.eksportir_nama || 'DIREKTUR';
+            this.w.pernyataan.tanggal_ttd = new Date().toISOString().slice(0, 10);
+            this.w.pernyataan.kota_ttd = 'JAKARTA';
+            this.w.pernyataan.jabatan_ttd = 'DIREKTUR';
+            this.showToast('Informasi penandatanganan disinkronkan.');
+        },
+
+        async saveDraftAjax() {
+            if (this.isReadOnly) {
+                this.showToast('Dokumen dalam Mode Inspeksi (Read-Only). Perubahan tidak dapat disimpan ke CEISA.', 'warning');
+                return;
+            }
+            this.saving = true;
+            try {
+                const res = await fetch('{{ route("bc30.update", $bc30->id) }}', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ wizard_payload: this.w })
+                });
+                const data = await res.json();
+                if (!res.ok || !data.success) throw new Error(data.message || 'Gagal menyimpan draft.');
+                this.showToast('Draft 9 tahap PEB tersimpan.');
+            } catch (err) {
+                this.showToast(err.message || 'Gagal menyimpan draft.', 'error');
+            } finally {
+                this.saving = false;
+            }
+        },
+
+        prepareFormSubmit(event) {
+            if (this.isReadOnly) {
+                event.preventDefault();
+                window.location.href = '{{ route("bc30.show", $bc30->id) }}';
+                return;
+            }
+            this.$refs.wizardPayloadInput.value = JSON.stringify(this.w);
+        },
+
+        showToast(msg, type = 'success') {
+            this.saveToast = { type, message: msg };
+            if (window.SwalToast) {
+                window.SwalToast.fire({
+                    icon: type === 'error' ? 'error' : (type === 'warning' ? 'warning' : 'success'),
+                    title: msg
+                });
+            }
+            setTimeout(() => {
+                if (this.saveToast.message === msg) this.saveToast.message = '';
+            }, 3500);
         },
 
         formatNumber(num) {
-            return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num);
+            return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num || 0);
         },
 
-        async updateKurs() {
-            try {
-                const res = await fetch('/ceisa/kurs/' + this.valuta);
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.nilai_kurs) {
-                        this.ndbmKurs = parseFloat(data.nilai_kurs);
-                    }
-                }
-            } catch (err) {
-                console.warn('Gagal ambil kurs terkini:', err);
+        formatInt(num) {
+            return new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(num || 0);
+        },
+
+        formatHsCode(hs) {
+            const clean = String(hs || '').replace(/[^0-9]/g, '');
+            if (clean.length === 8) {
+                return clean.substring(0, 4) + '.' + clean.substring(4, 6) + '.' + clean.substring(6, 8);
             }
+            return hs;
+        },
+
+        getDocTypeLabel(code) {
+            return docLabels[code] || ('Dokumen Kode ' + code);
         }
     };
 };
-
-document.addEventListener('alpine:init', () => {
-    if (window.Alpine && typeof window.Alpine.data === 'function') {
-        window.Alpine.data('bc30EditManager', window.bc30EditManager);
-    }
-});
-if (window.Alpine && typeof window.Alpine.data === 'function') {
-    window.Alpine.data('bc30EditManager', window.bc30EditManager);
-}
 </script>
 
-<div class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12" x-data="bc30EditManager()">
-    <!-- Breadcrumb -->
-    <x-breadcrumb :items="[
-        ['label' => 'Dashboard', 'url' => route('dashboard')],
-        ['label' => 'Tim Document', 'url' => route('core.document.index')],
-        ['label' => 'BC 3.0 (Ekspor)', 'url' => route('bc30.index')],
-        ['label' => 'Detail Dokumen', 'url' => route('bc30.show', $bc30->id)],
-        ['label' => 'Edit Data']
-    ]" />
-
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+<div class="max-w-[1780px] mx-auto px-3 sm:px-5 space-y-4 pt-3 pb-32" x-data="bc30WizardManager()" x-init="init()">
+    <!-- Header Toolbar -->
+    <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-4 sm:p-5 border border-black/[0.06] dark:border-white/[0.08] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
-            <div class="flex items-center gap-2 mb-1">
-                <span class="px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-[#34C759]/10 text-[#34C759] border border-[#34C759]/20">
-                    BC 3.0 (PEB)
+            <nav class="flex items-center gap-1.5 text-xs text-slate-500 font-medium mb-1">
+                <a href="{{ route('dashboard') }}" class="hover:text-[#0284c7]">Dashboard</a>
+                <span>/</span>
+                <a href="{{ route('bc30.index') }}" class="hover:text-[#0284c7]">BC 3.0 (PEB)</a>
+                <span>/</span>
+                <span class="text-slate-800 dark:text-slate-200 font-mono font-bold">{{ $bc30->nomor_aju }}</span>
+            </nav>
+            <div class="flex items-center gap-2 flex-wrap">
+                <h1 class="text-lg font-bold text-slate-900 dark:text-white">Wizard Pengajuan Dokumen BC 3.0 (PEB)</h1>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-[#0284c7]/10 text-[#0284c7]">
+                    9 TAHAP CEISA 4.0
                 </span>
-                <span class="inline-flex items-center px-3 py-0.5 rounded-full text-xs font-semibold {{ $bc30->status_badge_class }}">
-                    Status: {{ $bc30->status }}
-                </span>
+                @if($isReadOnly)
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">
+                        MODE INSPEKSI (READ-ONLY)
+                    </span>
+                @endif
             </div>
-            <h1 class="text-2xl font-bold font-apple-display text-slate-900 dark:text-white tracking-tight">
-                {{ $isDraft ? 'Edit Draf Dokumen Pabean BC 3.0 (PEB)' : 'Revisi Data Dokumen BC 3.0 (Pasca-Kirim CEISA)' }}
-            </h1>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-mono">
-                Nomor Aju: <strong>{{ $bc30->nomor_aju }}</strong> <span class="text-slate-300 dark:text-slate-600 mx-1">/</span> Dibuat: {{ $bc30->created_at->format('d/m/Y H:i') }}
-            </p>
         </div>
-        <div class="flex items-center space-x-2">
-            <a href="{{ route('bc30.show', $bc30->id) }}" class="btn-apple-gray text-xs px-3.5 py-2 inline-flex items-center gap-1.5">
-                <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
-                <span>Kembali ke Detail</span>
-            </a>
+
+        <div class="flex items-center gap-2">
+            <!-- Simpan Draft Ajax -->
+            <button type="button" @click="saveDraftAjax()" :disabled="saving || isReadOnly"
+                    x-show="!isReadOnly"
+                    class="w-9 h-9 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 inline-flex items-center justify-center transition-colors cursor-pointer shadow-2xs"
+                    title="Simpan Draft">
+                <template x-if="!saving">
+                    <i data-lucide="save" class="w-4 h-4 text-[#0284c7]"></i>
+                </template>
+                <template x-if="saving">
+                    <div class="w-4 h-4 border-2 border-[#0284c7] border-t-transparent rounded-full animate-spin"></div>
+                </template>
+            </button>
+
+            <!-- Toggle Preview PDF -->
+            <button type="button" @click="togglePreview()"
+                    :class="showPreview ? 'bg-[#0284c7]/10 text-[#0284c7] border-[#0284c7]/30' : 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-white/10 dark:text-slate-200 dark:border-white/15'"
+                    class="w-9 h-9 rounded-xl border inline-flex items-center justify-center transition-colors cursor-pointer shadow-2xs"
+                    :title="showPreview ? 'Tutup Panel Preview' : 'Buka Panel Preview (' + previewFiles.length + ')'">
+                <i data-lucide="panel-left" class="w-4 h-4"></i>
+            </button>
         </div>
     </div>
 
-    <!-- Banner Info Role Hak Akses -->
-    @if($isDraft)
-        <div class="p-4 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-900/40 text-emerald-900 dark:text-emerald-300 text-xs flex items-start gap-3">
-            <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5"></i>
-            <div>
-                <strong class="font-bold">Mode Edit Draft Aktif (Izin: document.edit)</strong>
-                <p class="text-[11px] text-emerald-700 dark:text-emerald-400 mt-0.5 leading-relaxed">
-                    Dokumen ini berstatus DRAFT. Anda dapat menyesuaikan data sarana pengangkut, buyer luar negeri, nilai ekspor FOB, dan rincian pos tarif HS Code sebelum divalidasi dan dikirim ke server CEISA 4.0 DJBC.
-                </p>
+    <!-- Stepper Waterfall Pabean & Tracking Dokumen Terpadu -->
+    @include('bc20.components.waterfall_stepper', [
+        'activeStage' => 4,
+        'bc30' => $bc30,
+        'shipment' => $shipment,
+    ])
+
+    <!-- Mode Notice Banners -->
+    @if($isReadOnly)
+        <div class="p-4 rounded-2xl bg-amber-50/90 dark:bg-amber-950/40 border border-amber-300/80 dark:border-amber-800/60 text-amber-950 dark:text-amber-200 text-xs flex items-center justify-between gap-3 shadow-xs">
+            <div class="flex items-center gap-3">
+                <i data-lucide="lock" class="w-5 h-5 text-amber-600 shrink-0"></i>
+                <div>
+                    <strong class="font-bold text-sm">Mode Inspeksi &amp; Arsip Dokumen Pabean (Read-Only)</strong>
+                    <p class="text-[11px] text-amber-800 dark:text-amber-300 mt-0.5">Dokumen telah berstatus Billing / Respon Resmi NPE di CEISA DJBC. Seluruh 9 tahapan pabean ekspor dan berkas dokumen dapat ditinjau. Pengubahan data pabean dinonaktifkan, namun Anda tetap dapat mengunggah berkas fisik pelengkap.</p>
+                </div>
             </div>
+            <span class="px-2.5 py-1 rounded-lg bg-amber-200/80 dark:bg-amber-900/60 font-bold font-mono text-[10px] uppercase shrink-0">Terkunci Fiskal</span>
         </div>
-    @else
-        <div class="p-4 rounded-2xl bg-amber-50/90 dark:bg-amber-950/40 border border-amber-300/80 dark:border-amber-800/60 text-amber-950 dark:text-amber-200 text-xs flex items-start gap-3 shadow-xs">
-            <i data-lucide="shield-alert" class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5"></i>
-            <div>
-                <strong class="font-bold">Mode Revisi Pasca-Kirim CEISA (Izin Khusus: document.edit_after_ceisa)</strong>
-                <p class="text-[11px] text-amber-800 dark:text-amber-300 mt-0.5 leading-relaxed">
-                    Dokumen ini telah diajukan ke CEISA dengan status <strong>{{ $bc30->status }}</strong>. Melalui hak akses supervisor/khusus ini, Anda diizinkan melakukan pembaruan data PEB yang nantinya dicatat secara otomatis dalam audit trail dan mereset pre-flight check skema untuk pengajuan perbaikan / ralat PEB.
-                </p>
+    @elseif($isBillingLocked && $isFromCeisaPull)
+        <div class="p-4 rounded-2xl bg-sky-50/90 dark:bg-sky-950/40 border border-sky-300/80 dark:border-sky-800/60 text-sky-950 dark:text-sky-200 text-xs flex items-center justify-between gap-3 shadow-xs">
+            <div class="flex items-center gap-3">
+                <i data-lucide="info" class="w-5 h-5 text-[#0284c7] shrink-0"></i>
+                <div>
+                    <strong class="font-bold text-sm">Data Hasil Tarikan CEISA 4.0 — Mode Penyesuaian Operasional</strong>
+                    <p class="text-[11px] text-sky-800 dark:text-sky-300 mt-0.5">Dokumen ini ditarik langsung dari CEISA DJBC. Anda dapat melengkapi rincian kontainer, kemasan, dokumen pelengkap, dan mengunggah berkas fisik untuk kebutuhan internal di GENIE. Pengiriman ulang ke CEISA dinonaktifkan karena respon resmi telah terbit.</p>
+                </div>
             </div>
+            <span class="px-2.5 py-1 rounded-lg bg-sky-200/80 dark:bg-sky-900/60 font-bold font-mono text-[10px] uppercase shrink-0">Data Tarikan CEISA</span>
         </div>
     @endif
 
-    <form action="{{ route('bc30.update', $bc30->id) }}" method="POST" id="bc30EditForm" class="space-y-6">
+    <!-- Main Split-Screen Workspace -->
+    <form action="{{ route('bc30.update', $bc30->id) }}" method="POST" id="bc30WizardForm" @submit="prepareFormSubmit($event)">
         @csrf
         @method('PUT')
+        <input type="hidden" name="wizard_payload" x-ref="wizardPayloadInput">
 
-        <!-- 1. Header & Kantor Pabean -->
-        <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-6 border border-slate-200/80 dark:border-white/10 shadow-xs">
-            <div class="flex items-center space-x-2 text-slate-800 dark:text-white font-bold text-sm mb-4 pb-2 border-b border-slate-100 dark:border-white/10">
-                <span class="w-6 h-6 rounded-lg bg-emerald-100 dark:bg-emerald-950/50 text-[#34C759] flex items-center justify-center text-xs font-bold">1</span>
-                <span>Kantor Pabean & Jenis Ekspor</span>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-                <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kantor Pabean Pemuatan *</label>
-                    <select name="kode_kantor" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#34C759]">
-                        @foreach($kantorList as $code => $name)
-                            <option value="{{ $code }}" {{ old('kode_kantor', $bc30->kode_kantor) === $code ? 'selected' : '' }}>
-                                {{ $code }} - {{ $name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jenis Ekspor</label>
-                    <input type="text" value="1 - Ekspor Biasa" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-500 dark:text-slate-400" readonly>
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kategori Ekspor</label>
-                    <input type="text" value="1 - Umum" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-500 dark:text-slate-400" readonly>
-                </div>
-            </div>
-        </div>
-
-        <!-- 2. Entitas Kepabeanan -->
-        <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-6 border border-slate-200/80 dark:border-white/10 shadow-xs">
-            <div class="flex items-center space-x-2 text-slate-800 dark:text-white font-bold text-sm mb-4 pb-2 border-b border-slate-100 dark:border-white/10">
-                <span class="w-6 h-6 rounded-lg bg-emerald-100 dark:bg-emerald-950/50 text-[#34C759] flex items-center justify-center text-xs font-bold">2</span>
-                <span>Entitas Kepabeanan Ekspor</span>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs">
-                <!-- Eksportir Lokal -->
-                <div class="p-4 rounded-xl bg-slate-50/70 dark:bg-[#2C2C2E]/60 border border-slate-200 dark:border-white/10">
-                    <span class="inline-block px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/50 text-[#34C759] font-bold text-[10px] mb-2">EKSPORTIR (KODE 2)</span>
-                    <div class="space-y-2">
-                        <div>
-                            <label class="block text-slate-500 dark:text-slate-400 font-medium">Nama Perusahaan Eksportir</label>
-                            <input type="text" value="{{ $bc30->nama_perusahaan_lokal ?? config('ceisa.company.name') }}" class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-[#1C1C1E] font-semibold text-slate-800 dark:text-white" readonly>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+            <!-- LEFT PANE: LIVE DOCUMENT PREVIEW -->
+            <div x-show="showPreview" x-cloak class="lg:col-span-5 lg:sticky lg:top-4">
+                <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl border border-black/[0.08] dark:border-white/[0.1] shadow-sm overflow-hidden flex flex-col h-[720px]">
+                    <!-- Preview Header Bar -->
+                    <div class="px-4 py-2.5 bg-slate-50 dark:bg-white/[0.03] border-b border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <i data-lucide="file-text" class="w-4 h-4 text-rose-500 shrink-0"></i>
+                            <span class="font-mono font-bold text-xs text-slate-800 dark:text-white truncate"
+                                  x-text="activePreviewFile ? activePreviewFile.nama_file : 'Belum ada berkas terunggah'"></span>
                         </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="block text-slate-500 dark:text-slate-400 font-medium">NPWP Eksportir</label>
-                                <input type="text" value="{{ $bc30->npwp_perusahaan_lokal ?? config('ceisa.company.npwp') }}" class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-[#1C1C1E] font-mono tabular-nums text-slate-700 dark:text-slate-300" readonly>
+                        <template x-if="activePreviewFile">
+                            <div class="flex items-center gap-1 shrink-0">
+                                <a :href="activePreviewFile.download_url" target="_blank" class="p-1 rounded-lg border border-slate-200 dark:border-white/15 hover:bg-slate-100 text-slate-700 dark:text-slate-200" title="Unduh Berkas">
+                                    <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                                </a>
+                                <button type="button" @click="prevPreviewDoc()" :disabled="previewFiles.length <= 1" class="p-1 rounded-lg border border-slate-200 dark:border-white/15 hover:bg-slate-100 disabled:opacity-40 cursor-pointer">
+                                    <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
+                                </button>
+                                <span class="text-[11px] font-mono px-1 font-semibold" x-text="(activePreviewIndex + 1) + '/' + previewFiles.length"></span>
+                                <button type="button" @click="nextPreviewDoc()" :disabled="previewFiles.length <= 1" class="p-1 rounded-lg border border-slate-200 dark:border-white/15 hover:bg-slate-100 disabled:opacity-40 cursor-pointer">
+                                    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                                </button>
                             </div>
-                            <div>
-                                <label class="block text-slate-500 dark:text-slate-400 font-medium">NIB</label>
-                                <input type="text" value="{{ config('ceisa.company.nib') }}" class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-[#1C1C1E] font-mono tabular-nums text-slate-700 dark:text-slate-300" readonly>
+                        </template>
+                    </div>
+
+                    <!-- Viewer Canvas Area -->
+                    <div class="flex-1 bg-slate-100 dark:bg-[#111113] overflow-auto relative flex flex-col items-center justify-start min-h-[580px]">
+                        <template x-if="!activePreviewFile">
+                            <div class="text-center p-6 space-y-3 my-auto">
+                                <div class="w-12 h-12 rounded-2xl bg-slate-200/70 dark:bg-white/10 text-slate-400 mx-auto flex items-center justify-center">
+                                    <i data-lucide="file-search" class="w-6 h-6"></i>
+                                </div>
+                                <div class="text-xs font-semibold text-slate-600 dark:text-slate-300">Belum ada file PDF / Gambar yang diunggah</div>
+                                <p class="text-[11px] text-slate-400 max-w-xs mx-auto">Unggah Invoice, Packing List, B/L, atau Draft PEB pada tab Dokumen untuk langsung melihat preview di sini.</p>
                             </div>
-                        </div>
-                    </div>
-                </div>
+                        </template>
 
-                <!-- Pembeli Luar Negeri (Buyer) -->
-                <div class="p-4 rounded-xl bg-slate-50/70 dark:bg-[#2C2C2E]/60 border border-slate-200 dark:border-white/10">
-                    <span class="inline-block px-2 py-0.5 rounded bg-slate-200 dark:bg-white/10 text-slate-800 dark:text-slate-200 font-bold text-[10px] mb-2">PEMBELI / BUYER (KODE 6)</span>
-                    <div class="space-y-2">
-                        <div>
-                            <label class="block text-slate-600 dark:text-slate-300 font-semibold mb-1">Nama Pembeli (Buyer) *</label>
-                            <input type="text" name="buyer_nama" 
-                                   value="{{ old('buyer_nama', $bc30->nama_mitra_luar_negeri) }}" 
-                                   class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white focus:ring-2 focus:ring-[#34C759]" required>
-                        </div>
-                        <div>
-                            <label class="block text-slate-600 dark:text-slate-300 font-semibold mb-1">Negara Tujuan / Pembeli *</label>
-                            <select name="buyer_negara" class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white focus:ring-2 focus:ring-[#34C759]" required>
-                                <option value="US" {{ old('buyer_negara', $bc30->negara_mitra_luar_negeri) === 'US' ? 'selected' : '' }}>US - Amerika Serikat</option>
-                                <option value="JP" {{ old('buyer_negara', $bc30->negara_mitra_luar_negeri) === 'JP' ? 'selected' : '' }}>JP - Jepang</option>
-                                <option value="CN" {{ old('buyer_negara', $bc30->negara_mitra_luar_negeri) === 'CN' ? 'selected' : '' }}>CN - Tiongkok (China)</option>
-                                <option value="SG" {{ old('buyer_negara', $bc30->negara_mitra_luar_negeri) === 'SG' ? 'selected' : '' }}>SG - Singapura</option>
-                                <option value="DE" {{ old('buyer_negara', $bc30->negara_mitra_luar_negeri) === 'DE' ? 'selected' : '' }}>DE - Jerman</option>
-                                <option value="NL" {{ old('buyer_negara', $bc30->negara_mitra_luar_negeri) === 'NL' ? 'selected' : '' }}>NL - Belanda</option>
-                                <option value="AU" {{ old('buyer_negara', $bc30->negara_mitra_luar_negeri) === 'AU' ? 'selected' : '' }}>AU - Australia</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+                        <!-- Image Viewer -->
+                        <template x-if="activePreviewFile && activePreviewFile.is_image">
+                            <div class="w-full h-full overflow-auto p-3 flex items-start justify-center">
+                                <img :src="activePreviewFile.preview_url" :alt="activePreviewFile.nama_file"
+                                     :style="'width: ' + previewZoom + '%; max-width: none;'"
+                                     class="rounded-lg shadow-md transition-all">
+                            </div>
+                        </template>
 
-        <!-- 3. Pengangkutan & Dokumen Pelengkap -->
-        <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-6 border border-slate-200/80 dark:border-white/10 shadow-xs">
-            <div class="flex items-center space-x-2 text-slate-800 dark:text-white font-bold text-sm mb-4 pb-2 border-b border-slate-100 dark:border-white/10">
-                <span class="w-6 h-6 rounded-lg bg-emerald-100 dark:bg-emerald-950/50 text-[#34C759] flex items-center justify-center text-xs font-bold">3</span>
-                <span>Pengangkutan & Dokumen Pelengkap Ekspor</span>
-            </div>
-            @php
-                $angkutNama = $payload['pengangkut'][0]['namaPengangkut'] ?? ($shipment ? ($shipment->vessel_name . ' ' . $shipment->voyage_number) : 'MV WAN HAI 315');
-                $pelMuat = $payload['pelabuhanMuat']['kodePelabuhan'] ?? ($shipment?->port_of_loading ?? 'IDTPP');
-                $pelBongkar = $payload['pelabuhanBongkar']['kodePelabuhan'] ?? ($shipment?->port_of_discharge ?? 'USLAX');
-                $invNo = $payload['dokumen'][0]['nomorDokumen'] ?? ($shipment?->invoice_number ?? 'PEB-INV-' . date('Ymd'));
-                $invDate = $payload['dokumen'][0]['tanggalDokumen'] ?? ($shipment?->invoice_date ? $shipment->invoice_date->format('Y-m-d') : date('Y-m-d'));
-            @endphp
-            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs mb-4">
-                <div class="sm:col-span-2">
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Kapal / Sarana Pengangkut *</label>
-                    <input type="text" name="nama_sarana_pengangkut" 
-                           value="{{ old('nama_sarana_pengangkut', $angkutNama) }}" 
-                           class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white focus:ring-2 focus:ring-[#34C759]" required>
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Pelabuhan Muat Ekspor *</label>
-                    <input type="text" name="pelabuhan_muat" 
-                           value="{{ old('pelabuhan_muat', $pelMuat) }}" 
-                           class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white font-mono uppercase focus:ring-2 focus:ring-[#34C759]" required>
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Pelabuhan Bongkar Tujuan *</label>
-                    <input type="text" name="pelabuhan_bongkar" 
-                           value="{{ old('pelabuhan_bongkar', $pelBongkar) }}" 
-                           class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white font-mono uppercase focus:ring-2 focus:ring-[#34C759]" required>
-                </div>
-            </div>
+                        <!-- PDF Viewer: Canvas Mode (PDF.js) -->
+                        <template x-if="activePreviewFile && !activePreviewFile.is_image && activePreviewFile.is_previewable && pdfMode === 'canvas'">
+                            <div class="w-full h-full flex flex-col overflow-hidden relative">
+                                <div x-show="pdfLoading" class="absolute inset-0 bg-white/85 dark:bg-[#1C1C1E]/85 flex flex-col items-center justify-center gap-2.5 z-20">
+                                    <div class="w-6 h-6 border-2 border-[#0284c7] border-t-transparent rounded-full animate-spin"></div>
+                                    <span class="text-xs font-semibold text-slate-700 dark:text-slate-200">Memuat halaman PDF...</span>
+                                </div>
 
-            <!-- Invoice & Perizinan Ekspor -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs pt-3 border-t border-slate-100 dark:border-white/10">
-                <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Invoice Ekspor *</label>
-                    <input type="text" name="invoice_no" 
-                           value="{{ old('invoice_no', $invNo) }}" 
-                           class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white font-mono" required>
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Invoice Ekspor *</label>
-                    <input type="date" name="invoice_date" 
-                           value="{{ old('invoice_date', $invDate) }}" 
-                           class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white" required>
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Lokasi Siap Periksa</label>
-                    <input type="text" name="lokasi_siap_periksa" 
-                           value="{{ old('lokasi_siap_periksa', $bc30->lokasi_siap_periksa ?? 'Gudang Konsolidasi TPS Tanjung Priok') }}" 
-                           class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white">
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Siap Periksa</label>
-                    <input type="date" name="tanggal_periksa" 
-                           value="{{ old('tanggal_periksa', $bc30->tanggal_periksa?->format('Y-m-d') ?? date('Y-m-d')) }}" 
-                           class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white">
-                </div>
-            </div>
-        </div>
+                                <div class="flex-1 overflow-auto p-4 flex items-start justify-center">
+                                    <canvas id="bc30PdfCanvas" class="shadow-xl rounded-md bg-white"></canvas>
+                                </div>
+                            </div>
+                        </template>
 
-        <!-- 4. Nilai Ekspor & Valuta (FOB) -->
-        <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-6 border border-slate-200/80 dark:border-white/10 shadow-xs">
-            <div class="flex items-center space-x-2 text-slate-800 dark:text-white font-bold text-sm mb-4 pb-2 border-b border-slate-100 dark:border-white/10">
-                <span class="w-6 h-6 rounded-lg bg-emerald-100 dark:bg-emerald-950/50 text-[#34C759] flex items-center justify-center text-xs font-bold">4</span>
-                <span>Valuta & Nilai Ekspor (Incoterm FOB)</span>
-            </div>
-            @php
-                $valuta = $bc30->kode_valuta ?? 'USD';
-                $kurs = (float) ($bc30->ndbm_kurs ?? 16200.0);
-                $fobVal = (float) ($header['fob'] ?? ($bc30->total_nilai ?? 48500.0));
-                $freightVal = (float) ($header['freight'] ?? 0.0);
-                $asuransiVal = (float) ($header['asuransi'] ?? 0.0);
-                $brutoVal = (float) ($bc30->total_bruto ?? 12000.0);
-                $nettoVal = (float) ($bc30->total_netto ?? 11500.0);
-            @endphp
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs mb-4">
-                <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Mata Uang (Valuta) *</label>
-                    <select name="kode_valuta" x-model="valuta" @change="updateKurs()" 
-                            class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white font-bold focus:ring-2 focus:ring-[#34C759]">
-                        <option value="USD" {{ $valuta === 'USD' ? 'selected' : '' }}>USD - US Dollar</option>
-                        <option value="EUR" {{ $valuta === 'EUR' ? 'selected' : '' }}>EUR - Euro</option>
-                        <option value="JPY" {{ $valuta === 'JPY' ? 'selected' : '' }}>JPY - Japanese Yen</option>
-                        <option value="SGD" {{ $valuta === 'SGD' ? 'selected' : '' }}>SGD - Singapore Dollar</option>
-                        <option value="CNY" {{ $valuta === 'CNY' ? 'selected' : '' }}>CNY - Chinese Yuan</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">NDBM Kurs Pajak (KMK) *</label>
-                    <input type="number" step="0.01" name="ndbm_kurs" x-model="ndbmKurs" 
-                           value="{{ old('ndbm_kurs', $kurs) }}" 
-                           class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white font-mono tabular-nums focus:ring-2 focus:ring-[#34C759]" required>
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nilai FOB Ekspor (Valas) *</label>
-                    <input type="number" step="0.01" name="fob" x-model="fob" 
-                           value="{{ old('fob', $fobVal) }}" 
-                           class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white font-mono tabular-nums focus:ring-2 focus:ring-[#34C759]" required>
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Freight (Opsional)</label>
-                    <input type="number" step="0.01" name="freight" 
-                           value="{{ old('freight', $freightVal) }}" 
-                           class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white font-mono tabular-nums">
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
-                <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Asuransi (Opsional)</label>
-                    <input type="number" step="0.01" name="asuransi" 
-                           value="{{ old('asuransi', $asuransiVal) }}" 
-                           class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white font-mono tabular-nums">
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Berat Bruto (KGM) *</label>
-                    <input type="number" step="0.01" name="bruto" 
-                           value="{{ old('bruto', $brutoVal) }}" 
-                           class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white font-mono tabular-nums focus:ring-2 focus:ring-[#34C759]" required>
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Berat Netto (KGM) *</label>
-                    <input type="number" step="0.01" name="netto" 
-                           value="{{ old('netto', $nettoVal) }}" 
-                           class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white font-mono tabular-nums focus:ring-2 focus:ring-[#34C759]" required>
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Total Nilai Ekspor (IDR)</label>
-                    <div class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 font-mono font-bold text-slate-900 dark:text-white" x-text="'Rp ' + formatNumber(fob * ndbmKurs)">
-                        Rp {{ number_format($fobVal * $kurs, 0, ',', '.') }}
+                        <!-- PDF Viewer: Native Fallback -->
+                        <template x-if="activePreviewFile && !activePreviewFile.is_image && activePreviewFile.is_previewable && pdfMode === 'native'">
+                            <iframe :src="activePreviewFile.preview_url" class="w-full h-full border-0"></iframe>
+                        </template>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- 5. Rincian Barang Ekspor & Bea Keluar -->
-        <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-6 border border-slate-200/80 dark:border-white/10 shadow-xs">
-            <div class="flex items-center justify-between text-slate-800 dark:text-white font-bold text-sm mb-4 pb-2 border-b border-slate-100 dark:border-white/10">
-                <div class="flex items-center space-x-2">
-                    <span class="w-6 h-6 rounded-lg bg-emerald-100 dark:bg-emerald-950/50 text-[#34C759] flex items-center justify-center text-xs font-bold">5</span>
-                    <span>Rincian Barang Ekspor & Bea Keluar (BK)</span>
-                </div>
-                <button type="button" @click="addItem()" class="btn-apple-tinted text-xs px-3 py-1.5 inline-flex items-center gap-1.5 cursor-pointer">
-                    <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
-                    <span>Tambah Baris Barang</span>
-                </button>
-            </div>
-
-            <div class="space-y-4">
-                <template x-for="(item, index) in items" :key="index">
-                    <div class="p-4 rounded-xl bg-slate-50 dark:bg-[#2C2C2E]/60 border border-slate-200 dark:border-white/10 relative">
-                        <div class="flex items-center justify-between mb-3">
-                            <span class="font-bold text-xs text-slate-700 dark:text-slate-300" x-text="'Barang Ekspor #' + (index + 1)"></span>
-                            <button type="button" @click="removeItem(index)" x-show="items.length > 1" class="text-rose-600 hover:text-rose-700 text-xs font-semibold">
-                                Hapus Baris
+            <!-- RIGHT PANE: 9-STAGE WIZARD FORM -->
+            <div :class="showPreview ? 'lg:col-span-7' : 'lg:col-span-12'" class="space-y-4">
+                <!-- 9-Stage Tab Navigation Bar -->
+                <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-2 border border-black/[0.06] dark:border-white/[0.08] shadow-xs overflow-x-auto">
+                    <div class="flex items-center gap-1 min-w-max">
+                        <template x-for="s in steps" :key="s.id">
+                            <button type="button" @click="setStep(s.id)"
+                                    :class="activeStep === s.id 
+                                        ? 'bg-[#0284c7] text-white shadow-xs font-bold' 
+                                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 font-semibold'"
+                                    class="px-3 py-2 rounded-xl text-xs transition-colors cursor-pointer inline-flex items-center gap-1.5 whitespace-nowrap">
+                                <span class="w-5 h-5 rounded-full inline-flex items-center justify-center text-[10px] font-mono"
+                                      :class="activeStep === s.id ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300'"
+                                      x-text="s.id"></span>
+                                <span x-text="s.label"></span>
                             </button>
-                        </div>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs mb-3">
-                            <div>
-                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">HS Code Ekspor (BTKI) *</label>
-                                <input type="text" :name="'barang[' + index + '][hs_code]'" x-model="item.hs_code"
-                                       class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white font-mono" required>
-                            </div>
-                            <div class="sm:col-span-2">
-                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Uraian Barang Ekspor *</label>
-                                <input type="text" :name="'barang[' + index + '][uraian]'" x-model="item.uraian"
-                                       class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white" required>
-                            </div>
-                            <div>
-                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Merek & Tipe</label>
-                                <input type="text" :name="'barang[' + index + '][merk]'" x-model="item.merk"
-                                       class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white">
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                            <div>
-                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jumlah Kemasan</label>
-                                <input type="number" :name="'barang[' + index + '][jumlah]'" x-model="item.jumlah"
-                                       class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white font-mono tabular-nums" required>
-                            </div>
-                            <div>
-                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jenis Kemasan</label>
-                                <input type="text" :name="'barang[' + index + '][kemasan]'" x-model="item.kemasan"
-                                       class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white font-mono" required>
-                            </div>
-                            <div>
-                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">FOB Ekspor (Valas) *</label>
-                                <input type="number" step="0.01" :name="'barang[' + index + '][fob]'" x-model="item.fob" @input="recalcFobFromItems()"
-                                       class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white font-mono tabular-nums" required>
-                            </div>
-                            <div>
-                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tarif BK (%)</label>
-                                <input type="number" step="0.1" :name="'barang[' + index + '][tarif_bk]'" x-model="item.tarif_bk"
-                                       class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/15 dark:bg-[#1C1C1E] dark:text-white font-mono tabular-nums">
-                            </div>
-                        </div>
+                        </template>
                     </div>
-                </template>
-            </div>
-        </div>
+                </div>
 
-        <!-- 6. Kontainer & Data Penutup -->
-        <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl p-6 border border-slate-200/80 dark:border-white/10 shadow-xs">
-            <div class="flex items-center space-x-2 text-slate-800 dark:text-white font-bold text-sm mb-4 pb-2 border-b border-slate-100 dark:border-white/10">
-                <span class="w-6 h-6 rounded-lg bg-emerald-100 dark:bg-emerald-950/50 text-[#34C759] flex items-center justify-center text-xs font-bold">6</span>
-                <span>Peti Kemas & Data Penanggung Jawab Ekspor</span>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
-                <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Total Kemasan</label>
-                    <input type="number" name="jumlah_kemasan" 
-                           value="{{ old('jumlah_kemasan', $bc30->total_kemasan ?? 200) }}" 
-                           class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white font-mono tabular-nums" required>
+                <!-- Stage 1 s/d 9 Contents -->
+                <div x-show="activeStep === 1">
+                    @include('bc30.wizard._stage_header')
                 </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama PIC Pembuat</label>
-                    <input type="text" name="pic_pembuat" 
-                           value="{{ old('pic_pembuat', $bc30->pic_pembuat ?? auth()->user()->name) }}" 
-                           class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white">
+                <div x-show="activeStep === 2">
+                    @include('bc30.wizard._stage_entitas')
                 </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Telepon PIC</label>
-                    <input type="text" name="telepon_pembuat" 
-                           value="{{ old('telepon_pembuat', $bc30->telepon_pembuat ?? '081234567890') }}" 
-                           class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white font-mono">
+                <div x-show="activeStep === 3">
+                    @include('bc30.wizard._stage_dokumen')
                 </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Bank Devisa Hasil Ekspor (DHE)</label>
-                    <input type="text" name="bank_nama" 
-                           value="{{ old('bank_nama', $bc30->bank_nama ?? 'BANK MANDIRI (PERSERO) TBK') }}" 
-                           class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white">
+                <div x-show="activeStep === 4">
+                    @include('bc30.wizard._stage_pengangkut')
                 </div>
-            </div>
-        </div>
+                <div x-show="activeStep === 5">
+                    @include('bc30.wizard._stage_kemasan')
+                </div>
+                <div x-show="activeStep === 6">
+                    @include('bc30.wizard._stage_transaksi')
+                </div>
+                <div x-show="activeStep === 7">
+                    @include('bc30.wizard._stage_barang')
+                </div>
+                <div x-show="activeStep === 8">
+                    @include('bc30.wizard._stage_pungutan')
+                </div>
+                <div x-show="activeStep === 9">
+                    @include('bc30.wizard._stage_pernyataan')
+                </div>
 
-        <!-- Tombol Aksi Simpan & Batal -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-white dark:bg-[#1C1C1E] rounded-2xl border border-black/10 dark:border-white/10 shadow-xs">
-            <div class="flex items-center gap-2">
-                <a href="{{ route('bc30.show', $bc30->id) }}" class="btn-apple-gray text-xs px-4 py-2.5">
-                    Batal
-                </a>
-            </div>
-            <div class="flex items-center gap-2">
-                <button type="submit" class="btn-apple-filled text-xs px-6 py-2.5 inline-flex items-center gap-2 cursor-pointer shadow-sm !bg-[#34C759] hover:!bg-[#2fb350]">
-                    <i data-lucide="save" class="w-4 h-4"></i>
-                    <span>Simpan Perubahan Dokumen BC 3.0</span>
-                </button>
+                <!-- Floating Bottom Navigation Bar -->
+                <div class="p-3.5 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-md rounded-2xl border border-black/[0.08] dark:border-white/[0.1] shadow-lg flex items-center justify-between gap-3 sticky bottom-4 z-30">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-mono font-bold text-slate-500">
+                            TAHAP <span class="text-[#0284c7]" x-text="activeStep"></span> / 9:
+                        </span>
+                        <span class="text-xs font-bold text-slate-800 dark:text-white" x-text="steps[activeStep - 1]?.label"></span>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <template x-if="!isReadOnly">
+                            <button type="button" @click="saveDraftAjax()" :disabled="saving"
+                                    class="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] hover:bg-slate-50 text-slate-700 dark:text-slate-200 font-semibold inline-flex items-center gap-1.5 cursor-pointer text-xs">
+                                <template x-if="!saving">
+                                    <i data-lucide="save" class="w-3.5 h-3.5 text-[#0284c7]"></i>
+                                </template>
+                                <template x-if="saving">
+                                    <div class="w-3.5 h-3.5 border-2 border-[#0284c7] border-t-transparent rounded-full animate-spin"></div>
+                                </template>
+                                <span x-text="saving ? 'Menyimpan...' : 'Simpan Draft'"></span>
+                            </button>
+                        </template>
+
+                        <button type="button" @click="prevStep()" :disabled="activeStep <= 1"
+                                class="px-4 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] text-xs font-semibold text-slate-700 dark:text-slate-200 disabled:opacity-40 inline-flex items-center gap-1.5 cursor-pointer">
+                            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                            <span>Sebelumnya</span>
+                        </button>
+
+                        <template x-if="activeStep < 9">
+                            <button type="button" @click="nextStep()"
+                                    class="px-5 py-2 rounded-xl bg-[#0284c7] hover:bg-[#0066D6] text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-sm cursor-pointer transition-colors">
+                                <span>Selanjutnya</span>
+                                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                            </button>
+                        </template>
+                        <template x-if="activeStep === 9 && !isReadOnly">
+                            <button type="submit"
+                                    class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-sm cursor-pointer transition-colors">
+                                <i data-lucide="check-circle" class="w-4 h-4"></i>
+                                <span>Simpan &amp; Selesai</span>
+                            </button>
+                        </template>
+                        <template x-if="activeStep === 9 && isReadOnly">
+                            <a href="{{ route('bc30.show', $bc30->id) }}"
+                               class="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-sm cursor-pointer transition-colors">
+                                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                                <span>Selesai Meninjau (Kembali)</span>
+                            </a>
+                        </template>
+                    </div>
+                </div>
             </div>
         </div>
     </form>
+
+    <!-- Modal Form Dokumen Pelengkap -->
+    <div x-show="docModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+        <div class="bg-white dark:bg-[#1C1C1E] rounded-3xl max-w-md w-full p-6 border border-black/10 dark:border-white/10 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
+                <h3 class="font-bold text-sm text-slate-900 dark:text-white" x-text="editingDocIndex !== null ? 'Edit Dokumen Pelengkap' : 'Tambah Dokumen Pelengkap'"></h3>
+                <button type="button" @click="docModalOpen = false" class="p-1 rounded-lg text-slate-400 hover:text-slate-700">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jenis Dokumen <span class="text-rose-500">*</span></label>
+                    <select x-model="docForm.kodeDokumen" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] dark:text-white">
+                        <option value="380">380 - Commercial Invoice</option>
+                        <option value="217">217 - Packing List</option>
+                        <option value="705">705 - Bill of Lading / Booking Confirmation</option>
+                        <option value="861">861 - Certificate of Origin (e-COO)</option>
+                        <option value="430">430 - Polis Asuransi Kargo</option>
+                        <option value="999">999 - Dokumen Pelengkap Lainnya</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Dokumen <span class="text-rose-500">*</span></label>
+                    <input type="text" x-model="docForm.nomorDokumen" placeholder="Contoh: INV-EXP-2026-001" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] dark:text-white">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Dokumen <span class="text-rose-500">*</span></label>
+                    <input type="date" x-model="docForm.tanggalDokumen" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] dark:text-white">
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-3 border-t border-black/[0.06] dark:border-white/[0.08]">
+                <button type="button" @click="docModalOpen = false" class="px-4 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-slate-100 text-slate-700 font-semibold text-xs">
+                    Batal
+                </button>
+                <button type="button" @click="saveDocModal()" class="px-4 py-2 rounded-xl bg-[#0284c7] text-white font-semibold text-xs">
+                    Simpan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Form Barang Ekspor -->
+    <div x-show="barangModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+        <div class="bg-white dark:bg-[#1C1C1E] rounded-3xl max-w-xl w-full p-6 border border-black/10 dark:border-white/10 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
+                <h3 class="font-bold text-sm text-slate-900 dark:text-white" x-text="editingBarangIndex !== null ? 'Edit Komoditas Barang Ekspor' : 'Tambah Komoditas Barang Ekspor'"></h3>
+                <button type="button" @click="barangModalOpen = false" class="p-1 rounded-lg text-slate-400 hover:text-slate-700">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Pos Tarif (HS Code 8-Digit) <span class="text-rose-500">*</span></label>
+                        <input type="text" x-model="barangForm.hs_code" placeholder="Contoh: 09011110" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] dark:text-white font-mono font-bold">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tarif Bea Keluar (%)</label>
+                        <input type="number" step="0.1" x-model.number="barangForm.tarif_bk" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] dark:text-white font-mono">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Uraian Barang Ekspor <span class="text-rose-500">*</span></label>
+                    <input type="text" x-model="barangForm.uraian" placeholder="Contoh: BIJI KOPI ARABIKA GAYO GRADE 1" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] dark:text-white uppercase font-semibold">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Merek</label>
+                        <input type="text" x-model="barangForm.merk" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] dark:text-white uppercase">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tipe / Kualitas</label>
+                        <input type="text" x-model="barangForm.tipe" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] dark:text-white uppercase">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jumlah Satuan <span class="text-rose-500">*</span></label>
+                        <input type="number" step="0.0001" x-model.number="barangForm.jumlah" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] dark:text-white font-mono">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kode Satuan</label>
+                        <input type="text" x-model="barangForm.satuan" placeholder="KGM, PCE, UNIT" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] dark:text-white uppercase font-mono font-bold">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Berat Netto (KG)</label>
+                        <input type="number" step="0.0001" x-model.number="barangForm.netto" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] dark:text-white font-mono">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jumlah Kemasan</label>
+                        <input type="number" x-model.number="barangForm.jumlah_kemasan" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] dark:text-white font-mono">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jenis Kemasan</label>
+                        <input type="text" x-model="barangForm.kemasan" placeholder="PK, BG, CT" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] dark:text-white uppercase font-mono font-bold">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nilai FOB Barang</label>
+                        <input type="number" step="0.01" x-model.number="barangForm.fob" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] dark:text-white font-mono font-bold">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-3 border-t border-black/[0.06] dark:border-white/[0.08]">
+                <button type="button" @click="barangModalOpen = false" class="px-4 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-slate-100 text-slate-700 font-semibold text-xs">
+                    Batal
+                </button>
+                <button type="button" @click="saveBarangModal()" class="px-4 py-2 rounded-xl bg-[#0284c7] text-white font-semibold text-xs">
+                    Simpan Barang
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
+
+@push('scripts')
+<script src="{{ asset('vendor/pdfjs/pdf.min.js') }}"></script>
+@endpush
 @endsection

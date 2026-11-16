@@ -3,6 +3,9 @@
 @section('title', 'Detail Dokumen BC 3.0 - ' . $bc30->nomor_aju)
 
 @section('content')
+@php
+    $isBillingLocked = $isBillingLocked ?? $bc30->isBillingLocked();
+@endphp
 <div class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12">
 
     <!-- 0. Header Proyek & 11 Pos Workflow Stepper -->
@@ -31,6 +34,43 @@
         <div id="pos-assignment">
             @include('core.components.project_pic_assignment_card')
         </div>
+    @endif
+
+    <!-- Banner Transparan Alur & Inspeksi Dokumen (Billing / NPE Terbit) -->
+    @if($isBillingLocked)
+    <div class="p-4 sm:p-5 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-900/50 text-slate-800 dark:text-slate-200 text-xs flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs">
+        <div class="flex items-start sm:items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/50 text-amber-600 flex items-center justify-center shrink-0">
+                <i data-lucide="shield-check" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <strong class="font-bold text-sm text-slate-900 dark:text-white">Dokumen Terbit Resmi CEISA 4.0: {{ $bc30->status }}</strong>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                        {{ $bc30->isFromCeisaPull() ? 'DATA TARIKAN CEISA' : 'INTEGRASI GENIE' }}
+                    </span>
+                </div>
+                <p class="text-slate-600 dark:text-slate-300 text-[11px] mt-0.5">
+                    {{ $bc30->isFromCeisaPull() 
+                        ? 'Dokumen ini ditarik dari CEISA DJBC. Seluruh tahapan 1 - 9 dapat ditinjau. Anda dapat mengunggah berkas fisik pelengkap (B/L, Invoice, Packing List) sebagai syarat kelengkapan operasional ekspor.' 
+                        : 'Respon resmi (NPE / Billing) telah terbit di DJBC. Seluruh proses sebelumnya dan data 9 tahapan pabean tetap dapat Anda buka dalam Mode Inspeksi transparan.' }}
+                </p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+            <a href="{{ route('bc30.edit', $bc30->id) }}" 
+               class="btn-apple-filled text-xs inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl shadow-xs !bg-amber-600 hover:!bg-amber-700">
+                <i data-lucide="eye" class="w-4 h-4"></i>
+                <span>Buka Wizard 9 Tahap (Inspeksi)</span>
+            </a>
+            <button type="button" 
+                    onclick="document.getElementById('modal-upload-pelengkap-bc30')?.classList.remove('hidden')"
+                    class="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] hover:bg-slate-50 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 font-semibold inline-flex items-center gap-1.5 cursor-pointer text-xs shadow-2xs">
+                <i data-lucide="upload" class="w-3.5 h-3.5 text-amber-600"></i>
+                <span>Unggah Berkas Fisik</span>
+            </button>
+        </div>
+    </div>
     @endif
 
     <!-- Breadcrumb & Header Toolbar -->
@@ -76,19 +116,27 @@
                 @endphp
 
                 @if($isBillingLocked)
+                    <!-- Tombol Buka Wizard 9 Tahap (Mode Inspeksi atau Penyesuaian Operasional) -->
+                    <a href="{{ route('bc30.edit', $bc30->id) }}" 
+                       class="btn-apple-filled text-xs inline-flex items-center gap-1.5 px-3.5 py-2 !bg-amber-600 hover:!bg-amber-700"
+                       title="{{ $bc30->isFromCeisaPull() ? 'Lengkapi Data Operasional & Berkas (9 Tahap)' : 'Tinjau Tahapan Dokumen (Mode Inspeksi 9 Tahap)' }}">
+                        <i data-lucide="{{ $bc30->isFromCeisaPull() ? 'edit-3' : 'eye' }}" class="w-3.5 h-3.5"></i>
+                        <span>{{ $bc30->isFromCeisaPull() ? 'Edit Data / Wizard 9 Tahap' : 'Buka Wizard 9 Tahap (Inspeksi)' }}</span>
+                    </a>
+
                     <!-- Indikator Terkunci & Read-Only saat Billing / NPE Terbit -->
                     <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 text-xs font-semibold"
                          title="Respon Resmi Kepabeanan (NPE/Billing) telah diterbitkan oleh DJBC. Dokumen terkunci permanen untuk menjaga integritas data fiskal. Data tetap dapat dilihat sepenuhnya (Read-Only).">
                         <i data-lucide="lock" class="w-3.5 h-3.5 text-amber-600"></i>
-                        <span>Terkunci (Respon Terbit) — Mode Baca Saja</span>
+                        <span>Terkunci</span>
                     </div>
 
                     @if($bc30->shipment)
                         <a href="{{ route('core.document.show', $bc30->shipment->id) }}" 
                            class="btn-apple-gray text-xs inline-flex items-center gap-1.5 px-3.5 py-2 !text-[#34C759] !border-[#34C759]/30 hover:!bg-[#34C759]/10"
                            title="Buka rincian berkas, deteksi HS code, dan proses sebelumnya pada workspace shipment">
-                            <i data-lucide="eye" class="w-3.5 h-3.5 text-[#34C759]"></i>
-                            <span>Lihat Proses Sebelumnya (Pos 1 - 3)</span>
+                            <i data-lucide="folder" class="w-3.5 h-3.5 text-[#34C759]"></i>
+                            <span>Workspace Berkas</span>
                         </a>
                     @endif
                 @else
@@ -205,6 +253,23 @@
         </div>
         @endif
     </div>
+
+    <!-- Skema Alur Waterfall Pabean & Tracking Dokumen Terpadu (Sinergi Create-Edit-Detail) -->
+    @php
+        $waterfallStage = 4;
+        if ($bc30->is_schema_valid && $bc30->status === 'DRAFT') {
+            $waterfallStage = 5;
+        } elseif ($bc30->kode_billing || in_array($bc30->status, ['SUBMITTED', 'REJECT', 'SIAP_KIRIM'], true)) {
+            $waterfallStage = 6;
+        } elseif (in_array($bc30->status, ['NPE', 'SPPB', 'GATE_IN', 'SELESAI'], true)) {
+            $waterfallStage = 7;
+        }
+    @endphp
+    @include('bc20.components.waterfall_stepper', [
+        'activeStage' => $waterfallStage,
+        'bc20' => $bc30,
+        'shipment' => $shipment ?? null,
+    ])
 
     <!-- NPE Card if available -->
     @if($bc30->nomor_sppb_npe)
@@ -481,4 +546,117 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Upload Berkas Pelengkap Pasca-Tarik CEISA atau Kapan Saja (BC 3.0) -->
+<div id="modal-upload-pelengkap-bc30" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-[#1C1C1E] w-full max-w-lg rounded-2xl border border-black/[0.08] dark:border-white/[0.1] shadow-2xl p-5 sm:p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-black/[0.06] dark:border-white/[0.08] pb-3">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
+                    <i data-lucide="upload-cloud" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-sm text-slate-900 dark:text-white">Unggah Berkas Fisik Pelengkap PEB</h3>
+                    <p class="text-[11px] text-slate-500">Arsip digital ekspor &amp; kelengkapan booking shipping line</p>
+                </div>
+            </div>
+            <button type="button" 
+                    onclick="document.getElementById('modal-upload-pelengkap-bc30')?.classList.add('hidden')"
+                    class="p-1 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <form id="form-upload-pelengkap-bc30" action="{{ route('bc30.upload-document', $bc30->id) }}" method="POST" enctype="multipart/form-data" class="space-y-3.5 text-xs">
+            @csrf
+            <div>
+                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jenis Dokumen <span class="text-rose-500">*</span></label>
+                <select name="kode_dokumen" required class="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] dark:text-white">
+                    <option value="380">380 - Commercial Invoice</option>
+                    <option value="217">217 - Packing List</option>
+                    <option value="705">705 - Bill of Lading (B/L) / Booking Confirmation</option>
+                    <option value="861">861 - Certificate of Origin (COO / Form E/D/AK)</option>
+                    <option value="430">430 - Polis Asuransi Kargo</option>
+                    <option value="999">999 - Dokumen Pelengkap / Perijinan Lainnya</option>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Dokumen</label>
+                    <input type="text" name="nomor_dokumen" placeholder="Contoh: INV-EXP-2026-001" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] dark:text-white">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Dokumen</label>
+                    <input type="date" name="tanggal_dokumen" value="{{ date('Y-m-d') }}" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] dark:text-white">
+                </div>
+            </div>
+
+            <div>
+                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Pilih Berkas (PDF / Gambar) <span class="text-rose-500">*</span></label>
+                <input type="file" name="file" required accept=".pdf,.png,.jpg,.jpeg,.webp" class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-amber-500/10 file:text-amber-600 hover:file:bg-amber-500/20 cursor-pointer">
+                <span class="text-[10px] text-slate-400 mt-1 block">Format didukung: PDF, PNG, JPG, JPEG (Maks. 10 MB). Berkas akan terintegrasi langsung ke panel preview split-screen.</span>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-3 border-t border-black/[0.06] dark:border-white/[0.08]">
+                <button type="button" 
+                        onclick="document.getElementById('modal-upload-pelengkap-bc30')?.classList.add('hidden')"
+                        class="px-4 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 text-slate-700 dark:text-slate-200 font-semibold cursor-pointer">
+                    Batal
+                </button>
+                <button type="submit" 
+                        class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-semibold inline-flex items-center gap-1.5 shadow-xs cursor-pointer">
+                    <i data-lucide="check" class="w-4 h-4"></i>
+                    <span>Simpan &amp; Unggah</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.getElementById('form-upload-pelengkap-bc30')?.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const form = this;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const origBtnHtml = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div><span>Mengunggah...</span>';
+
+    const formData = new FormData(form);
+    try {
+        const res = await fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            },
+            body: formData
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil',
+                text: data.message || 'Berkas fisik berhasil diunggah dan tersimpan.',
+                confirmButtonColor: '#d97706'
+            }).then(() => {
+                window.location.reload();
+            });
+        } else {
+            throw new Error(data.message || 'Gagal mengunggah berkas.');
+        }
+    } catch (err) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal Unggah',
+            text: err.message || 'Terjadi kesalahan saat mengunggah berkas.',
+            confirmButtonColor: '#d97706'
+        });
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = origBtnHtml;
+    }
+});
+</script>
 @endsection

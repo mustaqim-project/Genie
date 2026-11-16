@@ -291,7 +291,22 @@ class BC20Controller extends Controller implements HasMiddleware
         $threeWay = $shipment->three_way_matching;
         $taxes = $shipment->estimated_taxes;
 
-        return view('bc20.show', compact('bc20', 'shipment', 'completionRate', 'threeWay', 'taxes'));
+        $isBillingLocked = $bc20->isBillingLocked();
+        $isFromCeisaPull = $bc20->isFromCeisaPull();
+        $canEditData = $bc20->canEditData();
+        $canSubmitCeisa = $bc20->canSubmitCeisa();
+
+        return view('bc20.show', compact(
+            'bc20',
+            'shipment',
+            'completionRate',
+            'threeWay',
+            'taxes',
+            'isBillingLocked',
+            'isFromCeisaPull',
+            'canEditData',
+            'canSubmitCeisa'
+        ));
     }
 
     public function submit(CeisaDocument $bc20)
