@@ -174,8 +174,8 @@
 
         <!-- Table Mutasi -->
         <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-xs overflow-hidden text-xs">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left">
+            <div class="overflow-x-auto custom-scrollbar relative">
+                <table class="w-full text-left border-separate border-spacing-0 min-w-max whitespace-nowrap">
                     <thead class="bg-slate-50 dark:bg-[#2C2C2E] text-slate-600 dark:text-slate-300 font-semibold border-b border-slate-100 dark:border-white/10">
                         <tr>
                             <th class="py-3 px-4">Tanggal & Ref</th>
@@ -184,7 +184,7 @@
                             <th class="py-3 px-4 text-right">Kas Masuk (IDR)</th>
                             <th class="py-3 px-4 text-right">Kas Keluar (IDR)</th>
                             <th class="py-3 px-4 text-center">Rekonsiliasi</th>
-                            <th class="py-3 px-4 text-right">Aksi</th>
+                            <th class="py-3 px-4 text-right sticky right-0 z-20 bg-slate-50 dark:bg-[#2C2C2E] border-l border-slate-200/80 dark:border-white/10 shadow-[-6px_0_12px_rgba(0,0,0,0.06)] table-freeze-right">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 dark:divide-white/5 font-mono">
@@ -234,7 +234,7 @@
                                         </span>
                                     @endif
                                 </td>
-                                <td class="py-3 px-4 text-right font-sans">
+                                <td class="py-3 px-4 text-right font-sans whitespace-nowrap sticky right-0 z-10 bg-white dark:bg-[#1C1C1E] border-l border-slate-200/80 dark:border-white/10 shadow-[-6px_0_12px_rgba(0,0,0,0.06)] table-freeze-right">
                                     @can('finance.manage')
                                     <form action="{{ route('finance.cash-bank.transactions.reconcile', $t->id) }}" method="POST" class="inline-block">
                                         @csrf

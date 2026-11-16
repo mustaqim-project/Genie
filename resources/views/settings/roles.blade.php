@@ -330,7 +330,7 @@ if (window.Alpine && typeof window.Alpine.data === 'function') {
                         </button>
 
                         @if(!$isPreset)
-                        <form action="{{ route('settings.roles.destroy', $role->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus role custom ini?');" class="inline">
+                        <form action="{{ route('settings.roles.destroy', $role->id) }}" method="POST" onsubmit="return confirmSweetAlert(event, 'Apakah Anda yakin ingin menghapus role custom ini?');" class="inline">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="text-[11px] text-[#FF3B30] hover:underline font-semibold p-1 cursor-pointer" title="Hapus Role">
@@ -407,7 +407,7 @@ if (window.Alpine && typeof window.Alpine.data === 'function') {
                                 Ubah Peran
                             </button>
                             @if($m->email !== 'admin@agungtrans.co.id' && $m->id !== auth()->id())
-                            <form action="{{ route('settings.roles.members.destroy', $m->id) }}" method="POST" onsubmit="return confirm('Hapus anggota tim ini?');" class="inline">
+                            <form action="{{ route('settings.roles.members.destroy', $m->id) }}" method="POST" onsubmit="return confirmSweetAlert(event, 'Hapus anggota tim ini?');" class="inline">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn-apple-gray !h-7 !px-2 !text-[11px] text-[#FF3B30] hover:text-[#FF3B30]">

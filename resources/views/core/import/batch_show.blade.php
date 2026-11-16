@@ -32,7 +32,7 @@
         <div class="flex items-center gap-2">
             @if(auth()->user()->isSuperAdmin() || auth()->user()->hasAnyPermission(['document.create', 'document.edit', 'document.delete']))
                 <form action="{{ route('core.import.destroy', $batch->id) }}" method="POST" class="inline"
-                      onsubmit="return confirm('Hapus draft batch {{ $batch->batch_no }} beserta seluruh aset berkas fisiknya?');">
+                      onsubmit="return confirmSweetAlert(event, 'Hapus draft batch {{ $batch->batch_no }} beserta seluruh aset berkas fisiknya?');">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="px-3 py-1.5 rounded-[10px] text-[13px] font-semibold bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 transition cursor-pointer">
@@ -110,7 +110,7 @@
                             </a>
                             @if(auth()->user()->isSuperAdmin() || auth()->user()->hasAnyPermission(['document.create', 'document.edit', 'document.delete']))
                                 <form action="{{ route('core.import.doc.destroy', $doc->id) }}" method="POST" class="inline"
-                                      onsubmit="return confirm('Hapus draft dokumen ini beserta file aset fisiknya?');">
+                                      onsubmit="return confirmSweetAlert(event, 'Hapus draft dokumen ini beserta file aset fisiknya?');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit"

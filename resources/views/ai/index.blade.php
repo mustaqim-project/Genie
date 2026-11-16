@@ -593,7 +593,12 @@ ITEMS:
         const btn = document.getElementById('btn-run-scan');
 
         if (!rawText && fileInput.files.length === 0) {
-            alert('Silakan pilih berkas dokumen Packing List atau tempelkan teks baris barang terlebih dahulu.');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Perhatian',
+                text: 'Silakan pilih berkas dokumen Packing List atau tempelkan teks baris barang terlebih dahulu.',
+                confirmButtonColor: '#0284c7'
+            });
             return;
         }
 
@@ -712,7 +717,7 @@ ITEMS:
                     <td class="py-2.5 px-3">
                         <div class="flex items-center space-x-1.5">
                             <span class="font-mono font-bold text-sky-800 text-xs">${it.kode_hs}</span>
-                            <button type="button" onclick="navigator.clipboard.writeText('${it.kode_hs}'); alert('Kode HS disalin!');" title="Salin Pos Tarif" class="text-slate-400 hover:text-slate-700 cursor-pointer">
+                            <button type="button" onclick="navigator.clipboard.writeText('${it.kode_hs}'); window.SwalToast.fire({ icon: 'success', title: 'Kode HS disalin!' });" title="Salin Pos Tarif" class="text-slate-400 hover:text-slate-700 cursor-pointer">
                                 📋
                             </button>
                         </div>
@@ -743,7 +748,12 @@ ITEMS:
             document.getElementById('result_raw_json').textContent = JSON.stringify(data, null, 2);
 
         } catch (e) {
-            alert('Gagal memproses dokumen via OpenAI: ' + e.message);
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal Memproses Dokumen',
+                text: 'Gagal memproses dokumen via OpenAI: ' + e.message,
+                confirmButtonColor: '#0284c7'
+            });
         } finally {
             btn.innerHTML = originalBtnText;
             btn.disabled = false;
@@ -809,7 +819,12 @@ ITEMS:
                 }
             }
         } catch (e) {
-            alert('Gagal mencari pos tarif: ' + e.message);
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal Pencarian Pos Tarif',
+                text: 'Gagal mencari pos tarif: ' + e.message,
+                confirmButtonColor: '#0284c7'
+            });
         } finally {
             btn.innerHTML = originalBtnText;
             btn.disabled = false;

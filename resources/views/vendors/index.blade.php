@@ -43,8 +43,8 @@
 
     <!-- Vendor Table Bento Card -->
     <div class="bg-white/70 dark:bg-white/5 backdrop-blur-md rounded-2xl border border-black/5 dark:border-white/10 overflow-hidden shadow-2xs">
-        <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm text-black/80 dark:text-white/80">
+        <div class="overflow-x-auto custom-scrollbar relative">
+            <table class="w-full text-left text-sm text-black/80 dark:text-white/80 border-separate border-spacing-0 min-w-max whitespace-nowrap">
                 <thead class="bg-black/5 dark:bg-white/5 text-xs uppercase tracking-wider text-black/60 dark:text-white/60 font-semibold border-b border-black/5 dark:border-white/10">
                     <tr>
                         <th class="px-6 py-3.5">Kode & Vendor</th>
@@ -53,7 +53,7 @@
                         <th class="px-6 py-3.5">Portal / Web Tracking</th>
                         <th class="px-6 py-3.5 text-center">Total Proyek</th>
                         <th class="px-6 py-3.5 text-center">Status</th>
-                        <th class="px-6 py-3.5 text-right">Aksi</th>
+                        <th class="px-6 py-3.5 text-right sticky right-0 z-20 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-md border-l border-black/5 dark:border-white/10 shadow-[-6px_0_12px_rgba(0,0,0,0.06)] table-freeze-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-black/5 dark:divide-white/10 font-normal">
@@ -104,7 +104,7 @@
                                 </span>
                             @endif
                         </td>
-                        <td class="px-6 py-4 text-right">
+                        <td class="px-6 py-4 text-right whitespace-nowrap sticky right-0 z-10 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-md border-l border-black/5 dark:border-white/10 shadow-[-6px_0_12px_rgba(0,0,0,0.06)] table-freeze-right">
                             <div class="flex items-center justify-end gap-2">
                                 <form action="{{ route('vendors.toggle-status', $vendor->id) }}" method="POST" class="inline">
                                     @csrf
@@ -115,7 +115,7 @@
                                         <i data-lucide="{{ $vendor->is_active ? 'pause-circle' : 'play-circle' }}" class="w-4 h-4"></i>
                                     </button>
                                 </form>
-                                <form action="{{ route('vendors.destroy', $vendor->id) }}" method="POST" class="inline" onsubmit="return confirm('Hapus vendor ini?')">
+                                <form action="{{ route('vendors.destroy', $vendor->id) }}" method="POST" class="inline" onsubmit="return confirmSweetAlert(event, 'Hapus vendor ini?');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit"

@@ -102,7 +102,7 @@
                         @endif
                         @if($bc30->isDraftDeletable() && (auth()->user()->isSuperAdmin() || auth()->user()->hasAnyPermission(['document.create', 'document.edit', 'document.delete'])))
                             <form action="{{ route('bc30.destroy', $bc30->id) }}" method="POST" class="inline"
-                                  onsubmit="return confirm('Hapus draft BC 3.0 ({{ $bc30->nomor_aju }}) beserta proyek draft & seluruh aset berkas dokumennya?');">
+                                  onsubmit="return confirmSweetAlert(event, 'Hapus draft BC 3.0 ({{ $bc30->nomor_aju }}) beserta proyek draft & seluruh aset berkas dokumennya?');">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit"
@@ -122,7 +122,7 @@
                             </a>
 
                             <form action="{{ route('bc30.reopen-draft', $bc30->id) }}" method="POST" class="inline"
-                                  onsubmit="return confirm('Apakah Anda yakin ingin membuka kembali dokumen ini ke status DRAFT untuk revisi ulang dan penyesuaian skema CEISA?');">
+                                  onsubmit="return confirmSweetAlert(event, 'Apakah Anda yakin ingin membuka kembali dokumen ini ke status DRAFT untuk revisi ulang dan penyesuaian skema CEISA?');">
                                 @csrf
                                 <button type="submit" 
                                         class="btn-apple-gray text-xs inline-flex items-center gap-1.5 px-3.5 py-2 hover:!text-indigo-600"

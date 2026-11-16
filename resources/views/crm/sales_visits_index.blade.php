@@ -172,13 +172,20 @@ function openCheckInModal() {
             document.getElementById('geoLng').value = pos.coords.longitude.toFixed(7);
             document.getElementById('modalCheckIn').classList.remove('hidden');
         }, function(err) {
-            alert('Gagal mendapatkan lokasi GPS perangkat. Pastikan izin lokasi aktif.');
+            if (window.SwalToast) {
+                window.SwalToast.fire({ icon: 'warning', title: 'Gagal mendapatkan lokasi GPS perangkat. Menggunakan lokasi default kantor.' });
+            }
             document.getElementById('geoLat').value = '-6.2088000';
             document.getElementById('geoLng').value = '106.8456000';
             document.getElementById('modalCheckIn').classList.remove('hidden');
         });
     } else {
-        alert('Geolocation tidak didukung oleh browser Anda.');
+        Swal.fire({
+            icon: 'error',
+            title: 'Tidak Didukung',
+            text: 'Geolocation tidak didukung oleh browser Anda.',
+            confirmButtonColor: '#0284c7'
+        });
     }
 }
 </script>

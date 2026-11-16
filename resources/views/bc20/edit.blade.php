@@ -288,7 +288,17 @@ window.bc20WizardManager = function bc20WizardManager() {
 
         async resyncFromDocuments() {
             if (this.resyncing) return;
-            if (!confirm('Apakah Anda ingin membaca ulang seluruh berkas fisik PDF/gambar yang tersimpan dan menyinkronkan data form wizard PIB ini?')) {
+            const confirmResult = await Swal.fire({
+                title: 'Sinkronisasi Ulang Berkas',
+                text: 'Apakah Anda ingin membaca ulang seluruh berkas fisik PDF/gambar yang tersimpan dan menyinkronkan data form wizard PIB ini?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#0284c7',
+                cancelButtonColor: '#8E8E93',
+                confirmButtonText: 'Ya, Sinkronkan',
+                cancelButtonText: 'Batal'
+            });
+            if (!confirmResult.isConfirmed) {
                 return;
             }
 
@@ -1019,6 +1029,12 @@ window.bc20WizardManager = function bc20WizardManager() {
 
         showToast(msg, type = 'success') {
             this.saveToast = { type, message: msg };
+            if (window.SwalToast) {
+                window.SwalToast.fire({
+                    icon: type === 'error' ? 'error' : (type === 'warning' ? 'warning' : 'success'),
+                    title: msg
+                });
+            }
             setTimeout(() => {
                 if (this.saveToast.message === msg) this.saveToast.message = '';
             }, 3500);

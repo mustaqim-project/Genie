@@ -153,8 +153,8 @@
 
         <!-- Table Vendor Bills -->
         <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-xs overflow-hidden text-xs">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left">
+            <div class="overflow-x-auto custom-scrollbar relative">
+                <table class="w-full text-left border-separate border-spacing-0 min-w-max whitespace-nowrap">
                     <thead class="bg-slate-50 dark:bg-[#2C2C2E] text-slate-600 dark:text-slate-300 font-semibold border-b border-slate-100 dark:border-white/10">
                         <tr>
                             <th class="py-3 px-4">No. Ref & Tipe Vendor</th>
@@ -162,7 +162,7 @@
                             <th class="py-3 px-4 text-right">Nominal Tagihan</th>
                             <th class="py-3 px-4">Jatuh Tempo</th>
                             <th class="py-3 px-4 text-center">Status Tagihan</th>
-                            <th class="py-3 px-4 text-right">Aksi & Eksekusi</th>
+                            <th class="py-3 px-4 text-right sticky right-0 z-20 bg-slate-50 dark:bg-[#2C2C2E] border-l border-slate-200/80 dark:border-white/10 shadow-[-6px_0_12px_rgba(0,0,0,0.06)] table-freeze-right">Aksi & Eksekusi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 dark:divide-white/5">
@@ -220,14 +220,14 @@
                                         </span>
                                     @endif
                                 </td>
-                                <td class="py-3 px-4 text-right space-x-1.5 whitespace-nowrap">
+                                <td class="py-3 px-4 text-right space-x-1.5 whitespace-nowrap sticky right-0 z-10 bg-white dark:bg-[#1C1C1E] border-l border-slate-200/80 dark:border-white/10 shadow-[-6px_0_12px_rgba(0,0,0,0.06)] table-freeze-right">
                                     <!-- Aksi Approval Pimpinan -->
                                     @if($b->status === 'PENDING')
                                         @can('finance.ap_approve')
-                                            <form action="{{ route('finance.bills.approve', $b->id) }}" method="POST" class="inline-block">
+                                            <form action="{{ route('finance.bills.approve', $b->id) }}" method="POST" class="inline-block"
+                                                  onsubmit="return confirmSweetAlert(event, 'Setujui pencairan tagihan vendor {{ $b->ref_no }} senilai Rp {{ number_format($b->amount, 0, \',\', \'.\') }}?', { isDanger: false, confirmText: 'Ya, Setujui', icon: 'question' });">
                                                 @csrf
                                                 <button type="submit" 
-                                                        onclick="return confirm('Setujui pencairan tagihan vendor {{ $b->ref_no }} senilai Rp {{ number_format($b->amount, 0, ',', '.') }}?')"
                                                         class="btn-apple-filled !py-1 !px-2.5 !text-[11px] !bg-emerald-600 hover:!bg-emerald-700">
                                                     <i data-lucide="check" class="w-3.5 h-3.5"></i>
                                                     <span>Setujui</span>

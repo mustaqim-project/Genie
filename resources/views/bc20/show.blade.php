@@ -107,7 +107,7 @@
                         @endif
                         @if($bc20->isDraftDeletable() && (auth()->user()->isSuperAdmin() || auth()->user()->hasAnyPermission(['document.create', 'document.edit', 'document.delete'])))
                             <form action="{{ route('bc20.destroy', $bc20->id) }}" method="POST" class="inline"
-                                  onsubmit="return confirm('Hapus draft BC 2.0 ({{ $bc20->nomor_aju }}) beserta proyek draft & seluruh aset berkas dokumennya?');">
+                                  onsubmit="return confirmSweetAlert(event, 'Hapus draft BC 2.0 ({{ $bc20->nomor_aju }}) beserta proyek draft & seluruh aset berkas dokumennya?');">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit"
@@ -128,7 +128,7 @@
                             </a>
 
                             <form action="{{ route('bc20.reopen-draft', $bc20->id) }}" method="POST" class="inline"
-                                  onsubmit="return confirm('Apakah Anda yakin ingin membuka kembali dokumen ini ke status DRAFT untuk revisi ulang dan penyesuaian skema CEISA?');">
+                                  onsubmit="return confirmSweetAlert(event, 'Apakah Anda yakin ingin membuka kembali dokumen ini ke status DRAFT untuk revisi ulang dan penyesuaian skema CEISA?');">
                                 @csrf
                                 <button type="submit" 
                                         class="w-9 h-9 rounded-xl border border-indigo-300 dark:border-indigo-800 bg-indigo-50/80 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 inline-flex items-center justify-center transition-colors shadow-2xs cursor-pointer"

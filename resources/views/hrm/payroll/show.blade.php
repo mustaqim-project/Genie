@@ -40,14 +40,14 @@
             </a>
 
             @if($payrollRun->status === 'DRAFT')
-                <form method="POST" action="{{ route('hrm.payroll.approve', $payrollRun->id) }}" onsubmit="return confirm('Setujui batch payroll ini?')">
+                <form method="POST" action="{{ route('hrm.payroll.approve', $payrollRun->id) }}" onsubmit="return confirmSweetAlert(event, 'Setujui batch payroll ini?', { isDanger: false, confirmText: 'Ya, Setujui', icon: 'question' });">
                     @csrf
                     <button type="submit" class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold shadow-sm shadow-sky-600/20 transition">
                         Setujui Batch (Approve)
                     </button>
                 </form>
             @elseif($payrollRun->status === 'APPROVED')
-                <form method="POST" action="{{ route('hrm.payroll.disburse', $payrollRun->id) }}" onsubmit="return confirm('Cairkan dan selesaikan pemotongan kasbon?')">
+                <form method="POST" action="{{ route('hrm.payroll.disburse', $payrollRun->id) }}" onsubmit="return confirmSweetAlert(event, 'Cairkan dan selesaikan pemotongan kasbon?', { isDanger: false, confirmText: 'Ya, Cairkan', icon: 'question' });">
                     @csrf
                     <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm shadow-emerald-600/20 transition">
                         Cairkan Payroll (Disburse)

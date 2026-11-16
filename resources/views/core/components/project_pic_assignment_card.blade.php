@@ -46,10 +46,10 @@
 
         <div class="flex items-center gap-2">
             @if($canManagePic)
-            <form action="{{ route('core.document.assign-auto-pic', $shipment->id) }}" method="POST" class="inline">
+            <form action="{{ route('core.document.assign-auto-pic', $shipment->id) }}" method="POST" class="inline"
+                  onsubmit="return confirmSweetAlert(event, 'Tugaskan PIC secara otomatis ke staf yang memiliki peran sesuai dengan beban kerja terendah?');">
                 @csrf
                 <button type="submit" 
-                        onclick="return confirm('Tugaskan PIC secara otomatis ke staf yang memiliki peran sesuai dengan beban kerja terendah?')"
                         class="btn-apple-filled !py-2 !px-3 text-xs inline-flex items-center gap-1.5 shadow-xs cursor-pointer">
                     <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
                     <span>Assign Otomatis (Beban Terendah)</span>
@@ -189,7 +189,7 @@
                                 </button>
                                 @if($primaryUser)
                                     <form action="{{ route('core.document.remove-pic', $shipment->id) }}" method="POST" class="inline"
-                                          onsubmit="return confirm('Lepas penugasan PIC untuk tahap {{ $stg['title'] }}?')">
+                                          onsubmit="return confirmSweetAlert(event, 'Lepas penugasan PIC untuk tahap {{ $stg['title'] }}?');">
                                         @csrf
                                         <input type="hidden" name="process_code" value="{{ $stKey }}">
                                         <button type="submit" class="text-rose-500 hover:text-rose-700 p-1 cursor-pointer" title="Lepas PIC">

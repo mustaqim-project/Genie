@@ -116,6 +116,9 @@
     <!-- Alpine.js CDN for interactive dropdowns, modals & sidebar -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
 
+    <!-- SweetAlert2 CDN for Enterprise Alerts & Dialogs -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
         /* === PATS_CEISA / GENIE DESIGN SYSTEM (APPLE HIG STANDARD FROM COOCA CORE) === */
         :root {
@@ -570,6 +573,91 @@
         .table-responsive td.cell-nowrap {
             white-space: nowrap;
         }
+
+        /* Universal Frozen / Sticky Column Utilities (Enterprise Freeze Columns) */
+        .table-freeze-left {
+            position: -webkit-sticky !important;
+            position: sticky !important;
+            left: 0 !important;
+            z-index: 20 !important;
+            background-color: var(--surface) !important;
+        }
+        th.table-freeze-left {
+            z-index: 30 !important;
+        }
+        .table-freeze-right {
+            position: -webkit-sticky !important;
+            position: sticky !important;
+            right: 0 !important;
+            z-index: 20 !important;
+            background-color: var(--surface) !important;
+            box-shadow: -6px 0 12px rgba(0, 0, 0, 0.06);
+        }
+        th.table-freeze-right {
+            z-index: 30 !important;
+            box-shadow: -6px 0 12px rgba(0, 0, 0, 0.06);
+        }
+        .dark .table-freeze-right {
+            background-color: #1C1C1E !important;
+            box-shadow: -6px 0 14px rgba(0, 0, 0, 0.35);
+        }
+        .dark th.table-freeze-right {
+            background-color: #1C1C1E !important;
+            box-shadow: -6px 0 14px rgba(0, 0, 0, 0.35);
+        }
+
+        /* === SWEETALERT2 APPLE HIG DESIGN SYSTEM TOKENS === */
+        div:where(.swal2-container) {
+            z-index: 99999 !important;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Inter, system-ui, sans-serif !important;
+        }
+        div:where(.swal2-popup) {
+            border-radius: 20px !important;
+            padding: 1.5rem !important;
+            box-shadow: 0 20px 40px -15px rgba(0,0,0,0.2) !important;
+        }
+        .dark div:where(.swal2-popup) {
+            background: #1C1C1E !important;
+            color: #FFFFFF !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }
+        .dark div:where(.swal2-title),
+        .dark div:where(.swal2-html-container) {
+            color: #FFFFFF !important;
+        }
+        div:where(.swal2-actions) {
+            margin-top: 1.25rem !important;
+            gap: 0.5rem !important;
+        }
+        div:where(.swal2-styled) {
+            border-radius: 12px !important;
+            font-weight: 600 !important;
+            font-size: 0.8125rem !important;
+            padding: 0.625rem 1.25rem !important;
+            transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1) !important;
+        }
+        div:where(.swal2-styled.swal2-confirm) {
+            background-color: #0284c7 !important;
+            box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3) !important;
+        }
+        div:where(.swal2-styled.swal2-confirm):hover {
+            filter: brightness(1.08) !important;
+        }
+        div:where(.swal2-styled.swal2-cancel) {
+            background-color: #8E8E93 !important;
+            color: #FFFFFF !important;
+        }
+        div:where(.swal2-toast) {
+            border-radius: 14px !important;
+            padding: 0.75rem 1rem !important;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15) !important;
+        }
+        .dark div:where(.swal2-toast) {
+            background: rgba(28, 28, 30, 0.95) !important;
+            color: #FFFFFF !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            backdrop-filter: blur(12px) !important;
+        }
     </style>
 
     {{-- Universal Typography Hierarchy (H1 - H6 & Typographic Roles) --}}
@@ -670,6 +758,125 @@
                 window.lucide.createIcons();
             }
         });
+
+        // ==============================================================
+        // SWEETALERT2 GLOBAL ENTERPRISE ENGINE (APPLE HIG THEMED)
+        // ==============================================================
+        window.SwalToast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3500,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.onmouseenter = Swal.stopTimer;
+                toast.onmouseleave = Swal.resumeTimer;
+            }
+        });
+
+        window.showToast = function(message, icon = 'success') {
+            return window.SwalToast.fire({
+                icon: icon,
+                title: message
+            });
+        };
+
+        window.showSuccess = function(message, title = 'Berhasil') {
+            return Swal.fire({
+                icon: 'success',
+                title: title,
+                text: message,
+                confirmButtonColor: '#0284c7',
+                confirmButtonText: 'Tutup'
+            });
+        };
+
+        window.showError = function(message, title = 'Terjadi Kesalahan') {
+            return Swal.fire({
+                icon: 'error',
+                title: title,
+                text: message,
+                confirmButtonColor: '#0284c7',
+                confirmButtonText: 'Tutup'
+            });
+        };
+
+        window.showWarning = function(message, title = 'Perhatian') {
+            return Swal.fire({
+                icon: 'warning',
+                title: title,
+                text: message,
+                confirmButtonColor: '#0284c7',
+                confirmButtonText: 'Mengerti'
+            });
+        };
+
+        window.showInfo = function(message, title = 'Informasi') {
+            return Swal.fire({
+                icon: 'info',
+                title: title,
+                text: message,
+                confirmButtonColor: '#0284c7',
+                confirmButtonText: 'Tutup'
+            });
+        };
+
+        // Universal Confirm Handler with SweetAlert2
+        window.confirmSweetAlert = function(event, message, options = {}) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            const target = event ? (event.currentTarget || event.target) : null;
+            const form = target ? (target.tagName === 'FORM' ? target : target.closest('form')) : null;
+            const isDanger = options.isDanger || (form && (form.querySelector('input[name="_method"][value="DELETE"]') || form.action.includes('destroy') || form.action.includes('delete') || form.action.includes('revoke') || form.action.includes('reset')));
+
+            Swal.fire({
+                title: options.title || (isDanger ? 'Konfirmasi Hapus' : 'Konfirmasi Tindakan'),
+                text: message,
+                icon: isDanger ? 'warning' : (options.icon || 'question'),
+                showCancelButton: true,
+                confirmButtonColor: isDanger ? '#FF3B30' : '#0284c7',
+                cancelButtonColor: '#8E8E93',
+                confirmButtonText: options.confirmText || (isDanger ? 'Ya, Hapus' : 'Ya, Lanjutkan'),
+                cancelButtonText: options.cancelText || 'Batal',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if (typeof options.onConfirm === 'function') {
+                        options.onConfirm();
+                    } else if (form) {
+                        form.dataset.swalBypass = 'true';
+                        form.submit();
+                    } else if (target && target.tagName === 'A' && target.href) {
+                        window.location.href = target.href;
+                    }
+                }
+            });
+            return false;
+        };
+
+        // Universal Form Submitter Interceptor for forms with data-confirm
+        document.addEventListener('submit', function(e) {
+            const form = e.target;
+            if (form.dataset.swalBypass === 'true') return;
+            const confirmMsg = form.getAttribute('data-confirm');
+            if (confirmMsg) {
+                e.preventDefault();
+                window.confirmSweetAlert(e, confirmMsg);
+            }
+        }, true);
+
+        // Native Alert Override: Automatically route any legacy window.alert calls to SweetAlert2!
+        window.alert = function(message) {
+            Swal.fire({
+                title: 'Informasi',
+                html: typeof message === 'object' ? JSON.stringify(message) : message,
+                icon: 'info',
+                confirmButtonColor: '#0284c7',
+                confirmButtonText: 'Mengerti'
+            });
+        };
     </script>
 
     @stack('styles')
@@ -720,7 +927,77 @@
             <!-- TOPBAR HEADER -->
             @include('layouts.topbar')
 
-            <!-- DYNAMIC FLASH ALERTS (APPLE HIG NOTIFICATIONS) -->
+            <!-- DYNAMIC FLASH ALERTS (APPLE HIG NOTIFICATIONS & SWEETALERT2 DISPATCHER) -->
+            @if(session('success'))
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        if (window.SwalToast) {
+                            window.SwalToast.fire({
+                                icon: 'success',
+                                title: {!! json_encode(session('success')) !!}
+                            });
+                        }
+                    });
+                </script>
+            @endif
+            @if(session('error'))
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        if (window.Swal) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Terjadi Kesalahan',
+                                text: {!! json_encode(session('error')) !!},
+                                confirmButtonColor: '#0284c7',
+                                confirmButtonText: 'Tutup'
+                            });
+                        }
+                    });
+                </script>
+            @endif
+            @if(session('warning'))
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        if (window.Swal) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Perhatian',
+                                text: {!! json_encode(session('warning')) !!},
+                                confirmButtonColor: '#0284c7',
+                                confirmButtonText: 'Mengerti'
+                            });
+                        }
+                    });
+                </script>
+            @endif
+            @if(session('info'))
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        if (window.SwalToast) {
+                            window.SwalToast.fire({
+                                icon: 'info',
+                                title: {!! json_encode(session('info')) !!}
+                            });
+                        }
+                    });
+                </script>
+            @endif
+            @if($errors->any())
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        if (window.Swal) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Validasi Input Gagal',
+                                html: '<div class="text-left text-xs space-y-1.5 mt-2"><div class="font-bold text-slate-700 dark:text-slate-200">Mohon periksa kembali isian berikut:</div><ul class="list-disc list-inside space-y-1 text-slate-600 dark:text-slate-300">@foreach($errors->all() as $err)<li>{{ addslashes($err) }}</li>@endforeach</ul></div>',
+                                confirmButtonColor: '#0284c7',
+                                confirmButtonText: 'Perbaiki'
+                            });
+                        }
+                    });
+                </script>
+            @endif
+
             <div class="max-w-[1360px] mx-auto px-4 sm:px-6 pt-4">
                 @if(session('success'))
                     <div x-data="{ show: true }" 

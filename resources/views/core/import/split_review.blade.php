@@ -39,10 +39,17 @@ window.splitScreenReview = function splitScreenReview() {
 
                 const data = await res.json();
                 if (data.status === 'success') {
-                    alert('Koreksi berhasil disimpan!');
+                    if (window.SwalToast) {
+                        window.SwalToast.fire({ icon: 'success', title: 'Koreksi berhasil disimpan!' });
+                    }
                 }
             } catch (err) {
-                alert('Gagal menyimpan koreksi field.');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal Menyimpan',
+                    text: 'Gagal menyimpan koreksi field.',
+                    confirmButtonColor: '#0284c7'
+                });
             }
         }
     };

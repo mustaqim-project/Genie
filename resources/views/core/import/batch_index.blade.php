@@ -174,7 +174,7 @@
                             </a>
                             @if(auth()->user()->isSuperAdmin() || auth()->user()->hasAnyPermission(['document.create', 'document.edit', 'document.delete']))
                                 <form action="{{ route('core.import.destroy', $b->id) }}" method="POST" class="inline"
-                                      onsubmit="return confirm('Hapus draft batch {{ $b->batch_no }} beserta seluruh aset berkas fisiknya?');">
+                                      onsubmit="return confirmSweetAlert(event, 'Hapus draft batch {{ $b->batch_no }} beserta seluruh aset berkas fisiknya?');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit"

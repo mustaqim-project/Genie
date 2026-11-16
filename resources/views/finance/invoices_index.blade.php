@@ -138,8 +138,8 @@
             <span class="px-2.5 py-1 rounded-lg bg-black/5 dark:bg-white/10 text-slate-600 dark:text-slate-400 font-mono text-[11px] font-bold tabular-nums">Total: {{ $invoices->total() }} invoice</span>
         </div>
 
-        <div class="overflow-x-auto">
-            <table class="w-full text-left">
+        <div class="overflow-x-auto custom-scrollbar relative">
+            <table class="w-full text-left border-separate border-spacing-0 min-w-max whitespace-nowrap">
                 <thead class="bg-black/[0.02] dark:bg-white/[0.02] text-slate-500 dark:text-slate-400 font-semibold uppercase text-[10px] tracking-wider border-b border-black/[0.06] dark:border-white/[0.06]">
                     <tr>
                         <th class="py-3 px-4 cursor-pointer hover:text-slate-800 dark:hover:text-white transition-colors" @click="sortBy(0, 'string', $event)">
@@ -163,7 +163,7 @@
                             </div>
                         </th>
                         <th class="py-3 px-4 text-center">Status</th>
-                        <th class="py-3 px-4 text-right">Aksi</th>
+                        <th class="py-3 px-4 text-right sticky right-0 z-20 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-md border-l border-black/[0.06] dark:border-white/[0.06] shadow-[-6px_0_12px_rgba(0,0,0,0.06)] table-freeze-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-black/[0.04] dark:divide-white/[0.04]">
@@ -202,7 +202,7 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="py-3.5 px-4 text-right space-x-1.5 whitespace-nowrap">
+                            <td class="py-3.5 px-4 text-right space-x-1.5 whitespace-nowrap sticky right-0 z-10 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-md border-l border-black/[0.06] dark:border-white/[0.06] shadow-[-6px_0_12px_rgba(0,0,0,0.06)] table-freeze-right">
                                 <a href="{{ route('finance.invoices.show', $inv->id) }}"
                                    class="btn-apple-gray text-[11px] px-2.5 py-1 inline-flex items-center gap-1">
                                     <span>Detail</span>
@@ -214,7 +214,7 @@
                                     <span>PDF</span>
                                 </a>
                                 @if($inv->status !== 'PAID')
-                                    <form action="{{ route('finance.invoices.pay', $inv->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Tandai invoice {{ $inv->invoice_number ?? $inv->invoice_no }} sebagai lunas?')">
+                                    <form action="{{ route('finance.invoices.pay', $inv->id) }}" method="POST" class="inline-block" onsubmit="return confirmSweetAlert(event, 'Tandai invoice {{ $inv->invoice_number ?? $inv->invoice_no }} sebagai lunas?', { isDanger: false, confirmText: 'Ya, Tandai Lunas', icon: 'question' })">
                                         @csrf
                                         <input type="hidden" name="payment_date" value="{{ now()->format('Y-m-d') }}">
                                         <input type="hidden" name="payment_method" value="Bank Transfer BCA">

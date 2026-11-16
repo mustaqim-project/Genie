@@ -280,7 +280,7 @@ if (window.Alpine && typeof window.Alpine.data === 'function') {
                         <!-- Actions Button -->
                         <div class="flex items-center space-x-2">
                             @if($post->status === 'scheduled')
-                                <form action="{{ route('social-media.posts.publish-now', $post->id) }}" method="POST" onsubmit="return confirm('Publikasikan postingan ini ke kanal sekarang juga?')">
+                                <form action="{{ route('social-media.posts.publish-now', $post->id) }}" method="POST" onsubmit="return confirmSweetAlert(event, 'Publikasikan postingan ini ke kanal sekarang juga?', { isDanger: false, confirmText: 'Ya, Tayangkan', icon: 'question' })">
                                     @csrf
                                     <button type="submit" class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-bold text-[10px] transition-colors">
                                         Tayangkan Sekarang
@@ -288,7 +288,7 @@ if (window.Alpine && typeof window.Alpine.data === 'function') {
                                 </form>
                             @endif
 
-                            <form action="{{ route('social-media.posts.destroy', $post->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus postingan ini?')">
+                            <form action="{{ route('social-media.posts.destroy', $post->id) }}" method="POST" onsubmit="return confirmSweetAlert(event, 'Apakah Anda yakin ingin menghapus postingan ini?')">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="text-slate-400 hover:text-rose-600 transition-colors p-1" title="Hapus Postingan">

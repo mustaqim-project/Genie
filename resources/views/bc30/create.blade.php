@@ -23,7 +23,12 @@ window.bc30FormManager = function bc30FormManager() {
             const plInput = document.getElementById('bc30-pl-file');
 
             if (!blInput?.files?.length && !invInput?.files?.length && !plInput?.files?.length) {
-                alert('Silakan pilih minimal 1 berkas dokumen (B/L, Commercial Invoice, atau Packing List) untuk dipindai.');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Pilih Berkas Dokumen',
+                    text: 'Silakan pilih minimal 1 berkas dokumen (B/L, Commercial Invoice, atau Packing List) untuk dipindai.',
+                    confirmButtonColor: '#0284c7'
+                });
                 return;
             }
 
@@ -45,15 +50,28 @@ window.bc30FormManager = function bc30FormManager() {
                 if (res.status === 'success' && res.data) {
                     this.applyExtractedData(res.data);
                     this.scanned = true;
+                    if (window.SwalToast) {
+                        window.SwalToast.fire({ icon: 'success', title: 'Data dokumen ekspor berhasil dipindai & diekstrak!' });
+                    }
                     setTimeout(() => {
                         document.getElementById('bc30Form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }, 250);
                 } else {
-                    alert(res.message || 'Gagal memindai dokumen.');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal Memindai',
+                        text: res.message || 'Gagal memindai dokumen.',
+                        confirmButtonColor: '#0284c7'
+                    });
                 }
             } catch (err) {
                 console.error(err);
-                alert('Terjadi kesalahan koneksi saat memindai dokumen.');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Kesalahan Jaringan',
+                    text: 'Terjadi kesalahan koneksi saat memindai dokumen.',
+                    confirmButtonColor: '#0284c7'
+                });
             } finally {
                 this.scanning = false;
             }
@@ -891,7 +909,12 @@ if (window.Alpine && typeof window.Alpine.data === 'function') {
 
         const text = uraianInput?.value?.trim();
         if (!text) {
-            alert('Silakan isi uraian barang ekspor terlebih dahulu untuk klasifikasi AI.');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Uraian Barang Ekspor Kosong',
+                text: 'Silakan isi uraian barang ekspor terlebih dahulu untuk klasifikasi AI.',
+                confirmButtonColor: '#0284c7'
+            });
             uraianInput?.focus();
             return;
         }
@@ -936,11 +959,21 @@ if (window.Alpine && typeof window.Alpine.data === 'function') {
                     }
                 }
             } else {
-                alert(data.message || 'Gagal mengklasifikasikan barang ekspor via AI.');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Klasifikasi AI Ekspor Gagal',
+                    text: data.message || 'Gagal mengklasifikasikan barang ekspor via AI.',
+                    confirmButtonColor: '#0284c7'
+                });
             }
         } catch (err) {
             console.error('Error quick AI HS export lookup:', err);
-            alert('Terjadi kesalahan koneksi saat klasifikasi AI.');
+            Swal.fire({
+                icon: 'error',
+                title: 'Kesalahan Jaringan',
+                text: 'Terjadi kesalahan koneksi saat klasifikasi AI.',
+                confirmButtonColor: '#0284c7'
+            });
         } finally {
             btn.disabled = false;
             btn.innerHTML = originalText;

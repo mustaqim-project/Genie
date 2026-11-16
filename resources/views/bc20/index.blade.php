@@ -13,7 +13,12 @@
         aiResult: null,
         async runAiClassify() {
             if (!this.aiQuery.trim()) {
-                alert('Silakan masukkan nama produk atau spesifikasi komoditas impor terlebih dahulu.');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Komoditas Belum Diisi',
+                    text: 'Silakan masukkan nama produk atau spesifikasi komoditas impor terlebih dahulu.',
+                    confirmButtonColor: '#0284c7'
+                });
                 return;
             }
             this.aiLoading = true;
@@ -35,10 +40,20 @@
                 if (data.status === 'success' && data.data) {
                     this.aiResult = data.data;
                 } else {
-                    alert(data.message || 'Gagal mendeteksi pos tarif komoditas.');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Deteksi Gagal',
+                        text: data.message || 'Gagal mendeteksi pos tarif komoditas.',
+                        confirmButtonColor: '#0284c7'
+                    });
                 }
             } catch (e) {
-                alert('Terjadi kesalahan koneksi AI: ' + e.message);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Kesalahan AI',
+                    text: 'Terjadi kesalahan koneksi AI: ' + e.message,
+                    confirmButtonColor: '#0284c7'
+                });
             } finally {
                 this.aiLoading = false;
             }
@@ -250,8 +265,8 @@
 
     <!-- 3. ZONE 3: DATA LEDGER TABLE -->
     <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl border border-black/[0.06] dark:border-white/[0.08] shadow-xs overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
+        <div class="overflow-x-auto custom-scrollbar relative">
+            <table class="w-full text-left text-xs border-separate border-spacing-0 min-w-max whitespace-nowrap">
                 <thead class="bg-black/[0.02] dark:bg-white/[0.02] text-slate-500 dark:text-slate-400 font-semibold uppercase text-[10px] tracking-wider border-b border-black/[0.06] dark:border-white/[0.06]">
                     <tr>
                         <th class="py-3.5 px-4 cursor-pointer hover:text-slate-800 dark:hover:text-white transition-colors" @click="sortBy(0, 'string', $event)">
@@ -271,7 +286,7 @@
                         </th>
                         <th class="py-3.5 px-4 text-center">Status CEISA</th>
                         <th class="py-3.5 px-4">Billing MPN G3</th>
-                        <th class="py-3.5 px-4 text-center sticky right-0 z-20 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-md border-l border-black/[0.06] dark:border-white/[0.06] shadow-[-6px_0_12px_rgba(0,0,0,0.06)]">Aksi</th>
+                        <th class="py-3.5 px-4 text-center sticky right-0 z-20 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-md border-l border-black/[0.06] dark:border-white/[0.06] shadow-[-6px_0_12px_rgba(0,0,0,0.06)] table-freeze-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-black/[0.04] dark:divide-white/[0.04]">
@@ -337,7 +352,7 @@
                                     <span class="text-slate-400 dark:text-slate-500 text-[11px]">-</span>
                                 @endif
                             </td>
-                            <td class="py-3.5 px-3 text-center whitespace-nowrap sticky right-0 z-10 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-md border-l border-black/[0.06] dark:border-white/[0.06] shadow-[-6px_0_12px_rgba(0,0,0,0.06)]">
+                            <td class="py-3.5 px-3 text-center whitespace-nowrap sticky right-0 z-10 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-md border-l border-black/[0.06] dark:border-white/[0.06] shadow-[-6px_0_12px_rgba(0,0,0,0.06)] table-freeze-right">
                                 <div class="flex items-center justify-center gap-1">
                                     <a href="{{ route('bc20.show', $doc->id) }}" 
                                        class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-sky-300 dark:border-sky-800 bg-sky-50/80 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 text-[#0284c7] transition-colors"
@@ -357,7 +372,7 @@
 
                                     @if($doc->isDraftDeletable() && (auth()->user()->isSuperAdmin() || auth()->user()->hasAnyPermission(['document.create', 'document.edit', 'document.delete'])))
                                         <form action="{{ route('bc20.destroy', $doc->id) }}" method="POST" class="inline"
-                                              onsubmit="return confirm('Hapus draft BC 2.0 ({{ $doc->nomor_aju }}) beserta aset file dokumen terkait?');">
+                                              onsubmit="return confirmSweetAlert(event, 'Hapus draft BC 2.0 ({{ $doc->nomor_aju }}) beserta aset file dokumen terkait?');">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"
@@ -474,7 +489,7 @@
                         <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Hasil Pencocokan Pos Tarif BTKI 2022</div>
                         <div class="flex items-center gap-2 mt-0.5">
                             <span class="font-mono font-black text-lg text-indigo-700 dark:text-indigo-400" x-text="aiResult?.code"></span>
-                            <button type="button" @click="navigator.clipboard.writeText(aiResult?.code); alert('Pos tarif disalin!');" class="text-slate-400 hover:text-slate-700 text-xs cursor-pointer" title="Salin Pos Tarif">
+                            <button type="button" @click="navigator.clipboard.writeText(aiResult?.code); window.SwalToast.fire({ icon: 'success', title: 'Pos tarif disalin!' });" class="text-slate-400 hover:text-slate-700 text-xs cursor-pointer" title="Salin Pos Tarif">
                                 📋
                             </button>
                         </div>

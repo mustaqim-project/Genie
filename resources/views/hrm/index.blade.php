@@ -61,18 +61,38 @@
                 if (res.success) {
                     this.importEmployeePreview = res.data;
                 } else {
-                    alert(res.message || 'Gagal memproses file import');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal Impor',
+                        text: res.message || 'Gagal memproses file import',
+                        confirmButtonColor: '#0284c7'
+                    });
                 }
             })
             .catch(err => {
                 this.importEmployeeLoading = false;
-                alert('Terjadi kesalahan unggah: ' + err.message);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Kesalahan Unggah',
+                    text: 'Terjadi kesalahan unggah: ' + err.message,
+                    confirmButtonColor: '#0284c7'
+                });
             });
         },
 
-        executeEmployeeImport() {
+        async executeEmployeeImport() {
             if (!this.importEmployeePreview || !this.importEmployeePreview.rows) return;
-            if (!confirm('Proses ' + this.importEmployeePreview.valid_count + ' data pegawai baru?')) return;
+            const confirmRes = await Swal.fire({
+                title: 'Konfirmasi Impor Pegawai',
+                text: 'Proses ' + this.importEmployeePreview.valid_count + ' data pegawai baru?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#0284c7',
+                cancelButtonColor: '#8E8E93',
+                confirmButtonText: 'Ya, Proses',
+                cancelButtonText: 'Batal'
+            });
+            if (!confirmRes.isConfirmed) return;
 
             fetch('{{ route('hrm.employees.import-execute') }}', {
                 method: 'POST',
@@ -89,8 +109,14 @@
             })
             .then(res => res.json())
             .then(res => {
-                alert(res.message);
-                window.location.reload();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: res.message,
+                    confirmButtonColor: '#0284c7'
+                }).then(() => {
+                    window.location.reload();
+                });
             });
         },
 
@@ -128,12 +154,22 @@
                 if (res.success) {
                     this.importAttendancePreview = res.data;
                 } else {
-                    alert(res.message || 'Gagal memproses file log presensi');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal Impor Presensi',
+                        text: res.message || 'Gagal memproses file log presensi',
+                        confirmButtonColor: '#0284c7'
+                    });
                 }
             })
             .catch(err => {
                 this.importAttendanceLoading = false;
-                alert('Terjadi kesalahan: ' + err.message);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Kesalahan Sistem',
+                    text: 'Terjadi kesalahan: ' + err.message,
+                    confirmButtonColor: '#0284c7'
+                });
             });
         },
 
@@ -151,8 +187,14 @@
             })
             .then(res => res.json())
             .then(res => {
-                alert(res.message);
-                window.location.reload();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: res.message,
+                    confirmButtonColor: '#0284c7'
+                }).then(() => {
+                    window.location.reload();
+                });
             });
         }
      }">
@@ -399,8 +441,8 @@
 
         <!-- Tabel Data Pegawai -->
         <div class="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs text-slate-600">
+            <div class="overflow-x-auto custom-scrollbar relative">
+                <table class="w-full text-left text-xs text-slate-600 border-separate border-spacing-0 min-w-max whitespace-nowrap">
                     <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200">
                         <tr>
                             <th class="px-5 py-3.5">Pegawai</th>
@@ -409,7 +451,7 @@
                             <th class="px-4 py-3.5">Gaji Pokok</th>
                             <th class="px-4 py-3.5">Rekening Bank</th>
                             <th class="px-4 py-3.5">Biometrik Wajah</th>
-                            <th class="px-4 py-3.5 text-right">Aksi</th>
+                            <th class="px-4 py-3.5 text-right sticky right-0 z-20 bg-slate-50 border-l border-slate-200 shadow-[-6px_0_12px_rgba(0,0,0,0.06)] table-freeze-right">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
@@ -458,9 +500,9 @@
                                         </span>
                                     @endif
                                 </td>
-                                <td class="px-4 py-3.5 text-right">
+                                <td class="px-4 py-3.5 text-right whitespace-nowrap sticky right-0 z-10 bg-white border-l border-slate-100 shadow-[-6px_0_12px_rgba(0,0,0,0.06)] table-freeze-right">
                                     <div class="flex items-center justify-end space-x-1.5">
-                                        <form method="POST" action="{{ route('hrm.employees.destroy', $emp->id) }}" onsubmit="return confirm('Hapus/nonaktifkan pegawai ini?')">
+                                        <form method="POST" action="{{ route('hrm.employees.destroy', $emp->id) }}" onsubmit="return confirmSweetAlert(event, 'Hapus/nonaktifkan pegawai ini?');">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition" title="Hapus Pegawai">
@@ -636,7 +678,7 @@
                                         <span class="text-amber-700 bg-amber-100 px-2 py-0.5 rounded text-[10px] animate-pulse">MENUNGGU</span>
                                     @endif
                                 </td>
-                                <td class="px-4 py-3.5 text-right">
+                                <td class="px-4 py-3.5 text-right whitespace-nowrap sticky right-0 z-10 bg-white border-l border-slate-100 shadow-[-6px_0_12px_rgba(0,0,0,0.06)] table-freeze-right">
                                     @if($corr->status === 'PENDING')
                                         <div class="flex items-center justify-end space-x-1.5">
                                             <form method="POST" action="{{ route('hrm.attendance.corrections.approve', $corr->id) }}">
@@ -715,7 +757,7 @@
                     </div>
 
                     <div class="flex items-center justify-end space-x-2 pt-2 border-t border-slate-50">
-                        <form method="POST" action="{{ route('hrm.locations.destroy', $loc->id) }}" onsubmit="return confirm('Hapus titik lokasi ini?')">
+                        <form method="POST" action="{{ route('hrm.locations.destroy', $loc->id) }}" onsubmit="return confirmSweetAlert(event, 'Hapus titik lokasi ini?');">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 transition" title="Hapus Lokasi">
@@ -768,7 +810,7 @@
                     </div>
 
                     <div class="flex items-center justify-end space-x-2 pt-2">
-                        <form method="POST" action="{{ route('hrm.shifts.destroy', $sh->id) }}" onsubmit="return confirm('Hapus shift ini?')">
+                        <form method="POST" action="{{ route('hrm.shifts.destroy', $sh->id) }}" onsubmit="return confirmSweetAlert(event, 'Hapus shift ini?');">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 transition" title="Hapus Shift">
@@ -829,8 +871,8 @@
                                 <td class="px-4 py-3.5 text-slate-500">
                                     {{ $sch->notes ?: '-' }}
                                 </td>
-                                <td class="px-4 py-3.5 text-right">
-                                    <form method="POST" action="{{ route('hrm.schedules.destroy', $sch->id) }}" onsubmit="return confirm('Hapus jadwal kerja ini?')">
+                                <td class="px-4 py-3.5 text-right whitespace-nowrap sticky right-0 z-10 bg-white border-l border-slate-100 shadow-[-6px_0_12px_rgba(0,0,0,0.06)] table-freeze-right">
+                                    <form method="POST" action="{{ route('hrm.schedules.destroy', $sch->id) }}" onsubmit="return confirmSweetAlert(event, 'Hapus jadwal kerja ini?');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 transition" title="Hapus Jadwal">
@@ -901,7 +943,7 @@
                                 <td class="px-4 py-3.5 font-mono font-extrabold text-slate-900 text-sm">
                                     Rp {{ number_format((float) $run->payslips->sum('net'), 0, ',', '.') }}
                                 </td>
-                                <td class="px-4 py-3.5 text-right">
+                                <td class="px-4 py-3.5 text-right whitespace-nowrap sticky right-0 z-10 bg-white border-l border-slate-100 shadow-[-6px_0_12px_rgba(0,0,0,0.06)] table-freeze-right">
                                     <div class="flex items-center justify-end space-x-2">
                                         <a href="{{ route('hrm.payrolls.show', $run->id) }}"
                                            class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition">
@@ -985,9 +1027,9 @@
                                         {{ $loan->status }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-3.5 text-right">
+                                <td class="px-4 py-3.5 text-right whitespace-nowrap sticky right-0 z-10 bg-white border-l border-slate-100 shadow-[-6px_0_12px_rgba(0,0,0,0.06)] table-freeze-right">
                                     @if($loan->status === 'ACTIVE')
-                                        <form method="POST" action="{{ route('hrm.loans.cancel', $loan->id) }}" onsubmit="return confirm('Selesaikan/lunaskan kasbon ini secara manual?')">
+                                        <form method="POST" action="{{ route('hrm.loans.cancel', $loan->id) }}" onsubmit="return confirmSweetAlert(event, 'Selesaikan/lunaskan kasbon ini secara manual?', { isDanger: false, confirmText: 'Ya, Selesaikan', icon: 'question' });">
                                             @csrf
                                             <button type="submit" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[11px] transition">
                                                 Lunaskan

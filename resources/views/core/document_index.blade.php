@@ -119,7 +119,12 @@
             },
             async scanFiles() {
                 if (!['IMPORT', 'EXPORT'].includes(this.detected.type)) {
-                    alert('Wajib memilih Tipe Kepabeanan terlebih dahulu: Impor (BC 2.0) atau Ekspor (BC 3.0).');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Tipe Kepabeanan Wajib',
+                        text: 'Wajib memilih Tipe Kepabeanan terlebih dahulu: Impor (BC 2.0) atau Ekspor (BC 3.0).',
+                        confirmButtonColor: '#0284c7'
+                    });
                     return;
                 }
                 const bundleInput = document.getElementById(pfx + 'input-bundle-files');
@@ -134,7 +139,12 @@
                 const hasSingle = blInput?.files?.length || invInput?.files?.length || plInput?.files?.length || cooInput?.files?.length || insInput?.files?.length || lartasInput?.files?.length;
 
                 if (!hasBundle && !hasSingle) {
-                    alert('Silakan pilih minimal 1 berkas (Bundle Multi-File/ZIP, B/L, Commercial Invoice, atau Packing List) untuk dipindai.');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Pilih Berkas Dokumen',
+                        text: 'Silakan pilih minimal 1 berkas (Bundle Multi-File/ZIP, B/L, Commercial Invoice, atau Packing List) untuk dipindai.',
+                        confirmButtonColor: '#0284c7'
+                    });
                     return;
                 }
 
@@ -182,12 +192,25 @@
                             }
                             clientSelect.value = res.data.client_id;
                         }
+                        if (window.SwalToast) {
+                            window.SwalToast.fire({ icon: 'success', title: 'Dokumen berhasil dipindai & diekstrak!' });
+                        }
                     } else {
-                        alert(res.message || 'Gagal memindai dokumen.');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal Memindai',
+                            text: res.message || 'Gagal memindai dokumen.',
+                            confirmButtonColor: '#0284c7'
+                        });
                     }
                 } catch (err) {
                     console.error(err);
-                    alert('Terjadi kesalahan koneksi saat memindai dokumen.');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Kesalahan Koneksi',
+                        text: 'Terjadi kesalahan koneksi saat memindai dokumen.',
+                        confirmButtonColor: '#0284c7'
+                    });
                 } finally {
                     this.scanning = false;
                 }
@@ -283,9 +306,6 @@
                 </h1>
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#0284c7]/10 text-[#0284c7]">
                     BC 2.0 (PIB) + BC 3.0 (PEB)
-                </span>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/50">
-                    CEISA 4.0 DJBC &bull; Siklus P01–P10
                 </span>
             </div>
             <p class="text-[13px] text-black/50 dark:text-white/50 mt-1 leading-snug">
@@ -560,7 +580,7 @@
                         <th class="py-3 px-4 text-right border-b border-black/10 dark:border-white/10 whitespace-nowrap">Valuasi (CIF / FOB)</th>
                         <th class="py-3 px-4 text-center border-b border-black/10 dark:border-white/10 whitespace-nowrap">Status CEISA &amp; Siklus</th>
                         <th class="py-3 px-4 border-b border-black/10 dark:border-white/10 whitespace-nowrap">Billing MPN / SPPB / NPE</th>
-                        <th class="py-3 px-4 text-center sticky right-0 z-30 bg-white dark:bg-[#1C1C1E] border-b border-l border-black/10 dark:border-white/10 shadow-[-6px_0_12px_rgba(0,0,0,0.06)] whitespace-nowrap">Aksi</th>
+                        <th class="py-3 px-4 text-center sticky right-0 z-30 bg-white dark:bg-[#1C1C1E] border-b border-l border-black/10 dark:border-white/10 shadow-[-6px_0_12px_rgba(0,0,0,0.06)] whitespace-nowrap table-freeze-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y-0">
@@ -798,7 +818,7 @@
                             </td>
 
                             <!-- 8. Aksi Gabungan (Freeze Sticky Right Column & Icon-Only Group) -->
-                            <td class="py-3.5 px-3 text-center space-x-1 whitespace-nowrap sticky right-0 z-20 bg-white dark:bg-[#1C1C1E] border-b border-l border-black/5 dark:border-white/10 shadow-[-6px_0_12px_rgba(0,0,0,0.06)] group-hover:bg-[#F9F9FA] dark:group-hover:bg-[#202022]">
+                            <td class="py-3.5 px-3 text-center space-x-1 whitespace-nowrap sticky right-0 z-20 bg-white dark:bg-[#1C1C1E] border-b border-l border-black/5 dark:border-white/10 shadow-[-6px_0_12px_rgba(0,0,0,0.06)] group-hover:bg-[#F9F9FA] dark:group-hover:bg-[#202022] table-freeze-right">
                                 @if($ceisaDetailRoute)
                                     <a href="{{ $ceisaDetailRoute }}"
                                        class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-sky-300 dark:border-sky-800 bg-sky-50/80 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 {{ $isExport ? 'text-indigo-600 dark:text-indigo-400' : 'text-[#0284c7]' }} transition-colors"
@@ -858,7 +878,7 @@
                                         $destroyLabel = $shp ? $shp->project_no : ($ceisa?->nomor_aju ?? 'Draft');
                                     @endphp
                                     <form action="{{ $destroyAction }}" method="POST" class="inline"
-                                          onsubmit="return confirm('Hapus draft {{ $destroyLabel }} beserta seluruh aset berkas fisiknya? Tindakan ini tidak dapat dibatalkan.');">
+                                          onsubmit="return confirmSweetAlert(event, 'Hapus draft {{ $destroyLabel }} beserta seluruh aset berkas fisiknya? Tindakan ini tidak dapat dibatalkan.');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit"
@@ -1170,7 +1190,7 @@
                         <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Hasil Pencocokan Pos Tarif BTKI 2022</div>
                         <div class="flex items-center gap-2 mt-0.5">
                             <span class="font-mono font-black text-lg text-indigo-700 dark:text-indigo-400" x-text="result?.code"></span>
-                            <button type="button" @click="navigator.clipboard.writeText(result?.code); alert('Pos tarif disalin!');" class="text-slate-400 hover:text-slate-700 text-xs cursor-pointer" title="Salin Pos Tarif">
+                            <button type="button" @click="navigator.clipboard.writeText(result?.code); window.SwalToast.fire({ icon: 'success', title: 'Pos tarif disalin!' });" class="text-slate-400 hover:text-slate-700 text-xs cursor-pointer" title="Salin Pos Tarif">
                                 📋
                             </button>
                         </div>

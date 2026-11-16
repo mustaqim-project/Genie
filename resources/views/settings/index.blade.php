@@ -186,7 +186,7 @@
                                             </form>
 
                                             <!-- Delete User -->
-                                            <form action="{{ route('setting.users.destroy', $u->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pengguna {{ $u->name }}?')" class="inline">
+                                            <form action="{{ route('setting.users.destroy', $u->id) }}" method="POST" onsubmit="return confirmSweetAlert(event, 'Apakah Anda yakin ingin menghapus pengguna {{ $u->name }}?');" class="inline">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" title="Hapus Pengguna" class="p-1.5 rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50 transition-colors">
@@ -887,7 +887,7 @@
 
                     <div class="pt-4 mt-4 border-t border-slate-100">
                         @if($isLinked)
-                            <form action="{{ route('setting.social.disconnect', $acc->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin memutuskan integrasi akun ini?')">
+                            <form action="{{ route('setting.social.disconnect', $acc->id) }}" method="POST" onsubmit="return confirmSweetAlert(event, 'Apakah Anda yakin ingin memutuskan integrasi akun ini?');">
                                 @csrf
                                 <button type="submit" class="w-full py-2 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 font-bold text-xs transition-colors">
                                     Putuskan Koneksi
@@ -1012,7 +1012,7 @@
                 </p>
             </div>
 
-            <form action="{{ route('setting.session.force-reset') }}" method="POST" onsubmit="return confirm('PERINGATAN: Seluruh pengguna yang sedang login akan dipaksa logout seketika. Lanjutkan?')">
+            <form action="{{ route('setting.session.force-reset') }}" method="POST" onsubmit="return confirmSweetAlert(event, 'PERINGATAN: Seluruh pengguna yang sedang login akan dipaksa logout seketika. Lanjutkan?', { isDanger: true, confirmText: 'Ya, Reset Semua Sesi' });">
                 @csrf
                 <button type="submit" class="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-xs transition-all active:scale-95 whitespace-nowrap cursor-pointer">
                     Force Reset Semua Sesi

@@ -81,7 +81,12 @@ if (!window.createProjectModalManagerRegistered) {
             },
             async scanFiles() {
                 if (!['IMPORT', 'EXPORT'].includes(this.detected.type)) {
-                    alert('Wajib memilih Tipe Kepabeanan terlebih dahulu: Impor (BC 2.0) atau Ekspor (BC 3.0).');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Tipe Kepabeanan Wajib',
+                        text: 'Wajib memilih Tipe Kepabeanan terlebih dahulu: Impor (BC 2.0) atau Ekspor (BC 3.0).',
+                        confirmButtonColor: '#0284c7'
+                    });
                     return;
                 }
                 const bundleInput = document.getElementById(pfx + 'input-bundle-files');
@@ -96,7 +101,12 @@ if (!window.createProjectModalManagerRegistered) {
                 const hasSingle = blInput?.files?.length || invInput?.files?.length || plInput?.files?.length || cooInput?.files?.length || insInput?.files?.length || lartasInput?.files?.length;
 
                 if (!hasBundle && !hasSingle) {
-                    alert('Silakan pilih minimal 1 berkas (Bundle Multi-File/ZIP, B/L, Commercial Invoice, atau Packing List) untuk dipindai.');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Pilih Berkas Dokumen',
+                        text: 'Silakan pilih minimal 1 berkas (Bundle Multi-File/ZIP, B/L, Commercial Invoice, atau Packing List) untuk dipindai.',
+                        confirmButtonColor: '#0284c7'
+                    });
                     return;
                 }
 
@@ -144,12 +154,25 @@ if (!window.createProjectModalManagerRegistered) {
                             }
                             clientSelect.value = res.data.client_id;
                         }
+                        if (window.SwalToast) {
+                            window.SwalToast.fire({ icon: 'success', title: 'Dokumen berhasil dipindai & diidentifikasi!' });
+                        }
                     } else {
-                        alert(res.message || 'Gagal memindai dokumen.');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal Memindai',
+                            text: res.message || 'Gagal memindai dokumen.',
+                            confirmButtonColor: '#0284c7'
+                        });
                     }
                 } catch (err) {
                     console.error(err);
-                    alert('Terjadi kesalahan koneksi saat memindai dokumen.');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Kesalahan Koneksi',
+                        text: 'Terjadi kesalahan koneksi saat memindai dokumen.',
+                        confirmButtonColor: '#0284c7'
+                    });
                 } finally {
                     this.scanning = false;
                 }
@@ -271,7 +294,7 @@ if (!window.createProjectModalManagerRegistered) {
         </div>
 
         <form action="{{ route('core.document.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4"
-              @submit="if (!['IMPORT', 'EXPORT'].includes(detected.type)) { $event.preventDefault(); alert('Wajib pilih Tipe Kepabeanan terlebih dahulu: Impor (BC 2.0) atau Ekspor (BC 3.0).'); }">
+              @submit="if (!['IMPORT', 'EXPORT'].includes(detected.type)) { $event.preventDefault(); Swal.fire({ icon: 'warning', title: 'Tipe Kepabeanan Wajib', text: 'Wajib pilih Tipe Kepabeanan terlebih dahulu: Impor (BC 2.0) atau Ekspor (BC 3.0).', confirmButtonColor: '#0284c7' }); }">
             @csrf
 
             <!-- ============================================== -->

@@ -566,7 +566,7 @@ if (window.Alpine && typeof window.Alpine.data === 'function') {
                             </td>
                             <td class="p-3.5 text-right">
                                 @if($t->isValid())
-                                <form action="{{ route('settings.mcp.tokens.revoke', $t->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin mencabut kunci token ini? Klien AI yang menggunakannya tidak akan dapat mengakses MCP server lagi.');" class="inline">
+                                <form action="{{ route('settings.mcp.tokens.revoke', $t->id) }}" method="POST" onsubmit="return confirmSweetAlert(event, 'Apakah Anda yakin ingin mencabut kunci token ini? Klien AI yang menggunakannya tidak akan dapat mengakses MCP server lagi.', { isDanger: true, confirmText: 'Ya, Cabut Akses' });" class="inline">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn-apple-danger text-[11px] px-2.5 py-1">

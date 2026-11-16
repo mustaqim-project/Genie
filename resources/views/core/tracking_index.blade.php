@@ -27,7 +27,7 @@
         <!-- Action Toolbar -->
         <div class="flex flex-wrap items-center gap-2 w-full md:w-auto shrink-0">
             @if($kpis['incomplete_pic_count'] > 0)
-            <form action="{{ route('core.tracking.auto-assign-all') }}" method="POST" onsubmit="return confirm('Tugaskan PIC secara otomatis dengan beban kerja terendah untuk semua proyek yang belum lengkap?');">
+            <form action="{{ route('core.tracking.auto-assign-all') }}" method="POST" onsubmit="return confirmSweetAlert(event, 'Tugaskan PIC secara otomatis dengan beban kerja terendah untuk semua proyek yang belum lengkap?');">
                 @csrf
                 <button type="submit" 
                         class="px-3 py-1.5 rounded-[9px] text-[12px] font-semibold bg-[#0284c7]/10 hover:bg-[#0284c7]/20 text-[#0284c7] transition-all flex items-center gap-1.5 active:scale-[0.98]">
@@ -202,7 +202,7 @@
             <table class="w-full text-left border-separate border-spacing-0 min-w-max text-[11px] whitespace-nowrap">
                 <thead>
                     <tr class="bg-black/[0.025] dark:bg-white/[0.03] text-[10px] font-bold uppercase tracking-wider text-black/55 dark:text-white/55 whitespace-nowrap">
-                        <th class="py-2.5 px-3 min-w-[260px] sticky left-0 z-30 bg-white dark:bg-[#1C1C1E] border-b border-r border-black/10 dark:border-white/10 shadow-[4px_0_8px_rgba(0,0,0,0.04)] whitespace-nowrap">No &amp; Importir / Eksportir</th>
+                        <th class="py-2.5 px-3 min-w-[260px] sticky left-0 z-30 bg-white dark:bg-[#1C1C1E] border-b border-r border-black/10 dark:border-white/10 shadow-[4px_0_8px_rgba(0,0,0,0.04)] whitespace-nowrap table-freeze-left">No &amp; Importir / Eksportir</th>
                         <th class="py-2.5 px-3 text-center border-b border-black/10 dark:border-white/10 whitespace-nowrap">Tgl Terima</th>
                         <th class="py-2.5 px-3 border-b border-black/10 dark:border-white/10 whitespace-nowrap">Kelengkapan Dokumen</th>
                         <th class="py-2.5 px-3 border-b border-black/10 dark:border-white/10 whitespace-nowrap min-w-[160px]">Komoditi &amp; No BL</th>
@@ -215,7 +215,7 @@
                         <th class="py-2.5 px-3 text-center border-b border-black/10 dark:border-white/10 whitespace-nowrap">DO &amp; Foto SPJM/Segel</th>
                         <th class="py-2.5 px-3 border-b border-black/10 dark:border-white/10 whitespace-nowrap min-w-[140px]">Trucking &amp; Delv</th>
                         <th class="py-2.5 px-3 text-center border-b border-black/10 dark:border-white/10 whitespace-nowrap">ODOO / Fisik</th>
-                        <th class="py-2.5 px-3 text-right sticky right-0 z-30 bg-white dark:bg-[#1C1C1E] border-b border-l border-black/10 dark:border-white/10 shadow-[-6px_0_12px_rgba(0,0,0,0.06)] whitespace-nowrap min-w-[140px]">Aksi</th>
+                        <th class="py-2.5 px-3 text-right sticky right-0 z-30 bg-white dark:bg-[#1C1C1E] border-b border-l border-black/10 dark:border-white/10 shadow-[-6px_0_12px_rgba(0,0,0,0.06)] whitespace-nowrap min-w-[140px] table-freeze-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y-0">
@@ -228,7 +228,7 @@
                         $ceisa = $s->ceisaDocument;
                     @endphp
                     <tr class="hover:bg-black/[0.015] dark:hover:bg-white/[0.02] transition-colors whitespace-nowrap group">
-                        <td class="py-2.5 px-3 sticky left-0 z-20 bg-white dark:bg-[#1C1C1E] group-hover:bg-[#F9F9FA] dark:group-hover:bg-[#202022] border-b border-r border-black/5 dark:border-white/5 shadow-[4px_0_8px_rgba(0,0,0,0.04)] whitespace-nowrap">
+                        <td class="py-2.5 px-3 sticky left-0 z-20 bg-white dark:bg-[#1C1C1E] group-hover:bg-[#F9F9FA] dark:group-hover:bg-[#202022] border-b border-r border-black/5 dark:border-white/5 shadow-[4px_0_8px_rgba(0,0,0,0.04)] whitespace-nowrap table-freeze-left">
                             <div class="flex items-center gap-2 whitespace-nowrap">
                                 <span class="text-[10px] font-mono text-black/40 dark:text-white/40 w-4 text-center shrink-0">{{ $rowIdx + 1 }}</span>
                                 <span class="px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0 {{ $isExport ? 'bg-[#AF52DE]/15 text-[#AF52DE]' : 'bg-[#0284c7]/15 text-[#0284c7]' }}">
@@ -366,7 +366,7 @@
                                 </button>
                             </div>
                         </td>
-                        <td class="py-2.5 px-3 text-right sticky right-0 z-20 bg-white dark:bg-[#1C1C1E] group-hover:bg-[#F9F9FA] dark:group-hover:bg-[#202022] border-b border-l border-black/5 dark:border-white/5 shadow-[-6px_0_12px_rgba(0,0,0,0.06)] whitespace-nowrap min-w-[140px]">
+                        <td class="py-2.5 px-3 text-right sticky right-0 z-20 bg-white dark:bg-[#1C1C1E] group-hover:bg-[#F9F9FA] dark:group-hover:bg-[#202022] border-b border-l border-black/5 dark:border-white/5 shadow-[-6px_0_12px_rgba(0,0,0,0.06)] whitespace-nowrap min-w-[140px] table-freeze-right">
                             @php
                                 $editPayload = [
                                     'id' => $s->id,
@@ -421,7 +421,7 @@
             <table class="w-full text-left border-separate border-spacing-0 min-w-max whitespace-nowrap">
                 <thead>
                     <tr class="bg-black/[0.015] dark:bg-white/[0.02] text-[11px] font-bold uppercase tracking-wider text-black/45 dark:text-white/45 whitespace-nowrap">
-                        <th class="py-3 px-4 w-[240px] sticky left-0 z-30 bg-white dark:bg-[#1C1C1E] border-b border-r border-black/10 dark:border-white/10 shadow-[4px_0_8px_rgba(0,0,0,0.03)] whitespace-nowrap">Proyek &amp; Klien</th>
+                        <th class="py-3 px-4 w-[240px] sticky left-0 z-30 bg-white dark:bg-[#1C1C1E] border-b border-r border-black/10 dark:border-white/10 shadow-[4px_0_8px_rgba(0,0,0,0.03)] whitespace-nowrap table-freeze-left">Proyek &amp; Klien</th>
                         <th class="py-3 px-3 w-[110px] text-center border-b border-black/10 dark:border-white/10 whitespace-nowrap">Status / SLA</th>
                         @foreach($stages as $idx => $stg)
                         <th class="py-3 px-2 text-center w-[85px] font-medium border-b border-black/10 dark:border-white/10 whitespace-nowrap" title="{{ $stg['title'] }} ({{ $stg['role'] }})">
@@ -429,7 +429,7 @@
                             <div class="text-[9px] tracking-normal font-normal text-black/40 dark:text-white/40">{{ $stg['title'] }}</div>
                         </th>
                         @endforeach
-                        <th class="py-3 px-4 w-[100px] text-right sticky right-0 z-30 bg-white dark:bg-[#1C1C1E] border-b border-l border-black/10 dark:border-white/10 shadow-[-6px_0_12px_rgba(0,0,0,0.06)] whitespace-nowrap">Aksi</th>
+                        <th class="py-3 px-4 w-[100px] text-right sticky right-0 z-30 bg-white dark:bg-[#1C1C1E] border-b border-l border-black/10 dark:border-white/10 shadow-[-6px_0_12px_rgba(0,0,0,0.06)] whitespace-nowrap table-freeze-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y-0 text-[12px]">
@@ -444,7 +444,7 @@
                     <tr class="hover:bg-black/[0.015] dark:hover:bg-white/[0.02] transition-colors group">
                         
                         <!-- Sticky Project Info -->
-                        <td class="py-3 px-4 sticky left-0 z-20 bg-white dark:bg-[#1C1C1E] group-hover:bg-[#F9F9FA] dark:group-hover:bg-[#202022] border-b border-r border-black/5 dark:border-white/5 shadow-[4px_0_8px_rgba(0,0,0,0.03)] transition-colors whitespace-nowrap">
+                        <td class="py-3 px-4 sticky left-0 z-20 bg-white dark:bg-[#1C1C1E] group-hover:bg-[#F9F9FA] dark:group-hover:bg-[#202022] border-b border-r border-black/5 dark:border-white/5 shadow-[4px_0_8px_rgba(0,0,0,0.03)] transition-colors whitespace-nowrap table-freeze-left">
                             <div class="flex items-center gap-2 whitespace-nowrap">
                                 <a href="{{ route('core.document.show', $s->id) }}" class="font-bold text-black dark:text-white hover:text-[#0284c7] text-[13px] tracking-tight whitespace-nowrap">
                                     {{ $s->project_no }}
@@ -580,7 +580,7 @@
                         @endforeach
 
                         <!-- Aksi (FROZEN / STICKY RIGHT) -->
-                        <td class="py-3 px-4 text-right align-middle sticky right-0 z-20 bg-white dark:bg-[#1C1C1E] border-b border-l border-black/5 dark:border-white/5 shadow-[-6px_0_12px_rgba(0,0,0,0.06)] whitespace-nowrap group-hover:bg-[#F9F9FA] dark:group-hover:bg-[#202022]">
+                        <td class="py-3 px-4 text-right align-middle sticky right-0 z-20 bg-white dark:bg-[#1C1C1E] border-b border-l border-black/5 dark:border-white/5 shadow-[-6px_0_12px_rgba(0,0,0,0.06)] whitespace-nowrap group-hover:bg-[#F9F9FA] dark:group-hover:bg-[#202022] table-freeze-right">
                             <a href="{{ route('core.document.show', $s->id) }}" 
                                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-[7px] text-[11px] font-semibold bg-black/[0.04] dark:bg-white/[0.08] hover:bg-[#0284c7] hover:text-white transition-all text-black/75 dark:text-white/75 group/btn whitespace-nowrap">
                                 <span>Buka</span>

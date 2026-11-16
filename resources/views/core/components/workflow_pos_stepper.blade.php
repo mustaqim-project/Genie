@@ -250,7 +250,7 @@ window.openRollbackModalForStage = function(stageCode) {
 
             @if($shipment->isDraftDeletable() && (auth()->user()->isSuperAdmin() || auth()->user()->hasAnyPermission(['document.create', 'document.edit', 'document.delete'])))
                 <form action="{{ route('core.document.destroy', $shipment->id) }}" method="POST" class="inline"
-                      onsubmit="return confirm('Hapus draft proyek {{ $shipment->project_no }} beserta seluruh aset file dokumen yang terunggah? Tindakan ini tidak dapat dibatalkan.');">
+                      onsubmit="return confirmSweetAlert(event, 'Hapus draft proyek {{ $shipment->project_no }} beserta seluruh aset file dokumen yang terunggah? Tindakan ini tidak dapat dibatalkan.');">
                     @csrf
                     @method('DELETE')
                     <button type="submit"

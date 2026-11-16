@@ -551,7 +551,7 @@
                                         Koreksi
                                     </button>
                                     @can('document.create')
-                                    <form action="{{ route('core.document.items.destroy', [$shipment->id, $it->id]) }}" method="POST" class="inline" onsubmit="return confirm('Hapus item ini?')">
+                                    <form action="{{ route('core.document.items.destroy', [$shipment->id, $it->id]) }}" method="POST" class="inline" onsubmit="return confirmSweetAlert(event, 'Hapus item ini?')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn-apple-danger text-[11px] px-2.5 py-1">
@@ -641,10 +641,10 @@
                 </div>
 
                 <div class="flex flex-wrap items-center gap-2 pt-2">
-                    <form action="{{ route('core.do.send-email', $shipment->id) }}" method="POST">
+                    <form action="{{ route('core.do.send-email', $shipment->id) }}" method="POST"
+                          onsubmit="return confirmSweetAlert(event, 'Kirim email permohonan invoice DO otomatis ke vendor pelayaran?');">
                         @csrf
                         <button type="submit" 
-                                onclick="return confirm('Kirim email permohonan invoice DO otomatis ke vendor pelayaran?')"
                                 class="btn-apple-filled px-4 py-2 text-xs inline-flex items-center gap-1.5">
                             <i data-lucide="mail" class="w-3.5 h-3.5"></i>
                             <span>Kirim Permohonan Tagihan DO</span>
@@ -877,7 +877,7 @@
                                     {{ $photo->taken_at?->format('d/m/Y H:i') }} · {{ $photo->uploader?->name ?? 'Tim Lapangan' }}
                                 </div>
                             </div>
-                            <form action="{{ route('core.traffic.inspection-photos.destroy', [$shipment->id, $photo->id]) }}" method="POST" onsubmit="return confirm('Hapus foto ini?')">
+                            <form action="{{ route('core.traffic.inspection-photos.destroy', [$shipment->id, $photo->id]) }}" method="POST" onsubmit="return confirmSweetAlert(event, 'Hapus foto ini?')">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="p-1 text-rose-500 hover:bg-rose-500/10 rounded cursor-pointer" title="Hapus">
