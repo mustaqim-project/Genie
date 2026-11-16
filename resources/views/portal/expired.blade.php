@@ -75,7 +75,7 @@
             </a>
 
             <div class="text-[11px] text-slate-400 dark:text-slate-500">
-                PT Agung Trans Solusindo &bull; Divisi Kepabeanan & Forwarding
+                PT Agung Trans Solusindo — Divisi Kepabeanan &amp; Forwarding
             </div>
         </div>
 

@@ -378,7 +378,7 @@ if (window.Alpine && typeof window.Alpine.data === 'function') {
                     <tr class="hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
                         <td class="p-3.5">
                             <div class="font-bold text-black dark:text-white">{{ $m->name }}</div>
-                            <div class="text-[11px] text-black/45 dark:text-white/45 font-mono">{{ $m->email }} {{ $m->phone ? '• ' . $m->phone : '' }}</div>
+                            <div class="text-[11px] text-black/45 dark:text-white/45 font-mono">{{ $m->email }}{{ $m->phone ? ' / ' . $m->phone : '' }}</div>
                         </td>
                         <td class="p-3.5 text-black/80 dark:text-white/80">
                             <div class="font-medium">{{ $m->job_title ?? 'Staf Operasional' }}</div>

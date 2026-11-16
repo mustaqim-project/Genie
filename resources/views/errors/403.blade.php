@@ -77,7 +77,7 @@
         </div>
 
         <div class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-rose-100 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-[11px] font-bold uppercase tracking-wider mb-3">
-            <span>HTTP 403 &bull; Otorisasi RBAC Terbatas</span>
+            <span>HTTP 403 — Akses Terbatas</span>
         </div>
 
         <h1 class="text-2xl sm:text-3xl font-bold tracking-tight mb-2">

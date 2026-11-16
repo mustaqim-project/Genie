@@ -267,7 +267,7 @@
                     Rp {{ number_format($totalBaseSalary, 0, ',', '.') }}
                 </div>
                 <p class="text-xs text-slate-500 font-medium mt-0.5">
-                    BPJS TK: Rp {{ number_format($totalBpjsTk, 0, ',', '.') }} &bull; Kes: Rp {{ number_format($totalBpjsKes, 0, ',', '.') }}
+                    BPJS TK: Rp {{ number_format($totalBpjsTk, 0, ',', '.') }} / Kes: Rp {{ number_format($totalBpjsKes, 0, ',', '.') }}
                 </p>
             </div>
             <div class="text-[10px] text-slate-400 font-medium">Iuran 2% JHT & 1% BPJS Kes</div>

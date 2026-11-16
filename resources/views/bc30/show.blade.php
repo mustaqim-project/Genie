@@ -63,7 +63,7 @@
                 </div>
                 <h1 class="text-2xl font-bold font-mono text-slate-900 dark:text-white tracking-tight">{{ $bc30->nomor_aju }}</h1>
                 <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    Kantor Pabean Muat: <strong class="text-slate-700 dark:text-slate-300">{{ $bc30->kode_kantor }}</strong> ({{ $bc30->nama_kantor }}) &bull; Dibuat: <span class="tabular-nums">{{ $bc30->created_at->format('d/m/Y H:i') }}</span>
+                    Kantor Pabean Muat: <strong class="text-slate-700 dark:text-slate-300">{{ $bc30->kode_kantor }}</strong> ({{ $bc30->nama_kantor }}) <span class="text-slate-300 dark:text-slate-600 mx-1">/</span> Dibuat: <span class="tabular-nums">{{ $bc30->created_at->format('d/m/Y H:i') }}</span>
                 </p>
             </div>
 
@@ -80,7 +80,7 @@
                     <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 text-xs font-semibold"
                          title="Respon Resmi Kepabeanan (NPE/Billing) telah diterbitkan oleh DJBC. Dokumen terkunci permanen untuk menjaga integritas data fiskal. Data tetap dapat dilihat sepenuhnya (Read-Only).">
                         <i data-lucide="lock" class="w-3.5 h-3.5 text-amber-600"></i>
-                        <span>Terkunci (Respon Terbit) &bull; Mode Lihat Saja</span>
+                        <span>Terkunci (Respon Terbit) — Mode Baca Saja</span>
                     </div>
 
                     @if($bc30->shipment)

@@ -119,7 +119,7 @@ if (window.Alpine && typeof window.Alpine.data === 'function') {
                 {{ $isDraft ? 'Edit Draf Dokumen Pabean BC 3.0 (PEB)' : 'Revisi Data Dokumen BC 3.0 (Pasca-Kirim CEISA)' }}
             </h1>
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-mono">
-                Nomor Aju: <strong>{{ $bc30->nomor_aju }}</strong> &bull; Dibuat: {{ $bc30->created_at->format('d/m/Y H:i') }}
+                Nomor Aju: <strong>{{ $bc30->nomor_aju }}</strong> <span class="text-slate-300 dark:text-slate-600 mx-1">/</span> Dibuat: {{ $bc30->created_at->format('d/m/Y H:i') }}
             </p>
         </div>
         <div class="flex items-center space-x-2">

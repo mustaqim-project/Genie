@@ -88,15 +88,15 @@
                 <h2 class="text-lg font-bold mb-2">Analisis Kepabeanan & Risiko</h2>
                 <div class="space-y-3 text-xs text-slate-300 mt-4">
                     <div class="p-3 rounded-2xl bg-white/5 border border-white/10">
-                        <strong class="text-white block font-semibold mb-0.5">&bull; Integrasi OpenAI & BTKI 2022:</strong>
+                        <strong class="text-white block font-semibold mb-0.5">Integrasi OpenAI &amp; BTKI 2022:</strong>
                         AI memindai dokumen Packing List secara holistik, mengekstrak uraian, kemasan, bobot, FOB, serta mencocokkan pos tarif 8-digit.
                     </div>
                     <div class="p-3 rounded-2xl bg-white/5 border border-white/10">
-                        <strong class="text-white block font-semibold mb-0.5">&bull; Audit Perizinan Lartas:</strong>
+                        <strong class="text-white block font-semibold mb-0.5">Audit Perizinan Lartas:</strong>
                         Mendeteksi dokumen izin wajib (LS Kemendag, SNI Wajib, SDPPI, V-Legal Kayu, Karantina, BPOM).
                     </div>
                     <div class="p-3 rounded-2xl bg-white/5 border border-white/10">
-                        <strong class="text-white block font-semibold mb-0.5">&bull; Human-in-the-Loop:</strong>
+                        <strong class="text-white block font-semibold mb-0.5">Human-in-the-Loop:</strong>
                         Hasil pencocokan AI dapat ditinjau dan langsung diaplikasikan ke formulir draft PIB (BC 2.0) atau PEB (BC 3.0).
                     </div>
                 </div>

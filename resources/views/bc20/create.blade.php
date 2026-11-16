@@ -163,7 +163,7 @@ window.bc20FormManager = function bc20FormManager() {
                                     <div>
                                         <div class="flex items-center justify-between mb-1">
                                             <label class="block font-semibold text-slate-700 dark:text-slate-300">HS Code (BTKI) *</label>
-                                            <button type="button" onclick="quickAiHsLookupBc20(this, ${idx})" class="text-[10px] text-[#0284c7] font-bold hover:underline cursor-pointer">✨ Cek AI</button>
+                                            <button type="button" onclick="quickAiHsLookupBc20(this, ${idx})" class="inline-flex items-center gap-1 text-[10px] text-[#0284c7] font-bold hover:underline cursor-pointer"><i data-lucide="sparkles" class="w-3 h-3"></i><span>Cek AI</span></button>
                                         </div>
                                         <input type="text" name="barang[${idx}][hs_code]" 
                                                value="${cleanHs}" 
@@ -414,7 +414,7 @@ if (window.Alpine && typeof window.Alpine.data === 'function') {
                         <i data-lucide="file-up" class="w-4 h-4 text-[#0284c7]"></i>
                         <span>Unggah Berkas Kargo untuk Ekstraksi Otomatis</span>
                     </h3>
-                    <span class="text-[11px] text-slate-400">PDF, Excel, JPG &bull; Maks 15MB</span>
+                    <span class="text-[11px] text-slate-400">PDF, Excel, JPG — Maks. 15MB</span>
                 </div>
                 <p class="text-[12px] text-slate-500 dark:text-slate-400 mt-0.5">Unggah berkas kargo (B/L, Invoice, Packing List). Sistem mengekstrak informasi dan mengisi seluruh formulir pabean di bawah secara otomatis.</p>
             </div>

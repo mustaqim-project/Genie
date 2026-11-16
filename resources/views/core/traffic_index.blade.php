@@ -126,7 +126,7 @@
                                     @endif
                                 </div>
                                 <div class="text-[10px] font-mono text-black/50 dark:text-white/50 mt-1">
-                                    {{ $photoCnt }} Foto {{ $shp->new_seal_number ? '· Segel: ' . $shp->new_seal_number : '' }}
+                                    {{ $photoCnt }} Foto {{ $shp->new_seal_number ? '/ Segel: ' . $shp->new_seal_number : '' }}
                                 </div>
                             </td>
                             <td class="py-3 px-4">

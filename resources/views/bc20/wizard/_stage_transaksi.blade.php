@@ -89,7 +89,7 @@
 
         <button type="button" x-show="w.transaksi.freight_document_id" @click="previewByDocId(w.transaksi.freight_document_id)"
                 class="w-full py-1.5 rounded-xl bg-[#0284c7]/10 text-[#0284c7] font-semibold text-[11px] cursor-pointer">
-            &bull; Lihat Preview Bukti Freight
+            Lihat Pratinjau Bukti Freight
         </button>
 
         <div class="grid grid-cols-2 gap-2">

@@ -328,16 +328,16 @@ if (window.Alpine && typeof window.Alpine.data === 'function') {
                 <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-800 border border-sky-200 uppercase tracking-wide">
                     PORTAL MANDIRI KARYAWAN (ESS)
                 </span>
-                <span class="text-xs text-slate-300">&bull;</span>
+                <span class="text-xs text-slate-300">/</span>
                 <span class="text-xs text-slate-500 font-semibold">Masa Kerja: {{ $tenureText }}</span>
             </div>
             <div class="flex items-center space-x-3">
                 <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                    Halo, {{ $employee->full_name }}! 👋
+                    Halo, {{ $employee->full_name }}
                 </h1>
             </div>
             <p class="text-xs text-slate-500 font-medium">
-                {{ $employee->position }} &bull; Divisi <span class="font-bold text-slate-700">{{ $employee->team }}</span> &bull; NIK: <span class="font-mono font-bold">{{ $employee->nik }}</span>
+                {{ $employee->position }} <span class="text-slate-300 mx-1">/</span> Divisi <span class="font-bold text-slate-700">{{ $employee->team }}</span> <span class="text-slate-300 mx-1">/</span> NIK: <span class="font-mono font-bold">{{ $employee->nik }}</span>
             </p>
         </div>
 

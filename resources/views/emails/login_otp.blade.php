@@ -40,7 +40,7 @@
                                     {{ $otpCode }}
                                 </div>
                                 <span style="display: block; font-size: 11px; color: #64748B; margin-top: 10px;">
-                                    Berlaku selama 10 menit &bull; Sekali pakai
+                                    Berlaku selama 10 menit — Sekali pakai
                                 </span>
                             </div>
 
@@ -69,7 +69,7 @@
                                 Jika Anda tidak merasa melakukan percobaan masuk ini, segera ubah kata sandi akun Anda atau laporkan ke Administrator Sistem.
                             </p>
                             <p style="margin: 0; color: #334155;">
-                                &copy; {{ date('Y') }} PT Agung Trans Solusindo &bull; Genie ERP Enterprise System
+                                &copy; {{ date('Y') }} PT Agung Trans Solusindo — Genie ERP Enterprise System
                             </p>
                         </td>
                     </tr>

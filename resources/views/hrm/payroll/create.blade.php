@@ -115,7 +115,7 @@
                             <tr class="hover:bg-slate-50/70 transition">
                                 <td class="px-4 py-3">
                                     <div class="font-bold text-slate-900">{{ $emp->full_name }}</div>
-                                    <div class="text-[10px] font-mono text-slate-400">{{ $emp->nik }} &bull; {{ $emp->position }}</div>
+                                    <div class="text-[10px] font-mono text-slate-400">{{ $emp->nik }} / {{ $emp->position }}</div>
                                 </td>
                                 <td class="px-3 py-3">
                                     <input type="number" name="employees[{{ $emp->id }}][base_salary]" value="{{ $base }}"

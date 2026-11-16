@@ -3,7 +3,7 @@
     <div class="space-y-1.5 relative">
         <div class="flex items-center justify-between">
             <label class="block font-bold text-slate-800 dark:text-slate-100 text-xs">Lihat Database Pos Tarif (BTKI 2022)</label>
-            <span class="text-[10px] text-slate-400 font-mono">11.574 Pos Tarif Resmi DJBC &bull; Tekan untuk Autocomplete</span>
+            <span class="text-[10px] text-slate-400 font-mono">11.574 Pos Tarif Resmi DJBC — Tekan untuk Autocomplete</span>
         </div>
         <div class="relative">
             <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
@@ -67,7 +67,7 @@
                     </div>
                     <div class="text-right shrink-0 font-mono text-[10px] text-slate-500">
                         <div>BM: <strong class="text-slate-800 dark:text-white" x-text="(item.duty_bm || 0) + '%'"></strong></div>
-                        <div>PPN: <strong x-text="(item.duty_ppn || 11) + '%'"></strong> &bull; PPh: <strong x-text="(item.duty_pph || 2.5) + '%'"></strong></div>
+                        <div>PPN: <strong x-text="(item.duty_ppn || 11) + '%'"></strong> <span class="mx-1">/</span> PPh: <strong x-text="(item.duty_pph || 2.5) + '%'"></strong></div>
                     </div>
                 </div>
             </template>

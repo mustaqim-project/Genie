@@ -83,10 +83,10 @@
                 <div class="min-w-0">
                     <div class="flex items-center space-x-1.5 leading-none">
                         <span class="font-bold text-[14px] text-slate-900 dark:text-white tracking-tight">GENIE PORTAL</span>
-                        <span class="text-slate-300 dark:text-slate-600">&bull;</span>
+                        <span class="text-slate-300 dark:text-slate-600">/</span>
                         <span class="text-[12px] font-semibold text-[#0284c7] dark:text-[#0A84FF] truncate">{{ $client->nama_perusahaan ?? $client->name ?? 'Portal Pelacakan Kargo' }}</span>
                     </div>
-                    <div class="text-[11px] text-slate-400 dark:text-slate-400 font-medium truncate mt-0.5">PT Agung Trans Solusindo &bull; Forwarding & Customs</div>
+                    <div class="text-[11px] text-slate-400 dark:text-slate-400 font-medium truncate mt-0.5">PT Agung Trans Solusindo — Forwarding &amp; Customs</div>
                 </div>
             </div>
 
@@ -121,8 +121,8 @@
                    class="flex items-center">
                     <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#34C759]/10 text-[#248A3D] dark:bg-[#34C759]/20 dark:text-[#32D74B] text-[11px] font-mono font-medium border border-[#34C759]/20">
                         <span class="w-2 h-2 rounded-full bg-[#34C759] animate-pulse"></span>
-                        <span class="hidden sm:inline">Tautan Aktif &bull; Sisa</span>
-                        <span class="sm:hidden">Tautan Aktif &bull;</span>
+                        <span class="hidden sm:inline">Tautan Aktif — Sisa</span>
+                        <span class="sm:hidden">Tautan Aktif:</span>
                         <strong x-text="timeRemaining" class="font-bold">...</strong>
                     </span>
                 </div>
@@ -206,7 +206,7 @@
                     </div>
                     <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-slate-500 dark:text-slate-400 mt-1.5">
                         <span>No. B/L: <strong class="text-slate-800 dark:text-slate-200 font-mono">{{ $shipment->nomor_bl_awb ?? '-' }}</strong></span>
-                        <span class="text-slate-300 dark:text-slate-600">&bull;</span>
+                        <span class="text-slate-300 dark:text-slate-600">/</span>
                         <span>No. Aju: <strong class="text-slate-800 dark:text-slate-200 font-mono">{{ $shipment->nomor_aju }}</strong></span>
                     </div>
                 </div>
@@ -270,7 +270,7 @@
                             <span class="h-0.5 flex-1 bg-slate-200 dark:bg-white/10"></span>
                         </div>
                         <div class="text-[12px] font-bold text-slate-800 dark:text-slate-200 font-mono">
-                            {{ $shipment->nama_kapal ?? 'MV WAN HAI 315' }} <span class="text-slate-400">&bull;</span> {{ $shipment->voyage_no ?? 'V.042N' }}
+                            {{ $shipment->nama_kapal ?? 'MV WAN HAI 315' }} <span class="text-slate-400">/</span> {{ $shipment->voyage_no ?? 'V.042N' }}
                         </div>
                         <div class="text-[11px] text-[#0284c7] font-medium">
                             Pelayaran: {{ $shipment->shippingVendor->name ?? 'Ocean Carrier' }}
@@ -316,7 +316,7 @@
                         {{ number_format($shipment->total_netto, 2) }} kg
                     </div>
                     <div class="text-[11px] text-slate-500 truncate">
-                        {{ $shipment->total_kemasan }} {{ $shipment->jenis_kemasan ?? 'Colli' }} &bull; Gross: {{ number_format($shipment->total_bruto, 2) }}kg
+                        {{ $shipment->total_kemasan }} {{ $shipment->jenis_kemasan ?? 'Colli' }} <span class="text-slate-400 mx-1">/</span> Gross: {{ number_format($shipment->total_bruto, 2) }} kg
                     </div>
                 </div>
 
@@ -685,7 +685,7 @@
 
     <!-- 4. FOOTER -->
     <footer class="mt-auto border-t border-black/[0.06] dark:border-white/[0.08] bg-white/60 dark:bg-[#1C1C1E]/60 py-4 text-center text-[11px] text-slate-400 dark:text-slate-500">
-        &copy; {{ date('Y') }} PT Agung Trans Solusindo &bull; Sistem Operasional Pengapalan & Kepabeanan Terpadu GENIE ERP
+        &copy; {{ date('Y') }} PT Agung Trans Solusindo — Sistem Operasional Pengapalan &amp; Kepabeanan Terpadu GENIE ERP
     </footer>
 
     <script>

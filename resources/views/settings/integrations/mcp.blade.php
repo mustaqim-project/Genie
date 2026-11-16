@@ -1067,25 +1067,25 @@ print('Hasil Deteksi Pos Tarif:', result['result']['structured_data'])`, 'Kode P
                                 @click="setScopePreset('admin')"
                                 :class="selectedScopes.includes('*') ? 'btn-apple-filled' : 'btn-apple-gray'"
                                 class="px-2.5 py-1 text-[11px] font-semibold cursor-pointer">
-                            🛡️ Full Admin (*)
+                            Full Admin (*)
                         </button>
                         <button type="button" 
                                 @click="setScopePreset('ops')"
                                 :class="!selectedScopes.includes('*') && selectedScopes.includes('customs:create') && !selectedScopes.includes('finance:approve') ? 'btn-apple-filled' : 'btn-apple-gray'"
                                 class="px-2.5 py-1 text-[11px] font-semibold cursor-pointer">
-                            🚢 Operasional & Kepabeanan
+                            Operasional & Kepabeanan
                         </button>
                         <button type="button" 
                                 @click="setScopePreset('finance')"
                                 :class="!selectedScopes.includes('*') && selectedScopes.includes('finance:approve') ? 'btn-apple-filled' : 'btn-apple-gray'"
                                 class="px-2.5 py-1 text-[11px] font-semibold cursor-pointer">
-                            💰 Keuangan & Approval
+                            Keuangan & Approval
                         </button>
                         <button type="button" 
                                 @click="setScopePreset('readonly')"
                                 :class="!selectedScopes.includes('*') && selectedScopes.includes('approval:read') && !selectedScopes.includes('customs:create') ? 'btn-apple-filled' : 'btn-apple-gray'"
                                 class="px-2.5 py-1 text-[11px] font-semibold cursor-pointer">
-                            👁️ Auditor (Read-Only)
+                            Auditor (Read-Only)
                         </button>
                     </div>
 
@@ -1146,7 +1146,7 @@ print('Hasil Deteksi Pos Tarif:', result['result']['structured_data'])`, 'Kode P
                         <!-- 2. Kepabeanan & CEISA 4.0 -->
                         <div class="space-y-1.5 pt-2 border-t border-black/[0.06] dark:border-white/[0.06]">
                             <span class="text-[10px] font-bold uppercase tracking-wider text-[#0284c7] flex items-center gap-1">
-                                🛃 Kepabeanan & CEISA 4.0 (Customs)
+                                Kepabeanan & CEISA 4.0 (Customs)
                             </span>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                                 <label class="flex items-start gap-2 cursor-pointer p-1.5 rounded-lg hover:bg-black/[0.02] dark:hover:bg-white/[0.04] transition-colors">
@@ -1182,7 +1182,7 @@ print('Hasil Deteksi Pos Tarif:', result['result']['structured_data'])`, 'Kode P
                         <!-- 3. Operasional Pengapalan (P01) -->
                         <div class="space-y-1.5 pt-2 border-t border-black/[0.06] dark:border-white/[0.06]">
                             <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                                🚢 Operasional Pengapalan & Ekspedisi
+                                Operasional Pengapalan & Ekspedisi
                             </span>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                                 <label class="flex items-start gap-2 cursor-pointer p-1.5 rounded-lg hover:bg-black/[0.02] dark:hover:bg-white/[0.04] transition-colors">
@@ -1227,7 +1227,7 @@ print('Hasil Deteksi Pos Tarif:', result['result']['structured_data'])`, 'Kode P
                         <!-- 4. DO & Traffic Pelabuhan -->
                         <div class="space-y-1.5 pt-2 border-t border-black/[0.06] dark:border-white/[0.06]">
                             <span class="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 flex items-center gap-1">
-                                📑 Delivery Order (DO) & Armada Truk
+                                Delivery Order (DO) & Armada Truk
                             </span>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                                 <label class="flex items-start gap-2 cursor-pointer p-1.5 rounded-lg hover:bg-black/[0.02] dark:hover:bg-white/[0.04] transition-colors">
@@ -1263,7 +1263,7 @@ print('Hasil Deteksi Pos Tarif:', result['result']['structured_data'])`, 'Kode P
                         <!-- 5. Keuangan, Billing & Pajak -->
                         <div class="space-y-1.5 pt-2 border-t border-black/[0.06] dark:border-white/[0.06]">
                             <span class="text-[10px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 flex items-center gap-1">
-                                💳 Keuangan, Billing & Perpajakan
+                                Keuangan, Billing & Perpajakan
                             </span>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                                 <label class="flex items-start gap-2 cursor-pointer p-1.5 rounded-lg hover:bg-black/[0.02] dark:hover:bg-white/[0.04] transition-colors">
@@ -1326,7 +1326,7 @@ print('Hasil Deteksi Pos Tarif:', result['result']['structured_data'])`, 'Kode P
                         <!-- 6. CRM & HRM -->
                         <div class="space-y-1.5 pt-2 border-t border-black/[0.06] dark:border-white/[0.06]">
                             <span class="text-[10px] font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400 flex items-center gap-1">
-                                👥 CRM, Notifikasi WhatsApp & Kepegawaian (HRM)
+                                CRM, Notifikasi WhatsApp & Kepegawaian (HRM)
                             </span>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                                 <label class="flex items-start gap-2 cursor-pointer p-1.5 rounded-lg hover:bg-black/[0.02] dark:hover:bg-white/[0.04] transition-colors">

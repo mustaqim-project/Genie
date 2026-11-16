@@ -150,10 +150,10 @@
         </div>
         <div style="display: flex; gap: 8px;">
             <button onclick="window.print()" style="background: #2563eb; color: white; border: none; padding: 6px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 8.5pt;">
-                🖨️ Cetak / Simpan PDF
+                Cetak / Simpan PDF
             </button>
             <a href="?download=1" style="background: #059669; color: white; text-decoration: none; padding: 6px 14px; border-radius: 6px; font-weight: bold; font-size: 8.5pt; display: inline-block;">
-                📥 Download PDF Langsung
+                Download PDF Langsung
             </a>
         </div>
     </div>

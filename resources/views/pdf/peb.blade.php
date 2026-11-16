@@ -301,9 +301,9 @@
         <tr>
             <td width="50%">
                 <strong>PUNGUTAN EKSPOR:</strong><br>
-                • Bea Keluar (BK): Rp 0 (Tarif 0%)<br>
-                • Pungutan Sawit / BPDPKS: Rp 0 (Bukan Komoditas CPO)<br>
-                • Total Pungutan Ekspor: <strong>Rp 0</strong><br>
+                - Bea Keluar (BK): Rp 0 (Tarif 0%)<br>
+                - Pungutan Sawit / BPDPKS: Rp 0 (Bukan Komoditas CPO)<br>
+                - Total Pungutan Ekspor: <strong>Rp 0</strong><br>
                 <small>Cara Pembayaran: Bebas Pungutan</small>
             </td>
             <td width="50%">

@@ -111,7 +111,7 @@
                         <tr class="hover:bg-slate-50/70 transition">
                             <td class="px-4 py-3">
                                 <div class="font-bold text-slate-900">{{ $slip->employee?->full_name }}</div>
-                                <div class="text-[10px] font-mono text-slate-400">{{ $slip->employee?->nik }} &bull; {{ $slip->employee?->position }}</div>
+                                <div class="text-[10px] font-mono text-slate-400">{{ $slip->employee?->nik }} / {{ $slip->employee?->position }}</div>
                             </td>
                             <td class="px-4 py-3">
                                 <div class="font-bold text-slate-800">{{ $slip->employee?->bank_name ?: 'BCA' }}</div>

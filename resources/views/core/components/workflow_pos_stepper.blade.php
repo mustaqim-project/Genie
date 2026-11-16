@@ -136,10 +136,10 @@ window.openRollbackModalForStage = function(stageCode) {
             <!-- Subtitle BL & ETA info -->
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-mono">
                 <span>BL {{ $shipment->bl_number ?? $shipment->nomor_bl_awb ?? '-' }}</span>
-                <span class="text-slate-300 dark:text-slate-700 mx-1.5">&bull;</span>
+                <span class="text-slate-300 dark:text-slate-700 mx-1.5">/</span>
                 <span>ETA {{ $shipment->eta_date ? $shipment->eta_date->format('d M') : ($shipment->actual_arrival_date ? $shipment->actual_arrival_date->format('d M') : 'TBA') }}</span>
                 @if($shipment->nomor_aju)
-                    <span class="text-slate-300 dark:text-slate-700 mx-1.5">&bull;</span>
+                    <span class="text-slate-300 dark:text-slate-700 mx-1.5">/</span>
                     <span>Aju: {{ $shipment->nomor_aju }}</span>
                 @endif
             </p>
@@ -405,7 +405,7 @@ window.openRollbackModalForStage = function(stageCode) {
                         <strong class="text-slate-900 dark:text-white text-xs">Pos 1: Pengumpulan & Verifikasi Berkas (P01-P05)</strong>
                     </div>
                     <p class="text-slate-500 dark:text-slate-400 text-[11px]">
-                        BL {{ $shipment->bl_number ?? '-' }} &bull; Inv: {{ $shipment->invoice_number ?? '-' }} &bull; Vendor: {{ $shipment->shippingVendor?->name ?? '-' }}
+                        BL {{ $shipment->bl_number ?? '-' }} <span class="text-black/20 dark:text-white/20 mx-1">/</span> Inv: {{ $shipment->invoice_number ?? '-' }} <span class="text-black/20 dark:text-white/20 mx-1">/</span> Vendor: {{ $shipment->shippingVendor?->name ?? '-' }}
                     </p>
                     <div class="text-[11px] font-mono text-emerald-600 dark:text-emerald-400">
                         {{ $shipment->documents->where('status', 'VERIFIED')->count() }} / {{ $shipment->documents->count() }} Berkas Terverifikasi Sah
@@ -423,13 +423,13 @@ window.openRollbackModalForStage = function(stageCode) {
                 <div class="space-y-1">
                     <div class="flex items-center gap-2">
                         <span class="w-5 h-5 rounded-full {{ $currentIdx >= 1 ? 'bg-emerald-500 text-white' : 'bg-slate-300 text-slate-700' }} font-bold text-[10px] flex items-center justify-center">2</span>
-                        <strong class="text-slate-900 dark:text-white text-xs">Pos 2: Deteksi HS Code & Perizinan Lartas (P06-P08)</strong>
+                        <strong class="text-slate-900 dark:text-white text-xs">Pos 2: Deteksi HS Code &amp; Perizinan Lartas (P06-P08)</strong>
                     </div>
                     <p class="text-slate-500 dark:text-slate-400 text-[11px]">
-                        Total {{ $shipment->items->count() }} item barang &bull; Nilai CIF: {{ $shipment->currency }} {{ number_format($shipment->total_cif, 2) }}
+                        Total {{ $shipment->items->count() }} item barang <span class="text-black/20 dark:text-white/20 mx-1">/</span> Nilai CIF: {{ $shipment->currency }} {{ number_format($shipment->total_cif, 2) }}
                     </p>
                     <div class="text-[11px] {{ $shipment->lartas_info['has_lartas'] ? 'text-amber-600 dark:text-amber-400 font-semibold' : 'text-emerald-600 dark:text-emerald-400' }}">
-                        {{ $shipment->lartas_info['has_lartas'] ? '⚠️ ' . $shipment->lartas_info['lartas_count'] . ' Produk Kena Lartas (Izin Terlampir)' : '✅ Seluruh Barang Bebas Lartas' }}
+                        {{ $shipment->lartas_info['has_lartas'] ? $shipment->lartas_info['lartas_count'] . ' Produk Wajib Lartas (Izin Terlampir)' : 'Seluruh Barang Bebas Lartas' }}
                     </div>
                 </div>
                 <button type="button" onclick="selectTabAndCloseModal('items')" 
@@ -452,7 +452,8 @@ window.openRollbackModalForStage = function(stageCode) {
                     <div class="text-[11px] text-slate-600 dark:text-slate-400 flex items-center gap-2">
                         <span>Status: <strong class="font-bold text-[#0284c7]">{{ $shipment->ceisaDocument?->status ?? 'DRAFT' }}</strong></span>
                         @if($shipment->customs_channel)
-                            &bull; <span>Jalur: <strong class="font-bold">{{ $shipment->customs_channel }}</strong></span>
+                            <span class="text-black/20 dark:text-white/20 mx-1">/</span>
+                            <span>Jalur: <strong class="font-bold">{{ $shipment->customs_channel }}</strong></span>
                         @endif
                     </div>
                 </div>
@@ -485,7 +486,7 @@ window.openRollbackModalForStage = function(stageCode) {
                         </p>
                         <p class="text-[11px] text-slate-500 dark:text-slate-400">
                             Total Bayar: <strong class="text-slate-900 dark:text-white">Rp {{ number_format($shipment->ceisaDocument?->total_billing ?? $taxes['total_billing'] ?? 0, 0, ',', '.') }}</strong>
-                            &bull; Jatuh Tempo: {{ $shipment->ceisaDocument?->tgl_jatuh_tempo_billing?->format('d/m/Y') ?? '3 Hari Kerja' }}
+                            <span class="text-black/20 dark:text-white/20 mx-1">/</span> Jatuh Tempo: {{ $shipment->ceisaDocument?->tgl_jatuh_tempo_billing?->format('d/m/Y') ?? '3 Hari Kerja' }}
                         </p>
                     @else
                         <p class="text-slate-400 text-[11px] italic">Kode billing akan diterbitkan otomatis setelah dokumen dikirim ke CEISA 4.0.</p>
@@ -509,7 +510,7 @@ window.openRollbackModalForStage = function(stageCode) {
                     </div>
                     <p class="text-slate-500 dark:text-slate-400 text-[11px]">
                         Status: <strong class="text-slate-800 dark:text-slate-200">{{ $shipment->status_tahap }}</strong>
-                        &bull; DO: {{ $shipment->do_release_date ? 'Dirilis (' . $shipment->do_release_date->format('d/m/Y') . ')' : 'Dalam Proses' }}
+                        <span class="text-black/20 dark:text-white/20 mx-1">/</span> DO: {{ $shipment->do_release_date ? 'Dirilis (' . $shipment->do_release_date->format('d/m/Y') . ')' : 'Dalam Proses' }}
                     </p>
                 </div>
                 <button type="button" onclick="selectTabAndCloseModal('ops')" 

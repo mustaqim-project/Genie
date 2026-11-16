@@ -61,7 +61,7 @@
     <!-- Bento KPI Summary Grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 text-xs">
         <!-- Total Likuiditas Kas & Bank -->
-        <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-5 rounded-2xl shadow-sm border border-slate-700/50">
+        <div class="bg-slate-900 text-white p-5 rounded-2xl shadow-xs border border-slate-800">
             <span class="text-slate-400 font-bold uppercase tracking-wider block text-[10px] mb-1">Total Likuiditas Kas & Bank</span>
             <span class="text-2xl font-black font-mono tabular-nums text-white">Rp {{ number_format($totalLiquidity, 0, ',', '.') }}</span>
             <div class="mt-2 text-[11px] text-slate-300 flex items-center gap-1.5">

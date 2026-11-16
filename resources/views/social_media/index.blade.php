@@ -364,7 +364,7 @@ if (window.Alpine && typeof window.Alpine.data === 'function') {
                                                 x-model="selectedAccounts" class="rounded text-blue-600 focus:ring-blue-500">
                                             <div class="min-w-0">
                                                 <div class="text-xs truncate">{{ $acc->account_name }}</div>
-                                                <div class="text-[10px] text-slate-400 font-mono uppercase tracking-wider">{{ $acc->platform }} &bull; @<span>{{ $acc->username }}</span></div>
+                                                <div class="text-[10px] text-slate-400 font-mono uppercase tracking-wider">{{ $acc->platform }} / @<span>{{ $acc->username }}</span></div>
                                             </div>
                                         </div>
                                         <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-600 font-semibold shrink-0 ml-1">
@@ -586,7 +586,7 @@ if (window.Alpine && typeof window.Alpine.data === 'function') {
                                             </svg>
                                         </div>
                                         <div class="text-[10px] text-slate-400 font-mono">
-                                            <span x-text="previewPlatform.toUpperCase()"></span> &bull; Baru saja
+                                            <span x-text="previewPlatform.toUpperCase()"></span> <span class="mx-1">/</span> Baru saja
                                         </div>
                                     </div>
                                 </div>

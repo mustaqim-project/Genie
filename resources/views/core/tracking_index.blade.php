@@ -266,7 +266,7 @@
                         <td class="py-2.5 px-3 border-b border-black/5 dark:border-white/5 whitespace-nowrap">
                             <div class="font-medium text-black dark:text-white whitespace-nowrap">{{ $s->nama_kapal ?: '-' }}</div>
                             <div class="text-[10px] text-black/50 dark:text-white/50 whitespace-nowrap">
-                                {{ $s->shippingVendor?->name ?? '-' }} {{ $s->voyage_no ? '· ' . $s->voyage_no : '' }}
+                                {{ $s->shippingVendor?->name ?? '-' }} {{ $s->voyage_no ? '/ ' . $s->voyage_no : '' }}
                             </div>
                         </td>
                         <td class="py-2.5 px-3 border-b border-black/5 dark:border-white/5 whitespace-nowrap">
@@ -275,7 +275,7 @@
                         </td>
                         <td class="py-2.5 px-3 border-b border-black/5 dark:border-white/5 whitespace-nowrap">
                             <div class="font-mono font-semibold text-black dark:text-white whitespace-nowrap">
-                                {{ $s->total_kontainer ?? 1 }} Ctr · {{ number_format((float) $s->total_bruto, 0) }} KG
+                                {{ $s->total_kontainer ?? 1 }} Ctr / {{ number_format((float) $s->total_bruto, 0) }} KG
                             </div>
                             <div class="font-mono text-[10px] text-black/50 dark:text-white/50 whitespace-nowrap" title="{{ $s->nomor_kontainer }}">
                                 {{ $s->nomor_kontainer ?: '-' }}
@@ -341,7 +341,7 @@
                             <a href="{{ route('core.document.show', $s->id) }}#tab-ops"
                                class="inline-flex items-center gap-1 mt-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold whitespace-nowrap {{ $photoCount > 0 ? 'bg-[#0284c7]/15 text-[#0284c7]' : 'bg-black/[0.04] dark:bg-white/[0.06] text-black/45 dark:text-white/45' }}">
                                 <i data-lucide="camera" class="w-2.5 h-2.5"></i>
-                                <span>{{ $photoCount }} Foto {{ $s->new_seal_number ? '· ' . $s->new_seal_number : '' }}</span>
+                                <span>{{ $photoCount }} Foto {{ $s->new_seal_number ? '/ ' . $s->new_seal_number : '' }}</span>
                             </a>
                         </td>
                         <td class="py-2.5 px-3 border-b border-black/5 dark:border-white/5 whitespace-nowrap">
@@ -458,10 +458,11 @@
                             <div class="text-[11px] text-black/60 dark:text-white/60 font-medium mt-0.5 whitespace-nowrap">
                                 {{ $s->client?->name ?? 'Klien Umum' }}
                             </div>
-                            <div class="text-[10px] text-black/40 dark:text-white/40 mt-0.5 flex items-center gap-2 whitespace-nowrap">
+                            <div class="text-[10px] text-black/40 dark:text-white/40 mt-0.5 flex items-center gap-1.5 whitespace-nowrap">
                                 <span>B/L: {{ $s->nomor_bl_awb ?: '-' }}</span>
                                 @if($s->eta)
-                                <span>• ETA {{ \Carbon\Carbon::parse($s->eta)->format('d/m') }}</span>
+                                <span class="text-black/20 dark:text-white/20">/</span>
+                                <span>ETA {{ \Carbon\Carbon::parse($s->eta)->format('d/m') }}</span>
                                 @endif
                             </div>
                         </td>
@@ -568,7 +569,7 @@
                                         @if($picInitial)
                                             <span class="text-[9px]">{{ $picInitial }}</span>
                                         @else
-                                            <span class="text-[9px] text-black/25 dark:text-white/25">·</span>
+                                            <span class="w-1.5 h-1.5 rounded-full bg-black/20 dark:bg-white/20"></span>
                                         @endif
                                     </div>
                                     @if($picInitial)
@@ -626,8 +627,8 @@
                     <span>Dilewati (Jalur Hijau)</span>
                 </div>
                 <div class="flex items-center gap-1.5">
-                    <span class="w-4 h-4 rounded-full bg-black/5 dark:bg-white/10 text-center text-[9px] flex items-center justify-center">
-                        ·
+                    <span class="w-4 h-4 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center">
+                        <span class="w-1.5 h-1.5 rounded-full bg-black/30 dark:bg-white/40"></span>
                     </span>
                     <span>Menunggu Giliran (Antrean)</span>
                 </div>
@@ -693,7 +694,7 @@
                                         @endif
                                     </div>
                                     <div class="text-[11px] text-black/40 dark:text-white/40 truncate">
-                                        {{ $emp?->employee_id ?? 'NIP: -' }} • {{ $user->email }}
+                                        {{ $emp?->employee_id ?? 'NIP: -' }} / {{ $user->email }}
                                     </div>
                                 </div>
                             </div>

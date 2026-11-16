@@ -59,7 +59,7 @@
                 </div>
                 <h1 class="text-2xl font-bold font-mono text-slate-900 dark:text-white tracking-tight">{{ $bc20->nomor_aju }}</h1>
                 <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    Kantor Pabean: <strong class="text-slate-700 dark:text-slate-300">{{ $bc20->kode_kantor }}</strong> ({{ $bc20->nama_kantor }}) &bull; Dibuat: <span class="tabular-nums">{{ $bc20->created_at->format('d/m/Y H:i') }}</span>
+                    Kantor Pabean: <strong class="text-slate-700 dark:text-slate-300">{{ $bc20->kode_kantor }}</strong> ({{ $bc20->nama_kantor }}) <span class="text-slate-300 dark:text-slate-600 mx-1">/</span> Dibuat: <span class="tabular-nums">{{ $bc20->created_at->format('d/m/Y H:i') }}</span>
                 </p>
             </div>
 

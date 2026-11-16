@@ -199,6 +199,56 @@ class CeisaDocument extends Model
     }
 
     /**
+     * Cek apakah dokumen ini merupakan hasil penarikan (Tarik Data) langsung dari CEISA API,
+     * bukan dibuat dari formulir lokal GENIE.
+     */
+    public function isFromCeisaPull(): bool
+    {
+        // 1. Memiliki last_response dari CEISA namun raw_payload kosong atau minimal
+        if (!empty($this->last_response)) {
+            if (empty($this->raw_payload)) {
+                return true;
+            }
+            if (isset($this->last_response['dataStatus']) || isset($this->last_response['dataRespon']) || isset($this->last_response['nomorAju'])) {
+                return true;
+            }
+        }
+
+        // 2. Jika shipment dibuat otomatis tanpa user pembuat manual dan status langsung billing/SPPB
+        if ($this->shipment && (empty($this->shipment->created_by_user_id) || str_starts_with($this->shipment->nomor_bl_awb ?? '', 'BL-'))) {
+            if ($this->isBillingLocked() && empty($this->raw_payload)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Cek apakah data dokumen ini boleh diedit di GENIE:
+     * - Jika DRAFT/belum billing: BISA diedit.
+     * - Jika SUDAH BILLING/SPPB/NPE tapi asalnya dari TARIK CEISA: BISA diedit untuk kelengkapan operasional & DO di GENIE.
+     * - Jika SUDAH BILLING/SPPB/NPE dan asalnya dari GENIE: TERKUNCI (hanya view/inspeksi).
+     */
+    public function canEditData(): bool
+    {
+        if (!$this->isBillingLocked()) {
+            return true;
+        }
+
+        return $this->isFromCeisaPull();
+    }
+
+    /**
+     * Cek apakah dokumen ini boleh disubmit ulang ke CEISA API:
+     * Jika sudah terbit Billing / SPPB / NPE resmi, TIDAK BISA disubmit ulang ke CEISA apapun asalnya.
+     */
+    public function canSubmitCeisa(): bool
+    {
+        return !$this->isBillingLocked();
+    }
+
+    /**
      * Cek apakah dokumen CEISA masih dapat diedit.
      */
     public function isEditable(): bool

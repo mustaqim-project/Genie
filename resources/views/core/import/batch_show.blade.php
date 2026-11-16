@@ -75,7 +75,7 @@
                     <tr class="hover:bg-black/[0.01] dark:hover:bg-white/[0.01] transition">
                         <td class="px-6 py-4">
                             <span class="font-medium text-black dark:text-white block">{{ $doc->file?->original_name }}</span>
-                            <span class="text-[11px] text-black/40 dark:text-white/40">{{ $doc->file?->file_size_kb }} KB &bull; SHA: {{ substr($doc->file?->file_hash ?? '', 0, 8) }}...</span>
+                            <span class="text-[11px] text-black/40 dark:text-white/40">{{ $doc->file?->file_size_kb }} KB <span class="text-black/20 dark:text-white/20 mx-1">/</span> SHA: {{ substr($doc->file?->file_hash ?? '', 0, 8) }}...</span>
                         </td>
                         <td class="px-6 py-4">
                             <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#0284c7]/10 text-[#0284c7]">

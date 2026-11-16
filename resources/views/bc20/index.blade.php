@@ -453,14 +453,12 @@
                           placeholder="Ketik nama produk, spesifikasi bahan baku, merek, atau deskripsi barang impor (contoh: Mesin Jahit Industri High Speed, Laptop Komputer Core i7, Sepatu Olahraga Karet Tekstil, Router Wifi Wireless...)" 
                           class="w-full px-3.5 py-2.5 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-[#0284c7]"></textarea>
 
-                <div class="flex justify-between items-center pt-1">
-                    <div class="flex items-center gap-1 text-[11px] text-slate-400">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pt-1">
+                    <div class="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400 flex-wrap">
                         <span>Contoh cepat:</span>
-                        <button type="button" @click="aiQuery = 'Mesin Jahit Industri Otomatis High Speed Lockstitch (Model DDL-8700)'" class="text-[#0284c7] hover:underline font-semibold">Mesin Jahit</button>
-                        <span>&bull;</span>
-                        <button type="button" @click="aiQuery = 'Laptop Komputer Portabel Layar 14 Inci Core i7 RAM 16GB SSD 512GB'" class="text-[#0284c7] hover:underline font-semibold">Laptop</button>
-                        <span>&bull;</span>
-                        <button type="button" @click="aiQuery = 'Sepatu Olahraga Sneaker Sol Luar Karet Bagian Atas Tekstil'" class="text-[#0284c7] hover:underline font-semibold">Sepatu Sneaker</button>
+                        <button type="button" @click="aiQuery = 'Mesin Jahit Industri Otomatis High Speed Lockstitch (Model DDL-8700)'" class="px-2 py-0.5 rounded-md bg-[#0284c7]/10 text-[#0284c7] hover:bg-[#0284c7]/15 font-semibold transition-colors cursor-pointer">Mesin Jahit</button>
+                        <button type="button" @click="aiQuery = 'Laptop Komputer Portabel Layar 14 Inci Core i7 RAM 16GB SSD 512GB'" class="px-2 py-0.5 rounded-md bg-[#0284c7]/10 text-[#0284c7] hover:bg-[#0284c7]/15 font-semibold transition-colors cursor-pointer">Laptop</button>
+                        <button type="button" @click="aiQuery = 'Sepatu Olahraga Sneaker Sol Luar Karet Bagian Atas Tekstil'" class="px-2 py-0.5 rounded-md bg-[#0284c7]/10 text-[#0284c7] hover:bg-[#0284c7]/15 font-semibold transition-colors cursor-pointer">Sepatu Sneaker</button>
                     </div>
 
                     <button type="button" 
@@ -549,7 +547,7 @@
                         <div class="space-y-1">
                             <template x-for="doc in aiResult.required_documents" :key="doc.kode_dokumen">
                                 <div class="text-[10px] text-amber-800 dark:text-amber-300 flex items-center justify-between">
-                                    <span>&bull; <strong x-text="'[' + doc.kode_dokumen + '] ' + doc.nama_dokumen"></strong></span>
+                                    <span class="inline-flex items-center gap-1.5"><i data-lucide="file-check" class="w-3 h-3 text-amber-600 dark:text-amber-400"></i><strong x-text="'[' + doc.kode_dokumen + '] ' + doc.nama_dokumen"></strong></span>
                                     <span class="italic text-amber-700/70" x-text="doc.instansi"></span>
                                 </div>
                             </template>

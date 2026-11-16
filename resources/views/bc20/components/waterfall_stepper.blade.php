@@ -70,16 +70,16 @@
         <div class="flex flex-wrap items-center gap-2 text-[10px] text-slate-500 font-mono">
             @if($shp)
                 <span>Shipment: <a href="{{ route('core.document.show', $shp->id) }}" class="font-bold text-[#0284c7] hover:underline">{{ $shp->project_no ?? $shp->shipment_number }}</a></span>
-                <span>&bull;</span>
+                <span class="text-slate-300 dark:text-slate-700">/</span>
             @endif
             @if($doc)
                 <span>Aju: <strong class="text-slate-800 dark:text-slate-200">{{ substr($doc->nomor_aju, -8) }}</strong></span>
-                <span>&bull;</span>
+                <span class="text-slate-300 dark:text-slate-700">/</span>
                 <span>Status: <strong class="{{ $doc->status_badge_class }} px-1.5 py-0.2 rounded">{{ $doc->status }}</strong></span>
             @else
                 <span>Status: <strong class="text-amber-600">PENGAJUAN BARU</strong></span>
             @endif
-            <span>&bull;</span>
+            <span class="text-slate-300 dark:text-slate-700">/</span>
             <a href="{{ route('core.tracking.index', ['mode' => 'tracking_dok', 'search' => $shp?->project_no ?? $doc?->nomor_aju]) }}"
                target="_blank"
                class="text-[#0284c7] hover:underline font-semibold flex items-center gap-0.5"

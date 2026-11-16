@@ -135,7 +135,7 @@
                                 <div class="flex items-center gap-1.5 mt-1.5">
                                     <span class="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase
                                         {{ $item->platform === 'linkedin' ? 'bg-blue-100 text-blue-800' : 'bg-pink-100 text-pink-800' }}">
-                                        {{ $item->platform }} • {{ strtoupper($item->type) }}
+                                        {{ $item->platform }} / {{ strtoupper($item->type) }}
                                     </span>
                                     @if($item->status === 'unread')
                                         <span class="w-2 h-2 rounded-full bg-rose-500"></span>
@@ -164,7 +164,7 @@
                         </div>
                         <div>
                             <div class="font-bold text-slate-900 text-sm">{{ $activeConv?->contact?->name ?: 'Klien WhatsApp' }}</div>
-                            <div class="text-[11px] text-slate-500">No: {{ $activeConv?->contact?->phone ?: '+62 812-9000-8888' }} • Meta WABA Session Active</div>
+                            <div class="text-[11px] text-slate-500">No: {{ $activeConv?->contact?->phone ?: '+62 812-9000-8888' }} — Sesi Meta WABA Aktif</div>
                         </div>
                     </div>
                     <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">WhatsApp Resmi</span>
@@ -234,7 +234,7 @@
                             <div>
                                 <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase
                                     {{ $firstSocial->platform === 'linkedin' ? 'bg-blue-100 text-blue-800' : 'bg-pink-100 text-pink-800' }}">
-                                    {{ $firstSocial->platform }} • {{ strtoupper($firstSocial->type) }}
+                                    {{ $firstSocial->platform }} / {{ strtoupper($firstSocial->type) }}
                                 </span>
                                 <h3 class="font-bold text-slate-900 text-base mt-2">{{ $firstSocial->from_name }}</h3>
                                 <div class="text-xs text-slate-400">{{ $firstSocial->from_handle }}</div>

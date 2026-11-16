@@ -68,7 +68,7 @@
         <div class="text-center max-w-3xl mx-auto mb-16">
             <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-slate-800 text-sky-400 text-xs font-medium mb-6">
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>Host-to-Host Gateway Aktif &bull; Terhubung ke CEISA 4.0 DJBC Gateway v2.0</span>
+                <span>Host-to-Host Gateway Aktif — Terhubung ke CEISA 4.0 DJBC Gateway v2.0</span>
             </div>
             
             <h1 class="text-4xl sm:text-5xl font-black text-white tracking-tight leading-tight">
@@ -169,13 +169,13 @@
     <footer class="border-t border-slate-800/80 bg-slate-950/80 py-6 text-xs text-slate-500">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
-                &copy; {{ date('Y') }} PT Agung Trans Solusindo &bull; Sistem ERP Kepabeanan Terlindungi Enkripsi & RBAC
+                &copy; {{ date('Y') }} PT Agung Trans Solusindo — Sistem ERP Kepabeanan Terlindungi Enkripsi &amp; RBAC
             </div>
             <div class="flex items-center space-x-4 text-[11px]">
                 <span class="text-emerald-400 font-mono">v4.0.2 H2H DJBC</span>
-                <span>&bull;</span>
+                <span class="text-slate-700">/</span>
                 <span>SLA Gateway 99.9%</span>
-                <span>&bull;</span>
+                <span class="text-slate-700">/</span>
                 <a href="{{ route('login') }}" class="text-sky-400 hover:underline">Portal Login</a>
             </div>
         </div>

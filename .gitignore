@@ -28,3 +28,4 @@ Thumbs.db
 PATS_CEISA*
 *.sqlite*
 /scratch/
+/edge_profile/

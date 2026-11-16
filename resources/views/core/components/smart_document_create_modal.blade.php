@@ -236,14 +236,14 @@ if (!window.createProjectModalManagerRegistered) {
         };
     };
 
+    if (window.Alpine && typeof window.Alpine.data === 'function') {
+        window.Alpine.data('createProjectModalManager', window.createProjectModalManager);
+    }
     document.addEventListener('alpine:init', () => {
         if (window.Alpine && typeof window.Alpine.data === 'function') {
             window.Alpine.data('createProjectModalManager', window.createProjectModalManager);
         }
     });
-    if (window.Alpine && typeof window.Alpine.data === 'function') {
-        window.Alpine.data('createProjectModalManager', window.createProjectModalManager);
-    }
 }
 </script>
 
@@ -411,7 +411,7 @@ if (!window.createProjectModalManagerRegistered) {
                             <input type="file" id="{{ $pfx }}input-bl-file" name="bl_file" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx" class="hidden" @change="updateFileName('bl', $event)">
                             <button type="button" onclick="document.getElementById('{{ $pfx }}input-bl-file').click()" 
                                     class="w-full py-1.5 px-2.5 rounded-[8px] border border-[#0284c7]/30 bg-white dark:bg-[#2C2C2E] text-[#0284c7] font-semibold text-[11px] truncate flex items-center justify-center space-x-1.5 cursor-pointer">
-                                <span x-text="fileNames.bl ? '✓ ' + fileNames.bl : '📂 Pilih File B/L'"></span>
+                                <span x-text="fileNames.bl ? '✓ ' + fileNames.bl : 'Pilih File B/L'"></span>
                             </button>
                         </div>
                     </div>
@@ -432,7 +432,7 @@ if (!window.createProjectModalManagerRegistered) {
                             <input type="file" id="{{ $pfx }}input-inv-file" name="invoice_file" accept=".pdf,.xlsx,.xls,.png,.jpg,.jpeg,.doc,.docx" class="hidden" @change="updateFileName('invoice', $event)">
                             <button type="button" onclick="document.getElementById('{{ $pfx }}input-inv-file').click()" 
                                     class="w-full py-1.5 px-2.5 rounded-[8px] border border-[#5856D6]/30 bg-white dark:bg-[#2C2C2E] text-[#5856D6] font-semibold text-[11px] truncate flex items-center justify-center space-x-1.5 cursor-pointer">
-                                <span x-text="fileNames.invoice ? '✓ ' + fileNames.invoice : '📂 Pilih Commercial Invoice'"></span>
+                                <span x-text="fileNames.invoice ? '✓ ' + fileNames.invoice : 'Pilih Commercial Invoice'"></span>
                             </button>
                         </div>
                     </div>
@@ -453,7 +453,7 @@ if (!window.createProjectModalManagerRegistered) {
                             <input type="file" id="{{ $pfx }}input-pl-file" name="packing_list_file" accept=".pdf,.xlsx,.xls,.png,.jpg,.jpeg,.doc,.docx" class="hidden" @change="updateFileName('pl', $event)">
                             <button type="button" onclick="document.getElementById('{{ $pfx }}input-pl-file').click()" 
                                     class="w-full py-1.5 px-2.5 rounded-[8px] border border-[#34C759]/30 bg-white dark:bg-[#2C2C2E] text-[#248A3D] dark:text-[#30D158] font-semibold text-[11px] truncate flex items-center justify-center space-x-1.5 cursor-pointer">
-                                <span x-text="fileNames.pl ? '✓ ' + fileNames.pl : '📂 Pilih Packing List'"></span>
+                                <span x-text="fileNames.pl ? '✓ ' + fileNames.pl : 'Pilih Packing List'"></span>
                             </button>
                         </div>
                     </div>
@@ -479,7 +479,7 @@ if (!window.createProjectModalManagerRegistered) {
                                 <input type="file" id="{{ $pfx }}input-coo-file" name="coo_file" accept=".pdf,.png,.jpg,.jpeg" class="hidden" @change="updateFileName('coo', $event)">
                                 <button type="button" onclick="document.getElementById('{{ $pfx }}input-coo-file').click()" 
                                         class="w-full py-1.5 px-2 rounded-[6px] border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-black/70 dark:text-white/70 font-semibold text-[10px] truncate cursor-pointer">
-                                    <span x-text="fileNames.coo ? '✓ ' + fileNames.coo : '📂 Upload Form E / COO'"></span>
+                                    <span x-text="fileNames.coo ? '✓ ' + fileNames.coo : 'Upload Form E / COO'"></span>
                                 </button>
                             </div>
                         </div>
@@ -496,7 +496,7 @@ if (!window.createProjectModalManagerRegistered) {
                                 <input type="file" id="{{ $pfx }}input-insurance-file" name="insurance_file" accept=".pdf,.png,.jpg,.jpeg" class="hidden" @change="updateFileName('insurance', $event)">
                                 <button type="button" onclick="document.getElementById('{{ $pfx }}input-insurance-file').click()" 
                                         class="w-full py-1.5 px-2 rounded-[6px] border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-black/70 dark:text-white/70 font-semibold text-[10px] truncate cursor-pointer">
-                                    <span x-text="fileNames.insurance ? '✓ ' + fileNames.insurance : '📂 Upload Polis Asuransi'"></span>
+                                    <span x-text="fileNames.insurance ? '✓ ' + fileNames.insurance : 'Upload Polis Asuransi'"></span>
                                 </button>
                             </div>
                         </div>
@@ -513,7 +513,7 @@ if (!window.createProjectModalManagerRegistered) {
                                 <input type="file" id="{{ $pfx }}input-lartas-file" name="lartas_file" accept=".pdf,.png,.jpg,.jpeg,.zip" class="hidden" @change="updateFileName('lartas', $event)">
                                 <button type="button" onclick="document.getElementById('{{ $pfx }}input-lartas-file').click()" 
                                         class="w-full py-1.5 px-2 rounded-[6px] border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-black/70 dark:text-white/70 font-semibold text-[10px] truncate cursor-pointer">
-                                    <span x-text="fileNames.lartas ? '✓ ' + fileNames.lartas : '📂 Upload Izin Lartas'"></span>
+                                    <span x-text="fileNames.lartas ? '✓ ' + fileNames.lartas : 'Upload Izin Lartas'"></span>
                                 </button>
                             </div>
                         </div>

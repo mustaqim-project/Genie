@@ -65,7 +65,7 @@
                     {{ $totalShipments ?? 0 }}
                 </div>
                 <div class="text-[11px] text-black/45 dark:text-white/45 mt-0.5 truncate">
-                    {{ $shipmentsCollecting ?? 0 }} kumpul berkas &bull; {{ $shipmentsBilling ?? 0 }} billing
+                    {{ $shipmentsCollecting ?? 0 }} kumpul berkas / {{ $shipmentsBilling ?? 0 }} billing
                 </div>
             </div>
         </div>

@@ -9,7 +9,7 @@
         <!-- Left: Legal Identity & Product Name -->
         <div class="flex items-center space-x-1.5 text-center sm:text-left">
             <span class="font-semibold text-black/75 dark:text-white/75 tracking-tight">GENIE ERP</span>
-            <span class="opacity-30">&bull;</span>
+            <span class="opacity-30">/</span>
             <span>&copy; {{ date('Y') }} PT Agung Trans Solusindo</span>
         </div>
 
@@ -21,7 +21,7 @@
                 <span class="w-1.5 h-1.5 rounded-full bg-[#34C759]"></span>
                 <span class="font-medium">Gateway CEISA 4.0</span>
             </a>
-            <span class="opacity-30">&bull;</span>
+            <span class="opacity-30">/</span>
             <span class="font-mono tabular-nums text-black/40 dark:text-white/40">v2.4.0</span>
         </div>
 

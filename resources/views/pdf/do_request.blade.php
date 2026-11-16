@@ -210,7 +210,7 @@
 
             <!-- Tombol Cetak / PDF -->
             <button onclick="window.print()" style="background: #0284c7; color: white; border: none; padding: 7px 18px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(2, 132, 199, 0.4);">
-                🖨️ Cetak / Simpan PDF
+                Cetak / Simpan PDF
             </button>
         </div>
     </div>
@@ -424,7 +424,7 @@
                         Batal
                     </button>
                     <button type="submit" style="background: #0284c7; color: white; border: none; padding: 8px 20px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer;">
-                        💾 Simpan & Terapkan Perubahan
+                        Simpan & Terapkan Perubahan
                     </button>
                 </div>
             </form>

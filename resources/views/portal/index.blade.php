@@ -88,11 +88,13 @@
                                 {{ $shp->type === 'EXPORT' ? 'EKSPOR' : 'IMPOR' }}
                             </span>
                         </div>
-                        <p class="text-xs text-slate-500 mt-1">
-                            No. B/L: <strong class="text-slate-800 font-mono">{{ $shp->nomor_bl_awb }}</strong> &bull; 
-                            Kapal: {{ $shp->nama_kapal ?? '-' }} &bull; 
-                            Pelabuhan: {{ $shp->pelabuhan_bongkar ?? 'Tanjung Priok' }}
-                        </p>
+                        <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate-500 mt-1">
+                            <span>No. B/L: <strong class="text-slate-800 font-mono">{{ $shp->nomor_bl_awb }}</strong></span>
+                            <span class="text-slate-300 dark:text-slate-600">/</span>
+                            <span>Kapal: {{ $shp->nama_kapal ?? '-' }}</span>
+                            <span class="text-slate-300 dark:text-slate-600">/</span>
+                            <span>Pelabuhan: {{ $shp->pelabuhan_bongkar ?? 'Tanjung Priok' }}</span>
+                        </div>
                     </div>
 
                     <div class="text-left sm:text-right">
@@ -194,7 +196,7 @@
 
     <!-- 3. Portal Footer -->
     <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-400">
-        <p>&copy; 2026 PT Agung Trans Solusindo &bull; Genie ERP Logistics Platform</p>
+        <p>&copy; {{ date('Y') }} PT Agung Trans Solusindo — Platform Operasional Kepabeanan &amp; Logistik Terpadu</p>
     </footer>
 
 </body>

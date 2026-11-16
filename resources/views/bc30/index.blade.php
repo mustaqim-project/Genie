@@ -428,14 +428,12 @@
                           placeholder="Ketik nama produk, spesifikasi bahan baku, merek, atau deskripsi barang ekspor (contoh: Kopi Arabika Gayo Roasting Kemasan Retail 250gr, Sarang Burung Walet, Minyak Sawit CPO, Sepatu Kulit...)" 
                           class="w-full px-3.5 py-2.5 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-slate-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-[#0284c7]"></textarea>
 
-                <div class="flex justify-between items-center pt-1">
-                    <div class="flex items-center gap-1 text-[11px] text-slate-400">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pt-1">
+                    <div class="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400 flex-wrap">
                         <span>Contoh cepat:</span>
-                        <button type="button" @click="aiQuery = 'Kopi Arabika Roasting Kemasan Retail 250 Gram Asli Gayo'" class="text-[#0284c7] hover:underline font-semibold">Kopi Arabika</button>
-                        <span>&bull;</span>
-                        <button type="button" @click="aiQuery = 'Sarang Burung Walet Bersih Siap Konsumsi Kualitas Ekspor'" class="text-[#0284c7] hover:underline font-semibold">Sarang Walet</button>
-                        <span>&bull;</span>
-                        <button type="button" @click="aiQuery = 'Papan Kayu Olahan Merbau Moulding S4S Decking'" class="text-[#0284c7] hover:underline font-semibold">Produk Kayu</button>
+                        <button type="button" @click="aiQuery = 'Kopi Arabika Roasting Kemasan Retail 250 Gram Asli Gayo'" class="px-2 py-0.5 rounded-md bg-[#0284c7]/10 text-[#0284c7] hover:bg-[#0284c7]/15 font-semibold transition-colors cursor-pointer">Kopi Arabika</button>
+                        <button type="button" @click="aiQuery = 'Sarang Burung Walet Bersih Siap Konsumsi Kualitas Ekspor'" class="px-2 py-0.5 rounded-md bg-[#0284c7]/10 text-[#0284c7] hover:bg-[#0284c7]/15 font-semibold transition-colors cursor-pointer">Sarang Walet</button>
+                        <button type="button" @click="aiQuery = 'Papan Kayu Olahan Merbau Moulding S4S Decking'" class="px-2 py-0.5 rounded-md bg-[#0284c7]/10 text-[#0284c7] hover:bg-[#0284c7]/15 font-semibold transition-colors cursor-pointer">Produk Kayu</button>
                     </div>
 
                     <button type="button" 
@@ -524,7 +522,7 @@
                         <div class="space-y-1">
                             <template x-for="doc in aiResult.required_documents" :key="doc.kode_dokumen">
                                 <div class="text-[10px] text-amber-800 dark:text-amber-300 flex items-center justify-between">
-                                    <span>&bull; <strong x-text="'[' + doc.kode_dokumen + '] ' + doc.nama_dokumen"></strong></span>
+                                    <span class="inline-flex items-center gap-1.5"><i data-lucide="file-check" class="w-3 h-3 text-amber-600 dark:text-amber-400"></i><strong x-text="'[' + doc.kode_dokumen + '] ' + doc.nama_dokumen"></strong></span>
                                     <span class="italic text-amber-700/70" x-text="doc.instansi"></span>
                                 </div>
                             </template>

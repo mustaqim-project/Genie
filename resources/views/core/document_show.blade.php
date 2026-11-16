@@ -197,7 +197,7 @@
                             </div>
                             <div class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
                                 Total: <strong class="text-slate-800 dark:text-white tabular-nums">Rp {{ number_format($shipment->ceisaDocument?->total_billing ?? $taxes['total_billing'], 0, ',', '.') }}</strong>
-                                &bull; Jatuh Tempo: {{ $shipment->ceisaDocument?->tgl_jatuh_tempo_billing?->format('d/m/Y') ?? '3 Hari Kerja' }}
+                                <span class="text-black/20 dark:text-white/20 mx-1">/</span> Jatuh Tempo: {{ $shipment->ceisaDocument?->tgl_jatuh_tempo_billing?->format('d/m/Y') ?? '3 Hari Kerja' }}
                             </div>
                         @else
                             <div class="text-slate-400 dark:text-slate-500 text-xs italic mt-0.5">Diterbitkan otomatis saat dokumen disubmit ke CEISA.</div>
@@ -438,7 +438,7 @@
                                             <span class="font-mono font-bold text-[#0284c7]">[{{ $customDoc->kode_dokumen }}]</span> {{ $customDoc->nama_dokumen }}
                                         </td>
                                         <td class="p-3.5 text-slate-600 dark:text-slate-300">
-                                            <span class="font-mono text-[#0284c7] font-semibold">{{ $customDoc->item->kode_hs ?? '-' }}</span> &bull; {{ Str::limit($customDoc->item->uraian_barang ?? 'Seluruh Barang', 35) }}
+                                            <span class="font-mono text-[#0284c7] font-semibold">{{ $customDoc->item->kode_hs ?? '-' }}</span> <span class="text-slate-300 dark:text-slate-600">/</span> {{ Str::limit($customDoc->item->uraian_barang ?? 'Seluruh Barang', 35) }}
                                         </td>
                                         <td class="p-3.5 text-slate-500 dark:text-slate-400">
                                             {{ $customDoc->instansi_penerbit ?? '-' }}
@@ -542,7 +542,7 @@
                                     {{ number_format($it->nilai_fob, 2) }}
                                 </td>
                                 <td class="p-3.5 text-center text-[10px] text-slate-600 dark:text-slate-400 font-mono tabular-nums">
-                                    BM: {{ $it->tarif_bm_persen }}% &bull; PPN: {{ $it->tarif_ppn_persen }}% &bull; PPh: {{ $it->tarif_pph_persen }}%
+                                    BM: {{ $it->tarif_bm_persen }}% <span class="text-black/20 dark:text-white/20 mx-1">/</span> PPN: {{ $it->tarif_ppn_persen }}% <span class="text-black/20 dark:text-white/20 mx-1">/</span> PPh: {{ $it->tarif_pph_persen }}%
                                 </td>
                                 <td class="p-3.5 text-right whitespace-nowrap space-x-1">
                                     <button type="button" 
@@ -874,7 +874,7 @@
                                     {{ $photo->stage_label }}
                                 </span>
                                 <div class="font-mono text-[10px] text-slate-500 mt-1">
-                                    {{ $photo->taken_at?->format('d/m/Y H:i') }} · {{ $photo->uploader?->name ?? 'Tim Lapangan' }}
+                                    {{ $photo->taken_at?->format('d/m/Y H:i') }} <span class="text-black/20 dark:text-white/20 mx-1">/</span> {{ $photo->uploader?->name ?? 'Tim Lapangan' }}
                                 </div>
                             </div>
                             <form action="{{ route('core.traffic.inspection-photos.destroy', [$shipment->id, $photo->id]) }}" method="POST" onsubmit="return confirmSweetAlert(event, 'Hapus foto ini?')">
@@ -1648,7 +1648,7 @@
                 </div>
                 <div>
                     <h3 class="font-bold text-[15px] text-black dark:text-white">Portal Pelacakan Klien (Per Proyek)</h3>
-                    <p class="text-[11px] text-black/50 dark:text-white/50 font-mono">{{ $shipment->project_no }} &bull; {{ $shipment->client->name ?? '-' }}</p>
+                    <p class="text-[11px] text-black/50 dark:text-white/50 font-mono">{{ $shipment->project_no }} <span class="text-black/20 dark:text-white/20 mx-1">/</span> {{ $shipment->client->name ?? '-' }}</p>
                 </div>
             </div>
             <button type="button" onclick="closePortalModalShow()" class="p-1.5 rounded-lg text-black/40 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5">

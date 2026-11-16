@@ -81,7 +81,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm">
             <div class="flex items-center space-x-3 text-xs text-slate-500">
                 <span>Total: <strong class="text-slate-800">{{ $users->total() }} Pengguna</strong></span>
-                <span>&bull;</span>
+                <span class="text-slate-300">/</span>
                 <span class="text-emerald-700 font-semibold">{{ $users->where('is_active', true)->count() }} Aktif</span>
             </div>
             <div>
@@ -655,7 +655,7 @@
                             </svg>
                         </h2>
                         <p class="text-xs text-slate-300 font-mono mt-0.5">
-                            Nomor Resmi: {{ $waSetting->display_phone_number ?? '+62 812-9000-8888' }} &bull; WABA ID: {{ $waSetting->waba_id ?? '104928374829103' }}
+                            Nomor Resmi: {{ $waSetting->display_phone_number ?? '+62 812-9000-8888' }} <span class="text-white/40 mx-1">/</span> WABA ID: {{ $waSetting->waba_id ?? '104928374829103' }}
                         </p>
                     </div>
                 </div>
