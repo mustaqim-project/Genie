@@ -211,8 +211,8 @@
                         <th class="py-2.5 px-3 border-b border-black/10 dark:border-white/10 whitespace-nowrap min-w-[160px]">Vol &amp; Kontainer</th>
                         <th class="py-2.5 px-3 text-center border-b border-black/10 dark:border-white/10 whitespace-nowrap">ETA / ETD</th>
                         <th class="py-2.5 px-3 border-b border-black/10 dark:border-white/10 whitespace-nowrap min-w-[130px]">AJU &amp; NOPEN</th>
-                        <th class="py-2.5 px-3 text-center border-b border-black/10 dark:border-white/10 whitespace-nowrap">Respon (SPJM / SPPB / NPD / DNP / NHI)</th>
-                        <th class="py-2.5 px-3 text-center border-b border-black/10 dark:border-white/10 whitespace-nowrap">DO &amp; Foto SPJM/Segel</th>
+                        <th class="py-2.5 px-3 text-center border-b border-black/10 dark:border-white/10 whitespace-nowrap">Respon Pabean</th>
+                        <th class="py-2.5 px-3 text-center border-b border-black/10 dark:border-white/10 whitespace-nowrap">DO / Stuffing &amp; Segel</th>
                         <th class="py-2.5 px-3 border-b border-black/10 dark:border-white/10 whitespace-nowrap min-w-[140px]">Trucking &amp; Delv</th>
                         <th class="py-2.5 px-3 text-center border-b border-black/10 dark:border-white/10 whitespace-nowrap">ODOO / Fisik</th>
                         <th class="py-2.5 px-3 text-right sticky right-0 z-30 bg-white dark:bg-[#1C1C1E] border-b border-l border-black/10 dark:border-white/10 shadow-[-6px_0_12px_rgba(0,0,0,0.06)] whitespace-nowrap min-w-[140px] table-freeze-right">Aksi</th>
@@ -315,34 +315,67 @@
                         </td>
                         <td class="py-2.5 px-3 whitespace-nowrap text-center border-b border-black/5 dark:border-white/5">
                             <div class="inline-flex items-center justify-center gap-1 whitespace-nowrap">
-                                @foreach(['spjm' => 'SPJM', 'sppb' => 'SPPB', 'npd' => 'NPD', 'dnp' => 'DNP', 'nhi' => 'NHI'] as $flagKey => $flagLabel)
-                                @php
-                                    $isOn = !empty($responses[strtoupper($flagKey)]);
-                                    $onClass = match($flagKey) {
-                                        'sppb' => 'bg-[#34C759] text-white',
-                                        'spjm' => 'bg-[#FF3B30] text-white',
-                                        'nhi' => 'bg-purple-600 text-white',
-                                        default => 'bg-[#FF9500] text-white',
-                                    };
-                                @endphp
-                                <button type="button"
-                                        onclick="toggleTrackingFlag('{{ $s->id }}', '{{ $flagKey }}', this)"
-                                        class="px-1.5 py-0.5 rounded-[5px] text-[9px] font-bold transition-all cursor-pointer whitespace-nowrap {{ $isOn ? $onClass : 'bg-black/[0.04] dark:bg-white/[0.06] text-black/35 dark:text-white/35 hover:text-black' }}"
-                                        title="Klik untuk toggle status {{ $flagLabel }}">
-                                    {{ $flagLabel }}
-                                </button>
-                                @endforeach
+                                @if($isExport)
+                                    {{-- Respon Ekspor: NPE (Izin Muat), PPB (Periksa Fisik), PKBE (Konsolidasi) --}}
+                                    @foreach(['npe' => 'NPE', 'ppb' => 'PPB', 'pkbe' => 'PKBE'] as $flagKey => $flagLabel)
+                                    @php
+                                        $isOn = !empty($responses[strtoupper($flagKey)]);
+                                        $onClass = match($flagKey) {
+                                            'npe' => 'bg-[#34C759] text-white',
+                                            'ppb' => 'bg-[#FF3B30] text-white',
+                                            'pkbe' => 'bg-[#FF9500] text-white',
+                                            default => 'bg-[#0284c7] text-white',
+                                        };
+                                    @endphp
+                                    <button type="button"
+                                            onclick="toggleTrackingFlag('{{ $s->id }}', '{{ $flagKey }}', this)"
+                                            class="px-1.5 py-0.5 rounded-[5px] text-[9px] font-bold transition-all cursor-pointer whitespace-nowrap {{ $isOn ? $onClass : 'bg-black/[0.04] dark:bg-white/[0.06] text-black/35 dark:text-white/35 hover:text-black' }}"
+                                            title="Klik untuk toggle respon ekspor {{ $flagLabel }}">
+                                        {{ $flagLabel }}
+                                    </button>
+                                    @endforeach
+                                @else
+                                    {{-- Respon Impor: SPJM, SPPB, NPD, DNP, NHI --}}
+                                    @foreach(['spjm' => 'SPJM', 'sppb' => 'SPPB', 'npd' => 'NPD', 'dnp' => 'DNP', 'nhi' => 'NHI'] as $flagKey => $flagLabel)
+                                    @php
+                                        $isOn = !empty($responses[strtoupper($flagKey)]);
+                                        $onClass = match($flagKey) {
+                                            'sppb' => 'bg-[#34C759] text-white',
+                                            'spjm' => 'bg-[#FF3B30] text-white',
+                                            'nhi' => 'bg-purple-600 text-white',
+                                            default => 'bg-[#FF9500] text-white',
+                                        };
+                                    @endphp
+                                    <button type="button"
+                                            onclick="toggleTrackingFlag('{{ $s->id }}', '{{ $flagKey }}', this)"
+                                            class="px-1.5 py-0.5 rounded-[5px] text-[9px] font-bold transition-all cursor-pointer whitespace-nowrap {{ $isOn ? $onClass : 'bg-black/[0.04] dark:bg-white/[0.06] text-black/35 dark:text-white/35 hover:text-black' }}"
+                                            title="Klik untuk toggle status {{ $flagLabel }}">
+                                        {{ $flagLabel }}
+                                    </button>
+                                    @endforeach
+                                @endif
                             </div>
                         </td>
                         <td class="py-2.5 px-3 text-center border-b border-black/5 dark:border-white/5 whitespace-nowrap">
-                            <div class="text-[10px] font-semibold whitespace-nowrap {{ $s->do_is_released ? 'text-[#248A3D] dark:text-[#30D158]' : 'text-black/45 dark:text-white/45' }}">
-                                {{ $s->do_is_released ? ($s->nomor_do ?: 'DO Rilis') : 'DO Wait' }}
-                            </div>
-                            <a href="{{ route('core.document.show', $s->id) }}#tab-ops"
-                               class="inline-flex items-center gap-1 mt-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold whitespace-nowrap {{ $photoCount > 0 ? 'bg-[#0284c7]/15 text-[#0284c7]' : 'bg-black/[0.04] dark:bg-white/[0.06] text-black/45 dark:text-white/45' }}">
-                                <i data-lucide="camera" class="w-2.5 h-2.5"></i>
-                                <span>{{ $photoCount }} Foto {{ $s->new_seal_number ? '/ ' . $s->new_seal_number : '' }}</span>
-                            </a>
+                            @if($isExport)
+                                <div class="text-[10px] font-semibold whitespace-nowrap {{ in_array($s->status_tahap, ['STUFFING', 'ARRIVED', 'GATE_IN', 'TRAFFIC_SPPB', 'TRAFFIC_GATE_OUT', 'VESSEL_DEPARTED', 'DELIVERED_POD', 'COMPLETED']) ? 'text-[#248A3D] dark:text-[#30D158]' : 'text-black/45 dark:text-white/45' }}">
+                                    {{ in_array($s->status_tahap, ['STUFFING', 'ARRIVED', 'GATE_IN', 'TRAFFIC_SPPB', 'TRAFFIC_GATE_OUT', 'VESSEL_DEPARTED', 'DELIVERED_POD', 'COMPLETED']) ? 'Stuffing Selesai' : 'Depo / Stuffing' }}
+                                </div>
+                                <a href="{{ route('core.document.show', $s->id) }}#tab-ops"
+                                   class="inline-flex items-center gap-1 mt-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold whitespace-nowrap {{ $photoCount > 0 ? 'bg-[#AF52DE]/15 text-[#AF52DE]' : 'bg-black/[0.04] dark:bg-white/[0.06] text-black/45 dark:text-white/45' }}">
+                                    <i data-lucide="camera" class="w-2.5 h-2.5"></i>
+                                    <span>{{ $photoCount }} Foto {{ $s->new_seal_number ? '/ Segel: ' . $s->new_seal_number : '' }}</span>
+                                </a>
+                            @else
+                                <div class="text-[10px] font-semibold whitespace-nowrap {{ $s->do_is_released ? 'text-[#248A3D] dark:text-[#30D158]' : 'text-black/45 dark:text-white/45' }}">
+                                    {{ $s->do_is_released ? ($s->nomor_do ?: 'DO Rilis') : 'DO Wait' }}
+                                </div>
+                                <a href="{{ route('core.document.show', $s->id) }}#tab-ops"
+                                   class="inline-flex items-center gap-1 mt-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold whitespace-nowrap {{ $photoCount > 0 ? 'bg-[#0284c7]/15 text-[#0284c7]' : 'bg-black/[0.04] dark:bg-white/[0.06] text-black/45 dark:text-white/45' }}">
+                                    <i data-lucide="camera" class="w-2.5 h-2.5"></i>
+                                    <span>{{ $photoCount }} Foto {{ $s->new_seal_number ? '/ ' . $s->new_seal_number : '' }}</span>
+                                </a>
+                            @endif
                         </td>
                         <td class="py-2.5 px-3 border-b border-black/5 dark:border-white/5 whitespace-nowrap">
                             <div class="font-medium text-black dark:text-white whitespace-nowrap">
@@ -379,19 +412,28 @@
                                     'new_seal_number' => $s->new_seal_number,
                                     'trucking_vendor_name' => $s->trucking_vendor_name,
                                     'tps_location' => $s->tps_location,
-                                    'delivery_date' => $s->delivery_date?->format('Y-m-d'),
+                                    'delivery_date' => $s->delivery_date?->format('Y-m-d') ?? '',
                                 ];
                             @endphp
-                            @if($ceisa && $ceisa->jenis_dokumen === '20')
-                            <a href="{{ route('bc20.edit', $ceisa->id) }}"
-                               class="inline-flex items-center gap-1 px-2 py-1 rounded-[7px] text-[10px] font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white transition-colors mr-1 whitespace-nowrap"
-                               title="Buka Form Wizard BC 2.0">
-                                <i data-lucide="file-edit" class="w-3 h-3"></i>
-                                <span>BC 2.0</span>
-                            </a>
+                            @if($ceisa)
+                                @if($ceisa->jenis_dokumen === '20')
+                                <a href="{{ route('bc20.edit', $ceisa->id) }}"
+                                   class="inline-flex items-center gap-1 px-2 py-1 rounded-[7px] text-[10px] font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white transition-colors mr-1 whitespace-nowrap"
+                                   title="Buka Form Wizard BC 2.0 (PIB Impor)">
+                                    <i data-lucide="file-edit" class="w-3 h-3"></i>
+                                    <span>BC 2.0</span>
+                                </a>
+                                @elseif($ceisa->jenis_dokumen === '30')
+                                <a href="{{ route('bc30.edit', $ceisa->id) }}"
+                                   class="inline-flex items-center gap-1 px-2 py-1 rounded-[7px] text-[10px] font-semibold bg-amber-50 text-amber-700 hover:bg-amber-600 hover:text-white transition-colors mr-1 whitespace-nowrap"
+                                   title="Buka Form Wizard BC 3.0 (PEB Ekspor)">
+                                    <i data-lucide="file-edit" class="w-3 h-3"></i>
+                                    <span>BC 3.0</span>
+                                </a>
+                                @endif
                             @endif
                             <button type="button"
-                                    data-tracking='@json($editPayload)'
+                                    data-tracking="{{ htmlspecialchars(json_encode($editPayload), ENT_QUOTES, 'UTF-8') }}"
                                     onclick="openTrackingEditModal(this)"
                                     class="inline-flex items-center gap-1 px-2 py-1 rounded-[7px] text-[10px] font-semibold bg-[#0284c7]/10 text-[#0284c7] hover:bg-[#0284c7] hover:text-white transition-colors mr-1 cursor-pointer whitespace-nowrap">
                                 Edit
@@ -869,7 +911,12 @@
     }
 
     function openTrackingEditModal(btn) {
-        const data = JSON.parse(btn.getAttribute('data-tracking') || '{}');
+        let data = {};
+        try {
+            data = JSON.parse(btn.getAttribute('data-tracking') || '{}');
+        } catch (e) {
+            console.error('Gagal membaca data-tracking JSON:', e);
+        }
         document.getElementById('form-tracking-edit').action = `/core/tracking/${data.id}/quick-update`;
         document.getElementById('tracking-edit-subtitle').textContent = data.project_no || '';
         document.getElementById('te-jalur').value = data.customs_channel || '';
@@ -882,6 +929,7 @@
         document.getElementById('te-delv').value = data.delivery_date || '';
         document.getElementById('te-tps').value = data.tps_location || '';
         document.getElementById('modal-tracking-edit').classList.remove('hidden');
+        if (window.lucide) window.lucide.createIcons();
     }
 </script>
 @endsection

@@ -6,27 +6,56 @@
     $canManagePic = $authUser?->hasRole('R-OWN') || $authUser?->hasRole('R-ADM') || $authUser?->hasRole('R-DOC-SPV') || $authUser?->isSuperAdmin();
 @endphp
 
-<div class="bg-white dark:bg-[#1C1C1E] rounded-2xl border border-black/[0.06] dark:border-white/[0.08] shadow-xs p-5 sm:p-6 mb-6"
-     x-data="{
-        showPicModal: false,
-        activeStageKey: '',
-        activeStageTitle: '',
-        activeStageRole: '',
-        currentPicId: '',
-        currentBackupId: '',
-        selectedPicId: '',
-        selectedBackupId: '',
-        openModal(key, title, role, picId, backupId) {
-            this.activeStageKey = key;
-            this.activeStageTitle = title;
-            this.activeStageRole = role;
-            this.currentPicId = picId || '';
-            this.currentBackupId = backupId || '';
-            this.selectedPicId = picId || '';
-            this.selectedBackupId = backupId || '';
-            this.showPicModal = true;
+<script>
+if (typeof window.projectPicManager !== 'function') {
+    window.showPicModal = false;
+    window.activeStageKey = '';
+    window.activeStageTitle = '';
+    window.activeStageRole = '';
+    window.currentPicId = '';
+    window.currentBackupId = '';
+    window.selectedPicId = '';
+    window.selectedBackupId = '';
+
+    window.projectPicManager = function() {
+        return {
+            showPicModal: false,
+            activeStageKey: '',
+            activeStageTitle: '',
+            activeStageRole: '',
+            currentPicId: '',
+            currentBackupId: '',
+            selectedPicId: '',
+            selectedBackupId: '',
+            openModal(key, title, role, picId, backupId) {
+                this.activeStageKey = key || '';
+                this.activeStageTitle = title || '';
+                this.activeStageRole = role || '';
+                this.currentPicId = picId || '';
+                this.currentBackupId = backupId || '';
+                this.selectedPicId = picId || '';
+                this.selectedBackupId = backupId || '';
+                this.showPicModal = true;
+            },
+            closeModal() {
+                this.showPicModal = false;
+            }
+        };
+    };
+
+    if (window.Alpine && typeof window.Alpine.data === 'function') {
+        window.Alpine.data('projectPicManager', window.projectPicManager);
+    }
+    document.addEventListener('alpine:init', () => {
+        if (window.Alpine && typeof window.Alpine.data === 'function') {
+            window.Alpine.data('projectPicManager', window.projectPicManager);
         }
-     }">
+    });
+}
+</script>
+
+<div class="bg-white dark:bg-[#1C1C1E] rounded-2xl border border-black/[0.06] dark:border-white/[0.08] shadow-xs p-5 sm:p-6 mb-6"
+     x-data="projectPicManager()">
 
     <!-- Card Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-black/[0.06] dark:border-white/[0.08] mb-4 gap-3">
@@ -222,7 +251,7 @@
                         <p class="text-[11px] text-slate-500 dark:text-slate-400">Tugaskan staf operasional penanggung jawab pos</p>
                     </div>
                 </div>
-                <button type="button" @click="showPicModal = false" class="p-1 rounded text-slate-400 hover:text-black dark:hover:text-white cursor-pointer">
+                <button type="button" @click="closeModal()" class="p-1 rounded text-slate-400 hover:text-black dark:hover:text-white cursor-pointer">
                     <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
             </div>
@@ -272,7 +301,7 @@
                 </div>
 
                 <div class="pt-3 border-t border-black/5 dark:border-white/5 flex items-center justify-end space-x-2">
-                    <button type="button" @click="showPicModal = false" class="btn-apple-gray !h-8 text-[11px] cursor-pointer">Batal</button>
+                    <button type="button" @click="closeModal()" class="btn-apple-gray !h-8 text-[11px] cursor-pointer">Batal</button>
                     <button type="submit" class="btn-apple-filled !h-8 text-[11px] flex items-center space-x-1 cursor-pointer">
                         <i data-lucide="check" class="w-3.5 h-3.5"></i>
                         <span>Simpan Penugasan PIC</span>

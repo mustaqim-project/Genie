@@ -72,6 +72,19 @@ class BC30Controller extends Controller implements HasMiddleware
 
     public function index(Request $request)
     {
+        // Pastikan seluruh proyek shipment ekspor tersinkronisasi memiliki entri dokumen pabean BC 3.0 (DRAFT / Terbit)
+        $unlinkedExports = \App\Models\Shipment::where('jenis_layanan', 'EKSPORT_BC30')
+            ->whereNull('ceisa_document_id')
+            ->get();
+
+        foreach ($unlinkedExports as $shp) {
+            try {
+                $this->workflowService->generateCeisaDocFromShipment($shp);
+            } catch (\Throwable $e) {
+                // Abaikan jika berkas shipment belum lengkap, query tetap berjalan
+            }
+        }
+
         $query = CeisaDocument::where('jenis_dokumen', '30');
 
         if ($request->filled('search')) {
@@ -135,7 +148,10 @@ class BC30Controller extends Controller implements HasMiddleware
             'non_lartas_docs' => $nonLartasDocsCount,
         ];
 
-        return view('bc30.index', compact('documents', 'stats'));
+        $clients = \App\Models\Client::orderBy('name')->get();
+        $vendors = \App\Models\ShippingVendor::orderBy('name')->get();
+
+        return view('bc30.index', compact('documents', 'stats', 'clients', 'vendors'));
     }
 
     public function create(Request $request)

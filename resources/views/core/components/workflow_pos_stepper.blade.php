@@ -1,5 +1,5 @@
 @php
-    $stages = \App\Models\Shipment::STAGES_PIPELINE;
+    $stages = $shipment->stages_pipeline;
     $currentIdx = $shipment->stage_index;
     $picsMap = $shipment->stage_pics_map;
     $canRollback = auth()->user()->isSuperAdmin() || auth()->user()->hasPermission('workflow.rollback_stage');

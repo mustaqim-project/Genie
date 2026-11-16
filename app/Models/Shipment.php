@@ -557,21 +557,56 @@ class Shipment extends Model
     }
 
     /**
-     * Definisi 11 Tahapan Pipeline Operasional Genie (STG)
+     * Definisi 11 Tahapan Pipeline Operasional Genie - BC 2.0 (Impor - PIB)
      */
     public const STAGES_PIPELINE = [
-        0 => ['key' => 'doc', 'title' => 'Dokumen', 'role' => 'R-DOC', 'role_name' => 'Staf Document', 'action' => 'Verifikasi dokumen', 'sla_hours' => 4],
-        1 => ['key' => 'hs', 'title' => 'HS & Lartas', 'role' => 'R-DOC', 'role_name' => 'Staf Document', 'action' => 'Setujui HS code', 'sla_hours' => 4],
-        2 => ['key' => 'pib', 'title' => 'Dokumen pabean', 'role' => 'R-DOC-SPV', 'role_name' => 'Supervisor Document', 'action' => 'Approve & kirim ke CEISA', 'sla_hours' => 2],
-        3 => ['key' => 'bill', 'title' => 'Billing pabean', 'role' => 'R-FIN', 'role_name' => 'Finance', 'action' => 'Bayar billing', 'sla_hours' => 4],
-        4 => ['key' => 'do', 'title' => 'Pelayaran & DO', 'role' => 'R-DO', 'role_name' => 'Staf Delivery Order', 'action' => 'Terbitkan DO', 'sla_hours' => 8],
-        5 => ['key' => 'arr', 'title' => 'Kedatangan & jalur', 'role' => 'R-TRF', 'role_name' => 'Staf Traffic', 'action' => 'Tetapkan jalur', 'sla_hours' => 2],
-        6 => ['key' => 'hold', 'title' => 'Hold & notul', 'role' => 'R-TRF', 'role_name' => 'Staf Traffic', 'action' => 'Selesaikan hold', 'sla_hours' => 24],
-        7 => ['key' => 'gate', 'title' => 'SPPB & gate out', 'role' => 'R-TRF', 'role_name' => 'Staf Traffic', 'action' => 'Gate out', 'sla_hours' => 4],
-        8 => ['key' => 'send', 'title' => 'Pengiriman', 'role' => 'R-TRF', 'role_name' => 'Staf Traffic', 'action' => 'Berangkatkan truk', 'sla_hours' => 2],
-        9 => ['key' => 'pod', 'title' => 'POD & closing', 'role' => 'R-TRF', 'role_name' => 'Staf Traffic', 'action' => 'Tutup shipment', 'sla_hours' => 24],
-        10 => ['key' => 'inv', 'title' => 'Invoice klien', 'role' => 'R-FIN', 'role_name' => 'Finance', 'action' => 'Kirim invoice', 'sla_hours' => 24],
+        0 => ['key' => 'doc', 'title' => 'Dokumen Masuk', 'role' => 'R-DOC', 'role_name' => 'Staf Document', 'action' => 'Verifikasi dokumen impor (BL, Inv, PL, COO)', 'sla_hours' => 4],
+        1 => ['key' => 'hs', 'title' => 'HS & Lartas', 'role' => 'R-DOC', 'role_name' => 'Staf Document', 'action' => 'Setujui HS code & skrining lartas', 'sla_hours' => 4],
+        2 => ['key' => 'pib', 'title' => 'Dokumen Pabean', 'role' => 'R-DOC-SPV', 'role_name' => 'Supervisor Document', 'action' => 'Draft PIB & Submit ke CEISA 4.0', 'sla_hours' => 2],
+        3 => ['key' => 'bill', 'title' => 'Billing Pabean', 'role' => 'R-FIN', 'role_name' => 'Finance', 'action' => 'Bayar billing BM & PDRI', 'sla_hours' => 4],
+        4 => ['key' => 'do', 'title' => 'Pelayaran & DO', 'role' => 'R-DO', 'role_name' => 'Staf Delivery Order', 'action' => 'Penebusan DO Pelayaran', 'sla_hours' => 8],
+        5 => ['key' => 'arr', 'title' => 'Kedatangan & Jalur', 'role' => 'R-TRF', 'role_name' => 'Staf Traffic', 'action' => 'Monitoring ETA & penetapan jalur', 'sla_hours' => 2],
+        6 => ['key' => 'hold', 'title' => 'Hold & Notul', 'role' => 'R-TRF', 'role_name' => 'Staf Traffic', 'action' => 'Penyelesaian SPJM/Behandle/Notul', 'sla_hours' => 24],
+        7 => ['key' => 'gate', 'title' => 'SPPB & Gate Out', 'role' => 'R-TRF', 'role_name' => 'Staf Traffic', 'action' => 'SPPB terbit & gate out pelabuhan', 'sla_hours' => 4],
+        8 => ['key' => 'send', 'title' => 'Pengiriman Truk', 'role' => 'R-TRF', 'role_name' => 'Staf Traffic', 'action' => 'Pengiriman kargo ke gudang importer', 'sla_hours' => 2],
+        9 => ['key' => 'pod', 'title' => 'POD & Closing', 'role' => 'R-TRF', 'role_name' => 'Staf Traffic', 'action' => 'POD surat jalan & pengembalian empty depo', 'sla_hours' => 24],
+        10 => ['key' => 'inv', 'title' => 'Invoice Klien', 'role' => 'R-FIN', 'role_name' => 'Finance', 'action' => 'Penagihan reimbursement & jasa impor', 'sla_hours' => 24],
     ];
+
+    /**
+     * Definisi 11 Tahapan Pipeline Operasional Genie - BC 3.0 (Ekspor - PEB)
+     */
+    public const STAGES_PIPELINE_EXPORT = [
+        0 => ['key' => 'doc', 'title' => 'Dokumen Masuk', 'role' => 'R-DOC', 'role_name' => 'Staf Document', 'action' => 'Verifikasi Booking, SI, Inv, PL, COO', 'sla_hours' => 4],
+        1 => ['key' => 'hs', 'title' => 'HS & Lartas Ekspor', 'role' => 'R-DOC', 'role_name' => 'Staf Document', 'action' => 'HS Code & izin ekspor (ET/PE/LS)', 'sla_hours' => 4],
+        2 => ['key' => 'pib', 'title' => 'Dokumen Pabean (PEB)', 'role' => 'R-DOC-SPV', 'role_name' => 'Supervisor Document', 'action' => 'Draft PEB & Submit ke CEISA 4.0', 'sla_hours' => 2],
+        3 => ['key' => 'bill', 'title' => 'Billing Pabean', 'role' => 'R-FIN', 'role_name' => 'Finance', 'action' => 'Bayar Bea Keluar & PNBP Ekspor', 'sla_hours' => 4],
+        4 => ['key' => 'do', 'title' => 'Stuffing & Pick-up Depo', 'role' => 'R-DO', 'role_name' => 'Staf DO / Traffic', 'action' => 'Pick-up kontainer kosong & stuffing gudang', 'sla_hours' => 8],
+        5 => ['key' => 'arr', 'title' => 'Masuk Pelabuhan (CY)', 'role' => 'R-TRF', 'role_name' => 'Staf Traffic', 'action' => 'Gate in CY sebelum Port Closing Time', 'sla_hours' => 2],
+        6 => ['key' => 'hold', 'title' => 'Periksa Fisik Ekspor', 'role' => 'R-TRF', 'role_name' => 'Staf Traffic', 'action' => 'Pemeriksaan fisik PPB/Karantina jika ada', 'sla_hours' => 24],
+        7 => ['key' => 'gate', 'title' => 'NPE Terbit', 'role' => 'R-TRF', 'role_name' => 'Staf Traffic', 'action' => 'Terbit NPE resmi & izin muat kapal', 'sla_hours' => 4],
+        8 => ['key' => 'send', 'title' => 'Pemuatan Kapal', 'role' => 'R-TRF', 'role_name' => 'Staf Traffic', 'action' => 'Loading on vessel & kapal berangkat', 'sla_hours' => 2],
+        9 => ['key' => 'pod', 'title' => 'Final B/L & Closing', 'role' => 'R-TRF', 'role_name' => 'Staf Traffic', 'action' => 'Original B/L pelayaran terbit & tutup berkas', 'sla_hours' => 24],
+        10 => ['key' => 'inv', 'title' => 'Invoice Klien', 'role' => 'R-FIN', 'role_name' => 'Finance', 'action' => 'Penagihan freight, handling & jasa ekspor', 'sla_hours' => 24],
+    ];
+
+    /**
+     * Cek apakah shipment berjenis ekspor
+     */
+    public function getIsExportAttribute(): bool
+    {
+        return $this->type === 'EXPORT' 
+            || $this->jenis_layanan === 'EKSPORT_BC30' 
+            || ($this->ceisaDocument?->jenis_dokumen === '30');
+    }
+
+    /**
+     * Dapatkan Pipeline 11 Pos sesuai konteks Impor vs Ekspor
+     */
+    public function getStagesPipelineAttribute(): array
+    {
+        return $this->is_export ? self::STAGES_PIPELINE_EXPORT : self::STAGES_PIPELINE;
+    }
 
     /**
      * Hitung Indeks Tahap Pipeline Saat Ini (0 sampai 11)
@@ -587,13 +622,13 @@ class Shipment extends Model
             'DOC_READY' => 1,
             'HS_DETECTED', 'DRAFT_REVIEW' => 2,
             'CEISA_SUBMITTED', 'BILLING_ISSUED' => 3,
-            'BILLING_PAID', 'DO_PROCESSING' => 4,
-            'DO_RELEASED', 'ARRIVED', 'STUFFING' => 5,
-            'TRAFFIC_HOLD', 'INSPECTION_CUSTOMS' => 6,
-            'TRAFFIC_SPPB', 'SPPB_RELEASED', 'NPE_ISSUED' => 7,
-            'TRAFFIC_GATE_OUT', 'GATE_OUT', 'VESSEL_DEPARTED' => 8,
-            'DELIVERY', 'DELIVERED' => 9,
-            'DELIVERED_POD' => 10,
+            'BILLING_PAID', 'DO_PROCESSING', 'STUFFING' => 4,
+            'DO_RELEASED', 'ARRIVED', 'GATE_IN', 'GATE_IN_CY' => 5,
+            'TRAFFIC_HOLD', 'INSPECTION_CUSTOMS', 'PPB_INSPECTION' => 6,
+            'TRAFFIC_SPPB', 'SPPB_RELEASED', 'NPE_ISSUED', 'NPE_RELEASED' => 7,
+            'TRAFFIC_GATE_OUT', 'GATE_OUT', 'VESSEL_DEPARTED', 'VESSEL_LOADING' => 8,
+            'DELIVERY', 'DELIVERED', 'ATD_DEPARTED' => 9,
+            'DELIVERED_POD', 'FINAL_BL_ISSUED' => 10,
             default => 0,
         };
     }
@@ -656,11 +691,25 @@ class Shipment extends Model
         $spjm = (bool) $this->spjm_received
             || $jalur === 'MERAH'
             || str_contains($status, 'SPJM')
+            || str_contains($status, 'PPB')
             || str_contains($status, 'PEMERIKSAAN');
 
         $sppb = (bool) $this->sppb_received
             || !empty($ceisa?->nomor_sppb_npe)
             || in_array($status, ['SPPB', 'NPE', 'GATE_OUT', 'SELESAI'], true);
+
+        if ($this->is_export) {
+            return [
+                'NPE' => $sppb,
+                'PPB' => $spjm,
+                'PKBE' => (bool) ($this->customs_hold_steps['pkbe'] ?? false) || str_contains($status, 'PKBE'),
+                'SPPB' => $sppb,
+                'SPJM' => $spjm,
+                'NPD' => false,
+                'DNP' => false,
+                'NHI' => false,
+            ];
+        }
 
         return [
             'SPJM' => $spjm,
@@ -678,8 +727,8 @@ class Shipment extends Model
     {
         $currentIdx = $this->stage_index;
 
-        // Pos 6 (Hold & notul) dilewati otomatis saat Jalur Hijau
-        if ($index === 6 && $this->is_hold_skipped) {
+        // Pos 6 (Hold & notul) dilewati otomatis saat Jalur Hijau (khusus impor)
+        if ($index === 6 && !$this->is_export && $this->is_hold_skipped) {
             return 'skip';
         }
 
@@ -703,7 +752,8 @@ class Shipment extends Model
             return 'ok';
         }
 
-        $stageMeta = self::STAGES_PIPELINE[$this->stage_index] ?? null;
+        $pipeline = $this->stages_pipeline;
+        $stageMeta = $pipeline[$this->stage_index] ?? null;
         $targetHours = $stageMeta['sla_hours'] ?? 8;
 
         $elapsedHours = $this->updated_at ? now()->diffInHours($this->updated_at) : 0;
@@ -770,7 +820,8 @@ class Shipment extends Model
             ];
         }
 
-        return self::STAGES_PIPELINE[$idx] ?? self::STAGES_PIPELINE[0];
+        $pipeline = $this->stages_pipeline;
+        return $pipeline[$idx] ?? $pipeline[0];
     }
 
     /**

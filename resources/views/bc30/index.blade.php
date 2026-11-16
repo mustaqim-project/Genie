@@ -558,7 +558,7 @@
     'defaultAfterAction' => 'fill_bc_form',
     'title' => 'Buat Pengajuan Ekspor BC 3.0 (PEB)',
     'subtitle' => 'Unggah berkas kargo (Booking Confirmation, Commercial Invoice, Packing List). Sistem mengekstrak informasi dan membuat draft dokumen PEB BC 3.0 secara otomatis.',
-    'clients' => $clients,
-    'vendors' => $vendors
+    'clients' => $clients ?? \App\Models\Client::orderBy('name')->get(),
+    'vendors' => $vendors ?? \App\Models\ShippingVendor::orderBy('name')->get()
 ])
 @endsection

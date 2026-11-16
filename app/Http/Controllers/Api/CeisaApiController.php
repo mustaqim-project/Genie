@@ -241,7 +241,7 @@ class CeisaApiController extends Controller
         }
 
         // Single query
-        $query = $request->input('keyword') ?? $request->input('uraian') ?? $request->input('text') ?? $request->input('q') ?? '';
+        $query = $request->input('keyword') ?? $request->input('query') ?? $request->input('uraian') ?? $request->input('text') ?? $request->input('q') ?? '';
         if (empty(trim($query))) {
             return response()->json([
                 'success' => false,

@@ -313,7 +313,7 @@ window.bc30WizardManager = function bc30WizardManager() {
             this.btkiSearchLoading = true;
             this.btkiSearchOpen = true;
             try {
-                const res = await fetch('{{ route("bc20.recommend-hs") }}?query=' + encodeURIComponent(query));
+                const res = await fetch('{{ route("ceisa.hs-search") }}?q=' + encodeURIComponent(query));
                 const data = await res.json();
                 this.btkiSearchResults = data.data || [];
             } catch (err) {

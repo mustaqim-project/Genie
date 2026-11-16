@@ -70,6 +70,21 @@ class BC20Controller extends Controller implements HasMiddleware
 
     public function index(Request $request)
     {
+        // Pastikan seluruh proyek shipment impor tersinkronisasi memiliki entri dokumen pabean BC 2.0 (DRAFT / Terbit)
+        $unlinkedShipments = \App\Models\Shipment::where(function ($q) {
+            $q->where('jenis_layanan', 'IMPORT_BC20')
+                ->orWhere('jenis_layanan', 'IMPORT')
+                ->orWhereNull('jenis_layanan');
+        })->whereNull('ceisa_document_id')->get();
+
+        foreach ($unlinkedShipments as $shp) {
+            try {
+                $this->workflowService->generateCeisaDocFromShipment($shp);
+            } catch (\Throwable $e) {
+                // Abaikan jika berkas shipment belum lengkap, query tetap berjalan
+            }
+        }
+
         $query = CeisaDocument::where('jenis_dokumen', '20');
 
         if ($request->filled('search')) {

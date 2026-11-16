@@ -85,7 +85,7 @@ class ProjectTrackingController extends Controller implements HasMiddleware
         }
 
         // Perhitungan Executive KPI
-        $stages = Shipment::STAGES_PIPELINE;
+        $stages = ($direction === 'EXPORT') ? Shipment::STAGES_PIPELINE_EXPORT : Shipment::STAGES_PIPELINE;
         $totalActive = $allActiveShipments->count();
         $lateCount = $allActiveShipments->filter(fn($s) => $s->sla_status === 'late')->count();
         
@@ -314,7 +314,7 @@ class ProjectTrackingController extends Controller implements HasMiddleware
 
         $validated = $request->validate([
             'action' => 'nullable|in:toggle_flag,update_fields',
-            'field' => 'nullable|string|in:spjm,sppb,npd,dnp,nhi,odoo_synced,rekap_fisik',
+            'field' => 'nullable|string|in:spjm,sppb,npe,ppb,pkbe,npd,dnp,nhi,odoo_synced,rekap_fisik',
             'customs_channel' => 'nullable|in:HIJAU,KUNING,MERAH',
             'spjm_ticket' => 'nullable|string|max:100',
             'spjm_received_at' => 'nullable|date',
@@ -330,15 +330,50 @@ class ProjectTrackingController extends Controller implements HasMiddleware
 
         if (($validated['action'] ?? null) === 'toggle_flag' && !empty($validated['field'])) {
             $flag = $validated['field'];
-            if ($flag === 'spjm') {
+            $isExport = $shipment->is_export;
+
+            if ($flag === 'spjm' || $flag === 'ppb') {
                 $newVal = !$shipment->spjm_received;
-                $shipment->update([
+                $updateData = [
                     'spjm_received' => $newVal,
                     'customs_channel' => $newVal ? 'MERAH' : $shipment->customs_channel,
                     'spjm_received_at' => $newVal ? ($shipment->spjm_received_at ?? now()) : null,
-                ]);
-            } elseif ($flag === 'sppb') {
-                $shipment->update(['sppb_received' => !$shipment->sppb_received]);
+                ];
+                if ($newVal && $shipment->stage_index < 6) {
+                    $updateData['status_tahap'] = 'TRAFFIC_HOLD';
+                }
+                $shipment->update($updateData);
+
+            } elseif ($flag === 'sppb' || $flag === 'npe') {
+                $newVal = !$shipment->sppb_received;
+                $updateData = [
+                    'sppb_received' => $newVal,
+                ];
+
+                if ($newVal) {
+                    // Majukan state mesin ke Pos 7 (SPPB & Gate Out / NPE)
+                    $updateData['status_tahap'] = 'TRAFFIC_SPPB';
+                    if ($shipment->ceisaDocument) {
+                        $targetStatus = $isExport ? 'NPE' : 'SPPB';
+                        $shipment->ceisaDocument->update([
+                            'status' => $targetStatus,
+                            'nomor_sppb_npe' => $shipment->ceisaDocument->nomor_sppb_npe ?: ($isExport ? 'NPE-' . date('Ymd') . '-001' : 'SPPB-' . date('Ymd') . '-001'),
+                            'tanggal_sppb_npe' => $shipment->ceisaDocument->tanggal_sppb_npe ?: now(),
+                        ]);
+                    }
+                } else {
+                    // Rollback ke Pos 5 jika dicentang batal
+                    if ($shipment->status_tahap === 'TRAFFIC_SPPB') {
+                        $updateData['status_tahap'] = 'ARRIVED';
+                    }
+                }
+                $shipment->update($updateData);
+
+            } elseif ($flag === 'pkbe') {
+                $steps = $shipment->customs_hold_steps ?? [];
+                $steps['pkbe'] = !($steps['pkbe'] ?? false);
+                $shipment->update(['customs_hold_steps' => $steps]);
+
             } elseif ($flag === 'npd') {
                 $shipment->update(['npd_received' => !$shipment->npd_received]);
             } elseif ($flag === 'dnp') {
@@ -366,6 +401,14 @@ class ProjectTrackingController extends Controller implements HasMiddleware
             if (!empty($updatable['spjm_received_at']) || !empty($updatable['spjm_ticket'])) {
                 $updatable['spjm_received'] = true;
                 $updatable['customs_channel'] = $updatable['customs_channel'] ?? 'MERAH';
+                if ($shipment->stage_index < 6) {
+                    $updatable['status_tahap'] = 'TRAFFIC_HOLD';
+                }
+            }
+
+            // Jika tanggal delivery diisi, sinkronkan tahapan ke Pos 9 (POD & Closing)
+            if (!empty($updatable['delivery_date']) && $shipment->stage_index < 9) {
+                $updatable['status_tahap'] = 'DELIVERY';
             }
 
             $shipment->update($updatable);
