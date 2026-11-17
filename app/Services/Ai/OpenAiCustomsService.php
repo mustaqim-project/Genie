@@ -15,11 +15,114 @@ class OpenAiCustomsService
 
     public function __construct(CeisaHsCodeService $hsCodeService)
     {
-        $this->endpoint = rtrim(config('ai.endpoint', 'https://r4g77gv.abc-tunnel.us/v1'), '/');
-        $this->apiKey = config('ai.api_key', 'sk-59807b51bc76063d-ge0agt-97ac1590');
-        $this->defaultModel = config('ai.default_model', 'cx/gpt-6-astra');
-        $this->timeout = (int) config('ai.timeout', 60);
+        $dbEndpoint = class_exists(\App\Models\SystemSetting::class) ? \App\Models\SystemSetting::get('ai_endpoint') : null;
+        $dbApiKey = class_exists(\App\Models\SystemSetting::class) ? \App\Models\SystemSetting::get('ai_api_key') : null;
+        $dbModel = class_exists(\App\Models\SystemSetting::class) ? \App\Models\SystemSetting::get('ai_default_model') : null;
+        $dbTimeout = class_exists(\App\Models\SystemSetting::class) ? \App\Models\SystemSetting::get('ai_timeout') : null;
+
+        $this->endpoint = rtrim($dbEndpoint ?: config('ai.endpoint', 'https://r4g77gv.abc-tunnel.us/v1'), '/');
+        $this->apiKey = $dbApiKey ?: config('ai.api_key', 'sk-59807b51bc76063d-ge0agt-97ac1590');
+        $this->defaultModel = $dbModel ?: config('ai.default_model', 'cx/gpt-6-astra');
+        $this->timeout = (int) ($dbTimeout ?: config('ai.timeout', 60));
         $this->hsCodeService = $hsCodeService;
+    }
+
+    public function getEndpoint(): string
+    {
+        return $this->endpoint;
+    }
+
+    public function getApiKey(): string
+    {
+        return $this->apiKey;
+    }
+
+    public function getMaskedApiKey(): string
+    {
+        if (empty($this->apiKey)) {
+            return '';
+        }
+        $len = strlen($this->apiKey);
+        if ($len <= 8) {
+            return '********';
+        }
+        return substr($this->apiKey, 0, 4) . str_repeat('*', max(4, $len - 8)) . substr($this->apiKey, -4);
+    }
+
+    public function getProvider(): string
+    {
+        $dbProvider = class_exists(\App\Models\SystemSetting::class) ? \App\Models\SystemSetting::get('ai_provider') : null;
+        if ($dbProvider) {
+            return $dbProvider;
+        }
+
+        if (str_contains($this->endpoint, 'api.openai.com')) {
+            return 'openai';
+        } elseif (str_contains($this->endpoint, 'openrouter.ai')) {
+            return 'openrouter';
+        } elseif (str_contains($this->endpoint, 'googleapis.com')) {
+            return 'gemini';
+        } elseif (str_contains($this->endpoint, '9router') || str_contains($this->endpoint, 'abc-tunnel')) {
+            return '9router';
+        }
+        return 'custom';
+    }
+
+    public function testConnectionDirect(?string $testEndpoint = null, ?string $testApiKey = null, ?string $testModel = null): array
+    {
+        $url = rtrim($testEndpoint ?: $this->endpoint, '/') . '/chat/completions';
+        $key = $testApiKey ?: $this->apiKey;
+        $model = $testModel ?: $this->defaultModel;
+
+        $payload = [
+            'model' => $model,
+            'messages' => [
+                ['role' => 'system', 'content' => 'You are a test ping assistant. Respond strictly with JSON: {"status": "ok", "message": "Connection successful"}'],
+                ['role' => 'user', 'content' => 'ping']
+            ],
+            'temperature' => 0.1,
+            'max_tokens' => 50,
+        ];
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            "Authorization: Bearer {$key}",
+            "Content-Type: application/json",
+            "Accept: application/json",
+            "HTTP-Referer: http://127.0.0.1:9877",
+            "X-Title: GENIE Customs AI",
+        ]);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+        curl_close($ch);
+
+        if ($curlError) {
+            return ['success' => false, 'error' => "cURL Error: {$curlError}"];
+        }
+
+        if ($httpCode !== 200) {
+            $errData = json_decode((string) $response, true);
+            $errMsg = $errData['error']['message'] ?? substr(strip_tags((string) $response), 0, 300);
+            return ['success' => false, 'error' => "HTTP {$httpCode}: {$errMsg}"];
+        }
+
+        $json = json_decode($response, true);
+        $content = $json['choices'][0]['message']['content'] ?? 'OK';
+
+        return [
+            'success' => true,
+            'message' => 'Koneksi ke endpoint & model AI berhasil!',
+            'http_code' => $httpCode,
+            'model_used' => $model,
+            'response_sample' => $content,
+        ];
     }
 
     /**
@@ -29,7 +132,42 @@ class OpenAiCustomsService
      */
     public function getSupportedModels(): array
     {
-        return config('ai.models', []);
+        $provider = $this->getProvider();
+        $baseModels = match ($provider) {
+            'openai' => [
+                'gpt-4o' => ['id' => 'gpt-4o', 'name' => 'GPT-4o (Omni Flagship)', 'provider' => 'OpenAI', 'series' => 'GPT-4o', 'badge' => 'Recommended', 'description' => 'Model flagship OpenAI multimodal tercepat dan terakurat.', 'recommended' => true],
+                'gpt-4o-mini' => ['id' => 'gpt-4o-mini', 'name' => 'GPT-4o Mini (Fast & Efficient)', 'provider' => 'OpenAI', 'series' => 'GPT-4o', 'badge' => 'Fast', 'description' => 'Sangat cepat dan hemat token untuk packing list rutin.', 'recommended' => false],
+                'gpt-4-turbo' => ['id' => 'gpt-4-turbo', 'name' => 'GPT-4 Turbo', 'provider' => 'OpenAI', 'series' => 'GPT-4', 'badge' => 'High Context', 'description' => 'Mendukung konteks besar dokumen pabean komprehensif.', 'recommended' => false],
+                'o3-mini' => ['id' => 'o3-mini', 'name' => 'o3-mini (High Reasoning)', 'provider' => 'OpenAI', 'series' => 'o-Series', 'badge' => 'Reasoning', 'description' => 'Penalaran logis tinggi untuk komoditas kimia dan mesin rumit.', 'recommended' => false],
+            ],
+            'gemini' => [
+                'gemini-1.5-flash' => ['id' => 'gemini-1.5-flash', 'name' => 'Gemini 1.5 Flash', 'provider' => 'Google Gemini', 'series' => 'Gemini 1.5', 'badge' => 'Recommended', 'description' => 'Ekstraksi super cepat dengan konteks besar 1M token.', 'recommended' => true],
+                'gemini-1.5-pro' => ['id' => 'gemini-1.5-pro', 'name' => 'Gemini 1.5 Pro', 'provider' => 'Google Gemini', 'series' => 'Gemini 1.5', 'badge' => 'Deep Analysis', 'description' => 'Penalaran mendalam untuk perizinan lartas multi-kementerian.', 'recommended' => false],
+                'gemini-2.0-flash' => ['id' => 'gemini-2.0-flash', 'name' => 'Gemini 2.0 Flash', 'provider' => 'Google Gemini', 'series' => 'Gemini 2.0', 'badge' => 'Next-Gen', 'description' => 'Generasi terbaru Google Gemini multimodal ultra responsif.', 'recommended' => false],
+            ],
+            'openrouter' => [
+                'openai/gpt-4o' => ['id' => 'openai/gpt-4o', 'name' => 'OpenAI: GPT-4o', 'provider' => 'OpenRouter', 'series' => 'OpenAI', 'badge' => 'Flagship', 'description' => 'Akses resmi OpenAI GPT-4o via OpenRouter gateway.', 'recommended' => true],
+                'google/gemini-2.0-flash-exp:free' => ['id' => 'google/gemini-2.0-flash-exp:free', 'name' => 'Google: Gemini 2.0 Flash (Free)', 'provider' => 'OpenRouter', 'series' => 'Google', 'badge' => 'Free Tier', 'description' => 'Model gratis Gemini 2.0 Flash via OpenRouter.', 'recommended' => false],
+                'google/gemini-1.5-pro' => ['id' => 'google/gemini-1.5-pro', 'name' => 'Google: Gemini 1.5 Pro', 'provider' => 'OpenRouter', 'series' => 'Google', 'badge' => 'Deep Context', 'description' => 'Gemini 1.5 Pro via OpenRouter.', 'recommended' => false],
+                'anthropic/claude-3.5-sonnet' => ['id' => 'anthropic/claude-3.5-sonnet', 'name' => 'Anthropic: Claude 3.5 Sonnet', 'provider' => 'OpenRouter', 'series' => 'Anthropic', 'badge' => 'Top Quality', 'description' => 'Kemampuan ekstraksi dokumen dan tabel terdepan di dunia.', 'recommended' => false],
+                'deepseek/deepseek-chat' => ['id' => 'deepseek/deepseek-chat', 'name' => 'DeepSeek: V3 Chat', 'provider' => 'OpenRouter', 'series' => 'DeepSeek', 'badge' => 'Ultra Budget', 'description' => 'Performa tinggi dengan biaya token teramat murah.', 'recommended' => false],
+            ],
+            default => config('ai.models', []),
+        };
+
+        if (!empty($this->defaultModel) && !isset($baseModels[$this->defaultModel])) {
+            $baseModels[$this->defaultModel] = [
+                'id' => $this->defaultModel,
+                'name' => $this->defaultModel . ' (Aktif)',
+                'provider' => ucfirst($provider),
+                'series' => 'Custom',
+                'badge' => 'Active',
+                'description' => 'Model yang saat ini dikonfigurasi.',
+                'recommended' => true,
+            ];
+        }
+
+        return $baseModels;
     }
 
     /**
@@ -96,15 +234,22 @@ class OpenAiCustomsService
     public function chatCompletion(array $messages, ?string $model = null, float $temperature = 0.1): array
     {
         $requestedModel = $model ?: $this->defaultModel;
-        $fallbackChain = config('ai.fallback_models', [
-            'cx/gpt-6-astra',
-            'cx/gpt-5.6-terra',
-            'cx/gpt-6-astra-xhigh',
-            'cx/gpt-5.6-sol',
-            'cx/gpt-5.6-luna',
-            'ag/gemini-3.8-flash-high',
-            'ag/gemini-3.8-flash-low',
-        ]);
+        $provider = $this->getProvider();
+
+        $fallbackChain = match ($provider) {
+            'openai' => ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo'],
+            'gemini' => ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash'],
+            'openrouter' => ['openai/gpt-4o', 'google/gemini-2.0-flash-exp:free', 'openai/gpt-4o-mini'],
+            default => config('ai.fallback_models', [
+                'cx/gpt-6-astra',
+                'cx/gpt-5.6-terra',
+                'cx/gpt-6-astra-xhigh',
+                'cx/gpt-5.6-sol',
+                'cx/gpt-5.6-luna',
+                'ag/gemini-3.8-flash-high',
+                'ag/gemini-3.8-flash-low',
+            ]),
+        };
 
         // Prioritaskan model yang diminta di urutan pertama
         $modelsToTry = array_unique(array_merge([$requestedModel], $fallbackChain));

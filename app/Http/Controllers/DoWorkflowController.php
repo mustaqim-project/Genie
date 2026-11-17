@@ -72,7 +72,10 @@ class DoWorkflowController extends Controller implements HasMiddleware
 
         $emailLog = $this->workflowService->sendVendorEmailForDo($shipment, $customNotes);
 
-        return back()->with('success', "Permintaan invoice pelayaran berhasil dikirimkan via email ke [{$shipment->shippingVendor->name} - {$shipment->shippingVendor->email}]. Status diperbarui ke DO_REQUESTED.");
+        $vendorName = $shipment->shippingVendor?->name ?? ($shipment->nama_kapal ? "Pelayaran ({$shipment->nama_kapal})" : 'Pelayaran');
+        $recipientEmail = $emailLog['recipient'] ?? ($shipment->shippingVendor?->pic_email ?? $shipment->do_email_recipient ?? 'Vendor Pelayaran');
+
+        return back()->with('success', "Permintaan invoice pelayaran berhasil dikirimkan via email ke [{$vendorName} - {$recipientEmail}]. Status diperbarui ke DO_PROCESSING.");
     }
 
     /**

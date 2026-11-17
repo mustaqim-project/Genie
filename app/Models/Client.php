@@ -32,6 +32,14 @@ class Client extends Model
         'is_active' => 'boolean',
     ];
 
+    /**
+     * Alias atribut nama_perusahaan untuk kompatibilitas MoM ERP
+     */
+    public function getNamaPerusahaanAttribute(): string
+    {
+        return $this->name ?? '';
+    }
+
     public function shipments()
     {
         return $this->hasMany(Shipment::class);
@@ -47,8 +55,23 @@ class Client extends Model
         return $this->hasMany(ClientInvoice::class);
     }
 
-    public function getNamaPerusahaanAttribute(): string
+    public function deposits()
     {
-        return $this->name ?? '';
+        return $this->hasMany(ClientDeposit::class)->latest('tanggal');
+    }
+
+    public function depositUsages()
+    {
+        return $this->hasMany(ClientDepositUsage::class)->latest('tanggal');
+    }
+
+    public function hsCodes()
+    {
+        return $this->hasMany(ClientHsCode::class)->latest('created_at');
+    }
+
+    public function getSaldoDepositAktifAttribute(): float
+    {
+        return (float) $this->deposits()->where('status', 'CONFIRMED')->sum('saldo_sisa');
     }
 }

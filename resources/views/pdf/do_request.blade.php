@@ -245,9 +245,9 @@
         <div style="margin-bottom: 14px;">
             Kepada Yth.<br>
             <strong>Bagian Customer Service / Import DO Release</strong><br>
-            <strong>{{ $shipment->shippingVendor->name ?? 'PT MAERSK INDONESIA' }}</strong><br>
-            <span>{{ $shipment->shippingVendor->address ?? 'Wisma 46 Kota BNI Lt. 35, Jl. Jend. Sudirman Kav. 1, Jakarta Pusat' }}</span><br>
-            <span>Email: {{ $shipment->shippingVendor->email ?? 'id.import@maersk.com' }}</span>
+            <strong>{{ $shipment->shippingVendor?->name ?? 'PT MAERSK INDONESIA' }}</strong><br>
+            <span>{{ $shipment->shippingVendor?->address ?? 'Wisma 46 Kota BNI Lt. 35, Jl. Jend. Sudirman Kav. 1, Jakarta Pusat' }}</span><br>
+            <span>Email: {{ $shipment->shippingVendor?->pic_email ?? ($shipment->shippingVendor?->email ?? ($shipment->do_email_recipient ?? 'id.import@maersk.com')) }}</span>
         </div>
 
         <!-- Salam & Paragraf Pembuka -->

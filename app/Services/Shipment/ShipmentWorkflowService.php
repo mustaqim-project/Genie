@@ -849,6 +849,10 @@ class ShipmentWorkflowService
             $updateData['trucking_vendor_reason'] = $extra['trucking_vendor_reason'];
         }
 
+        if (isset($extra['trucking_vendor_name'])) {
+            $updateData['trucking_vendor_name'] = $extra['trucking_vendor_name'];
+        }
+
         if (isset($extra['traffic_notes'])) {
             $updateData['catatan'] = $extra['traffic_notes'];
         }

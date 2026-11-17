@@ -2,6 +2,32 @@
 
 @section('title', 'Tracking Project & Workflow 11 Pos')
 
+@push('styles')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<style>
+    .leaflet-popup-content-wrapper {
+        border-radius: 12px;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+    }
+    .leaflet-container {
+        font-family: inherit;
+    }
+    @keyframes radar-ping {
+        75%, 100% {
+            transform: scale(2.2);
+            opacity: 0;
+        }
+    }
+    .animate-radar-ping {
+        animation: radar-ping 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+</style>
+@endpush
+
+@push('scripts')
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+@endpush
+
 @section('content')
 <div class="max-w-[1440px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12">
 
@@ -173,6 +199,35 @@
                         @endif
                     </a>
                 </div>
+
+                <!-- Filter Prioritas Kerja (Low, Medium, High, Urgent) - Sesuai MoM Poin 10 -->
+                <div class="inline-flex p-1 bg-black/[0.04] dark:bg-white/[0.06] rounded-[10px]">
+                    <a href="{{ route('core.tracking.index', array_merge(request()->query(), ['priority' => ''])) }}"
+                       class="px-2 py-1.5 rounded-[8px] text-[11px] font-semibold transition-all {{ !request('priority') ? 'bg-white dark:bg-[#2C2C2E] text-black dark:text-white shadow-sm' : 'text-black/50' }}">
+                        Prioritas: Semua
+                    </a>
+                    <a href="{{ route('core.tracking.index', array_merge(request()->query(), ['priority' => 'URGENT'])) }}"
+                       class="px-2 py-1.5 rounded-[8px] text-[11px] font-bold transition-all {{ request('priority') == 'URGENT' ? 'bg-rose-600 text-white shadow-sm' : 'text-rose-600 dark:text-rose-400' }}"
+                       title="Prioritas Urgent (Free time sisa <= 1 hari / SPJM Hold)">
+                        Urgent
+                    </a>
+                    <a href="{{ route('core.tracking.index', array_merge(request()->query(), ['priority' => 'HIGH'])) }}"
+                       class="px-2 py-1.5 rounded-[8px] text-[11px] font-bold transition-all {{ request('priority') == 'HIGH' ? 'bg-amber-500 text-white shadow-sm' : 'text-amber-600 dark:text-amber-400' }}"
+                       title="Prioritas High (Jalur Merah / Free time sisa <= 3 hari)">
+                        High
+                    </a>
+                    <a href="{{ route('core.tracking.index', array_merge(request()->query(), ['priority' => 'MEDIUM'])) }}"
+                       class="px-2 py-1.5 rounded-[8px] text-[11px] font-semibold transition-all {{ request('priority') == 'MEDIUM' ? 'bg-blue-600 text-white shadow-sm' : 'text-blue-600 dark:text-blue-400' }}">
+                        Medium
+                    </a>
+                </div>
+
+                <!-- Filter Overdue Deadline - Sesuai MoM Poin 10 -->
+                <a href="{{ route('core.tracking.index', array_merge(request()->query(), ['overdue' => request('overdue') == '1' ? '' : '1'])) }}"
+                   class="px-2.5 py-1.5 rounded-[10px] text-[11px] font-bold transition-all flex items-center gap-1.5 border {{ request('overdue') == '1' ? 'bg-rose-50 border-rose-300 text-rose-700 dark:bg-rose-950/40 dark:border-rose-800 dark:text-rose-300' : 'bg-black/[0.04] dark:bg-white/[0.06] border-transparent text-slate-600 dark:text-slate-400 hover:text-rose-600' }}">
+                    <i data-lucide="clock-alert" class="w-3.5 h-3.5 text-rose-500"></i>
+                    <span>Hanya Overdue</span>
+                </a>
             </div>
 
             <!-- Search Form -->
@@ -227,13 +282,30 @@
                         $photoCount = $s->inspectionPhotos->count();
                         $ceisa = $s->ceisaDocument;
                     @endphp
-                    <tr class="hover:bg-black/[0.015] dark:hover:bg-white/[0.02] transition-colors whitespace-nowrap group">
+                    <tr class="hover:bg-black/[0.015] dark:hover:bg-white/[0.02] transition-colors whitespace-nowrap group {{ $s->is_overdue ? 'bg-rose-50/20 dark:bg-rose-950/10' : '' }}">
                         <td class="py-2.5 px-3 sticky left-0 z-20 bg-white dark:bg-[#1C1C1E] group-hover:bg-[#F9F9FA] dark:group-hover:bg-[#202022] border-b border-r border-black/5 dark:border-white/5 shadow-[4px_0_8px_rgba(0,0,0,0.04)] whitespace-nowrap table-freeze-left">
                             <div class="flex items-center gap-2 whitespace-nowrap">
                                 <span class="text-[10px] font-mono text-black/40 dark:text-white/40 w-4 text-center shrink-0">{{ $rowIdx + 1 }}</span>
                                 <span class="px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0 {{ $isExport ? 'bg-[#AF52DE]/15 text-[#AF52DE]' : 'bg-[#0284c7]/15 text-[#0284c7]' }}">
                                     {{ $isExport ? 'EXP' : 'IMP' }}
                                 </span>
+                                <!-- Priority Indicator Badge (Sesuai MoM Poin 10) -->
+                                @php
+                                    $priLevel = $s->priority_level;
+                                @endphp
+                                @if($priLevel === 'URGENT')
+                                    <span class="px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-rose-600 text-white animate-pulse" title="Prioritas Sangat Mendesak!">URGENT</span>
+                                @elseif($priLevel === 'HIGH')
+                                    <span class="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider bg-amber-500 text-white" title="Prioritas Tinggi">HIGH</span>
+                                @endif
+
+                                @if($s->is_overdue)
+                                    <span class="px-1 py-0.5 rounded text-[8px] font-bold bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300 flex items-center gap-0.5" title="Pekerjaan Melebihi Batas Waktu / SLA Overdue!">
+                                        <i data-lucide="clock-alert" class="w-2.5 h-2.5"></i>
+                                        <span>OVERDUE</span>
+                                    </span>
+                                @endif
+
                                 <a href="{{ route('core.document.show', $s->id) }}" class="font-bold text-black dark:text-white hover:text-[#0284c7] whitespace-nowrap">
                                     {{ $s->client?->name ?? 'N/A' }}
                                 </a>
@@ -264,10 +336,45 @@
                             </div>
                         </td>
                         <td class="py-2.5 px-3 border-b border-black/5 dark:border-white/5 whitespace-nowrap">
-                            <div class="font-medium text-black dark:text-white whitespace-nowrap">{{ $s->nama_kapal ?: '-' }}</div>
-                            <div class="text-[10px] text-black/50 dark:text-white/50 whitespace-nowrap">
-                                {{ $s->shippingVendor?->name ?? '-' }} {{ $s->voyage_no ? '/ ' . $s->voyage_no : '' }}
+                            @php
+                                $isAir = $s->is_air_freight;
+                                $etaInfo = $s->eta_status_info;
+                            @endphp
+                            <div class="flex items-center gap-1.5 whitespace-nowrap">
+                                <i data-lucide="{{ $isAir ? 'plane' : 'anchor' }}" class="w-3.5 h-3.5 {{ $isAir ? 'text-indigo-600 dark:text-indigo-400' : 'text-[#0284c7]' }} shrink-0"></i>
+                                <span class="font-semibold text-black dark:text-white whitespace-nowrap">
+                                    {{ $s->nama_kapal ?: ($isAir ? 'Penerbangan' : 'Kapal Belum Diset') }}
+                                </span>
+                                @if($s->voyage_no)
+                                    <span class="px-1.5 py-0.2 rounded bg-black/5 dark:bg-white/10 font-mono text-[9px] text-black/60 dark:text-white/60">
+                                        {{ $s->voyage_no }}
+                                    </span>
+                                @endif
                             </div>
+                            <div class="text-[10px] text-black/50 dark:text-white/50 whitespace-nowrap mt-0.5">
+                                {{ $s->shippingVendor?->name ?? 'Carrier Belum Diset' }}
+                            </div>
+                            <button type="button"
+                                    onclick="openVesselTrackingModal(
+                                        '{{ $s->id }}',
+                                        '{{ $s->shipment_number ?? $s->project_no }}',
+                                        '{{ addslashes($s->nama_kapal ?? '') }}',
+                                        '{{ addslashes($s->voyage_no ?? '') }}',
+                                        '{{ $s->shipping_vendor_id ?? '' }}',
+                                        '{{ addslashes($s->nomor_bl_awb ?? '') }}',
+                                        '{{ addslashes($s->pelabuhan_muat ?? '') }}',
+                                        '{{ addslashes($s->pelabuhan_bongkar ?? '') }}',
+                                        '{{ addslashes($s->tps_location ?? '') }}',
+                                        '{{ $s->eta_date ? $s->eta_date->format('Y-m-d\TH:i') : '' }}',
+                                        '{{ $s->actual_arrival_date ? $s->actual_arrival_date->format('Y-m-d\TH:i') : '' }}',
+                                        '{{ addslashes($s->catatan ?? '') }}',
+                                        {{ $isAir ? 'true' : 'false' }},
+                                        {{ json_encode($s->tracking_links) }}
+                                    )"
+                                    class="inline-flex items-center gap-1 text-[10px] font-semibold text-[#0284c7] hover:underline cursor-pointer mt-0.5">
+                                <i data-lucide="radar" class="w-3 h-3 text-[#0284c7]"></i>
+                                <span>Live Radar AIS &rarr;</span>
+                            </button>
                         </td>
                         <td class="py-2.5 px-3 border-b border-black/5 dark:border-white/5 whitespace-nowrap">
                             <div class="text-[10px] text-black/70 dark:text-white/70 whitespace-nowrap">{{ $s->pelabuhan_muat ?: '-' }}</div>
@@ -282,10 +389,46 @@
                             </div>
                         </td>
                         <td class="py-2.5 px-3 text-center font-mono border-b border-black/5 dark:border-white/5 whitespace-nowrap">
-                            <div>{{ $s->eta_date?->format('d/m/y') ?: '-' }}</div>
-                            @if($s->etd_date)
-                            <div class="text-[9px] text-black/45 dark:text-white/45 whitespace-nowrap">ETD {{ $s->etd_date->format('d/m/y') }}</div>
-                            @endif
+                            <button type="button"
+                                    onclick="openVesselTrackingModal(
+                                        '{{ $s->id }}',
+                                        '{{ $s->shipment_number ?? $s->project_no }}',
+                                        '{{ addslashes($s->nama_kapal ?? '') }}',
+                                        '{{ addslashes($s->voyage_no ?? '') }}',
+                                        '{{ $s->shipping_vendor_id ?? '' }}',
+                                        '{{ addslashes($s->nomor_bl_awb ?? '') }}',
+                                        '{{ addslashes($s->pelabuhan_muat ?? '') }}',
+                                        '{{ addslashes($s->pelabuhan_bongkar ?? '') }}',
+                                        '{{ addslashes($s->tps_location ?? '') }}',
+                                        '{{ $s->eta_date ? $s->eta_date->format('Y-m-d\TH:i') : '' }}',
+                                        '{{ $s->actual_arrival_date ? $s->actual_arrival_date->format('Y-m-d\TH:i') : '' }}',
+                                        '{{ addslashes($s->catatan ?? '') }}',
+                                        {{ $isAir ? 'true' : 'false' }},
+                                        {{ json_encode($s->tracking_links) }}
+                                    )"
+                                    class="block mx-auto text-left cursor-pointer group"
+                                    title="Klik untuk melihat live radar & mengatur jadwal ETA / konfirmasi sandar">
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-semibold font-mono {{ $etaInfo['badge_class'] }}">
+                                    @if($etaInfo['is_arrived'])
+                                        <i data-lucide="check-circle" class="w-2.5 h-2.5 text-emerald-600"></i>
+                                    @elseif($etaInfo['status'] === 'TODAY')
+                                        <i data-lucide="clock" class="w-2.5 h-2.5 text-amber-600"></i>
+                                    @elseif($etaInfo['status'] === 'OVERDUE')
+                                        <i data-lucide="alert-triangle" class="w-2.5 h-2.5 text-rose-600"></i>
+                                    @else
+                                        <i data-lucide="navigation" class="w-2.5 h-2.5 text-sky-600"></i>
+                                    @endif
+                                    <span>{{ $etaInfo['label'] }}</span>
+                                </span>
+                                <div class="font-bold text-black dark:text-white text-[11px] mt-0.5 group-hover:text-[#0284c7] transition-colors">
+                                    {{ $s->eta_date?->format('d/m/y') ?: '-' }}
+                                </div>
+                                @if($s->actual_arrival_date)
+                                    <div class="text-[9px] text-emerald-600 dark:text-emerald-400 font-semibold">ATA {{ $s->actual_arrival_date->format('d/m H:i') }}</div>
+                                @elseif($s->etd_date)
+                                    <div class="text-[9px] text-black/45 dark:text-white/45">ETD {{ $s->etd_date->format('d/m/y') }}</div>
+                                @endif
+                            </button>
                         </td>
                         <td class="py-2.5 px-3 border-b border-black/5 dark:border-white/5 whitespace-nowrap">
                             <div class="font-mono text-[10px] font-semibold text-black dark:text-white whitespace-nowrap">
@@ -432,6 +575,67 @@
                                 </a>
                                 @endif
                             @endif
+                            <button type="button"
+                                    onclick="openVesselTrackingModal(
+                                        '{{ $s->id }}',
+                                        '{{ $s->shipment_number ?? $s->project_no }}',
+                                        '{{ addslashes($s->nama_kapal ?? '') }}',
+                                        '{{ addslashes($s->voyage_no ?? '') }}',
+                                        '{{ $s->shipping_vendor_id ?? '' }}',
+                                        '{{ addslashes($s->nomor_bl_awb ?? '') }}',
+                                        '{{ addslashes($s->pelabuhan_muat ?? '') }}',
+                                        '{{ addslashes($s->pelabuhan_bongkar ?? '') }}',
+                                        '{{ addslashes($s->tps_location ?? '') }}',
+                                        '{{ $s->eta_date ? $s->eta_date->format('Y-m-d\TH:i') : '' }}',
+                                        '{{ $s->actual_arrival_date ? $s->actual_arrival_date->format('Y-m-d\TH:i') : '' }}',
+                                        '{{ addslashes($s->catatan ?? '') }}',
+                                        {{ $s->is_air_freight ? 'true' : 'false' }},
+                                        {{ json_encode($s->tracking_links) }}
+                                    )"
+                                    class="inline-flex items-center gap-1 px-2 py-1 rounded-[7px] text-[10px] font-semibold bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 hover:bg-[#0284c7] hover:text-white transition-colors mr-1 cursor-pointer whitespace-nowrap"
+                                    title="Live Tracking Radar AIS & Atur ETA">
+                                <i data-lucide="radar" class="w-3 h-3"></i>
+                                <span>Radar</span>
+                            </button>
+                            <!-- Dropdown Cetak Surat Jalan (4 Template Resmi MoM) -->
+                            <div class="relative inline-block text-left" x-data="{ open: false }">
+                                <button type="button" 
+                                        @click="open = !open" 
+                                        @click.away="open = false"
+                                        class="inline-flex items-center gap-0.5 px-2 py-1 rounded-[7px] text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-600 hover:text-white transition-colors mr-1 cursor-pointer whitespace-nowrap"
+                                        title="Cetak Surat Jalan Resmi (4 Template)">
+                                    <i data-lucide="printer" class="w-3 h-3"></i>
+                                    <span>SJ</span>
+                                    <i data-lucide="chevron-down" class="w-2.5 h-2.5 opacity-60"></i>
+                                </button>
+                                <div x-show="open" 
+                                     x-cloak
+                                     class="origin-top-right absolute right-0 mt-1 w-56 rounded-xl shadow-xl bg-white dark:bg-[#2C2C2E] border border-black/10 dark:border-white/10 z-50 py-1 text-left text-xs divide-y divide-slate-100 dark:divide-white/5">
+                                    <div class="px-2.5 py-1 text-[9px] font-bold text-slate-400 uppercase tracking-wider">
+                                        Pilih Template Surat Jalan:
+                                    </div>
+                                    <a href="{{ route('pdf.surat-jalan', $s->id) }}?template=fcl" target="_blank"
+                                       class="flex items-center gap-2 px-2.5 py-1.5 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5">
+                                        <i data-lucide="container" class="w-3.5 h-3.5 text-blue-500 shrink-0"></i>
+                                        <span>1. Kontainer FCL</span>
+                                    </a>
+                                    <a href="{{ route('pdf.surat-jalan', $s->id) }}?template=lcl" target="_blank"
+                                       class="flex items-center gap-2 px-2.5 py-1.5 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5">
+                                        <i data-lucide="package" class="w-3.5 h-3.5 text-amber-500 shrink-0"></i>
+                                        <span>2. LCL / Air Freight</span>
+                                    </a>
+                                    <a href="{{ route('pdf.surat-jalan', $s->id) }}?template=inter_factory" target="_blank"
+                                       class="flex items-center gap-2 px-2.5 py-1.5 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5">
+                                        <i data-lucide="factory" class="w-3.5 h-3.5 text-emerald-500 shrink-0"></i>
+                                        <span>3. Antar Pabrik KB</span>
+                                    </a>
+                                    <a href="{{ route('pdf.surat-jalan', $s->id) }}?template=empty_depo" target="_blank"
+                                       class="flex items-center gap-2 px-2.5 py-1.5 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5">
+                                        <i data-lucide="archive-restore" class="w-3.5 h-3.5 text-purple-500 shrink-0"></i>
+                                        <span>4. Empty Depo Return</span>
+                                    </a>
+                                </div>
+                            </div>
                             <button type="button"
                                     data-tracking="{{ htmlspecialchars(json_encode($editPayload), ENT_QUOTES, 'UTF-8') }}"
                                     onclick="openTrackingEditModal(this)"
@@ -891,7 +1095,613 @@
     </div>
 </div>
 
+<!-- Modal Live Tracking Pelayaran & Penerbangan (Monitoring ETA Pos 5) -->
+<div id="modal-vessel-tracking" class="hidden fixed inset-0 z-[200] overflow-y-auto bg-black/60 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="app-modal-dialog app-modal-dialog-lg rounded-t-[20px] sm:rounded-[20px] bg-white dark:bg-[#1C1C1E] border border-black/10 dark:border-white/10 shadow-2xl p-6 text-[13px] transform transition-all max-w-2xl w-full max-h-[92vh] overflow-y-auto space-y-4">
+        
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between pb-3 border-b border-black/5 dark:border-white/5">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-[#0284c7]/10 text-[#0284c7] flex items-center justify-center shrink-0">
+                    <i data-lucide="radar" class="w-5 h-5 text-[#0284c7]"></i>
+                </div>
+                <div>
+                    <h3 class="text-[16px] font-bold text-black dark:text-white flex items-center gap-2">
+                        <span>Live Tracking Pelayaran &amp; Penerbangan</span>
+                    </h3>
+                    <p class="text-[11px] text-black/50 dark:text-white/50" id="trk_modal_subtitle">
+                        Monitoring posisi armada, konfirmasi jadwal kedatangan (ETA) &amp; waktu sandar (ATA)
+                    </p>
+                </div>
+            </div>
+            <button type="button" onclick="document.getElementById('modal-vessel-tracking').classList.add('hidden')" class="p-1 rounded-[8px] text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white hover:bg-black/[0.05] dark:hover:bg-white/[0.08] transition-colors cursor-pointer">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <!-- 1. LIVE RADAR SATELLITE INTERACTIVE MAP (LEAFLET ENGINE) -->
+        <div class="space-y-2">
+            <div class="relative rounded-2xl overflow-hidden border border-slate-700/70 shadow-lg bg-slate-950">
+                <!-- Map Leaflet Canvas -->
+                <div id="vessel_live_leaflet_map" class="w-full h-[250px] bg-slate-950" style="z-index: 1;"></div>
+                
+                <!-- Map Top-Left Overlay Pill: Status Live Sensor -->
+                <div class="absolute top-2.5 left-2.5 z-[10] flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/90 backdrop-blur-md border border-white/10 text-white shadow-lg">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="font-mono text-[10px] font-bold tracking-wider text-emerald-300" id="radar_overlay_mode_badge">LIVE AIS RADAR</span>
+                </div>
+
+                <!-- Map Top-Right Button: Re-Ping Transponder -->
+                <div class="absolute top-2.5 right-2.5 z-[10]">
+                    <button type="button" 
+                            id="btn_live_detect_arrival" 
+                            onclick="triggerLiveArrivalDetection()" 
+                            class="px-3 py-1 rounded-full bg-slate-900/90 hover:bg-slate-800 text-sky-400 hover:text-white backdrop-blur-md border border-white/10 text-[11px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-lg active:scale-95">
+                        <i data-lucide="radio" class="w-3.5 h-3.5" id="icon_live_detect_btn"></i>
+                        <span id="text_live_detect_btn">Re-Ping Posisi</span>
+                    </button>
+                </div>
+
+                <!-- Map Bottom Overlay: Lokasi Terkini & Koordinat Geografis -->
+                <div class="absolute bottom-2.5 left-2.5 right-2.5 z-[10] flex items-center justify-between px-3.5 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md border border-white/10 text-white text-[11px] shadow-lg">
+                    <div class="flex items-center gap-2 truncate">
+                        <i data-lucide="map-pin" class="w-3.5 h-3.5 text-rose-400 shrink-0"></i>
+                        <span class="font-semibold text-slate-200 truncate" id="radar_overlay_location_label">Mendeteksi koordinat kapal/pesawat...</span>
+                    </div>
+                    <div class="font-mono text-[10px] text-sky-300 shrink-0 ml-2 font-bold" id="radar_overlay_coordinates">Scanning transponder...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. KARTU TELEMETRI STATUS SARANA PENGANGKUT (Apple HIG Glassmorphism) -->
+        <div id="box_live_detect_result" class="p-4 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 text-white space-y-3.5 border border-indigo-900/60 shadow-md">
+            <!-- Header Kartu: Status Operasional & Badge -->
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2.5">
+                    <div id="res_live_icon_container" class="w-9 h-9 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center shrink-0 border border-sky-400/20">
+                        <i data-lucide="ship" class="w-4 h-4" id="res_live_type_icon"></i>
+                    </div>
+                    <div>
+                        <div class="font-bold text-[13px] sm:text-sm text-white flex items-center gap-2" id="res_live_status_title">
+                            <span>Mendeteksi Lokasi &amp; Status Armada...</span>
+                        </div>
+                        <div class="text-[11px] text-slate-300" id="res_live_explanation">
+                            Menghubungi satelit AIS &amp; transponder pelayaran internasional...
+                        </div>
+                    </div>
+                </div>
+                <span id="res_live_badge" class="px-2.5 py-1 rounded-full text-[10px] font-bold font-mono bg-sky-500/20 text-sky-300 border border-sky-500/40">
+                    Scanning Radar
+                </span>
+            </div>
+
+            <!-- Progress Perjalanan: Origin -> Current Position -> Destination -->
+            <div class="space-y-1.5 pt-0.5">
+                <div class="flex items-center justify-between text-[11px] font-medium text-slate-300">
+                    <span class="flex items-center gap-1.5" id="res_live_origin_label">
+                        <i data-lucide="anchor" class="w-3 h-3 text-sky-400"></i>
+                        <span class="truncate max-w-[130px] sm:max-w-[200px]" id="res_origin_text">POL (Pelabuhan Muat)</span>
+                    </span>
+                    <span class="font-mono text-emerald-400 font-bold" id="res_live_progress_text">Progress --%</span>
+                    <span class="flex items-center gap-1.5 justify-end" id="res_live_dest_label">
+                        <span class="truncate max-w-[130px] sm:max-w-[200px]" id="res_dest_text">POD (Tujuan)</span>
+                        <i data-lucide="map-pin" class="w-3 h-3 text-emerald-400"></i>
+                    </span>
+                </div>
+                <div class="w-full h-2 rounded-full bg-slate-800/90 overflow-hidden border border-white/10">
+                    <div id="res_live_progress_bar" class="h-full bg-gradient-to-r from-sky-500 via-indigo-500 to-emerald-400 transition-all duration-700 rounded-full" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- 4 Indikator Telemetri Kunci -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-0.5 font-mono text-[11px]">
+                <div class="p-2.5 rounded-xl bg-white/[0.04] border border-white/5">
+                    <div class="text-slate-400 text-[10px]">Sarana Pengangkut</div>
+                    <div id="res_live_vessel_name" class="font-bold text-white truncate">-</div>
+                </div>
+                <div class="p-2.5 rounded-xl bg-white/[0.04] border border-white/5">
+                    <div class="text-slate-400 text-[10px]">Kecepatan Terkini</div>
+                    <div id="res_live_speed" class="font-bold text-sky-300">-</div>
+                </div>
+                <div class="p-2.5 rounded-xl bg-white/[0.04] border border-white/5">
+                    <div class="text-slate-400 text-[10px]">Sisa Jarak ke Tujuan</div>
+                    <div id="res_live_dist" class="font-bold text-indigo-300">-</div>
+                </div>
+                <div class="p-2.5 rounded-xl bg-white/[0.04] border border-white/5">
+                    <div class="text-slate-400 text-[10px]">Estimasi Tiba (ETA)</div>
+                    <div id="res_live_eta" class="font-bold text-emerald-400 truncate">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. TAUTAN CADANGAN RADAR SATELLITE (MarineTraffic, VesselFinder, dll) -->
+        <details class="group rounded-xl border border-black/10 dark:border-white/10 bg-slate-50/60 dark:bg-white/[0.02] p-3 text-xs">
+            <summary class="font-semibold text-black dark:text-white cursor-pointer flex items-center justify-between select-none">
+                <span class="flex items-center gap-1.5 text-sky-600 dark:text-sky-400">
+                    <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                    <span>Tautan Satelit Eksternal (MarineTraffic, VesselFinder, Official Carrier)</span>
+                </span>
+                <span class="text-[10px] text-black/40 dark:text-white/40 group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-2.5" id="trk_radar_buttons_container">
+                <!-- Dynamic Radar Buttons generated by JS -->
+            </div>
+        </details>
+
+        <!-- Form Update Data Tracking & Tanggal ETA/ATA -->
+        <form id="form-vessel-tracking" action="" method="POST" class="space-y-4">
+            @csrf
+
+            <!-- Toggle Pilihan Moda: Pelayaran (Sea) vs Penerbangan (Air) -->
+            <div>
+                <label class="block font-semibold text-black dark:text-white mb-1.5 text-[12px]">Moda Pengangkutan Utama</label>
+                <div class="grid grid-cols-2 gap-2 text-xs font-semibold">
+                    <button type="button" id="trk_btn_mode_sea" onclick="switchTrkMode(false)" class="p-2.5 rounded-xl border flex items-center justify-center gap-2 transition-all cursor-pointer">
+                        <i data-lucide="anchor" class="w-4 h-4"></i>
+                        <span>Pelayaran (Laut / Kapal)</span>
+                    </button>
+                    <button type="button" id="trk_btn_mode_air" onclick="switchTrkMode(true)" class="p-2.5 rounded-xl border flex items-center justify-center gap-2 transition-all cursor-pointer">
+                        <i data-lucide="plane" class="w-4 h-4"></i>
+                        <span>Penerbangan (Udara / Pesawat)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Identitas Sarana Pengangkut -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]" id="trk_lbl_vessel">Nama Kapal / Sarana Pengangkut</label>
+                    <input type="text" name="nama_kapal" id="trk_input_vessel" required placeholder="Contoh: MV WAN HAI 315 atau EVER GIVEN" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]">
+                </div>
+                <div>
+                    <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]" id="trk_lbl_voyage">Nomor Voyage / Flight No</label>
+                    <input type="text" name="voyage_no" id="trk_input_voyage" placeholder="Contoh: 042N atau GA-872" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] font-mono focus:outline-none focus:border-[#0284c7]">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Pelayaran / Maskapai (Carrier)</label>
+                    <select name="shipping_vendor_id" id="trk_input_vendor_id" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]">
+                        <option value="">-- Pilih Vendor Pelayaran / Airline --</option>
+                        @if(isset($shippingVendors))
+                            @foreach($shippingVendors as $v)
+                                <option value="{{ $v->id }}">{{ $v->name }} {{ $v->code ? '[' . $v->code . ']' : '' }}</option>
+                            @endforeach
+                        @endif
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Nomor B/L atau Master AWB</label>
+                    <input type="text" name="nomor_bl_awb" id="trk_input_bl" placeholder="Contoh: WHS1029384 atau 126-98765432" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] font-mono focus:outline-none focus:border-[#0284c7]">
+                </div>
+            </div>
+
+            <!-- Rute Muat & Bongkar + Lokasi Terminal TPS -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                    <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Pelabuhan Muat (POL)</label>
+                    <input type="text" name="pelabuhan_muat" id="trk_input_pol" placeholder="Misal: SHANGHAI (CNSHA)" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]">
+                </div>
+                <div>
+                    <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Pelabuhan Bongkar (POD)</label>
+                    <input type="text" name="pelabuhan_bongkar" id="trk_input_pod" placeholder="Misal: TANJUNG PRIOK (IDTPP)" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]">
+                </div>
+                <div>
+                    <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Terminal TPS / Dermaga</label>
+                    <input type="text" name="tps_location" id="trk_input_tps" placeholder="Misal: JICT 1, Koja, NPCT 1, Soetta Cargo" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] focus:outline-none focus:border-[#0284c7]">
+                </div>
+            </div>
+
+            <!-- Jadwal Kedatangan: ETA & ATA -->
+            <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-black/10 dark:border-white/10 space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="font-bold text-black dark:text-white text-[12px] flex items-center gap-1.5">
+                                <i data-lucide="calendar" class="w-3.5 h-3.5 text-[#0284c7]"></i>
+                                <span>Perkiraan Waktu Tiba (ETA)</span>
+                            </label>
+                            <span class="text-[10px] text-slate-400">Jadwal Est.</span>
+                        </div>
+                        <input type="datetime-local" name="eta_date" id="trk_input_eta" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] font-mono focus:outline-none focus:border-[#0284c7]">
+                    </div>
+
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="font-bold text-black dark:text-white text-[12px] flex items-center gap-1.5">
+                                <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600"></i>
+                                <span>Kedatangan Aktual (ATA / Sandar)</span>
+                            </label>
+                            <button type="button" onclick="setArrivalNow()" class="text-[10px] font-semibold text-emerald-600 hover:text-emerald-700 hover:underline cursor-pointer">
+                                + Tiba / Sandar Sekarang
+                            </button>
+                        </div>
+                        <input type="datetime-local" name="actual_arrival_date" id="trk_input_ata" class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[13px] font-mono focus:outline-none focus:border-[#0284c7]">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Catatan Lapangan / Posisi Terakhir -->
+            <div>
+                <label class="block font-semibold text-black dark:text-white mb-1 text-[12px]">Catatan Posisi Kargo / Info Pelayaran</label>
+                <textarea name="catatan" id="trk_input_notes" rows="2" placeholder="Catatan posisi kargo (misal: Kapal lego jangkar di Teluk Jakarta, rencana sandar dermaga 02 JICT pukul 20:00 WIB)..." class="w-full px-3 py-2 rounded-[10px] border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black dark:text-white text-[12px] focus:outline-none focus:border-[#0284c7]"></textarea>
+            </div>
+
+            <!-- Modal Action Buttons -->
+            <div class="pt-3 border-t border-black/5 dark:border-white/5 flex items-center justify-end space-x-2">
+                <button type="button" onclick="document.getElementById('modal-vessel-tracking').classList.add('hidden')" class="btn-apple-gray !h-9 text-[12px]">
+                    Batal
+                </button>
+                <button type="submit" class="btn-apple-filled !bg-[#0284c7] hover:!bg-[#0066D6] !h-9 text-[12px] inline-flex items-center gap-1.5">
+                    <i data-lucide="check" class="w-4 h-4"></i>
+                    <span>Simpan Jadwal ETA &amp; Data Tracking</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
+    let currentTrkLinks = {};
+    let currentTrackingShipmentId = null;
+    let leafletRadarMap = null;
+    let leafletRadarMarkers = [];
+    let leafletRadarPolyline = null;
+
+    function renderLeafletRadar(pos, isAir, vesselName, statusText, locationLabel) {
+        const mapContainer = document.getElementById('vessel_live_leaflet_map');
+        if (!mapContainer || typeof L === 'undefined') return;
+
+        const currLat = pos.lat || (isAir ? -6.12 : -6.05);
+        const currLon = pos.lon || (isAir ? 106.65 : 106.88);
+
+        if (!leafletRadarMap) {
+            leafletRadarMap = L.map('vessel_live_leaflet_map', {
+                zoomControl: true,
+                attributionControl: false
+            }).setView([currLat, currLon], 5);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 18,
+                subdomains: ['a', 'b', 'c']
+            }).addTo(leafletRadarMap);
+        }
+
+        // Bersihkan marker lama
+        leafletRadarMarkers.forEach(m => {
+            try { leafletRadarMap.removeLayer(m); } catch(e){}
+        });
+        leafletRadarMarkers = [];
+        if (leafletRadarPolyline) {
+            try { leafletRadarMap.removeLayer(leafletRadarPolyline); } catch(e){}
+            leafletRadarPolyline = null;
+        }
+
+        const boundsPoints = [];
+
+        // 1. Marker Asal (Origin / POL / Origin Airport)
+        if (pos.origin_lat && pos.origin_lon) {
+            const originHtml = `
+                <div style="background: rgba(15,23,42,0.92); color: #94a3b8; padding: 2px 8px; border-radius: 8px; font-size: 10px; font-weight: bold; border: 1px solid rgba(255,255,255,0.15); white-space: nowrap; box-shadow: 0 4px 10px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 4px;">
+                    <span>${isAir ? '🛫' : '⚓'}</span>
+                    <span>${pos.origin || 'Asal'}</span>
+                </div>
+            `;
+            const mOrigin = L.marker([pos.origin_lat, pos.origin_lon], {
+                icon: L.divIcon({ className: 'custom-radar-origin', html: originHtml, iconSize: [90, 24], iconAnchor: [45, 12] })
+            }).addTo(leafletRadarMap);
+            mOrigin.bindPopup(`<b>Asal / Muat:</b><br>${pos.origin || '-'}`);
+            leafletRadarMarkers.push(mOrigin);
+            boundsPoints.push([pos.origin_lat, pos.origin_lon]);
+        }
+
+        // 2. Marker Tujuan (POD / Dest Airport)
+        if (pos.dest_lat && pos.dest_lon) {
+            const destHtml = `
+                <div style="background: rgba(15,23,42,0.92); color: #34d399; padding: 2px 8px; border-radius: 8px; font-size: 10px; font-weight: bold; border: 1px solid rgba(52,211,153,0.3); white-space: nowrap; box-shadow: 0 4px 10px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 4px;">
+                    <span>${isAir ? '🛬' : '🏁'}</span>
+                    <span>${pos.destination || 'Tujuan'}</span>
+                </div>
+            `;
+            const mDest = L.marker([pos.dest_lat, pos.dest_lon], {
+                icon: L.divIcon({ className: 'custom-radar-dest', html: destHtml, iconSize: [90, 24], iconAnchor: [45, 12] })
+            }).addTo(leafletRadarMap);
+            mDest.bindPopup(`<b>Tujuan / Bongkar:</b><br>${pos.destination || '-'}`);
+            leafletRadarMarkers.push(mDest);
+            boundsPoints.push([pos.dest_lat, pos.dest_lon]);
+        }
+
+        // 3. Live Marker Kapal / Pesawat
+        const vesselSymbol = isAir ? '✈️' : '🚢';
+        const vesselColor = isAir ? '#818cf8' : '#38bdf8';
+        const vesselHtml = `
+            <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px;">
+                <div style="position: absolute; width: 42px; height: 42px; border-radius: 50%; background: ${isAir ? 'rgba(129,140,248,0.35)' : 'rgba(56,189,248,0.35)'}; animation: radar-ping 1.6s cubic-bezier(0,0,0.2,1) infinite;"></div>
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: #0f172a; border: 2.5px solid ${vesselColor}; display: flex; align-items: center; justify-content: center; font-size: 15px; box-shadow: 0 6px 16px rgba(0,0,0,0.6); z-index: 2;">
+                    ${vesselSymbol}
+                </div>
+            </div>
+        `;
+        const mVessel = L.marker([currLat, currLon], {
+            icon: L.divIcon({ className: 'custom-radar-vessel', html: vesselHtml, iconSize: [44, 44], iconAnchor: [22, 22] }),
+            zIndexOffset: 1000
+        }).addTo(leafletRadarMap);
+
+        mVessel.bindPopup(`
+            <div style="font-size: 12px; line-height: 1.4;">
+                <div style="font-weight: bold; color: #0284c7;">${vesselSymbol} ${vesselName || 'Armada Kargo'}</div>
+                <div style="color: #64748b; font-size: 11px;">Status: <b>${statusText || 'Dalam Pelayaran'}</b></div>
+                <div style="color: #64748b; font-size: 11px;">Lokasi: ${locationLabel || '-'}</div>
+                <div style="font-mono; font-size: 10px; color: #94a3b8; margin-top: 3px;">${currLat.toFixed(4)}, ${currLon.toFixed(4)}</div>
+            </div>
+        `);
+        leafletRadarMarkers.push(mVessel);
+        boundsPoints.push([currLat, currLon]);
+
+        // 4. Polyline Lintasan
+        if (pos.origin_lat && pos.origin_lon && pos.dest_lat && pos.dest_lon) {
+            leafletRadarPolyline = L.polyline([
+                [pos.origin_lat, pos.origin_lon],
+                [currLat, currLon],
+                [pos.dest_lat, pos.dest_lon]
+            ], {
+                color: isAir ? '#818cf8' : '#0284c7',
+                weight: 3.5,
+                opacity: 0.85,
+                dashArray: '7, 9'
+            }).addTo(leafletRadarMap);
+        }
+
+        if (boundsPoints.length > 1) {
+            try {
+                leafletRadarMap.fitBounds(boundsPoints, { padding: [40, 40], maxZoom: 7 });
+            } catch(e) {}
+        } else {
+            leafletRadarMap.setView([currLat, currLon], 6);
+        }
+
+        setTimeout(() => {
+            if (leafletRadarMap) leafletRadarMap.invalidateSize();
+        }, 200);
+    }
+
+    function switchTrkMode(isAir) {
+        const btnSea = document.getElementById('trk_btn_mode_sea');
+        const btnAir = document.getElementById('trk_btn_mode_air');
+        const lblVessel = document.getElementById('trk_lbl_vessel');
+        const lblVoyage = document.getElementById('trk_lbl_voyage');
+        const inputVessel = document.getElementById('trk_input_vessel');
+        const inputVoyage = document.getElementById('trk_input_voyage');
+
+        if (!btnSea || !btnAir) return;
+
+        if (isAir) {
+            btnAir.className = 'p-2.5 rounded-xl border border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 flex items-center justify-center gap-2 transition-all cursor-pointer font-bold shadow-xs';
+            btnSea.className = 'p-2.5 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black/60 dark:text-white/60 flex items-center justify-center gap-2 transition-all cursor-pointer';
+            lblVessel.textContent = 'Nama Maskapai / Pesawat Udara';
+            lblVoyage.textContent = 'Nomor Penerbangan (Flight No)';
+            inputVessel.placeholder = 'Contoh: GARUDA INDONESIA atau SINGAPORE AIRLINES';
+            inputVoyage.placeholder = 'Contoh: GA-872 atau SQ-951';
+        } else {
+            btnSea.className = 'p-2.5 rounded-xl border border-[#0284c7] bg-[#0284c7]/10 text-[#0284c7] flex items-center justify-center gap-2 transition-all cursor-pointer font-bold shadow-xs';
+            btnAir.className = 'p-2.5 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-[#2C2C2E] text-black/60 dark:text-white/60 flex items-center justify-center gap-2 transition-all cursor-pointer';
+            lblVessel.textContent = 'Nama Kapal / Sarana Pengangkut';
+            lblVoyage.textContent = 'Nomor Voyage Kapal';
+            inputVessel.placeholder = 'Contoh: MV WAN HAI 315 atau EVER GIVEN';
+            inputVoyage.placeholder = 'Contoh: 042N atau 082W';
+        }
+    }
+
+    function openVesselTrackingModal(shipmentId, shipmentNumber, vessel = '', voyage = '', vendorId = '', blNo = '', pol = '', pod = '', tps = '', eta = '', ata = '', notes = '', isAir = false, trackingLinks = {}) {
+        currentTrackingShipmentId = shipmentId;
+        const modal = document.getElementById('modal-vessel-tracking');
+        const form = document.getElementById('form-vessel-tracking');
+        form.action = `/core/traffic/${shipmentId}/tracking`;
+
+        document.getElementById('trk_modal_subtitle').textContent = `Shipment: ${shipmentNumber} | BL/AWB: ${blNo || '-'}`;
+        document.getElementById('trk_input_vessel').value = vessel || '';
+        document.getElementById('trk_input_voyage').value = voyage || '';
+        document.getElementById('trk_input_vendor_id').value = vendorId || '';
+        document.getElementById('trk_input_bl').value = blNo || '';
+        document.getElementById('trk_input_pol').value = pol || '';
+        document.getElementById('trk_input_pod').value = pod || '';
+        document.getElementById('trk_input_tps').value = tps || '';
+        document.getElementById('trk_input_eta').value = eta || '';
+        document.getElementById('trk_input_ata').value = ata || '';
+        document.getElementById('trk_input_notes').value = notes || '';
+
+        // Set Default Placeholder State pada Telemetri
+        document.getElementById('radar_overlay_mode_badge').textContent = isAir ? 'LIVE ADS-B RADAR' : 'LIVE AIS RADAR';
+        document.getElementById('radar_overlay_location_label').textContent = 'Menginisialisasi transponder radar satelit...';
+        document.getElementById('radar_overlay_coordinates').textContent = 'Scanning...';
+        document.getElementById('res_live_vessel_name').textContent = vessel || (isAir ? 'Pesawat Udara' : 'Kapal Laut');
+        document.getElementById('res_live_speed').textContent = 'Mengukur...';
+        document.getElementById('res_live_dist').textContent = 'Menghitung...';
+        document.getElementById('res_live_eta').textContent = eta || 'Menghitung...';
+        document.getElementById('res_origin_text').textContent = pol || 'Origin (POL)';
+        document.getElementById('res_dest_text').textContent = pod || 'Destination (POD)';
+        document.getElementById('res_live_progress_bar').style.width = '10%';
+        document.getElementById('res_live_progress_text').textContent = 'Scanning...';
+
+        switchTrkMode(isAir);
+
+        // Render Quick Radar Links
+        const container = document.getElementById('trk_radar_buttons_container');
+        container.innerHTML = '';
+        currentTrkLinks = trackingLinks || {};
+
+        const keys = Object.keys(currentTrkLinks);
+        if (keys.length > 0) {
+            keys.forEach(k => {
+                const item = currentTrkLinks[k];
+                const a = document.createElement('a');
+                a.href = item.url;
+                a.target = '_blank';
+                a.rel = 'noopener noreferrer';
+                a.className = 'p-2 rounded-xl bg-black/[0.03] dark:bg-white/[0.05] hover:bg-black/[0.06] dark:hover:bg-white/[0.1] border border-black/10 dark:border-white/10 text-black dark:text-white flex items-center justify-between gap-1.5 transition-all text-xs font-semibold group';
+                a.innerHTML = `
+                    <div class="truncate">
+                        <div class="truncate font-bold">${item.name}</div>
+                        <div class="text-[9px] text-[#0284c7] font-mono">${item.badge}</div>
+                    </div>
+                    <i data-lucide="external-link" class="w-3.5 h-3.5 text-[#0284c7] group-hover:translate-x-0.5 transition-transform shrink-0"></i>
+                `;
+                container.appendChild(a);
+            });
+        } else {
+            container.innerHTML = `<div class="col-span-full text-center text-slate-400 text-xs py-2 italic">Masukkan nama kapal/pesawat untuk memunculkan tautan radar AIS otomatis.</div>`;
+        }
+
+        modal.classList.remove('hidden');
+        if (window.lucide) window.lucide.createIcons();
+
+        // ⚡ LANGSUNG OTOMATIS PICU DETEKSI REAL-TIME TANPA HARUS KLIK TOMBOL
+        setTimeout(() => {
+            triggerLiveArrivalDetection();
+        }, 100);
+    }
+
+    function triggerLiveArrivalDetection() {
+        if (!currentTrackingShipmentId) return;
+
+        const btn = document.getElementById('btn_live_detect_arrival');
+        const icon = document.getElementById('icon_live_detect_btn');
+        const text = document.getElementById('text_live_detect_btn');
+
+        if (btn) btn.disabled = true;
+        if (text) text.textContent = 'Mendeteksi Posisi...';
+        if (icon) {
+            icon.setAttribute('data-lucide', 'loader-2');
+            icon.classList.add('animate-spin');
+        }
+        if (window.lucide) window.lucide.createIcons();
+
+        fetch(`/core/tracking/${currentTrackingShipmentId}/live-detect`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res.success && res.data) {
+                const d = res.data;
+                const pos = d.position || {};
+                const isAir = (d.mode === 'AIR');
+
+                // 1. Overlay Map Info
+                const badgeModeEl = document.getElementById('radar_overlay_mode_badge');
+                if (badgeModeEl) badgeModeEl.textContent = isAir ? 'LIVE ADS-B RADAR' : 'LIVE AIS RADAR';
+
+                const locLabel = pos.location_label || (isAir ? 'Ruang Udara Kargo Internasional' : 'Perairan Terbuka');
+                const overlayLocEl = document.getElementById('radar_overlay_location_label');
+                if (overlayLocEl) overlayLocEl.textContent = `📍 ${locLabel}`;
+
+                const overlayCoordsEl = document.getElementById('radar_overlay_coordinates');
+                if (overlayCoordsEl) {
+                    overlayCoordsEl.textContent = pos.lat && pos.lon ? `${pos.lat.toFixed(3)}, ${pos.lon.toFixed(3)}` : 'Terdeteksi';
+                }
+
+                // 2. Status Title & Explanation
+                const titleEl = document.getElementById('res_live_status_title');
+                if (titleEl) {
+                    const iconSymbol = isAir ? '✈️' : (d.is_arrived ? '⚓' : '🚢');
+                    titleEl.innerHTML = `<span>${iconSymbol} ${d.status}</span>`;
+                }
+
+                const expEl = document.getElementById('res_live_explanation');
+                if (expEl) expEl.textContent = d.explanation || '';
+
+                const badgeEl = document.getElementById('res_live_badge');
+                if (badgeEl) {
+                    badgeEl.textContent = d.badge || d.status;
+                    badgeEl.className = d.is_arrived 
+                        ? 'px-2.5 py-1 rounded-full text-[10px] font-bold font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' 
+                        : 'px-2.5 py-1 rounded-full text-[10px] font-bold font-mono bg-sky-500/20 text-sky-300 border border-sky-500/40';
+                }
+
+                // 3. Progress Perjalanan
+                const pct = typeof pos.progress_pct !== 'undefined' ? pos.progress_pct : (d.is_arrived ? 100 : 50);
+                const pBar = document.getElementById('res_live_progress_bar');
+                if (pBar) pBar.style.width = `${Math.min(100, Math.max(0, pct))}%`;
+
+                const pText = document.getElementById('res_live_progress_text');
+                if (pText) pText.textContent = `${pct}% Perjalanan Selesai`;
+
+                const origText = document.getElementById('res_origin_text');
+                if (origText) origText.textContent = pos.origin || 'Asal (POL)';
+
+                const destText = document.getElementById('res_dest_text');
+                if (destText) destText.textContent = pos.destination || 'Tujuan (POD)';
+
+                // 4. 4 Kotak Telemetri
+                const nameEl = document.getElementById('res_live_vessel_name');
+                if (nameEl) nameEl.textContent = d.flight_or_vessel || '-';
+
+                const speedEl = document.getElementById('res_live_speed');
+                if (speedEl) {
+                    if (pos.speed_knots) speedEl.textContent = `⚡ ${pos.speed_knots} Knots`;
+                    else if (pos.speed_kmh) speedEl.textContent = `⚡ ${pos.speed_kmh} km/h`;
+                    else if (pos.speed) speedEl.textContent = `⚡ ${pos.speed} ${pos.speed_unit || ''}`;
+                    else speedEl.textContent = d.is_arrived ? '0 Knots (Sandar)' : '16 Knots';
+                }
+
+                const distEl = document.getElementById('res_live_dist');
+                if (distEl) {
+                    if (pos.distance_nm) distEl.textContent = `${pos.distance_nm} NM (${pos.distance_km || Math.round(pos.distance_nm * 1.852)} km)`;
+                    else if (pos.distance_km) distEl.textContent = `${pos.distance_km} km`;
+                    else distEl.textContent = d.is_arrived ? '0 km (Tiba)' : '-';
+                }
+
+                const etaEl = document.getElementById('res_live_eta');
+                if (etaEl) {
+                    etaEl.textContent = d.eta_display || (d.actual_arrival_date || d.eta_date || '-');
+                }
+
+                // 5. Render / Update Leaflet Interactive Map
+                renderLeafletRadar(pos, isAir, d.flight_or_vessel, d.status, locLabel);
+
+                // 6. Isi nilai form input otomatis
+                if (d.eta_date) {
+                    const etaInput = document.getElementById('trk_input_eta');
+                    if (etaInput) etaInput.value = d.eta_date.replace(' ', 'T').slice(0, 16);
+                }
+                if (d.actual_arrival_date) {
+                    const ataInput = document.getElementById('trk_input_ata');
+                    if (ataInput) ataInput.value = d.actual_arrival_date.replace(' ', 'T').slice(0, 16);
+                }
+                if (d.explanation) {
+                    const notesInput = document.getElementById('trk_input_notes');
+                    if (notesInput && !notesInput.value) {
+                        notesInput.value = d.explanation;
+                    }
+                }
+            } else {
+                console.warn(res.message || 'Gagal memproses posisi radar.');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+        })
+        .finally(() => {
+            if (btn) btn.disabled = false;
+            if (text) text.textContent = 'Re-Ping Posisi';
+            if (icon) {
+                icon.setAttribute('data-lucide', 'radio');
+                icon.classList.remove('animate-spin');
+            }
+            if (window.lucide) window.lucide.createIcons();
+        });
+    }
+
+    function setArrivalNow() {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        document.getElementById('trk_input_ata').value = now.toISOString().slice(0, 16);
+    }
     function toggleTrackingFlag(shipmentId, field, btn) {
         fetch(`/core/tracking/${shipmentId}/quick-update`, {
             method: 'POST',

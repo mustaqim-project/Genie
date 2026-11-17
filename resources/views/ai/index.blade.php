@@ -6,23 +6,28 @@
 <div class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12">
 
     <!-- Page Header & AI Gateway Status -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
             <div class="text-xs text-slate-500 font-medium mb-1">
-                <a href="{{ route('dashboard') }}" class="hover:underline">Dashboard</a> / <span class="text-slate-800">AI Agent & MCP</span>
+                <a href="{{ route('dashboard') }}" class="hover:underline">Dashboard</a> / <span class="text-slate-800 dark:text-slate-200">AI Agent & MCP</span>
             </div>
-            <h1 class="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
                 <span>AI Customs Agent & MCP Gateway</span>
                 <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide bg-gradient-to-r from-indigo-500 to-sky-500 text-white shadow-xs">
-                    OpenAI Engine v3.0
+                    {{ strtoupper($aiProvider ?? 'OpenAI') }} v3.0
                 </span>
             </h1>
-            <p class="text-xs text-slate-500 mt-0.5">Pemindaian cerdas Packing List, pencocokan otomatis pos tarif HS Code BTKI 2022, audit kepatuhan Lartas Bea Cukai, serta penyusunan deklarasi PIB (BC 2.0) dan PEB (BC 3.0).</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Pemindaian cerdas Packing List, pencocokan otomatis pos tarif HS Code BTKI 2022, audit kepatuhan Lartas Bea Cukai, serta penyusunan deklarasi PIB (BC 2.0) dan PEB (BC 3.0).</p>
         </div>
-        <div class="flex items-center space-x-2">
-            <span class="inline-flex items-center px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold">
+        <div class="flex flex-wrap items-center gap-2 shrink-0">
+            <!-- Tombol Pengaturan Provider & Gateway -->
+            <button type="button" onclick="openAiConfigModal()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs inline-flex items-center gap-1.5 shadow-sm transition-all cursor-pointer">
+                <svg class="w-4 h-4 text-sky-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <span>Setting API &amp; Provider</span>
+            </button>
+            <span class="inline-flex items-center px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 text-xs font-semibold">
                 <span class="w-2 h-2 rounded-full bg-emerald-600 mr-2 animate-pulse"></span>
-                OpenAI Gateway: ONLINE
+                Gateway: ONLINE
             </span>
             <a href="{{ route('api.mcp.tools') }}" target="_blank" class="inline-flex items-center space-x-1 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-sm">
                 <span>⚡ Tools Schema JSON</span>
@@ -31,22 +36,22 @@
     </div>
 
     <!-- Active AI Engine Banner & Model Selector Bar -->
-    <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-5 text-white shadow-lg border border-indigo-900/60 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div class="space-y-1">
+    <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-5 text-white shadow-lg border border-indigo-900/60 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div class="space-y-1 min-w-0 flex-1">
             <div class="flex items-center space-x-2 text-indigo-300 text-[11px] font-bold uppercase tracking-wider">
-                <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                <span>Gateway Endpoint Terhubung</span>
+                <svg class="w-4 h-4 text-sky-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                <span>Gateway Endpoint ({{ strtoupper($aiProvider ?? 'OpenAI') }})</span>
             </div>
-            <div class="font-mono text-xs text-emerald-400 font-semibold flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                <span>{{ $aiEndpoint ?? 'https://r4g77gv.abc-tunnel.us/v1' }}</span>
+            <div class="font-mono text-xs text-emerald-400 font-semibold flex items-center gap-1.5 truncate">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                <span class="truncate">{{ $aiEndpoint ?? 'https://api.openai.com/v1' }}</span>
             </div>
-            <p class="text-[11px] text-slate-300">Mendukung 13 Model AI (OpenAI Codex Astra, Sol, Terra, Luna & Google Antigravity Gemini Flash).</p>
+            <p class="text-[11px] text-slate-300">Pencocokan pos tarif 8-digit BTKI 2022, ekstraksi dokumen, &amp; audit Lartas.</p>
         </div>
 
-        <div class="flex flex-col sm:flex-row sm:items-center gap-2.5">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-2.5 shrink-0">
             <label for="global_ai_model" class="text-xs text-indigo-200 font-semibold shrink-0">Model AI Aktif:</label>
-            <select id="global_ai_model" onchange="syncSelectedModel(this.value)" class="px-3.5 py-2 rounded-xl bg-slate-800/90 border border-indigo-500/40 text-white font-mono text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-sky-400 shadow-inner">
+            <select id="global_ai_model" onchange="syncSelectedModel(this.value)" class="w-full sm:w-auto max-w-full sm:max-w-xs px-3.5 py-2 rounded-xl bg-slate-800/90 border border-indigo-500/40 text-white font-mono text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-sky-400 shadow-inner truncate">
                 <optgroup label="⭐ OpenAI Codex Astra (Rekomendasi Utama)">
                     <option value="cx/gpt-6-astra" {{ ($defaultModel ?? '') === 'cx/gpt-6-astra' ? 'selected' : '' }}>cx/gpt-6-astra (Balanced & Cepat) [REKOMENDASI]</option>
                     <option value="cx/gpt-6-astra-xhigh" {{ ($defaultModel ?? '') === 'cx/gpt-6-astra-xhigh' ? 'selected' : '' }}>cx/gpt-6-astra-xhigh (Ultra High Precision)</option>
@@ -173,7 +178,7 @@
             </div>
 
             <!-- Tab Buttons -->
-            <div class="flex items-center space-x-1.5 p-1 bg-slate-100 rounded-2xl">
+            <div class="flex flex-wrap items-center gap-1.5 p-1 bg-slate-100 dark:bg-white/[0.06] rounded-2xl">
                 <button type="button" onclick="switchWorkbenchTab('scanner')" id="tab-btn-scanner" class="px-3.5 py-1.5 rounded-xl font-bold text-xs bg-white text-slate-900 shadow-sm transition-all cursor-pointer">
                     📄 Packing List & HS Matcher (AI)
                 </button>
@@ -832,4 +837,272 @@ ITEMS:
     }
 </script>
 
+    <!-- Modal Konfigurasi AI Provider & API Gateway (Apple HIG) -->
+    <div id="ai_config_modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+        <div class="bg-white dark:bg-[#1C1C1E] rounded-3xl max-w-2xl w-full p-6 border border-black/10 dark:border-white/10 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-base text-slate-900 dark:text-white">Pengaturan API Gateway & Provider AI</h3>
+                        <p class="text-xs text-slate-500">Sesuaikan endpoint, model, dan API key untuk OpenAI, Gemini, OpenRouter, atau 9Router</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeAiConfigModal()" class="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <!-- Provider Presets Selector -->
+            <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">Pilih Provider Preset:</label>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    <button type="button" onclick="selectAiPreset('openai')" id="preset_btn_openai" class="p-3 rounded-2xl border text-left transition-all cursor-pointer hover:border-indigo-500 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/20">
+                        <div class="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> OpenAI Official
+                        </div>
+                        <div class="text-[10px] text-slate-500 mt-1">api.openai.com</div>
+                    </button>
+                    <button type="button" onclick="selectAiPreset('gemini')" id="preset_btn_gemini" class="p-3 rounded-2xl border text-left transition-all cursor-pointer hover:border-indigo-500 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/20">
+                        <div class="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-blue-500"></span> Google Gemini
+                        </div>
+                        <div class="text-[10px] text-slate-500 mt-1">googleapis.com/v1beta</div>
+                    </button>
+                    <button type="button" onclick="selectAiPreset('openrouter')" id="preset_btn_openrouter" class="p-3 rounded-2xl border text-left transition-all cursor-pointer hover:border-indigo-500 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/20">
+                        <div class="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-purple-500"></span> OpenRouter
+                        </div>
+                        <div class="text-[10px] text-slate-500 mt-1">openrouter.ai/api/v1</div>
+                    </button>
+                    <button type="button" onclick="selectAiPreset('9router')" id="preset_btn_9router" class="p-3 rounded-2xl border text-left transition-all cursor-pointer hover:border-indigo-500 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/20">
+                        <div class="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-amber-500"></span> 9Router / Tunnel
+                        </div>
+                        <div class="text-[10px] text-slate-500 mt-1">Custom Tunnel/Proxy</div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Form Detail Fields -->
+            <form id="ai_config_form" onsubmit="saveAiConfig(event)" class="space-y-3.5 text-xs">
+                <input type="hidden" id="cfg_provider" value="{{ $aiProvider ?? '9router' }}">
+
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Base Endpoint URL (OpenAI-compatible) <span class="text-rose-500">*</span></label>
+                    <input type="url" id="cfg_endpoint" value="{{ $aiEndpoint ?? 'https://r4g77gv.abc-tunnel.us/v1' }}" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 bg-slate-50 dark:bg-[#2C2C2E] dark:text-white font-mono text-xs focus:ring-2 focus:ring-indigo-500">
+                    <p class="text-[11px] text-slate-400 mt-1">Format: <code>https://host/v1</code> (tanpa slash di akhir, sistem otomatis memanggil <code>/chat/completions</code>)</p>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="font-semibold text-slate-700 dark:text-slate-300">API Secret Key <span class="text-rose-500">*</span></label>
+                        <span class="text-[11px] text-slate-400">Tersimpan aman & terenkripsi</span>
+                    </div>
+                    <div class="relative">
+                        <input type="password" id="cfg_api_key" placeholder="Masukkan API Key (kosongkan jika tidak ingin mengubah)" class="w-full pl-3.5 pr-10 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] dark:text-white font-mono text-xs">
+                        <button type="button" onclick="toggleApiKeyVisibility()" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                            <svg id="eye_icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        </button>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-1">Key aktif saat ini: <code class="font-mono text-indigo-600 dark:text-indigo-400">{{ $aiApiKeyMasked ?? 'sk-****' }}</code></p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Default Model AI <span class="text-rose-500">*</span></label>
+                        <input type="text" id="cfg_default_model" value="{{ $defaultModel ?? 'cx/gpt-6-astra' }}" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] dark:text-white font-mono text-xs font-bold">
+                        <p class="text-[10px] text-slate-400 mt-1">Contoh: <code>gpt-4o</code>, <code>gemini-1.5-flash</code>, <code>openai/gpt-4o</code>, <code>cx/gpt-6-astra</code></p>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Timeout Koneksi (Detik)</label>
+                        <input type="number" id="cfg_timeout" value="60" min="5" max="300" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] dark:text-white font-mono text-xs">
+                        <p class="text-[10px] text-slate-400 mt-1">Disarankan: 60 - 120 detik untuk dokumen PDF besar.</p>
+                    </div>
+                </div>
+
+                <!-- Test Connection Status Box -->
+                <div id="test_conn_result" class="hidden p-3 rounded-2xl text-xs space-y-1"></div>
+
+                <!-- Modal Actions -->
+                <div class="flex items-center justify-between pt-4 border-t border-black/[0.06] dark:border-white/[0.08]">
+                    <button type="button" onclick="testAiConnection()" id="btn_test_conn" class="px-4 py-2.5 rounded-xl border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 bg-indigo-50/70 hover:bg-indigo-100 dark:bg-indigo-950/40 font-semibold inline-flex items-center gap-1.5 cursor-pointer">
+                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        <span>Tes Koneksi API</span>
+                    </button>
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="closeAiConfigModal()" class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/15 bg-slate-100 text-slate-700 dark:text-slate-300 font-semibold cursor-pointer">
+                            Batal
+                        </button>
+                        <button type="submit" id="btn_save_cfg" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold inline-flex items-center gap-1.5 shadow-md cursor-pointer">
+                            <span>Simpan Pengaturan</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const AI_PRESETS = {
+            openai: {
+                endpoint: 'https://api.openai.com/v1',
+                model: 'gpt-4o',
+                placeholderKey: 'sk-proj-...'
+            },
+            gemini: {
+                endpoint: 'https://generativelanguage.googleapis.com/v1beta/openai',
+                model: 'gemini-1.5-flash',
+                placeholderKey: 'AIzaSy...'
+            },
+            openrouter: {
+                endpoint: 'https://openrouter.ai/api/v1',
+                model: 'openai/gpt-4o',
+                placeholderKey: 'sk-or-v1-...'
+            },
+            '9router': {
+                endpoint: 'https://api.9router.com/v1',
+                model: 'cx/gpt-6-astra',
+                placeholderKey: 'sk-...'
+            }
+        };
+
+        function openAiConfigModal() {
+            document.getElementById('ai_config_modal').classList.remove('hidden');
+            const prov = document.getElementById('cfg_provider').value;
+            highlightPresetButton(prov);
+        }
+
+        function closeAiConfigModal() {
+            document.getElementById('ai_config_modal').classList.add('hidden');
+        }
+
+        function selectAiPreset(prov) {
+            document.getElementById('cfg_provider').value = prov;
+            highlightPresetButton(prov);
+            if (AI_PRESETS[prov]) {
+                document.getElementById('cfg_endpoint').value = AI_PRESETS[prov].endpoint;
+                document.getElementById('cfg_default_model').value = AI_PRESETS[prov].model;
+                document.getElementById('cfg_api_key').placeholder = `Format: ${AI_PRESETS[prov].placeholderKey}`;
+            }
+        }
+
+        function highlightPresetButton(prov) {
+            ['openai', 'gemini', 'openrouter', '9router'].forEach(p => {
+                const btn = document.getElementById(`preset_btn_${p}`);
+                if (!btn) return;
+                if (p === prov) {
+                    btn.className = 'p-3 rounded-2xl border-2 border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/40 text-left shadow-sm';
+                } else {
+                    btn.className = 'p-3 rounded-2xl border border-slate-200 dark:border-white/10 text-left hover:border-slate-300 dark:hover:border-white/20';
+                }
+            });
+        }
+
+        function toggleApiKeyVisibility() {
+            const input = document.getElementById('cfg_api_key');
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        async function testAiConnection() {
+            const endpoint = document.getElementById('cfg_endpoint').value;
+            const apiKey = document.getElementById('cfg_api_key').value;
+            const model = document.getElementById('cfg_default_model').value;
+            const btn = document.getElementById('btn_test_conn');
+            const resBox = document.getElementById('test_conn_result');
+
+            btn.disabled = true;
+            btn.innerHTML = '<span>⏳ Menguji koneksi...</span>';
+            resBox.className = 'p-3 rounded-2xl text-xs bg-slate-100 border border-slate-200 text-slate-700';
+            resBox.innerHTML = 'Menghubungi endpoint AI gateway...';
+            resBox.classList.remove('hidden');
+
+            try {
+                const res = await fetch('{{ route("ai.test-connection") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ endpoint, api_key: apiKey, model })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    resBox.className = 'p-3 rounded-2xl text-xs bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200';
+                    resBox.innerHTML = `<strong>&check; Koneksi Berhasil!</strong> Model: <code>${data.model_used}</code> merespons (HTTP ${data.http_code}). Respon: <em>"${data.response_sample}"</em>`;
+                } else {
+                    resBox.className = 'p-3 rounded-2xl text-xs bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200';
+                    resBox.innerHTML = `<strong>&times; Gagal Terhubung:</strong> ${data.error || 'Endpoint tidak merespons.'}`;
+                }
+            } catch (err) {
+                resBox.className = 'p-3 rounded-2xl text-xs bg-rose-50 border border-rose-200 text-rose-800';
+                resBox.innerHTML = `<strong>&times; Network Error:</strong> ${err.message}`;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> <span>Tes Koneksi API</span>`;
+            }
+        }
+
+        async function saveAiConfig(e) {
+            e.preventDefault();
+            const provider = document.getElementById('cfg_provider').value;
+            const endpoint = document.getElementById('cfg_endpoint').value;
+            const apiKey = document.getElementById('cfg_api_key').value;
+            const defaultModel = document.getElementById('cfg_default_model').value;
+            const timeout = document.getElementById('cfg_timeout').value;
+            const btn = document.getElementById('btn_save_cfg');
+
+            btn.disabled = true;
+            btn.innerHTML = '<span>Menyimpan...</span>';
+
+            try {
+                const res = await fetch('{{ route("ai.settings.update") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        provider,
+                        endpoint,
+                        api_key: apiKey,
+                        default_model: defaultModel,
+                        timeout
+                    })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Pengaturan Tersimpan!',
+                        text: data.message,
+                        timer: 1800,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    throw new Error(data.message || 'Gagal menyimpan pengaturan.');
+                }
+            } catch (err) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal Menyimpan',
+                    text: err.message,
+                    confirmButtonColor: '#0284c7'
+                });
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Simpan Pengaturan</span>';
+            }
+        }
+    </script>
 @endsection
+

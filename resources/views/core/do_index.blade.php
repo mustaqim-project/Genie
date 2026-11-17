@@ -83,8 +83,8 @@
                                 <div class="text-[11px] text-black/45 dark:text-white/45 font-sans mt-0.5">BL: {{ $shp->bl_number ?? '-' }}</div>
                             </td>
                             <td class="py-3 px-4">
-                                <div class="font-semibold text-black dark:text-white">{{ $shp->shippingVendor->name ?? 'MAERSK LINE' }}</div>
-                                <div class="text-[11px] text-black/45 dark:text-white/45 font-mono">{{ $shp->shippingVendor->email ?? 'id.import@maersk.com' }}</div>
+                                <div class="font-semibold text-black dark:text-white">{{ $shp->shippingVendor?->name ?? ($shp->nama_kapal ?? 'MAERSK LINE') }}</div>
+                                <div class="text-[11px] text-black/45 dark:text-white/45 font-mono">{{ $shp->shippingVendor?->pic_email ?? ($shp->shippingVendor?->email ?? ($shp->do_email_recipient ?? 'id.import@maersk.com')) }}</div>
                             </td>
                             <td class="py-3 px-4 text-black/80 dark:text-white/80">
                                 <div>{{ $shp->vessel_name ?? '-' }}</div>

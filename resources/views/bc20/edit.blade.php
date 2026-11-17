@@ -37,6 +37,9 @@ window.bc20WizardManager = function bc20WizardManager() {
         previewZoom: 100,
         saving: false,
         resyncing: false,
+        bundleUploading: false,
+        singleDocUploadingIndex: null,
+        modalSaving: false,
         saveToast: { type: 'success', message: '' },
 
         // PDF.js Canvas Viewer State
@@ -533,7 +536,7 @@ window.bc20WizardManager = function bc20WizardManager() {
             this.showToast('Data Pengirim disalin ke Penjual.');
         },
 
-        // Stage 3: Dokumen helpers
+        // Stage 3: Dokumen helpers & Deteksi Otomatis
         openNewDocModal() {
             this.editingDocIndex = null;
             this.docForm = {
@@ -544,23 +547,97 @@ window.bc20WizardManager = function bc20WizardManager() {
                 ecooStatus: '-',
                 linkedSeri: '',
             };
+            if (this.$refs.docModalFileInput) {
+                this.$refs.docModalFileInput.value = '';
+            }
             this.docModalOpen = true;
         },
 
         openEditDocModal(idx) {
             this.editingDocIndex = idx;
             this.docForm = Object.assign({}, this.w.dokumen[idx]);
+            if (this.$refs.docModalFileInput) {
+                this.$refs.docModalFileInput.value = '';
+            }
             this.docModalOpen = true;
         },
 
-        saveDocModal() {
+        setDocDateToday() {
+            this.docForm.tanggalDokumen = new Date().toISOString().slice(0, 10);
+        },
+
+        setDocDateYesterday() {
+            const d = new Date();
+            d.setDate(d.getDate() - 1);
+            this.docForm.tanggalDokumen = d.toISOString().slice(0, 10);
+        },
+
+        setDocDateSevenDaysAgo() {
+            const d = new Date();
+            d.setDate(d.getDate() - 7);
+            this.docForm.tanggalDokumen = d.toISOString().slice(0, 10);
+        },
+
+        async saveDocModal(keepOpen = false) {
+            if (!this.docForm.nomorDokumen || !this.docForm.nomorDokumen.trim()) {
+                this.showToast('Nomor dokumen wajib diisi.', 'error');
+                return;
+            }
+
+            const fileInput = this.$refs.docModalFileInput;
+            const file = fileInput && fileInput.files && fileInput.files[0];
+
+            if (file) {
+                this.modalSaving = true;
+                try {
+                    const fd = new FormData();
+                    fd.append('file', file);
+                    fd.append('kode_dokumen', this.docForm.kodeDokumen);
+                    fd.append('nomor_dokumen', this.docForm.nomorDokumen.trim());
+                    fd.append('tanggal_dokumen', this.docForm.tanggalDokumen);
+                    fd.append('purpose', 'dokumen');
+
+                    const res = await fetch('{{ route("bc20.upload-document", $bc20->id) }}', {
+                        method: 'POST',
+                        headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                        body: fd
+                    });
+                    const data = await res.json();
+                    if (!res.ok || !data.success) throw new Error(data.message || 'Gagal mengunggah lampiran berkas.');
+
+                    if (data.preview_file) {
+                        this.previewFiles.unshift(data.preview_file);
+                        this.activePreviewIndex = 0;
+                        this.showPreview = true;
+                        this.docForm.shipmentDocumentId = data.preview_file.id;
+                    }
+                } catch (err) {
+                    this.showToast(err.message || 'Gagal mengunggah berkas lampiran.', 'error');
+                    this.modalSaving = false;
+                    return;
+                } finally {
+                    this.modalSaving = false;
+                    if (fileInput) fileInput.value = '';
+                }
+            }
+
             if (this.editingDocIndex === null) {
                 this.w.dokumen.push(Object.assign({ seriDokumen: this.w.dokumen.length + 1 }, this.docForm));
             } else {
                 this.w.dokumen[this.editingDocIndex] = Object.assign({}, this.docForm, { seriDokumen: this.editingDocIndex + 1 });
             }
-            this.docModalOpen = false;
             this.renumberDocs();
+
+            if (keepOpen) {
+                this.showToast('Dokumen berhasil ditambahkan. Silakan isi dokumen berikutnya.');
+                this.docForm.nomorDokumen = '';
+                this.docForm.shipmentDocumentId = '';
+                if (fileInput) fileInput.value = '';
+            } else {
+                this.docModalOpen = false;
+                this.showToast('Dokumen berhasil disimpan.');
+            }
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
         },
 
         duplicateDocRow(idx) {
@@ -594,6 +671,101 @@ window.bc20WizardManager = function bc20WizardManager() {
                 }
             });
             this.showToast(found ? 'Dokumen e-COO (861) tervalidasi aktif.' : 'Belum ada dokumen kode 861 (e-COO) pada daftar.', found ? 'success' : 'error');
+        },
+
+        // Unggah Bundle Berkas (Multi-File / ZIP) dengan Auto-Matching Cerdas
+        async handleWizardBundleUpload(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
+
+            const fd = new FormData();
+            for (let i = 0; i < files.length; i++) {
+                fd.append('bundle_files[]', files[i]);
+            }
+            fd.append('current_dokumen', JSON.stringify(this.w.dokumen));
+
+            this.bundleUploading = true;
+            try {
+                const res = await fetch('{{ route("bc20.upload-wizard-bundle", $bc20->id) }}', {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                    body: fd
+                });
+                const data = await res.json();
+                if (!res.ok || !data.success) throw new Error(data.message || 'Gagal memproses bundle dokumen.');
+
+                if (data.preview_files) {
+                    this.previewFiles = data.preview_files;
+                    if (this.previewFiles.length > 0) {
+                        this.activePreviewIndex = 0;
+                        this.showPreview = true;
+                    }
+                }
+                if (data.dokumen) {
+                    this.w.dokumen = data.dokumen;
+                }
+
+                this.showToast(data.message || 'Bundle dokumen berhasil diproses.');
+            } catch (err) {
+                this.showToast(err.message || 'Gagal memproses bundle berkas.', 'error');
+            } finally {
+                this.bundleUploading = false;
+                event.target.value = '';
+                this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+            }
+        },
+
+        // Re-upload / Ganti Berkas PDF Khusus Baris Dokumen Tertentu
+        async handleSingleDocReupload(idx, event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const targetDoc = this.w.dokumen[idx];
+            const fd = new FormData();
+            fd.append('file', file);
+            fd.append('purpose', 'dokumen');
+            fd.append('kode_dokumen', targetDoc ? targetDoc.kodeDokumen : '380');
+            fd.append('nomor_dokumen', targetDoc ? targetDoc.nomorDokumen : '');
+            fd.append('tanggal_dokumen', targetDoc ? targetDoc.tanggalDokumen : '');
+            fd.append('doc_index', idx);
+
+            this.singleDocUploadingIndex = idx;
+            try {
+                const res = await fetch('{{ route("bc20.upload-document", $bc20->id) }}', {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                    body: fd
+                });
+                const data = await res.json();
+                if (!res.ok || !data.success) throw new Error(data.message || 'Gagal mengunggah berkas.');
+
+                if (data.preview_file) {
+                    const existingIdx = this.previewFiles.findIndex(f => f.id === data.preview_file.id);
+                    if (existingIdx !== -1) {
+                        this.previewFiles[existingIdx] = data.preview_file;
+                        this.activePreviewIndex = existingIdx;
+                    } else {
+                        this.previewFiles.unshift(data.preview_file);
+                        this.activePreviewIndex = 0;
+                    }
+                    this.showPreview = true;
+                }
+
+                if (this.w.dokumen[idx]) {
+                    this.w.dokumen[idx].shipmentDocumentId = data.preview_file ? data.preview_file.id : (data.doc_entry ? data.doc_entry.shipmentDocumentId : null);
+                    if (data.doc_entry && data.doc_entry.ecooStatus) {
+                        this.w.dokumen[idx].ecooStatus = data.doc_entry.ecooStatus;
+                    }
+                }
+
+                this.showToast('Berkas fisik untuk seri #' + (idx + 1) + ' berhasil diperbarui.');
+            } catch (err) {
+                this.showToast(err.message || 'Gagal mengunggah berkas revisi.', 'error');
+            } finally {
+                this.singleDocUploadingIndex = null;
+                event.target.value = '';
+                this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+            }
         },
 
         async handleWizardDocUpload(event, purpose = 'dokumen') {

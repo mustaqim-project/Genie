@@ -73,6 +73,13 @@
             </svg>
             <span>Parameter Sistem (Zero Hardcoding)</span>
         </button>
+
+        <button type="button" @click="activeTab = 'mom_config'" :class="activeTab === 'mom_config' ? 'border-emerald-600 text-emerald-700 font-bold' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-4 py-3 border-b-2 text-xs transition-colors whitespace-nowrap flex items-center space-x-2">
+            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span>Konfigurasi MoM ERP &amp; Retensi 10 Tahun</span>
+        </button>
     </div>
 
     <!-- TAB 1: MANAJEMEN PENGGUNA -->
@@ -1223,8 +1230,866 @@
             @endforelse
         </div>
     </div>
-</div>
 
-<!-- Alpine JS Script for Tab Switching & Modals -->
-<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <!-- TAB 8: KONFIGURASI MOM ERP, TEMPLATE SURAT JALAN & RETENSI 10 TAHUN -->
+    <div x-show="activeTab === 'mom_config'" class="space-y-6" x-cloak>
+        <!-- Hero Banner MoM Compliance -->
+        <div class="bg-gradient-to-r from-emerald-950 via-slate-900 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div class="relative z-10 max-w-2xl">
+                <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-semibold mb-3">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>Minutes of Meeting (MoM) ERP Import Export Standards</span>
+                </div>
+                <h3 class="text-xl sm:text-2xl font-bold tracking-tight text-white mb-2">Pusat Konfigurasi Operasional &amp; Master Data MoM</h3>
+                <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                    Kelola format default 4 template Surat Jalan resmi, template korespondensi email per divisi, rekening penampung deposit klien, serta jadwal audit dan masa retensi arsip 10 tahun (UU KUP Pasal 28 &amp; Kepabeanan).
+                </p>
+            </div>
+            <div class="relative z-10 shrink-0">
+                <a href="{{ route('settings.templates.index') }}" class="px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg inline-flex items-center gap-2 transition-all active:scale-95">
+                    <i data-lucide="layout-template" class="w-4 h-4"></i>
+                    <span>Kelola CRUD Master Template</span>
+                </a>
+            </div>
+        </div>
+
+        <form action="{{ route('setting.mom-config.update') }}" method="POST" class="space-y-6">
+            @csrf
+
+            <!-- 1. PENGATURAN MASTER SURAT JALAN -->
+            <div class="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-sm">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                            <i data-lucide="truck" class="w-5 h-5 text-emerald-600"></i>
+                            <span>Master Konfigurasi Surat Jalan (4 Template Resmi)</span>
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Penetapan template default pengeluaran kargo dan klausul sah serah terima.</p>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 font-mono">
+                        MoM Poin 1 &amp; 2
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Template Surat Jalan Default</label>
+                        <select name="surat_jalan_default_template" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white">
+                            @php $defTpl = \App\Models\SystemSetting::get('surat_jalan_default_template', 'fcl'); @endphp
+                            <option value="fcl" {{ $defTpl === 'fcl' ? 'selected' : '' }}>Template 1: Kontainer FCL (Pelabuhan ke Gudang Klien)</option>
+                            <option value="lcl" {{ $defTpl === 'lcl' ? 'selected' : '' }}>Template 2: Kargo LCL / Udara (CFS &amp; Air Freight)</option>
+                            <option value="inter_factory" {{ $defTpl === 'inter_factory' ? 'selected' : '' }}>Template 3: Antar Pabrik KB (BC 2.7 / BC 4.0)</option>
+                            <option value="empty_depo" {{ $defTpl === 'empty_depo' ? 'selected' : '' }}>Template 4: Pengembalian Empty Depo (EIR Return)</option>
+                        </select>
+                        <p class="text-[11px] text-slate-400 mt-1">Dapat dipilih dan disesuaikan per shipment saat proses cetak.</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Nama Penanggung Jawab Logistik (Signee)</label>
+                        <input type="text" name="surat_jalan_signee_name" 
+                               value="{{ \App\Models\SystemSetting::get('surat_jalan_signee_name', 'Bambang Wijaya (Manager Ops Lapangan)') }}"
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <p class="text-[11px] text-slate-400 mt-1">Nama dan jabatan yang tercantum di lembar tanda tangan pengirim.</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">No. Kontak Hotline / Dispatch Driver</label>
+                        <input type="text" name="surat_jalan_emergency_phone" 
+                               value="{{ \App\Models\SystemSetting::get('surat_jalan_emergency_phone', '+62 811-3322-1100 / 031-3558899') }}"
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <p class="text-[11px] text-slate-400 mt-1">Kontak darurat yang dicetak di bagian catatan bawah surat jalan.</p>
+                    </div>
+
+                    <div class="md:col-span-3">
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Klausul Syarat &amp; Ketentuan Pengiriman Kargo</label>
+                        <textarea name="surat_jalan_terms" rows="2" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">{{ \App\Models\SystemSetting::get('surat_jalan_terms', '1. Segel kontainer/koli wajib dalam keadaan utuh saat serah terima. 2. Penerima wajib membubuhkan stempel resmi, tanda tangan, nama jelas & jam terima barang pada lembar putih. 3. Klaim kerusakan/kekurangan kargo harus dicatat langsung di lembar surat jalan sebelum truk meninggalkan lokasi.') }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. PENGATURAN TEMPLATE & EMAIL RESMI 4 DIVISI (MoM Poin 7) -->
+            <div class="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-sm space-y-6">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                            <i data-lucide="mail-check" class="w-5 h-5 text-sky-600"></i>
+                            <span>4 Akun Email Resmi &amp; 4 Server SMTP Dedicated Per Divisi</span>
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Setiap divisi operasional memiliki identitas pengirim resmi (*From Address*, *From Name*, *Reply-To*) dan koneksi server SMTP mandiri untuk mengisolasi penawaran, penagihan, dokumen, dan dispatch armada.</p>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-sky-50 text-sky-700 font-mono">
+                        MoM Poin 7 &bull; 4 Divisi Terisolasi
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Kartu 1: Divisi Marketing -->
+                    <div class="p-5 rounded-2xl bg-amber-50/40 border border-amber-200/80 space-y-3.5" x-data="{ 
+                        showSmtp: {{ \App\Models\SystemSetting::get('email_marketing_smtp_custom', 1) ? 'true' : 'false' }},
+                        showPass: false,
+                        isTesting: false,
+                        testMsg: '',
+                        testSuccess: false,
+                        testRecipient: '{{ \App\Models\SystemSetting::get('email_marketing_from_address', 'marketing@agungtrans.co.id') }}',
+                        host: '{{ \App\Models\SystemSetting::get('email_marketing_smtp_host', 'smtp.gmail.com') }}',
+                        port: {{ \App\Models\SystemSetting::get('email_marketing_smtp_port', 587) }},
+                        enc: '{{ \App\Models\SystemSetting::get('email_marketing_smtp_encryption', 'tls') }}',
+                        user: '{{ \App\Models\SystemSetting::get('email_marketing_smtp_username', 'marketing@agungtrans.co.id') }}',
+                        pass: '{{ \App\Models\SystemSetting::get('email_marketing_smtp_password', '') }}',
+                        fromEmail: '{{ \App\Models\SystemSetting::get('email_marketing_from_address', 'marketing@agungtrans.co.id') }}',
+                        fromName: '{{ \App\Models\SystemSetting::get('email_marketing_from_name', 'PT Agung Trans - Marketing & Sales') }}',
+                        testConn() {
+                            this.isTesting = true;
+                            this.testMsg = '';
+                            fetch('{{ route('setting.test-smtp') }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: JSON.stringify({ 
+                                    division: 'marketing',
+                                    test_email: this.testRecipient,
+                                    smtp_host: this.host,
+                                    smtp_port: this.port,
+                                    smtp_encryption: this.enc,
+                                    smtp_username: this.user,
+                                    smtp_password: this.pass,
+                                    from_address: this.fromEmail,
+                                    from_name: this.fromName
+                                })
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                this.isTesting = false;
+                                this.testSuccess = data.success;
+                                this.testMsg = data.message;
+                            })
+                            .catch(err => {
+                                this.isTesting = false;
+                                this.testSuccess = false;
+                                this.testMsg = 'Gagal menghubungi endpoint: ' + err.message;
+                            });
+                        }
+                    }">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-700 flex items-center justify-center font-bold text-xs">
+                                    <i data-lucide="badge-dollar-sign" class="w-4 h-4"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-900">1. Divisi Marketing &amp; Sales</h4>
+                                    <p class="text-[11px] text-slate-500">Kirim Penawaran Harga (Quotation) &amp; Sales Inquiries</p>
+                                </div>
+                            </div>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">SMTP 1 &bull; Marketing</span>
+                        </div>
+                        <div class="space-y-2.5 text-xs">
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Email Pengirim Resmi (From Address)</label>
+                                <input type="email" name="email_marketing_from_address" x-model="fromEmail"
+                                       value="{{ \App\Models\SystemSetting::get('email_marketing_from_address', 'marketing@agungtrans.co.id') }}" 
+                                       placeholder="marketing@agungtrans.co.id" 
+                                       class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-mono text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block font-semibold text-slate-700 mb-1">Nama Pengirim (From Name)</label>
+                                    <input type="text" name="email_marketing_from_name" x-model="fromName"
+                                           value="{{ \App\Models\SystemSetting::get('email_marketing_from_name', 'PT Agung Trans - Marketing & Sales') }}" 
+                                           placeholder="PT Agung Trans - Marketing & Sales" 
+                                           class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 mb-1">Reply-To Address</label>
+                                    <input type="email" name="email_marketing_reply_to" 
+                                           value="{{ \App\Models\SystemSetting::get('email_marketing_reply_to', 'marketing@agungtrans.co.id') }}" 
+                                           placeholder="marketing@agungtrans.co.id" 
+                                           class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-mono text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Template Subjek Email</label>
+                                <input type="text" name="email_marketing_subject" 
+                                       value="{{ \App\Models\SystemSetting::get('email_marketing_subject', 'Penawaran Harga Resmi Ekspor Impor - PT Agung Trans Sinergi') }}" 
+                                       class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                            </div>
+
+                            <!-- Dedicated SMTP Server Divisi Marketing -->
+                            <div class="pt-3 border-t border-amber-200/70">
+                                <div class="flex items-center justify-between">
+                                    <label class="flex items-center gap-2 cursor-pointer select-none">
+                                        <input type="checkbox" name="email_marketing_smtp_custom" value="1" x-model="showSmtp" class="w-4 h-4 rounded text-amber-600 focus:ring-amber-500 border-slate-300">
+                                        <span class="font-bold text-slate-800 text-[11px]">Dedicated SMTP Server Divisi Marketing</span>
+                                    </label>
+                                    <span class="text-[10px] font-semibold" :class="showSmtp ? 'text-amber-700' : 'text-slate-400'" x-text="showSmtp ? 'Dedicated SMTP Aktif' : 'Default .env'"></span>
+                                </div>
+
+                                <div x-show="showSmtp" x-transition class="mt-3 space-y-2.5 p-3.5 rounded-xl bg-white/95 border border-amber-200/80 shadow-xs">
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                        <div class="sm:col-span-2">
+                                            <label class="block font-semibold text-slate-700 text-[11px] mb-1">SMTP Host *</label>
+                                            <input type="text" name="email_marketing_smtp_host" x-model="host"
+                                                   placeholder="smtp.gmail.com / mail.agungtrans.co.id" 
+                                                   class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white font-mono text-[11px] focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block font-semibold text-slate-700 text-[11px] mb-1">Port &amp; Enkripsi *</label>
+                                            <div class="flex gap-1.5">
+                                                <input type="number" name="email_marketing_smtp_port" x-model="port"
+                                                       placeholder="587" 
+                                                       class="w-16 px-2 py-1.5 rounded-lg border border-slate-200 bg-white font-mono text-[11px] focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                                                <select name="email_marketing_smtp_encryption" x-model="enc" class="flex-1 px-1.5 py-1.5 rounded-lg border border-slate-200 bg-white font-mono text-[11px] focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                                                    <option value="tls">TLS</option>
+                                                    <option value="ssl">SSL</option>
+                                                    <option value="none">None</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                        <div>
+                                            <label class="block font-semibold text-slate-700 text-[11px] mb-1">SMTP Username / Email Akun *</label>
+                                            <input type="text" name="email_marketing_smtp_username" x-model="user"
+                                                   placeholder="marketing@agungtrans.co.id" 
+                                                   class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white font-mono text-[11px] focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block font-semibold text-slate-700 text-[11px] mb-1">SMTP Password / App Password *</label>
+                                            <div class="relative">
+                                                <input :type="showPass ? 'text' : 'password'" name="email_marketing_smtp_password" x-model="pass"
+                                                       placeholder="Kata sandi / App Password" 
+                                                       class="w-full px-2.5 py-1.5 pr-8 rounded-lg border border-slate-200 bg-white font-mono text-[11px] focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                                                <button type="button" @click="showPass = !showPass" class="absolute inset-y-0 right-0 pr-2 flex items-center text-slate-400 hover:text-slate-600">
+                                                    <span class="text-[10px] font-mono" x-text="showPass ? 'Hide' : 'Show'"></span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Bar Uji Coba Real-Time -->
+                                    <div class="pt-2 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                        <div class="flex items-center gap-1.5 flex-1">
+                                            <span class="text-[10px] text-slate-500 shrink-0">Tes Kirim Ke:</span>
+                                            <input type="email" x-model="testRecipient" placeholder="Email tujuan uji coba" class="flex-1 max-w-xs px-2 py-1 rounded border border-slate-200 font-mono text-[10px] bg-slate-50 focus:bg-white focus:outline-none">
+                                        </div>
+                                        <button type="button" @click="testConn()" :disabled="isTesting" class="px-3 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white font-bold text-[11px] inline-flex items-center gap-1.5 transition-all shrink-0">
+                                            <span x-show="isTesting" class="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                                            <i data-lucide="send" class="w-3 h-3" x-show="!isTesting"></i>
+                                            <span x-text="isTesting ? 'Menguji...' : 'Tes Koneksi SMTP 1'"></span>
+                                        </button>
+                                    </div>
+                                    <div x-show="testMsg" x-transition class="p-2.5 rounded-lg text-[11px] leading-relaxed" :class="testSuccess ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'">
+                                        <p class="font-bold" x-text="testSuccess ? '✓ Koneksi SMTP Marketing Sukses' : '✗ Gagal Terhubung ke SMTP'"></p>
+                                        <p class="text-[10px] mt-0.5" x-text="testMsg"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kartu 2: Divisi Finance -->
+                    <div class="p-5 rounded-2xl bg-emerald-50/40 border border-emerald-200/80 space-y-3.5" x-data="{ 
+                        showSmtp: {{ \App\Models\SystemSetting::get('email_finance_smtp_custom', 1) ? 'true' : 'false' }},
+                        showPass: false,
+                        isTesting: false,
+                        testMsg: '',
+                        testSuccess: false,
+                        testRecipient: '{{ \App\Models\SystemSetting::get('email_finance_from_address', 'finance@agungtrans.co.id') }}',
+                        host: '{{ \App\Models\SystemSetting::get('email_finance_smtp_host', 'smtp.gmail.com') }}',
+                        port: {{ \App\Models\SystemSetting::get('email_finance_smtp_port', 587) }},
+                        enc: '{{ \App\Models\SystemSetting::get('email_finance_smtp_encryption', 'tls') }}',
+                        user: '{{ \App\Models\SystemSetting::get('email_finance_smtp_username', 'finance@agungtrans.co.id') }}',
+                        pass: '{{ \App\Models\SystemSetting::get('email_finance_smtp_password', '') }}',
+                        fromEmail: '{{ \App\Models\SystemSetting::get('email_finance_from_address', 'finance@agungtrans.co.id') }}',
+                        fromName: '{{ \App\Models\SystemSetting::get('email_finance_from_name', 'PT Agung Trans - Finance & Billing') }}',
+                        testConn() {
+                            this.isTesting = true;
+                            this.testMsg = '';
+                            fetch('{{ route('setting.test-smtp') }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: JSON.stringify({ 
+                                    division: 'finance',
+                                    test_email: this.testRecipient,
+                                    smtp_host: this.host,
+                                    smtp_port: this.port,
+                                    smtp_encryption: this.enc,
+                                    smtp_username: this.user,
+                                    smtp_password: this.pass,
+                                    from_address: this.fromEmail,
+                                    from_name: this.fromName
+                                })
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                this.isTesting = false;
+                                this.testSuccess = data.success;
+                                this.testMsg = data.message;
+                            })
+                            .catch(err => {
+                                this.isTesting = false;
+                                this.testSuccess = false;
+                                this.testMsg = 'Gagal menghubungi endpoint: ' + err.message;
+                            });
+                        }
+                    }">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-700 flex items-center justify-center font-bold text-xs">
+                                    <i data-lucide="receipt" class="w-4 h-4"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-900">2. Divisi Finance &amp; Billing</h4>
+                                    <p class="text-[11px] text-slate-500">Kirim Tagihan (Invoice P19), Kwitansi, Deposit</p>
+                                </div>
+                            </div>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">SMTP 2 &bull; Finance</span>
+                        </div>
+                        <div class="space-y-2.5 text-xs">
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Email Pengirim Resmi (From Address)</label>
+                                <input type="email" name="email_finance_from_address" x-model="fromEmail"
+                                       value="{{ \App\Models\SystemSetting::get('email_finance_from_address', 'finance@agungtrans.co.id') }}" 
+                                       placeholder="finance@agungtrans.co.id" 
+                                       class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-mono text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block font-semibold text-slate-700 mb-1">Nama Pengirim (From Name)</label>
+                                    <input type="text" name="email_finance_from_name" x-model="fromName"
+                                           value="{{ \App\Models\SystemSetting::get('email_finance_from_name', 'PT Agung Trans - Finance & Billing') }}" 
+                                           placeholder="PT Agung Trans - Finance & Billing" 
+                                           class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 mb-1">Reply-To Address</label>
+                                    <input type="email" name="email_finance_reply_to" 
+                                           value="{{ \App\Models\SystemSetting::get('email_finance_reply_to', 'finance@agungtrans.co.id') }}" 
+                                           placeholder="finance@agungtrans.co.id" 
+                                           class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-mono text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Template Subjek Email</label>
+                                <input type="text" name="email_finance_subject" 
+                                       value="{{ \App\Models\SystemSetting::get('email_finance_subject', 'Pemberitahuan Tagihan Resmi (Invoice P19) - PT Agung Trans Sinergi') }}" 
+                                       class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                            </div>
+
+                            <!-- Dedicated SMTP Server Divisi Finance -->
+                            <div class="pt-3 border-t border-emerald-200/70">
+                                <div class="flex items-center justify-between">
+                                    <label class="flex items-center gap-2 cursor-pointer select-none">
+                                        <input type="checkbox" name="email_finance_smtp_custom" value="1" x-model="showSmtp" class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300">
+                                        <span class="font-bold text-slate-800 text-[11px]">Dedicated SMTP Server Divisi Finance</span>
+                                    </label>
+                                    <span class="text-[10px] font-semibold" :class="showSmtp ? 'text-emerald-700' : 'text-slate-400'" x-text="showSmtp ? 'Dedicated SMTP Aktif' : 'Default .env'"></span>
+                                </div>
+
+                                <div x-show="showSmtp" x-transition class="mt-3 space-y-2.5 p-3.5 rounded-xl bg-white/95 border border-emerald-200/80 shadow-xs">
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                        <div class="sm:col-span-2">
+                                            <label class="block font-semibold text-slate-700 text-[11px] mb-1">SMTP Host *</label>
+                                            <input type="text" name="email_finance_smtp_host" x-model="host"
+                                                   placeholder="smtp.gmail.com / mail.agungtrans.co.id" 
+                                                   class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white font-mono text-[11px] focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block font-semibold text-slate-700 text-[11px] mb-1">Port &amp; Enkripsi *</label>
+                                            <div class="flex gap-1.5">
+                                                <input type="number" name="email_finance_smtp_port" x-model="port"
+                                                       placeholder="587" 
+                                                       class="w-16 px-2 py-1.5 rounded-lg border border-slate-200 bg-white font-mono text-[11px] focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                                <select name="email_finance_smtp_encryption" x-model="enc" class="flex-1 px-1.5 py-1.5 rounded-lg border border-slate-200 bg-white font-mono text-[11px] focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                                    <option value="tls">TLS</option>
+                                                    <option value="ssl">SSL</option>
+                                                    <option value="none">None</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                        <div>
+                                            <label class="block font-semibold text-slate-700 text-[11px] mb-1">SMTP Username / Email Akun *</label>
+                                            <input type="text" name="email_finance_smtp_username" x-model="user"
+                                                   placeholder="finance@agungtrans.co.id" 
+                                                   class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white font-mono text-[11px] focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block font-semibold text-slate-700 text-[11px] mb-1">SMTP Password / App Password *</label>
+                                            <div class="relative">
+                                                <input :type="showPass ? 'text' : 'password'" name="email_finance_smtp_password" x-model="pass"
+                                                       placeholder="Kata sandi / App Password" 
+                                                       class="w-full px-2.5 py-1.5 pr-8 rounded-lg border border-slate-200 bg-white font-mono text-[11px] focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                                <button type="button" @click="showPass = !showPass" class="absolute inset-y-0 right-0 pr-2 flex items-center text-slate-400 hover:text-slate-600">
+                                                    <span class="text-[10px] font-mono" x-text="showPass ? 'Hide' : 'Show'"></span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Bar Uji Coba Real-Time -->
+                                    <div class="pt-2 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                        <div class="flex items-center gap-1.5 flex-1">
+                                            <span class="text-[10px] text-slate-500 shrink-0">Tes Kirim Ke:</span>
+                                            <input type="email" x-model="testRecipient" placeholder="Email tujuan uji coba" class="flex-1 max-w-xs px-2 py-1 rounded border border-slate-200 font-mono text-[10px] bg-slate-50 focus:bg-white focus:outline-none">
+                                        </div>
+                                        <button type="button" @click="testConn()" :disabled="isTesting" class="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-[11px] inline-flex items-center gap-1.5 transition-all shrink-0">
+                                            <span x-show="isTesting" class="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                                            <i data-lucide="send" class="w-3 h-3" x-show="!isTesting"></i>
+                                            <span x-text="isTesting ? 'Menguji...' : 'Tes Koneksi SMTP 2'"></span>
+                                        </button>
+                                    </div>
+                                    <div x-show="testMsg" x-transition class="p-2.5 rounded-lg text-[11px] leading-relaxed" :class="testSuccess ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'">
+                                        <p class="font-bold" x-text="testSuccess ? '✓ Koneksi SMTP Finance Sukses' : '✗ Gagal Terhubung ke SMTP'"></p>
+                                        <p class="text-[10px] mt-0.5" x-text="testMsg"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kartu 3: Divisi Dokumen Pabean -->
+                    <div class="p-5 rounded-2xl bg-indigo-50/40 border border-indigo-200/80 space-y-3.5" x-data="{ 
+                        showSmtp: {{ \App\Models\SystemSetting::get('email_document_smtp_custom', 1) ? 'true' : 'false' }},
+                        showPass: false,
+                        isTesting: false,
+                        testMsg: '',
+                        testSuccess: false,
+                        testRecipient: '{{ \App\Models\SystemSetting::get('email_document_from_address', 'dokumen@agungtrans.co.id') }}',
+                        host: '{{ \App\Models\SystemSetting::get('email_document_smtp_host', 'smtp.gmail.com') }}',
+                        port: {{ \App\Models\SystemSetting::get('email_document_smtp_port', 587) }},
+                        enc: '{{ \App\Models\SystemSetting::get('email_document_smtp_encryption', 'tls') }}',
+                        user: '{{ \App\Models\SystemSetting::get('email_document_smtp_username', 'dokumen@agungtrans.co.id') }}',
+                        pass: '{{ \App\Models\SystemSetting::get('email_document_smtp_password', '') }}',
+                        fromEmail: '{{ \App\Models\SystemSetting::get('email_document_from_address', 'dokumen@agungtrans.co.id') }}',
+                        fromName: '{{ \App\Models\SystemSetting::get('email_document_from_name', 'PT Agung Trans - Dokumen & Kepabeanan') }}',
+                        testConn() {
+                            this.isTesting = true;
+                            this.testMsg = '';
+                            fetch('{{ route('setting.test-smtp') }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: JSON.stringify({ 
+                                    division: 'document',
+                                    test_email: this.testRecipient,
+                                    smtp_host: this.host,
+                                    smtp_port: this.port,
+                                    smtp_encryption: this.enc,
+                                    smtp_username: this.user,
+                                    smtp_password: this.pass,
+                                    from_address: this.fromEmail,
+                                    from_name: this.fromName
+                                })
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                this.isTesting = false;
+                                this.testSuccess = data.success;
+                                this.testMsg = data.message;
+                            })
+                            .catch(err => {
+                                this.isTesting = false;
+                                this.testSuccess = false;
+                                this.testMsg = 'Gagal menghubungi endpoint: ' + err.message;
+                            });
+                        }
+                    }">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-700 flex items-center justify-center font-bold text-xs">
+                                    <i data-lucide="file-check-2" class="w-4 h-4"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-900">3. Divisi Dokumen Kepabeanan</h4>
+                                    <p class="text-[11px] text-slate-500">Review &amp; Approval Draft PIB/PEB &amp; Billing Bea Cukai</p>
+                                </div>
+                            </div>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800">SMTP 3 &bull; Dokumen</span>
+                        </div>
+                        <div class="space-y-2.5 text-xs">
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Email Pengirim Resmi (From Address)</label>
+                                <input type="email" name="email_document_from_address" x-model="fromEmail"
+                                       value="{{ \App\Models\SystemSetting::get('email_document_from_address', 'dokumen@agungtrans.co.id') }}" 
+                                       placeholder="dokumen@agungtrans.co.id" 
+                                       class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-mono text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block font-semibold text-slate-700 mb-1">Nama Pengirim (From Name)</label>
+                                    <input type="text" name="email_document_from_name" x-model="fromName"
+                                           value="{{ \App\Models\SystemSetting::get('email_document_from_name', 'PT Agung Trans - Dokumen & Kepabeanan') }}" 
+                                           placeholder="PT Agung Trans - Dokumen & Kepabeanan" 
+                                           class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 mb-1">Reply-To Address</label>
+                                    <input type="email" name="email_document_reply_to" 
+                                           value="{{ \App\Models\SystemSetting::get('email_document_reply_to', 'dokumen@agungtrans.co.id') }}" 
+                                           placeholder="dokumen@agungtrans.co.id" 
+                                           class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-mono text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Template Subjek Email</label>
+                                <input type="text" name="email_document_subject" 
+                                       value="{{ \App\Models\SystemSetting::get('email_document_subject', 'Konfirmasi & Approval Draft Dokumen Pabean (PIB/PEB)') }}" 
+                                       class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            </div>
+
+                            <!-- Dedicated SMTP Server Divisi Dokumen -->
+                            <div class="pt-3 border-t border-indigo-200/70">
+                                <div class="flex items-center justify-between">
+                                    <label class="flex items-center gap-2 cursor-pointer select-none">
+                                        <input type="checkbox" name="email_document_smtp_custom" value="1" x-model="showSmtp" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300">
+                                        <span class="font-bold text-slate-800 text-[11px]">Dedicated SMTP Server Divisi Dokumen</span>
+                                    </label>
+                                    <span class="text-[10px] font-semibold" :class="showSmtp ? 'text-indigo-700' : 'text-slate-400'" x-text="showSmtp ? 'Dedicated SMTP Aktif' : 'Default .env'"></span>
+                                </div>
+
+                                <div x-show="showSmtp" x-transition class="mt-3 space-y-2.5 p-3.5 rounded-xl bg-white/95 border border-indigo-200/80 shadow-xs">
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                        <div class="sm:col-span-2">
+                                            <label class="block font-semibold text-slate-700 text-[11px] mb-1">SMTP Host *</label>
+                                            <input type="text" name="email_document_smtp_host" x-model="host"
+                                                   placeholder="smtp.gmail.com / mail.agungtrans.co.id" 
+                                                   class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white font-mono text-[11px] focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block font-semibold text-slate-700 text-[11px] mb-1">Port &amp; Enkripsi *</label>
+                                            <div class="flex gap-1.5">
+                                                <input type="number" name="email_document_smtp_port" x-model="port"
+                                                       placeholder="587" 
+                                                       class="w-16 px-2 py-1.5 rounded-lg border border-slate-200 bg-white font-mono text-[11px] focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                                                <select name="email_document_smtp_encryption" x-model="enc" class="flex-1 px-1.5 py-1.5 rounded-lg border border-slate-200 bg-white font-mono text-[11px] focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                                                    <option value="tls">TLS</option>
+                                                    <option value="ssl">SSL</option>
+                                                    <option value="none">None</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                        <div>
+                                            <label class="block font-semibold text-slate-700 text-[11px] mb-1">SMTP Username / Email Akun *</label>
+                                            <input type="text" name="email_document_smtp_username" x-model="user"
+                                                   placeholder="dokumen@agungtrans.co.id" 
+                                                   class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white font-mono text-[11px] focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block font-semibold text-slate-700 text-[11px] mb-1">SMTP Password / App Password *</label>
+                                            <div class="relative">
+                                                <input :type="showPass ? 'text' : 'password'" name="email_document_smtp_password" x-model="pass"
+                                                       placeholder="Kata sandi / App Password" 
+                                                       class="w-full px-2.5 py-1.5 pr-8 rounded-lg border border-slate-200 bg-white font-mono text-[11px] focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                                                <button type="button" @click="showPass = !showPass" class="absolute inset-y-0 right-0 pr-2 flex items-center text-slate-400 hover:text-slate-600">
+                                                    <span class="text-[10px] font-mono" x-text="showPass ? 'Hide' : 'Show'"></span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Bar Uji Coba Real-Time -->
+                                    <div class="pt-2 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                        <div class="flex items-center gap-1.5 flex-1">
+                                            <span class="text-[10px] text-slate-500 shrink-0">Tes Kirim Ke:</span>
+                                            <input type="email" x-model="testRecipient" placeholder="Email tujuan uji coba" class="flex-1 max-w-xs px-2 py-1 rounded border border-slate-200 font-mono text-[10px] bg-slate-50 focus:bg-white focus:outline-none">
+                                        </div>
+                                        <button type="button" @click="testConn()" :disabled="isTesting" class="px-3 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold text-[11px] inline-flex items-center gap-1.5 transition-all shrink-0">
+                                            <span x-show="isTesting" class="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                                            <i data-lucide="send" class="w-3 h-3" x-show="!isTesting"></i>
+                                            <span x-text="isTesting ? 'Menguji...' : 'Tes Koneksi SMTP 3'"></span>
+                                        </button>
+                                    </div>
+                                    <div x-show="testMsg" x-transition class="p-2.5 rounded-lg text-[11px] leading-relaxed" :class="testSuccess ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'">
+                                        <p class="font-bold" x-text="testSuccess ? '✓ Koneksi SMTP Dokumen Sukses' : '✗ Gagal Terhubung ke SMTP'"></p>
+                                        <p class="text-[10px] mt-0.5" x-text="testMsg"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kartu 4: Divisi Traffic & Lapangan -->
+                    <div class="p-5 rounded-2xl bg-sky-50/40 border border-sky-200/80 space-y-3.5" x-data="{ 
+                        showSmtp: {{ \App\Models\SystemSetting::get('email_traffic_smtp_custom', 1) ? 'true' : 'false' }},
+                        showPass: false,
+                        isTesting: false,
+                        testMsg: '',
+                        testSuccess: false,
+                        testRecipient: '{{ \App\Models\SystemSetting::get('email_traffic_from_address', 'traffic@agungtrans.co.id') }}',
+                        host: '{{ \App\Models\SystemSetting::get('email_traffic_smtp_host', 'smtp.gmail.com') }}',
+                        port: {{ \App\Models\SystemSetting::get('email_traffic_smtp_port', 587) }},
+                        enc: '{{ \App\Models\SystemSetting::get('email_traffic_smtp_encryption', 'tls') }}',
+                        user: '{{ \App\Models\SystemSetting::get('email_traffic_smtp_username', 'traffic@agungtrans.co.id') }}',
+                        pass: '{{ \App\Models\SystemSetting::get('email_traffic_smtp_password', '') }}',
+                        fromEmail: '{{ \App\Models\SystemSetting::get('email_traffic_from_address', 'traffic@agungtrans.co.id') }}',
+                        fromName: '{{ \App\Models\SystemSetting::get('email_traffic_from_name', 'PT Agung Trans - Traffic & Lapangan') }}',
+                        testConn() {
+                            this.isTesting = true;
+                            this.testMsg = '';
+                            fetch('{{ route('setting.test-smtp') }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: JSON.stringify({ 
+                                    division: 'traffic',
+                                    test_email: this.testRecipient,
+                                    smtp_host: this.host,
+                                    smtp_port: this.port,
+                                    smtp_encryption: this.enc,
+                                    smtp_username: this.user,
+                                    smtp_password: this.pass,
+                                    from_address: this.fromEmail,
+                                    from_name: this.fromName
+                                })
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                this.isTesting = false;
+                                this.testSuccess = data.success;
+                                this.testMsg = data.message;
+                            })
+                            .catch(err => {
+                                this.isTesting = false;
+                                this.testSuccess = false;
+                                this.testMsg = 'Gagal menghubungi endpoint: ' + err.message;
+                            });
+                        }
+                    }">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-700 flex items-center justify-center font-bold text-xs">
+                                    <i data-lucide="navigation" class="w-4 h-4"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-900">4. Divisi Traffic &amp; Armada Lapangan</h4>
+                                    <p class="text-[11px] text-slate-500">Notifikasi Armada, Posisi Kargo, ETA, SPPB, &amp; Dispatch</p>
+                                </div>
+                            </div>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-800">SMTP 4 &bull; Traffic</span>
+                        </div>
+                        <div class="space-y-2.5 text-xs">
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Email Pengirim Resmi (From Address)</label>
+                                <input type="email" name="email_traffic_from_address" x-model="fromEmail"
+                                       value="{{ \App\Models\SystemSetting::get('email_traffic_from_address', 'traffic@agungtrans.co.id') }}" 
+                                       placeholder="traffic@agungtrans.co.id" 
+                                       class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-mono text-xs focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block font-semibold text-slate-700 mb-1">Nama Pengirim (From Name)</label>
+                                    <input type="text" name="email_traffic_from_name" x-model="fromName"
+                                           value="{{ \App\Models\SystemSetting::get('email_traffic_from_name', 'PT Agung Trans - Traffic & Lapangan') }}" 
+                                           placeholder="PT Agung Trans - Traffic & Lapangan" 
+                                           class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 mb-1">Reply-To Address</label>
+                                    <input type="email" name="email_traffic_reply_to" 
+                                           value="{{ \App\Models\SystemSetting::get('email_traffic_reply_to', 'traffic@agungtrans.co.id') }}" 
+                                           placeholder="traffic@agungtrans.co.id" 
+                                           class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-mono text-xs focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Template Subjek Email</label>
+                                <input type="text" name="email_traffic_subject" 
+                                       value="{{ \App\Models\SystemSetting::get('email_traffic_subject', 'Update Status Kargo, Estimasi Kedatangan (ETA) & SPPB') }}" 
+                                       class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                            </div>
+
+                            <!-- Dedicated SMTP Server Divisi Traffic -->
+                            <div class="pt-3 border-t border-sky-200/70">
+                                <div class="flex items-center justify-between">
+                                    <label class="flex items-center gap-2 cursor-pointer select-none">
+                                        <input type="checkbox" name="email_traffic_smtp_custom" value="1" x-model="showSmtp" class="w-4 h-4 rounded text-sky-600 focus:ring-sky-500 border-slate-300">
+                                        <span class="font-bold text-slate-800 text-[11px]">Dedicated SMTP Server Divisi Traffic</span>
+                                    </label>
+                                    <span class="text-[10px] font-semibold" :class="showSmtp ? 'text-sky-700' : 'text-slate-400'" x-text="showSmtp ? 'Dedicated SMTP Aktif' : 'Default .env'"></span>
+                                </div>
+
+                                <div x-show="showSmtp" x-transition class="mt-3 space-y-2.5 p-3.5 rounded-xl bg-white/95 border border-sky-200/80 shadow-xs">
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                        <div class="sm:col-span-2">
+                                            <label class="block font-semibold text-slate-700 text-[11px] mb-1">SMTP Host *</label>
+                                            <input type="text" name="email_traffic_smtp_host" x-model="host"
+                                                   placeholder="smtp.gmail.com / mail.agungtrans.co.id" 
+                                                   class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white font-mono text-[11px] focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block font-semibold text-slate-700 text-[11px] mb-1">Port &amp; Enkripsi *</label>
+                                            <div class="flex gap-1.5">
+                                                <input type="number" name="email_traffic_smtp_port" x-model="port"
+                                                       placeholder="587" 
+                                                       class="w-16 px-2 py-1.5 rounded-lg border border-slate-200 bg-white font-mono text-[11px] focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                                                <select name="email_traffic_smtp_encryption" x-model="enc" class="flex-1 px-1.5 py-1.5 rounded-lg border border-slate-200 bg-white font-mono text-[11px] focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                                                    <option value="tls">TLS</option>
+                                                    <option value="ssl">SSL</option>
+                                                    <option value="none">None</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                        <div>
+                                            <label class="block font-semibold text-slate-700 text-[11px] mb-1">SMTP Username / Email Akun *</label>
+                                            <input type="text" name="email_traffic_smtp_username" x-model="user"
+                                                   placeholder="traffic@agungtrans.co.id" 
+                                                   class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white font-mono text-[11px] focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block font-semibold text-slate-700 text-[11px] mb-1">SMTP Password / App Password *</label>
+                                            <div class="relative">
+                                                <input :type="showPass ? 'text' : 'password'" name="email_traffic_smtp_password" x-model="pass"
+                                                       placeholder="Kata sandi / App Password" 
+                                                       class="w-full px-2.5 py-1.5 pr-8 rounded-lg border border-slate-200 bg-white font-mono text-[11px] focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                                                <button type="button" @click="showPass = !showPass" class="absolute inset-y-0 right-0 pr-2 flex items-center text-slate-400 hover:text-slate-600">
+                                                    <span class="text-[10px] font-mono" x-text="showPass ? 'Hide' : 'Show'"></span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Bar Uji Coba Real-Time -->
+                                    <div class="pt-2 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                        <div class="flex items-center gap-1.5 flex-1">
+                                            <span class="text-[10px] text-slate-500 shrink-0">Tes Kirim Ke:</span>
+                                            <input type="email" x-model="testRecipient" placeholder="Email tujuan uji coba" class="flex-1 max-w-xs px-2 py-1 rounded border border-slate-200 font-mono text-[10px] bg-slate-50 focus:bg-white focus:outline-none">
+                                        </div>
+                                        <button type="button" @click="testConn()" :disabled="isTesting" class="px-3 py-1 rounded-lg bg-sky-600 hover:bg-sky-700 disabled:opacity-50 text-white font-bold text-[11px] inline-flex items-center gap-1.5 transition-all shrink-0">
+                                            <span x-show="isTesting" class="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                                            <i data-lucide="send" class="w-3 h-3" x-show="!isTesting"></i>
+                                            <span x-text="isTesting ? 'Menguji...' : 'Tes Koneksi SMTP 4'"></span>
+                                        </button>
+                                    </div>
+                                    <div x-show="testMsg" x-transition class="p-2.5 rounded-lg text-[11px] leading-relaxed" :class="testSuccess ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'">
+                                        <p class="font-bold" x-text="testSuccess ? '✓ Koneksi SMTP Traffic Sukses' : '✗ Gagal Terhubung ke SMTP'"></p>
+                                        <p class="text-[10px] mt-0.5" x-text="testMsg"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rekening Bank Resmi Finance -->
+                    <div class="lg:col-span-2 p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                        <label class="block text-xs font-bold text-slate-800">Rekening Bank Resmi Finance (Tercantum pada Email Penagihan &amp; Faktur P19)</label>
+                        <p class="text-[11px] text-slate-500">Informasi rekening ini akan secara otomatis disisipkan ke dalam email penagihan resmi yang dikirimkan kepada klien.</p>
+                        <textarea name="email_finance_bank_info" rows="2" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs focus:ring-2 focus:ring-sky-500 focus:outline-none">{{ \App\Models\SystemSetting::get('email_finance_bank_info', "Bank Mandiri Cabang Tanjung Perak: 141-00-9876543-2\nBank Central Asia (BCA) KCP Surabaya: 010-8899-771\nAtas Nama: PT GENIE LOGISTIK INDONESIA") }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. RETENSI ARSIP 10 TAHUN & JADWAL BACKUP -->
+            <div class="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-sm">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                            <i data-lucide="archive" class="w-5 h-5 text-purple-600"></i>
+                            <span>Backup Otomatis Harian &amp; Retensi 10 Tahun</span>
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Kepatuhan regulasi penyimpanan arsip perpajakan (UU KUP No. 28/2007) dan dokumen pabean.</p>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-purple-50 text-purple-700 font-mono">
+                        MoM Poin 11
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Masa Retensi Arsip Dokumen</label>
+                        <div class="relative">
+                            <input type="number" name="backup_retention_years" min="1" max="30"
+                                   value="{{ \App\Models\SystemSetting::get('backup_retention_years', 10) }}"
+                                   class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-mono focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                            <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-xs text-slate-400 pointer-events-none">Tahun</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-1">Standar wajib: <strong>10 Tahun</strong> (Surat Jalan, Invoice, Dokumen Pabean).</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Waktu Eksekusi Backup Harian Otomatis</label>
+                        <input type="text" name="backup_schedule_time" 
+                               value="{{ \App\Models\SystemSetting::get('backup_schedule_time', '01:00 WIB') }}"
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-mono focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                        <p class="text-[11px] text-slate-400 mt-1">Dijalankan otomatis oleh background scheduler.</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Status Manifest Retensi Aktif</label>
+                        <div class="p-2.5 rounded-xl bg-purple-50/60 border border-purple-100 text-purple-800 text-xs font-mono">
+                            Retensi s/d: <strong>{{ date('d F Y', strtotime('+10 years')) }}</strong>
+                        </div>
+                        <p class="text-[10px] text-slate-400 mt-1">storage/app/backups/archive_10yr/</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. PENGATURAN DEPOSIT KLIEN -->
+            <div class="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-sm">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                            <i data-lucide="wallet" class="w-5 h-5 text-amber-600"></i>
+                            <span>Rekening Penampung Deposit Klien</span>
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Penetapan rekening khusus escrow / dana talangan pabean yang disetorkan klien.</p>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-700 font-mono">
+                        MoM Poin 5
+                    </span>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Keterangan Rekening Penampung Deposit</label>
+                    <input type="text" name="deposit_rekening_tujuan" 
+                           value="{{ \App\Models\SystemSetting::get('deposit_rekening_tujuan', 'Bank Mandiri Escrow: 141-00-1122334-5 a.n PT GENIE LOGISTIK INDONESIA (ESCROW)') }}"
+                           class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    <p class="text-[11px] text-slate-400 mt-1">Rekening ini otomatis disarankan saat staf menginput bukti setoran deposit baru dari klien.</p>
+                </div>
+            </div>
+
+            <!-- Tombol Simpan -->
+            <div class="flex items-center justify-end gap-3 pt-2">
+                <button type="submit" class="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition-all active:scale-95 flex items-center gap-2 cursor-pointer">
+                    <i data-lucide="save" class="w-4 h-4 text-emerald-400"></i>
+                    <span>Simpan Seluruh Konfigurasi MoM</span>
+                </button>
+            </div>
+        </form>
+
+        <!-- Eksekusi Snapshot Manual Backup 10 Tahun (Emergency / On-Demand Action) -->
+        <div class="bg-purple-50/60 rounded-3xl p-6 sm:p-8 border border-purple-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+            <div>
+                <h4 class="text-sm font-bold text-purple-900 flex items-center gap-2">
+                    <i data-lucide="database-backup" class="w-4 h-4 text-purple-600"></i>
+                    <span>Tindakan Langsung: Jalankan Snapshot Backup Database Sekarang</span>
+                </h4>
+                <p class="text-xs text-purple-800 mt-1.5 leading-relaxed max-w-2xl">
+                    Ambil snapshot basis data dan perbarui berkas indeks manifest retensi 10 tahun seketika tanpa menunggu jadwal tengah malam.
+                </p>
+            </div>
+
+            <form action="{{ route('setting.backup-now') }}" method="POST" onsubmit="return confirm('Mulai proses backup database dan pengindeksan dokumen 10 tahun sekarang?')">
+                @csrf
+                <button type="submit" class="px-5 py-2.5 rounded-xl bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs shadow-xs transition-all active:scale-95 whitespace-nowrap cursor-pointer flex items-center gap-1.5">
+                    <i data-lucide="play" class="w-3.5 h-3.5"></i>
+                    <span>Backup Database Sekarang</span>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection

@@ -7,6 +7,7 @@ use App\Models\Shipment;
 use App\Models\ShipmentEvent;
 use App\Models\ShipmentOperationCost;
 use App\Services\Shipment\ShipmentWorkflowService;
+use App\Services\Tracking\LiveRadarTrackingService;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
@@ -23,7 +24,8 @@ class TrafficWorkflowController extends Controller implements HasMiddleware
         return [
             new Middleware('permission:traffic.view', only: ['index', 'show']),
             new Middleware('permission:traffic.behandle|traffic.manage', only: ['recordInspection', 'uploadInspectionPhotos', 'behandle']),
-            new Middleware('permission:traffic.manage', except: ['index', 'show', 'recordInspection', 'uploadInspectionPhotos', 'behandle']),
+            new Middleware('permission:traffic.process|traffic.manage', only: ['updateCustomsStatus', 'updateCustomsResponses', 'updateTracking', 'detectLiveArrival']),
+            new Middleware('permission:traffic.manage', except: ['index', 'show', 'recordInspection', 'uploadInspectionPhotos', 'behandle', 'updateCustomsStatus', 'updateCustomsResponses', 'updateTracking', 'detectLiveArrival']),
         ];
     }
     protected ShipmentWorkflowService $workflowService;
@@ -62,8 +64,9 @@ class TrafficWorkflowController extends Controller implements HasMiddleware
         }
 
         $shipments = $query->latest()->paginate(10);
+        $shippingVendors = \App\Models\ShippingVendor::where('is_active', true)->orderBy('name')->get();
 
-        return view('core.traffic_index', compact('shipments'));
+        return view('core.traffic_index', compact('shipments', 'shippingVendors'));
     }
 
     /**
@@ -101,10 +104,13 @@ class TrafficWorkflowController extends Controller implements HasMiddleware
     {
         Gate::authorize('traffic.gateout');
 
-        $request->validate([
+        $validated = $request->validate([
             'truck_plate_number' => 'required|string|max:20',
             'driver_name' => 'required|string|max:100',
             'surat_jalan_number' => 'required|string|max:100',
+            'trucking_vendor_name' => 'nullable|string|max:150',
+            'destination_address' => 'nullable|string|max:255',
+            'trucking_cost' => 'nullable|numeric|min:0',
         ]);
 
         $shipment = Shipment::findOrFail($id);
@@ -113,14 +119,33 @@ class TrafficWorkflowController extends Controller implements HasMiddleware
             return back()->with('error', 'DO belum dirilis! Kontainer tidak dapat keluar sebelum DO sah dari pelayaran.');
         }
 
-        $this->workflowService->advanceTraffic($shipment, 'GATE_OUT', [
-            'truck_plate_number' => $request->truck_plate_number,
-            'driver_name' => $request->driver_name,
-            'surat_jalan_number' => $request->surat_jalan_number,
+        $extraData = [
+            'truck_plate_number' => $validated['truck_plate_number'],
+            'driver_name' => $validated['driver_name'],
+            'surat_jalan_number' => $validated['surat_jalan_number'],
+            'trucking_vendor_name' => $validated['trucking_vendor_name'] ?? null,
+            'traffic_notes' => 'Tujuan: ' . ($validated['destination_address'] ?? 'Gudang Klien'),
             'gate_out_at' => now(),
-        ]);
+        ];
 
-        return back()->with('success', "Kontainer berhasil Gate Out dari TPS Pelabuhan menuju gudang klien dengan truk [{$request->truck_plate_number}].");
+        $this->workflowService->advanceTraffic($shipment, 'GATE_OUT', $extraData);
+
+        // Catat biaya trucking otomatis ke rekapan biaya operasional jika diisi
+        if (!empty($validated['trucking_cost']) && (float) $validated['trucking_cost'] > 0) {
+            ShipmentOperationCost::create([
+                'shipment_id' => $shipment->id,
+                'cost_category' => 'TRUCKING',
+                'vendor_name' => $validated['trucking_vendor_name'] ?? 'Vendor Trucking',
+                'invoice_number' => $validated['surat_jalan_number'],
+                'amount' => (float) $validated['trucking_cost'],
+                'status' => 'PAID',
+                'cost_date' => now()->toDateString(),
+                'notes' => 'Ongkos angkut trucking pengiriman ke ' . ($validated['destination_address'] ?? 'Gudang Klien'),
+                'created_by' => auth()->id(),
+            ]);
+        }
+
+        return back()->with('success', "Kontainer berhasil Gate Out menuju gudang tujuan dengan armada [{$validated['truck_plate_number']}] supir [{$validated['driver_name']}].");
     }
 
     /**
@@ -238,6 +263,90 @@ class TrafficWorkflowController extends Controller implements HasMiddleware
         ]);
 
         return back()->with('success', "Data respon kepabeanan & segel kontainer {$shipment->project_no} berhasil disimpan.");
+    }
+
+    /**
+     * Pembaruan Data Pelacakan Pelayaran / Penerbangan & Jadwal Kedatangan (ETA / ATA)
+     * Hak Akses: traffic.process | traffic.manage
+     */
+    public function updateTracking(string $id, Request $request)
+    {
+        Gate::authorize('traffic.process');
+
+        $shipment = Shipment::findOrFail($id);
+
+        $validated = $request->validate([
+            'nama_kapal' => 'nullable|string|max:255',
+            'voyage_no' => 'nullable|string|max:50',
+            'shipping_vendor_id' => 'nullable|string|exists:shipping_vendors,id',
+            'nomor_bl_awb' => 'nullable|string|max:50',
+            'pelabuhan_muat' => 'nullable|string|max:50',
+            'pelabuhan_bongkar' => 'nullable|string|max:50',
+            'tps_location' => 'nullable|string|max:100',
+            'eta_date' => 'nullable|date',
+            'actual_arrival_date' => 'nullable|date',
+            'catatan' => 'nullable|string|max:1000',
+        ]);
+
+        $shipment->update($validated);
+
+        if (!empty($validated['actual_arrival_date'])) {
+            ShipmentEvent::create([
+                'shipment_id' => $shipment->id,
+                'process_code' => 'VESSEL_ARRIVED',
+                'to_status' => $shipment->status_tahap,
+                'actor_id' => auth()->id(),
+                'note' => sprintf(
+                    'Konfirmasi kedatangan sarana pengangkut %s (Voy/Flight: %s) sandar/tiba pada %s di %s.',
+                    $shipment->nama_kapal ?? '-',
+                    $shipment->voyage_no ?? '-',
+                    \Carbon\Carbon::parse($validated['actual_arrival_date'])->format('d/m/Y H:i'),
+                    $shipment->tps_location ?? 'Pelabuhan/Bandara'
+                ),
+                'created_at' => now(),
+            ]);
+        } else {
+            ShipmentEvent::create([
+                'shipment_id' => $shipment->id,
+                'process_code' => 'ETA_UPDATED',
+                'to_status' => $shipment->status_tahap,
+                'actor_id' => auth()->id(),
+                'note' => sprintf(
+                    'Pembaruan jadwal tracking: %s (Voy/Flight: %s), ETA: %s, Terminal: %s.',
+                    $shipment->nama_kapal ?? '-',
+                    $shipment->voyage_no ?? '-',
+                    $shipment->eta_date ? $shipment->eta_date->format('d/m/Y H:i') : 'Menunggu jadwal',
+                    $shipment->tps_location ?? '-'
+                ),
+                'created_at' => now(),
+            ]);
+        }
+
+        $namaPengangkut = $shipment->nama_kapal ?: ($shipment->is_air_freight ? 'Penerbangan' : 'Kapal');
+        return back()->with('success', "Informasi tracking & jadwal kedatangan (ETA) sarana pengangkut [{$namaPengangkut}] berhasil disimpan.");
+    }
+
+    /**
+     * Deteksi Otomatis Realtime Kedatangan (ETA & Status Sandar/Landed) via Free Open APIs
+     * Hak Akses: traffic.process | traffic.manage
+     */
+    public function detectLiveArrival(string $id, LiveRadarTrackingService $radarService)
+    {
+        Gate::authorize('traffic.process');
+
+        $shipment = Shipment::with('shippingVendor')->findOrFail($id);
+
+        $result = $radarService->detectArrival($shipment);
+
+        if (request()->wantsJson() || request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Status kedatangan realtime berhasil dideteksi via ' . ($result['source'] ?? 'Radar API'),
+                'data' => $result,
+            ]);
+        }
+
+        return back()->with('success', $result['explanation'] ?? 'Data kedatangan realtime berhasil diperbarui.');
     }
 
     /**

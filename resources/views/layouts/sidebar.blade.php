@@ -133,6 +133,12 @@
                         <span class="w-1.5 h-1.5 rounded-full {{ $isImportBatchActive ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
                         <span class="truncate">Import Berkas &amp; OCR</span>
                     </a>
+                    <a href="{{ route('core.client-hs-codes.index') }}" 
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('core.client-hs-codes.*') ? 'bg-[#0284c7] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}"
+                       title="Kamus Pos Tarif HS Code per Klien untuk Repeat Order">
+                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('core.client-hs-codes.*') ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
+                        <span class="truncate">Kamus HS Code Klien</span>
+                    </a>
                 </div>
             </div>
             @endif
@@ -219,6 +225,18 @@
                         <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('finance.invoices.*') ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
                         <span class="truncate">Piutang & Invoice Klien</span>
                     </a>
+                    <a href="{{ route('finance.deposits.index') }}" 
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('finance.deposits.*') ? 'bg-[#0284c7] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}"
+                       title="Pencatatan Deposit Klien & Pemotongan Piutang">
+                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('finance.deposits.*') ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
+                        <span class="truncate">Deposit Klien (Saldo)</span>
+                    </a>
+                    <a href="{{ route('finance.pnl') }}" 
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('finance.pnl*') ? 'bg-[#0284c7] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}"
+                       title="Laporan Profit & Loss (PnL) per Job Order & Margin">
+                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('finance.pnl*') ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
+                        <span class="truncate">Laporan PnL per Job</span>
+                    </a>
                     <a href="{{ route('finance.bills.index') }}" 
                        class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('finance.bills.*') ? 'bg-[#0284c7] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
                         <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('finance.bills.*') ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
@@ -247,6 +265,14 @@
                 <span x-show="!sidebarCollapsed" class="truncate">Akuntansi & Jurnal</span>
             </a>
             @endif
+
+            <!-- MENU 3: LAPORAN 4 DIVISI (.XLSX) -->
+            <a href="{{ route('reports.division.index') }}" 
+               class="flex items-center space-x-2.5 px-2.5 py-1.5 rounded-[9px] font-medium transition-all group min-h-[36px] active:scale-[0.98] {{ request()->routeIs('reports.division.*') ? 'bg-[#0284c7] text-white font-semibold shadow-[0_2px_8px_rgba(0,122,255,0.30)]' : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.06]' }}"
+               title="Reporting 4 Divisi & Ekspor Spreadsheet Excel (.xlsx)">
+                <i data-lucide="sheet" class="w-4 h-4 flex-shrink-0 {{ request()->routeIs('reports.division.*') ? 'text-white' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white' }}"></i>
+                <span x-show="!sidebarCollapsed" class="truncate">Laporan 4 Divisi (.xlsx)</span>
+            </a>
         </div>
 
         <!-- ============================================================== -->
@@ -393,7 +419,7 @@
             </div>
 
             <!-- MENU 1: PENGATURAN & HAK AKSES (ACCORDION SUBMENU) -->
-            @php $isSettingActive = request()->routeIs('settings.roles*', 'setting.*', 'config.*'); @endphp
+            @php $isSettingActive = request()->routeIs('settings.roles*', 'settings.templates*', 'setting.*', 'config.*'); @endphp
             <div x-data="{ open: {{ $isSettingActive ? 'true' : 'false' }} }" class="space-y-0.5">
                 <button type="button" 
                         @click="if (sidebarCollapsed) { window.location.href = '{{ route('settings.roles.index') }}'; } else { open = !open; }"
@@ -422,9 +448,17 @@
                     @endif
 
                     @if(!auth()->check() || auth()->user()->hasPermission('setting.view'))
+                    <a href="{{ route('settings.templates.index') }}" 
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('settings.templates*') ? 'bg-[#0284c7] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
+                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('settings.templates*') ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
+                        <span class="truncate">Master Template &amp; Dokumen</span>
+                    </a>
+                    @endif
+
+                    @if(!auth()->check() || auth()->user()->hasPermission('setting.view'))
                     <a href="{{ route('setting.index') }}" 
-                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('setting.*') && !request()->routeIs('settings.roles*') ? 'bg-[#0284c7] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
-                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('setting.*') && !request()->routeIs('settings.roles*') ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
+                       class="flex items-center space-x-2 px-2.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-all active:scale-[0.98] {{ request()->routeIs('setting.*') && !request()->routeIs('settings.roles*') && !request()->routeIs('settings.templates*') ? 'bg-[#0284c7] text-white font-semibold shadow-[0_1.5px_4px_rgba(0,122,255,0.28)]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.05]' }}">
+                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('setting.*') && !request()->routeIs('settings.roles*') && !request()->routeIs('settings.templates*') ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
                         <span class="truncate">Pengguna &amp; Parameter Sistem</span>
                     </a>
                     @endif

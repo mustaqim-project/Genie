@@ -23,6 +23,7 @@ class PdfController extends Controller implements HasMiddleware
             new Middleware('permission:finance.view|finance.invoice', only: ['invoice']),
             new Middleware('permission:crm.view', only: ['quotation']),
             new Middleware('permission:hrm.view|finance.view', only: ['form1721A1']),
+            new Middleware('permission:traffic.view|traffic.process|traffic.manage|document.view', only: ['suratJalan']),
         ];
     }
     /**
@@ -175,5 +176,40 @@ class PdfController extends Controller implements HasMiddleware
         }
 
         return view('pdf.form_1721_a1', compact('reconciliation'));
+    }
+
+    /**
+     * Cetak / Download Surat Jalan (4 Template Sesuai MoM Poin 4)
+     * Template:
+     * 1. fcl (Pengiriman Kontainer FCL Pelabuhan ke Gudang Klien)
+     * 2. lcl (Kargo LCL / Udara / CFS)
+     * 3. inter_factory (Transfer Antar Pabrik Kawasan Berikat BC 2.7 / BC 4.0)
+     * 4. empty_depo (Pengembalian Kontainer Kosong ke Depo Pelayaran)
+     */
+    public function suratJalan(string $id, Request $request)
+    {
+        $shipment = Shipment::with(['client', 'shippingVendor', 'ceisaDocument'])->findOrFail($id);
+
+        $template = strtolower($request->query('template', 'fcl'));
+        $viewMap = [
+            'fcl' => 'pdf.surat_jalan_fcl',
+            'template_1_fcl' => 'pdf.surat_jalan_fcl',
+            'lcl' => 'pdf.surat_jalan_lcl',
+            'template_2_lcl' => 'pdf.surat_jalan_lcl',
+            'inter_factory' => 'pdf.surat_jalan_inter_factory',
+            'template_3_inter_factory' => 'pdf.surat_jalan_inter_factory',
+            'empty_depo' => 'pdf.surat_jalan_empty_depo',
+            'template_4_empty_depo' => 'pdf.surat_jalan_empty_depo',
+        ];
+
+        $viewName = $viewMap[$template] ?? 'pdf.surat_jalan_fcl';
+        $docNumber = $shipment->surat_jalan_number ?: $shipment->project_no;
+
+        if ($request->has('download')) {
+            $pdf = Pdf::loadView($viewName, compact('shipment'));
+            return $pdf->download("SURAT-JALAN-{$docNumber}.pdf");
+        }
+
+        return view($viewName, compact('shipment'));
     }
 }

@@ -72,6 +72,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{bc20}', [BC20Controller::class, 'destroy'])->name('destroy');
         Route::post('/{bc20}/upload-document', [BC20Controller::class, 'uploadWizardDocument'])->name('upload-document');
         Route::post('/{bc20}/upload-wizard-document', [BC20Controller::class, 'uploadWizardDocument'])->name('upload-wizard-document');
+        Route::post('/{bc20}/upload-wizard-bundle', [BC20Controller::class, 'uploadWizardBundle'])->name('upload-wizard-bundle');
         Route::post('/{bc20}/resync-extraction', [BC20Controller::class, 'resyncExtraction'])->name('resync-extraction');
         Route::post('/{bc20}/reopen-draft', [BC20Controller::class, 'reopenDraft'])->name('reopen-draft');
         Route::post('/{bc20}/check-schema', [BC20Controller::class, 'checkSchema'])->name('check-schema');
@@ -91,6 +92,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/{bc30}/reopen-draft', [BC30Controller::class, 'reopenDraft'])->name('reopen-draft');
         Route::post('/{bc30}/upload-document', [BC30Controller::class, 'uploadWizardDocument'])->name('upload-document');
         Route::post('/{bc30}/upload-wizard-document', [BC30Controller::class, 'uploadWizardDocument'])->name('upload-wizard-document');
+        Route::post('/{bc30}/upload-wizard-bundle', [BC30Controller::class, 'uploadWizardBundle'])->name('upload-wizard-bundle');
         Route::post('/{bc30}/resync-extraction', [BC30Controller::class, 'resyncExtraction'])->name('resync-extraction');
         Route::post('/{bc30}/check-schema', [BC30Controller::class, 'checkSchema'])->name('check-schema');
         Route::post('/{bc30}/submit', [BC30Controller::class, 'submit'])->name('submit');
@@ -241,9 +243,24 @@ Route::middleware('auth')->group(function () {
         Route::delete('/posts/{post}', [\App\Http\Controllers\SocialMediaController::class, 'destroyPost'])->name('posts.destroy');
     });
 
+    // Reporting per Divisi (Sesuai MoM Poin 6)
+    Route::prefix('reports/division')->name('reports.division.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\DivisionReportController::class, 'index'])->name('index');
+        Route::get('/export', [\App\Http\Controllers\DivisionReportController::class, 'export'])->name('export');
+    });
+
     // 5. Finance
     Route::prefix('finance')->name('finance.')->group(function () {
         Route::get('/', [FinanceController::class, 'index'])->name('index');
+        Route::get('/pnl', [FinanceController::class, 'pnlReport'])->name('pnl');
+        Route::get('/pnl/export', [FinanceController::class, 'exportPnl'])->name('pnl.export');
+
+        // Form Deposit Klien & Saldo Berjalan (Sesuai MoM Poin 5)
+        Route::prefix('deposits')->name('deposits.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\ClientDepositController::class, 'index'])->name('index');
+            Route::post('/', [\App\Http\Controllers\ClientDepositController::class, 'store'])->name('store');
+            Route::post('/deduct', [\App\Http\Controllers\ClientDepositController::class, 'deduct'])->name('deduct');
+        });
     });
 
     // 6. Accounting
@@ -263,6 +280,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/classify-hs', [AiAgentController::class, 'classifyHs'])->name('classify-hs');
         Route::post('/classify', [AiAgentController::class, 'classifyHs'])->name('classify');
         Route::get('/models', [AiAgentController::class, 'models'])->name('models');
+        Route::post('/settings', [AiAgentController::class, 'updateSettings'])->name('settings.update');
+        Route::post('/test-connection', [AiAgentController::class, 'testConnection'])->name('test-connection');
     });
     Route::get('/settings/integrations/mcp', [\App\Http\Controllers\McpIntegrationController::class, 'index'])->name('settings.mcp');
     Route::post('/settings/integrations/mcp/tokens', [\App\Http\Controllers\McpIntegrationController::class, 'storeToken'])->name('settings.mcp.tokens.store');
@@ -304,6 +323,22 @@ Route::middleware('auth')->group(function () {
 
         // Parameterization Zero Hardcoding Management
         Route::post('/parameters', [SettingController::class, 'updateSystemParameters'])->name('parameters.update');
+
+        // Konfigurasi Master MoM ERP & Backup Retensi 10 Tahun
+        Route::post('/mom-config', [SettingController::class, 'updateMomConfig'])->name('mom-config.update');
+        Route::post('/backup-now', [SettingController::class, 'triggerManualBackup'])->name('backup-now');
+        Route::post('/test-smtp', [SettingController::class, 'testSmtpConnection'])->name('test-smtp');
+    });
+
+    // Master Template & Dokumen (CRUD Engine: Email 4 Divisi, 4 Surat Jalan, & Klausul Kontrak)
+    Route::prefix('settings/templates')->name('settings.templates.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\DocumentTemplateController::class, 'index'])->name('index');
+        Route::post('/', [\App\Http\Controllers\DocumentTemplateController::class, 'store'])->name('store');
+        Route::put('/{id}', [\App\Http\Controllers\DocumentTemplateController::class, 'update'])->name('update');
+        Route::delete('/{id}', [\App\Http\Controllers\DocumentTemplateController::class, 'destroy'])->name('destroy');
+        Route::post('/{id}/duplicate', [\App\Http\Controllers\DocumentTemplateController::class, 'duplicate'])->name('duplicate');
+        Route::post('/{id}/default', [\App\Http\Controllers\DocumentTemplateController::class, 'setDefault'])->name('set-default');
+        Route::get('/{id}/preview', [\App\Http\Controllers\DocumentTemplateController::class, 'preview'])->name('preview');
     });
 
     Route::prefix('config')->name('config.')->group(function () {
@@ -375,6 +410,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/core/tracking', [\App\Http\Controllers\ProjectTrackingController::class, 'index'])->name('core.tracking.index');
     Route::post('/core/tracking/auto-assign-all', [\App\Http\Controllers\ProjectTrackingController::class, 'autoAssignAll'])->name('core.tracking.auto-assign-all');
     Route::post('/core/tracking/{id}/quick-update', [\App\Http\Controllers\ProjectTrackingController::class, 'quickUpdateTrackingDok'])->name('core.tracking.quick-update');
+    Route::post('/core/tracking/{id}/live-detect', [\App\Http\Controllers\TrafficWorkflowController::class, 'detectLiveArrival'])->name('core.tracking.live-detect');
+
+    // Kamus HS Code per Klien (Sesuai MoM Poin 12)
+    Route::prefix('core/client-hs-codes')->name('core.client-hs-codes.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\ClientHsCodeController::class, 'index'])->name('index');
+        Route::post('/', [\App\Http\Controllers\ClientHsCodeController::class, 'store'])->name('store');
+        Route::delete('/{id}', [\App\Http\Controllers\ClientHsCodeController::class, 'destroy'])->name('destroy');
+        Route::get('/suggest', [\App\Http\Controllers\ClientHsCodeController::class, 'suggest'])->name('suggest');
+    });
 
     // Tim DO Lifecycle & Shipping Line Automation
     Route::prefix('core/do')->name('core.do.')->group(function () {
@@ -387,6 +431,8 @@ Route::middleware('auth')->group(function () {
     Route::prefix('core/traffic')->name('core.traffic.')->group(function () {
         Route::get('/', [\App\Http\Controllers\TrafficWorkflowController::class, 'index'])->name('index');
         Route::post('/{id}/customs-status', [\App\Http\Controllers\TrafficWorkflowController::class, 'updateCustomsStatus'])->name('customs-status');
+        Route::post('/{id}/tracking', [\App\Http\Controllers\TrafficWorkflowController::class, 'updateTracking'])->name('tracking.update');
+        Route::post('/{id}/live-detect', [\App\Http\Controllers\TrafficWorkflowController::class, 'detectLiveArrival'])->name('live-detect');
         Route::post('/{id}/customs-responses', [\App\Http\Controllers\TrafficWorkflowController::class, 'updateCustomsResponses'])->name('customs-responses');
         Route::post('/{id}/inspection-photos', [\App\Http\Controllers\TrafficWorkflowController::class, 'uploadInspectionPhotos'])->name('inspection-photos.store');
         Route::delete('/{id}/inspection-photos/{photoId}', [\App\Http\Controllers\TrafficWorkflowController::class, 'deleteInspectionPhoto'])->name('inspection-photos.destroy');
@@ -433,6 +479,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/{id}/status', [\App\Http\Controllers\QuotationController::class, 'updateStatus'])->name('status');
         Route::post('/{id}/approve-discount', [\App\Http\Controllers\QuotationController::class, 'approveDiscount'])->name('approve-discount');
         Route::post('/{id}/convert-to-so', [\App\Http\Controllers\QuotationController::class, 'convertToSalesOrder'])->name('convert-to-so');
+        Route::post('/{id}/convert-to-invoice', [\App\Http\Controllers\QuotationController::class, 'convertToInvoice'])->name('convert-to-invoice');
         Route::post('/{id}/convert-to-project', [\App\Http\Controllers\QuotationController::class, 'convertToProject'])->name('convert-to-project');
     });
 
@@ -462,10 +509,29 @@ Route::middleware('auth')->group(function () {
     Route::prefix('print')->name('pdf.')->group(function () {
         Route::get('/shipments/{id}/pib', [\App\Http\Controllers\PdfController::class, 'pib'])->name('pib');
         Route::get('/shipments/{id}/peb', [\App\Http\Controllers\PdfController::class, 'peb'])->name('peb');
+        Route::get('/shipments/{id}/surat-jalan', [\App\Http\Controllers\PdfController::class, 'suratJalan'])->name('surat-jalan');
         Route::get('/shipments/{id}/do-request', [\App\Http\Controllers\PdfController::class, 'doRequest'])->name('do-request');
         Route::get('/shipments/{id}/billing', [\App\Http\Controllers\PdfController::class, 'billingMpn'])->name('billing');
         Route::get('/invoices/{id}', [\App\Http\Controllers\PdfController::class, 'invoice'])->name('invoice');
         Route::get('/quotations/{id}', [\App\Http\Controllers\PdfController::class, 'quotation'])->name('quotation');
         Route::get('/employees/{id}/form-1721-a1', [\App\Http\Controllers\PdfController::class, 'form1721A1'])->name('form-1721-a1');
     });
+
+    // ==========================================
+    // 4 Template Email Divisi Preview & Send Routes (MoM Poin 7)
+    // ==========================================
+    Route::prefix('emails/preview')->name('emails.preview.')->group(function () {
+        Route::get('/quotation/{id}', [\App\Http\Controllers\EmailPreviewController::class, 'previewQuotation'])->name('quotation');
+        Route::get('/invoice/{id}', [\App\Http\Controllers\EmailPreviewController::class, 'previewInvoice'])->name('invoice');
+        Route::get('/document/{id}', [\App\Http\Controllers\EmailPreviewController::class, 'previewDocument'])->name('document');
+        Route::get('/traffic/{id}', [\App\Http\Controllers\EmailPreviewController::class, 'previewTraffic'])->name('traffic');
+    });
+
+    // ==========================================
+    // Integrasi Pengiriman Email Resmi Terpisah per Divisi
+    // ==========================================
+    Route::post('/crm/quotations/{id}/send-email', [\App\Http\Controllers\EmailPreviewController::class, 'sendQuotation'])->name('crm.quotations.send-email');
+    Route::post('/finance/invoices/{id}/send-email', [\App\Http\Controllers\EmailPreviewController::class, 'sendInvoice'])->name('finance.invoices.send-email');
+    Route::post('/core/document/{id}/send-draft-email', [\App\Http\Controllers\EmailPreviewController::class, 'sendDocumentDraft'])->name('core.document.send-draft-email');
+    Route::post('/core/traffic/{id}/send-eta-email', [\App\Http\Controllers\EmailPreviewController::class, 'sendTrafficEta'])->name('core.traffic.send-eta-email');
 });

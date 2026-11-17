@@ -7,55 +7,66 @@
 @endphp
 
 <script>
-if (typeof window.projectPicManager !== 'function') {
-    window.showPicModal = false;
-    window.activeStageKey = '';
-    window.activeStageTitle = '';
-    window.activeStageRole = '';
-    window.currentPicId = '';
-    window.currentBackupId = '';
-    window.selectedPicId = '';
-    window.selectedBackupId = '';
+window.showPicModal = false;
+window.activeStageKey = '';
+window.activeStageTitle = '';
+window.activeStageRole = '';
+window.currentPicId = '';
+window.currentBackupId = '';
+window.selectedPicId = '';
+window.selectedBackupId = '';
 
-    window.projectPicManager = function() {
-        return {
-            showPicModal: false,
-            activeStageKey: '',
-            activeStageTitle: '',
-            activeStageRole: '',
-            currentPicId: '',
-            currentBackupId: '',
-            selectedPicId: '',
-            selectedBackupId: '',
-            openModal(key, title, role, picId, backupId) {
-                this.activeStageKey = key || '';
-                this.activeStageTitle = title || '';
-                this.activeStageRole = role || '';
-                this.currentPicId = picId || '';
-                this.currentBackupId = backupId || '';
-                this.selectedPicId = picId || '';
-                this.selectedBackupId = backupId || '';
-                this.showPicModal = true;
-            },
-            closeModal() {
-                this.showPicModal = false;
-            }
-        };
-    };
-
-    if (window.Alpine && typeof window.Alpine.data === 'function') {
-        window.Alpine.data('projectPicManager', window.projectPicManager);
-    }
-    document.addEventListener('alpine:init', () => {
-        if (window.Alpine && typeof window.Alpine.data === 'function') {
-            window.Alpine.data('projectPicManager', window.projectPicManager);
+window.projectPicManager = function() {
+    return {
+        showPicModal: false,
+        activeStageKey: '',
+        activeStageTitle: '',
+        activeStageRole: '',
+        currentPicId: '',
+        currentBackupId: '',
+        selectedPicId: '',
+        selectedBackupId: '',
+        openModal(key, title, role, picId, backupId) {
+            this.activeStageKey = key || '';
+            this.activeStageTitle = title || '';
+            this.activeStageRole = role || '';
+            this.currentPicId = picId || '';
+            this.currentBackupId = backupId || '';
+            this.selectedPicId = picId || '';
+            this.selectedBackupId = backupId || '';
+            this.showPicModal = true;
+        },
+        closeModal() {
+            this.showPicModal = false;
         }
-    });
-}
+    };
+};
 </script>
 
 <div class="bg-white dark:bg-[#1C1C1E] rounded-2xl border border-black/[0.06] dark:border-white/[0.08] shadow-xs p-5 sm:p-6 mb-6"
-     x-data="projectPicManager()">
+     x-data="{
+        showPicModal: false,
+        activeStageKey: '',
+        activeStageTitle: '',
+        activeStageRole: '',
+        currentPicId: '',
+        currentBackupId: '',
+        selectedPicId: '',
+        selectedBackupId: '',
+        openModal(key, title, role, picId, backupId) {
+            this.activeStageKey = key || '';
+            this.activeStageTitle = title || '';
+            this.activeStageRole = role || '';
+            this.currentPicId = picId || '';
+            this.currentBackupId = backupId || '';
+            this.selectedPicId = picId || '';
+            this.selectedBackupId = backupId || '';
+            this.showPicModal = true;
+        },
+        closeModal() {
+            this.showPicModal = false;
+        }
+     }">
 
     <!-- Card Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-black/[0.06] dark:border-white/[0.08] mb-4 gap-3">

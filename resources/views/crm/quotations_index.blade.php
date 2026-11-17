@@ -3,7 +3,12 @@
 @section('title', 'CRM — Surat Penawaran Harga (Quotation) Forwarder & PPJK')
 
 @section('content')
-<div class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12" x-data="{ showCreateModal: false }">
+<div class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12" 
+     x-data="{ 
+         showCreateModal: false, 
+         showSendMailModal: false, 
+         mailTarget: { id: '', no: '', client: '', email: '', previewUrl: '', sendUrl: '' } 
+     }">
 
     <!-- Breadcrumb -->
     <x-breadcrumb :items="[
@@ -156,6 +161,19 @@
                                 </span>
                             </td>
                             <td class="py-3.5 px-4 text-right space-x-1.5 whitespace-nowrap">
+                                <button type="button" 
+                                        @click="showSendMailModal = true; mailTarget = { id: '{{ $quo->id }}', no: '{{ $quo->quotation_no ?? ('QUO-'.$quo->id) }}', client: '{{ addslashes($quo->client?->name ?? '') }}', email: '{{ addslashes($quo->client?->email ?? '') }}', previewUrl: '{{ route('emails.preview.quotation', $quo->id) }}', sendUrl: '{{ route('crm.quotations.send-email', $quo->id) }}' }"
+                                        class="btn-apple-gray !py-1 !px-2.5 !text-[11px] text-amber-600 dark:text-amber-400 font-semibold inline-flex items-center gap-1"
+                                        title="Kirim Email Penawaran Resmi (Divisi Marketing)">
+                                    <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                                    <span>Kirim Email</span>
+                                </button>
+                                <a href="{{ route('emails.preview.quotation', $quo->id) }}" target="_blank"
+                                   class="btn-apple-gray !py-1 !px-2.5 !text-[11px] text-sky-600 dark:text-sky-400"
+                                   title="Pratinjau Template Email Penawaran Harga (Marketing)">
+                                    <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                                    <span>Preview</span>
+                                </a>
                                 <a href="{{ route('pdf.quotation', $quo->id) }}" target="_blank"
                                    class="btn-apple-gray !py-1 !px-2.5 !text-[11px]">
                                     <i data-lucide="printer" class="w-3.5 h-3.5 text-slate-500 dark:text-slate-400"></i>
@@ -168,6 +186,15 @@
                                         <button type="submit" class="btn-apple-filled !py-1 !px-2.5 !text-[11px] !bg-emerald-600 hover:!bg-emerald-700">
                                             <i data-lucide="check" class="w-3.5 h-3.5"></i>
                                             <span>Deal</span>
+                                        </button>
+                                    </form>
+                                @endif
+                                @if(in_array($quo->status, ['ACCEPTED', 'APPROVED', 'SENT']))
+                                    <form action="{{ route('crm.quotations.convert-to-invoice', $quo->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Konversi Penawaran Harga ini menjadi Invoice Penagihan Klien (P19)?')">
+                                        @csrf
+                                        <button type="submit" class="btn-apple-filled !py-1 !px-2.5 !text-[11px] !bg-blue-600 hover:!bg-blue-700 inline-flex items-center gap-1" title="Konversi Otomatis ke Invoice Klien P19 (Sesuai MoM Poin 3 & 4)">
+                                            <i data-lucide="receipt" class="w-3.5 h-3.5"></i>
+                                            <span>Jadikan Invoice</span>
                                         </button>
                                     </form>
                                 @endif
@@ -268,6 +295,105 @@
                 <div class="pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-end space-x-2">
                     <button type="button" @click="showCreateModal = false" class="btn-apple-gray">Batal</button>
                     <button type="submit" class="btn-apple-filled">Terbitkan Quotation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Kirim Email Penawaran Harga (Divisi Marketing) -->
+    <div x-show="showSendMailModal" 
+         class="fixed inset-0 z-[200] overflow-y-auto flex items-end sm:items-center justify-center p-0 sm:p-4 md:p-6"
+         role="dialog"
+         aria-modal="true"
+         x-cloak>
+        <div x-show="showSendMailModal"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-md"
+             @click="showSendMailModal = false"
+             aria-hidden="true"></div>
+
+        <div x-show="showSendMailModal"
+             x-transition:enter="transition ease-out duration-250"
+             x-transition:enter-start="opacity-0 translate-y-8 sm:translate-y-0 sm:scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave-end="opacity-0 translate-y-8 sm:translate-y-0 sm:scale-95"
+             class="relative z-10 bg-white dark:bg-[#1C1C1E] rounded-t-[28px] sm:rounded-3xl border border-slate-200/90 dark:border-white/10 shadow-2xl max-w-lg w-full p-6 text-xs space-y-4">
+            
+            <div class="sm:hidden w-12 h-1.5 bg-slate-200 dark:bg-white/20 rounded-full mx-auto -mt-2 mb-3"></div>
+
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/10">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-700 flex items-center justify-center font-bold">
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900 dark:text-white">Kirim Email Penawaran Harga Resmi</h3>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Dikirim atas nama resmi Divisi Marketing &amp; Sales</p>
+                    </div>
+                </div>
+                <button type="button" @click="showSendMailModal = false" class="btn-apple-gray !p-1.5 rounded-full">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <!-- Identitas Pengirim Resmi Divisi Marketing -->
+            <div class="p-3 rounded-2xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/80 dark:border-amber-900/40 text-[11px] space-y-1">
+                <div class="flex items-center justify-between">
+                    <span class="font-semibold text-amber-900 dark:text-amber-300 flex items-center gap-1.5">
+                        <i data-lucide="badge-check" class="w-3.5 h-3.5 text-amber-600"></i>
+                        <span>Divisi Pengirim: <strong>Marketing &amp; Sales</strong></span>
+                    </span>
+                    <span class="px-2 py-0.5 rounded-md font-mono text-[10px] font-bold bg-amber-200/80 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200">
+                        {{ \App\Models\SystemSetting::get('email_marketing_from_address', 'marketing@genie-logistics.id') }}
+                    </span>
+                </div>
+                <div class="text-slate-600 dark:text-slate-300">
+                    Nama Pengirim: <strong>{{ \App\Models\SystemSetting::get('email_marketing_from_name', 'GENIE Marketing & Sales Dept') }}</strong> &bull; Reply-To: <span class="font-mono">{{ \App\Models\SystemSetting::get('email_marketing_reply_to', 'marketing@genie-logistics.id') }}</span>
+                </div>
+            </div>
+
+            <form :action="mailTarget.sendUrl" method="POST" class="space-y-3.5">
+                @csrf
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Penawaran</label>
+                    <input type="text" :value="mailTarget.no + ' (' + mailTarget.client + ')'" readonly class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 text-xs font-medium cursor-not-allowed">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Email Klien Penerima <span class="text-rose-500">*</span></label>
+                    <input type="email" name="recipient_email" x-model="mailTarget.email" required placeholder="klien@perusahaan.com" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white font-mono text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    <p class="text-[10px] text-slate-400 mt-1">Dapat diubah apabila penawaran ditujukan ke PIC/departemen spesifik klien.</p>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Catatan Tambahan / Pesan Pengantar (Opsional)</label>
+                    <textarea name="custom_notes" rows="3" placeholder="Tuliskan catatan khusus atau pesan negosiasi yang akan tampil pada body email..." class="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none"></textarea>
+                </div>
+
+                <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-300">
+                    <span class="flex items-center gap-1.5">
+                        <i data-lucide="file-text" class="w-3.5 h-3.5 text-rose-500"></i>
+                        <span>Lampiran Otomatis: <strong>Quotation PDF</strong></span>
+                    </span>
+                    <a :href="mailTarget.previewUrl" target="_blank" class="text-sky-600 dark:text-sky-400 hover:underline font-semibold flex items-center gap-1">
+                        <span>Preview Format Email</span>
+                        <i data-lucide="external-link" class="w-3 h-3"></i>
+                    </a>
+                </div>
+
+                <div class="pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-end space-x-2">
+                    <button type="button" @click="showSendMailModal = false" class="btn-apple-gray">Batal</button>
+                    <button type="submit" class="btn-apple-filled !bg-amber-600 hover:!bg-amber-700 inline-flex items-center gap-1.5 text-white">
+                        <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                        <span>Kirim Email Penawaran Sekarang</span>
+                    </button>
                 </div>
             </form>
         </div>

@@ -295,4 +295,62 @@ class QuotationController extends Controller implements HasMiddleware
         return redirect()->route('core.document.show', $shipment->id)
             ->with('success', "Project Shipment [{$shipment->project_no}] berhasil dibuka dari Penawaran {$quotation->quotation_number} dengan penugasan PIC 11 tahapan otomatis.");
     }
+
+    /**
+     * Konversi 1-Klik Penawaran (Quotation Approved) Menjadi Invoice Tagihan Resmi (MoM Poin 8)
+     * Hak Akses: crm.deal | finance.invoice
+     */
+    public function convertToInvoice(string $id, Request $request)
+    {
+        $quotation = Quotation::with(['client', 'lines'])->findOrFail($id);
+
+        if ($quotation->discount_approval_status === 'PENDING_APPROVAL') {
+            return back()->with('error', 'Penawaran ini belum disetujui Pimpinan karena memuat diskon > 10%.');
+        }
+
+        $invoice = DB::transaction(function () use ($quotation, $request) {
+            $quotation->update(['status' => 'ACCEPTED']);
+
+            $totalTagihan = (float) $quotation->total_idr;
+            $jatuhTempo = $request->jatuh_tempo ? \Carbon\Carbon::parse($request->jatuh_tempo) : now()->addDays(14);
+
+            $inv = \App\Models\ClientInvoice::create([
+                'invoice_no' => \App\Models\ClientInvoice::generateInvoiceNo(),
+                'quotation_id' => $quotation->id,
+                'client_id' => $quotation->client_id,
+                'tanggal' => now(),
+                'jatuh_tempo' => $jatuhTempo,
+                'jasa_ppjk_idr' => $quotation->subtotal_idr,
+                'subtotal_idr' => $quotation->subtotal_idr,
+                'ppn_jasa_idr' => $quotation->ppn_idr,
+                'total_tagihan_idr' => $totalTagihan,
+                'deposit_deducted_idr' => 0,
+                'sisa_tagihan_idr' => $totalTagihan,
+                'status' => 'UNPAID',
+                'created_by_user_id' => auth()->id(),
+            ]);
+
+            // Salin seluruh baris rincian quotation ke client_invoice_lines
+            if ($quotation->lines->isNotEmpty()) {
+                foreach ($quotation->lines as $line) {
+                    \App\Models\ClientInvoiceLine::create([
+                        'invoice_id' => $inv->id,
+                        'description' => $line->description . ($line->quantity > 1 ? " ({$line->quantity} {$line->unit})" : ''),
+                        'amount' => $line->subtotal_idr,
+                    ]);
+                }
+            } else {
+                \App\Models\ClientInvoiceLine::create([
+                    'invoice_id' => $inv->id,
+                    'description' => "Jasa Logistik & Kepabeanan sesuai Penawaran {$quotation->quotation_no}",
+                    'amount' => $quotation->subtotal_idr,
+                ]);
+            }
+
+            return $inv;
+        });
+
+        return redirect()->route('finance.invoices.show', $invoice->id)
+            ->with('success', "Invoice {$invoice->invoice_no} berhasil diterbitkan dari Penawaran {$quotation->quotation_no}.");
+    }
 }

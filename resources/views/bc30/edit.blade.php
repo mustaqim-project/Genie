@@ -59,6 +59,9 @@ window.bc30WizardManager = function bc30WizardManager() {
         // Dokumen modal state
         docModalOpen: false,
         editingDocIndex: null,
+        bundleUploading: false,
+        singleDocUploadingIndex: null,
+        modalSaving: false,
         docForm: { kodeDokumen: '380', nomorDokumen: '', tanggalDokumen: '', shipmentDocumentId: '' },
 
         // Barang search & modal state
@@ -405,7 +408,7 @@ window.bc30WizardManager = function bc30WizardManager() {
             }
         },
 
-        // Modal Dokumen
+        // Modal Dokumen & Deteksi Otomatis Ekspor
         openNewDocModal() {
             this.editingDocIndex = null;
             this.docForm = {
@@ -414,36 +417,202 @@ window.bc30WizardManager = function bc30WizardManager() {
                 tanggalDokumen: new Date().toISOString().slice(0, 10),
                 shipmentDocumentId: ''
             };
+            if (this.$refs.docModalFileInput) {
+                this.$refs.docModalFileInput.value = '';
+            }
             this.docModalOpen = true;
         },
 
         editDocModal(index) {
             this.editingDocIndex = index;
             this.docForm = JSON.parse(JSON.stringify(this.w.dokumen[index]));
+            if (this.$refs.docModalFileInput) {
+                this.$refs.docModalFileInput.value = '';
+            }
             this.docModalOpen = true;
         },
 
-        saveDocModal() {
+        setDocDateToday() {
+            this.docForm.tanggalDokumen = new Date().toISOString().slice(0, 10);
+        },
+
+        setDocDateYesterday() {
+            const d = new Date();
+            d.setDate(d.getDate() - 1);
+            this.docForm.tanggalDokumen = d.toISOString().slice(0, 10);
+        },
+
+        setDocDateSevenDaysAgo() {
+            const d = new Date();
+            d.setDate(d.getDate() - 7);
+            this.docForm.tanggalDokumen = d.toISOString().slice(0, 10);
+        },
+
+        async saveDocModal(keepOpen = false) {
+            if (!this.docForm.nomorDokumen || !this.docForm.nomorDokumen.trim()) {
+                this.showToast('Nomor dokumen wajib diisi.', 'error');
+                return;
+            }
+
+            const fileInput = this.$refs.docModalFileInput;
+            const file = fileInput && fileInput.files && fileInput.files[0];
+
+            if (file) {
+                this.modalSaving = true;
+                try {
+                    const fd = new FormData();
+                    fd.append('file', file);
+                    fd.append('kode_dokumen', this.docForm.kodeDokumen);
+                    fd.append('nomor_dokumen', this.docForm.nomorDokumen.trim());
+                    fd.append('tanggal_dokumen', this.docForm.tanggalDokumen);
+                    fd.append('purpose', 'dokumen');
+
+                    const res = await fetch('{{ route("bc30.upload-document", $bc30->id) }}', {
+                        method: 'POST',
+                        headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                        body: fd
+                    });
+                    const data = await res.json();
+                    if (!res.ok || !data.success) throw new Error(data.message || 'Gagal mengunggah lampiran berkas.');
+
+                    if (data.preview_file) {
+                        this.previewFiles.unshift(data.preview_file);
+                        this.activePreviewIndex = 0;
+                        this.showPreview = true;
+                        this.docForm.shipmentDocumentId = data.preview_file.id;
+                    }
+                } catch (err) {
+                    this.showToast(err.message || 'Gagal mengunggah berkas lampiran.', 'error');
+                    this.modalSaving = false;
+                    return;
+                } finally {
+                    this.modalSaving = false;
+                    if (fileInput) fileInput.value = '';
+                }
+            }
+
             if (this.editingDocIndex !== null) {
                 this.w.dokumen[this.editingDocIndex] = JSON.parse(JSON.stringify(this.docForm));
             } else {
                 this.docForm.seriDokumen = this.w.dokumen.length + 1;
                 this.w.dokumen.push(JSON.parse(JSON.stringify(this.docForm)));
             }
-            this.docModalOpen = false;
-            this.showToast('Dokumen berhasil disimpan.');
+
+            if (keepOpen) {
+                this.showToast('Dokumen berhasil ditambahkan. Silakan isi dokumen berikutnya.');
+                this.docForm.nomorDokumen = '';
+                this.docForm.shipmentDocumentId = '';
+                if (fileInput) fileInput.value = '';
+            } else {
+                this.docModalOpen = false;
+                this.showToast('Dokumen berhasil disimpan.');
+            }
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
         },
 
         removeDoc(index) {
             this.w.dokumen.splice(index, 1);
+            this.w.dokumen.forEach((d, i) => d.seriDokumen = i + 1);
             this.showToast('Dokumen berhasil dihapus.');
         },
 
         sortDocumentsAuto() {
-            const priority = { '380': 1, '217': 2, '705': 3, '861': 4, '430': 5 };
+            const priority = { '380': 1, '217': 2, '705': 3, '740': 3, '861': 4, '430': 5 };
             this.w.dokumen.sort((a, b) => (priority[a.kodeDokumen] || 99) - (priority[b.kodeDokumen] || 99));
             this.w.dokumen.forEach((d, i) => d.seriDokumen = i + 1);
             this.showToast('Dokumen pelengkap diurutkan otomatis.');
+        },
+
+        // Unggah Bundle Berkas Ekspor (Multi-File / ZIP) dengan Auto-Matching Cerdas
+        async handleWizardBundleUpload(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
+
+            const fd = new FormData();
+            for (let i = 0; i < files.length; i++) {
+                fd.append('bundle_files[]', files[i]);
+            }
+            fd.append('current_dokumen', JSON.stringify(this.w.dokumen));
+
+            this.bundleUploading = true;
+            try {
+                const res = await fetch('{{ route("bc30.upload-wizard-bundle", $bc30->id) }}', {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                    body: fd
+                });
+                const data = await res.json();
+                if (!res.ok || !data.success) throw new Error(data.message || 'Gagal memproses bundle dokumen.');
+
+                if (data.preview_files) {
+                    this.previewFiles = data.preview_files;
+                    if (this.previewFiles.length > 0) {
+                        this.activePreviewIndex = 0;
+                        this.showPreview = true;
+                    }
+                }
+                if (data.dokumen) {
+                    this.w.dokumen = data.dokumen;
+                }
+
+                this.showToast(data.message || 'Bundle dokumen ekspor berhasil diproses.');
+            } catch (err) {
+                this.showToast(err.message || 'Gagal memproses bundle berkas ekspor.', 'error');
+            } finally {
+                this.bundleUploading = false;
+                event.target.value = '';
+                this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+            }
+        },
+
+        // Re-upload / Ganti Berkas PDF Khusus Baris Dokumen Ekspor Tertentu
+        async handleSingleDocReupload(idx, event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const targetDoc = this.w.dokumen[idx];
+            const fd = new FormData();
+            fd.append('file', file);
+            fd.append('purpose', 'dokumen');
+            fd.append('kode_dokumen', targetDoc ? targetDoc.kodeDokumen : '380');
+            fd.append('nomor_dokumen', targetDoc ? targetDoc.nomorDokumen : '');
+            fd.append('tanggal_dokumen', targetDoc ? targetDoc.tanggalDokumen : '');
+            fd.append('doc_index', idx);
+
+            this.singleDocUploadingIndex = idx;
+            try {
+                const res = await fetch('{{ route("bc30.upload-document", $bc30->id) }}', {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                    body: fd
+                });
+                const data = await res.json();
+                if (!res.ok || !data.success) throw new Error(data.message || 'Gagal mengunggah berkas.');
+
+                if (data.preview_file) {
+                    const existingIdx = this.previewFiles.findIndex(f => f.id === data.preview_file.id);
+                    if (existingIdx !== -1) {
+                        this.previewFiles[existingIdx] = data.preview_file;
+                        this.activePreviewIndex = existingIdx;
+                    } else {
+                        this.previewFiles.unshift(data.preview_file);
+                        this.activePreviewIndex = 0;
+                    }
+                    this.showPreview = true;
+                }
+
+                if (this.w.dokumen[idx]) {
+                    this.w.dokumen[idx].shipmentDocumentId = data.preview_file ? data.preview_file.id : (data.doc_entry ? data.doc_entry.shipmentDocumentId : null);
+                }
+
+                this.showToast('Berkas fisik untuk seri #' + (idx + 1) + ' berhasil diperbarui.');
+            } catch (err) {
+                this.showToast(err.message || 'Gagal mengunggah berkas revisi.', 'error');
+            } finally {
+                this.singleDocUploadingIndex = null;
+                event.target.value = '';
+                this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+            }
         },
 
         copyEksportirToPemilik() {
@@ -793,48 +962,7 @@ window.bc30WizardManager = function bc30WizardManager() {
         </div>
     </form>
 
-    <!-- Modal Form Dokumen Pelengkap -->
-    <div x-show="docModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-        <div class="bg-white dark:bg-[#1C1C1E] rounded-3xl max-w-md w-full p-6 border border-black/10 dark:border-white/10 shadow-2xl space-y-4">
-            <div class="flex items-center justify-between pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
-                <h3 class="font-bold text-sm text-slate-900 dark:text-white" x-text="editingDocIndex !== null ? 'Edit Dokumen Pelengkap' : 'Tambah Dokumen Pelengkap'"></h3>
-                <button type="button" @click="docModalOpen = false" class="p-1 rounded-lg text-slate-400 hover:text-slate-700">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
 
-            <div class="space-y-3 text-xs">
-                <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jenis Dokumen <span class="text-rose-500">*</span></label>
-                    <select x-model="docForm.kodeDokumen" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] dark:text-white">
-                        <option value="380">380 - Commercial Invoice</option>
-                        <option value="217">217 - Packing List</option>
-                        <option value="705">705 - Bill of Lading / Booking Confirmation</option>
-                        <option value="861">861 - Certificate of Origin (e-COO)</option>
-                        <option value="430">430 - Polis Asuransi Kargo</option>
-                        <option value="999">999 - Dokumen Pelengkap Lainnya</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Dokumen <span class="text-rose-500">*</span></label>
-                    <input type="text" x-model="docForm.nomorDokumen" placeholder="Contoh: INV-EXP-2026-001" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] dark:text-white">
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Dokumen <span class="text-rose-500">*</span></label>
-                    <input type="date" x-model="docForm.tanggalDokumen" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-[#2C2C2E] dark:text-white">
-                </div>
-            </div>
-
-            <div class="flex items-center justify-end gap-2 pt-3 border-t border-black/[0.06] dark:border-white/[0.08]">
-                <button type="button" @click="docModalOpen = false" class="px-4 py-2 rounded-xl border border-slate-200 dark:border-white/15 bg-slate-100 text-slate-700 font-semibold text-xs">
-                    Batal
-                </button>
-                <button type="button" @click="saveDocModal()" class="px-4 py-2 rounded-xl bg-[#0284c7] text-white font-semibold text-xs">
-                    Simpan
-                </button>
-            </div>
-        </div>
-    </div>
 
     <!-- Modal Form Barang Ekspor -->
     <div x-show="barangModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">

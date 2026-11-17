@@ -32,8 +32,8 @@ class AiAgentController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:ai.view', only: ['index', 'matchPackingList', 'classifyHs', 'models']),
-            new Middleware('permission:ai.approve', except: ['index', 'matchPackingList', 'classifyHs', 'models']),
+            new Middleware('permission:ai.view', only: ['index', 'matchPackingList', 'classifyHs', 'models', 'testConnection']),
+            new Middleware('permission:ai.view|ai.approve', only: ['updateSettings']),
         ];
     }
 
@@ -47,7 +47,9 @@ class AiAgentController extends Controller implements HasMiddleware
         $activeShipments = Shipment::with('items')->latest()->take(20)->get();
         $availableModels = $this->aiService->getSupportedModels();
         $defaultModel = $this->aiService->getDefaultModel();
-        $aiEndpoint = config('ai.endpoint');
+        $aiEndpoint = $this->aiService->getEndpoint();
+        $aiProvider = $this->aiService->getProvider();
+        $aiApiKeyMasked = $this->aiService->getMaskedApiKey();
 
         return view('ai.index', compact(
             'pendingApprovals',
@@ -55,8 +57,101 @@ class AiAgentController extends Controller implements HasMiddleware
             'activeShipments',
             'availableModels',
             'defaultModel',
-            'aiEndpoint'
+            'aiEndpoint',
+            'aiProvider',
+            'aiApiKeyMasked'
         ));
+    }
+
+    /**
+     * Simpan Pengaturan Gateway & Provider AI
+     */
+    public function updateSettings(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'provider' => 'required|string|in:openai,gemini,openrouter,9router,custom',
+            'endpoint' => 'required|url',
+            'api_key' => 'nullable|string|max:500',
+            'default_model' => 'required|string|max:100',
+            'timeout' => 'nullable|integer|min:5|max:300',
+        ]);
+
+        \App\Models\SystemSetting::set('ai_provider', $validated['provider'], 'ai', 'Provider AI Gateway');
+        \App\Models\SystemSetting::set('ai_endpoint', rtrim($validated['endpoint'], '/'), 'ai', 'Endpoint Base URL AI');
+        \App\Models\SystemSetting::set('ai_default_model', $validated['default_model'], 'ai', 'Default Model AI');
+        if (!empty($validated['timeout'])) {
+            \App\Models\SystemSetting::set('ai_timeout', (int) $validated['timeout'], 'ai', 'Timeout Request AI (detik)');
+        }
+
+        // Simpan API Key jika diisi dan bukan placeholder bintang
+        if (!empty($validated['api_key']) && !str_contains($validated['api_key'], '****')) {
+            \App\Models\SystemSetting::set('ai_api_key', trim($validated['api_key']), 'ai', 'API Secret Key AI');
+        }
+
+        // Sinkronisasi ke .env jika memungkinkan
+        $envUpdates = [
+            'OPENAI_CUSTOMS_ENDPOINT' => rtrim($validated['endpoint'], '/'),
+            'OPENAI_CUSTOMS_MODEL' => $validated['default_model'],
+        ];
+        if (!empty($validated['api_key']) && !str_contains($validated['api_key'], '****')) {
+            $envUpdates['OPENAI_CUSTOMS_API_KEY'] = trim($validated['api_key']);
+        }
+        $this->syncEnvFile($envUpdates);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pengaturan Gateway AI (' . strtoupper($validated['provider']) . ') berhasil disimpan.',
+            'endpoint' => rtrim($validated['endpoint'], '/'),
+            'model' => $validated['default_model'],
+            'provider' => $validated['provider'],
+        ]);
+    }
+
+    /**
+     * Uji Koneksi Langsung ke Provider AI
+     */
+    public function testConnection(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'endpoint' => 'nullable|url',
+            'api_key' => 'nullable|string',
+            'model' => 'nullable|string',
+        ]);
+
+        $key = $validated['api_key'] ?? null;
+        if ($key && str_contains($key, '****')) {
+            $key = null; // gunakan key tersimpan
+        }
+
+        $result = $this->aiService->testConnectionDirect(
+            $validated['endpoint'] ?? null,
+            $key,
+            $validated['model'] ?? null
+        );
+
+        return response()->json($result, $result['success'] ? 200 : 422);
+    }
+
+    /**
+     * Helper sinkronisasi nilai ke file .env
+     */
+    protected function syncEnvFile(array $values): void
+    {
+        $envPath = base_path('.env');
+        if (!file_exists($envPath) || !is_writable($envPath)) {
+            return;
+        }
+
+        $envContent = file_get_contents($envPath);
+        foreach ($values as $key => $val) {
+            $valStr = (str_contains($val, ' ') || str_contains($val, '#')) ? '"' . addslashes($val) . '"' : $val;
+            if (preg_match("/^{$key}=.*/m", $envContent)) {
+                $envContent = preg_replace("/^{$key}=.*/m", "{$key}={$valStr}", $envContent);
+            } else {
+                $envContent .= "\n{$key}={$valStr}";
+            }
+        }
+        @file_put_contents($envPath, $envContent);
     }
 
     /**

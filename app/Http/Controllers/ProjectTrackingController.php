@@ -61,6 +61,14 @@ class ProjectTrackingController extends Controller implements HasMiddleware
             $query->where('jenis_layanan', 'EKSPORT_BC30');
         }
 
+        // Filter Tanggal Operasional (Sesuai MoM Poin 10)
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('project_no', 'like', "%{$search}%")
@@ -72,6 +80,17 @@ class ProjectTrackingController extends Controller implements HasMiddleware
         }
 
         $allActiveShipments = $query->latest()->get();
+
+        // Filter Prioritas Kerja (Low, Medium, High, Urgent) - Sesuai MoM Poin 10
+        if ($request->filled('priority')) {
+            $pri = strtoupper($request->priority);
+            $allActiveShipments = $allActiveShipments->filter(fn($s) => $s->priority_level === $pri);
+        }
+
+        // Filter Overdue Indicator (Sesuai MoM Poin 10)
+        if ($request->filled('overdue') && $request->overdue == '1') {
+            $allActiveShipments = $allActiveShipments->filter(fn($s) => $s->is_overdue);
+        }
 
         // Filter 'me' (Tugas Saya)
         $shipments = $allActiveShipments;
@@ -161,6 +180,8 @@ class ProjectTrackingController extends Controller implements HasMiddleware
             ];
         });
 
+        $shippingVendors = \App\Models\ShippingVendor::where('is_active', true)->orderBy('name')->get();
+
         return view('core.tracking_index', compact(
             'shipments',
             'stages',
@@ -169,7 +190,8 @@ class ProjectTrackingController extends Controller implements HasMiddleware
             'filter',
             'direction',
             'mode',
-            'search'
+            'search',
+            'shippingVendors'
         ));
     }
 

@@ -273,7 +273,7 @@
                             {{ $shipment->nama_kapal ?? 'MV WAN HAI 315' }} <span class="text-slate-400">/</span> {{ $shipment->voyage_no ?? 'V.042N' }}
                         </div>
                         <div class="text-[11px] text-[#0284c7] font-medium">
-                            Pelayaran: {{ $shipment->shippingVendor->name ?? 'Ocean Carrier' }}
+                            Pelayaran: {{ $shipment->shippingVendor?->name ?? 'Ocean Carrier' }}
                         </div>
                     </div>
 

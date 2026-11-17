@@ -4,6 +4,15 @@
 
 @section('content')
 <script>
+    // Fallback safe global variables agar template directives Alpine tidak pernah throw ReferenceError
+    window.aiModalOpen = false;
+    window.productText = '';
+    window.direction = 'import';
+    window.aiModel = 'cx/gpt-6-astra';
+    window.loading = false;
+    window.errorMsg = null;
+    window.result = null;
+
     // Inisialisasi Komponen Alpine.js di awal halaman sebelum DOM diparse
     window.aiHsMatcher = function aiHsMatcher() {
         return {
@@ -478,7 +487,7 @@
                                     </div>
                                 @endif
                                 @if($shp?->shippingVendor)
-                                    <div class="text-[10px] text-black/55 dark:text-white/55 mt-0.5">Pelayaran: <strong>{{ $shp->shippingVendor->name }}</strong></div>
+                                    <div class="text-[10px] text-black/55 dark:text-white/55 mt-0.5">Pelayaran: <strong>{{ $shp->shippingVendor?->name ?? 'Pelayaran' }}</strong></div>
                                 @endif
                             </td>
 
@@ -683,9 +692,7 @@
         </div>
     </div>
 
-</div>
-
-<!-- Modals Buka Proyek & Pengajuan BC 2.0 / BC 3.0 Cerdas -->
+    <!-- Modals Buka Proyek & Pengajuan BC 2.0 / BC 3.0 Cerdas -->
 @include('core.components.smart_document_create_modal', [
     'modalId' => 'modal-create-project',
     'pfx' => 'core_gen_',
@@ -1103,4 +1110,5 @@
         </div>
     </div>
     @endcan
+</div>
 @endsection

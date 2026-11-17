@@ -24,7 +24,7 @@ class BC20Controller extends Controller implements HasMiddleware
             new Middleware('permission:document.view', only: ['index', 'show']),
             new Middleware('permission:document.create', only: ['create', 'store']),
             new Middleware('permission:document.create|document.edit', only: ['destroy']),
-            new Middleware('permission:document.edit|document.edit_after_ceisa', only: ['edit', 'update', 'uploadWizardDocument', 'resyncExtraction']),
+            new Middleware('permission:document.edit|document.edit_after_ceisa', only: ['edit', 'update', 'uploadWizardDocument', 'uploadWizardBundle', 'resyncExtraction']),
             new Middleware('permission:document.edit_after_ceisa', only: ['reopenDraft']),
             new Middleware('permission:ceisa.submit', only: ['submit', 'checkSchema', 'checkStatus', 'fetchResponse']),
         ];
@@ -72,8 +72,7 @@ class BC20Controller extends Controller implements HasMiddleware
     {
         // Pastikan seluruh proyek shipment impor tersinkronisasi memiliki entri dokumen pabean BC 2.0 (DRAFT / Terbit)
         $unlinkedShipments = \App\Models\Shipment::where(function ($q) {
-            $q->where('jenis_layanan', 'IMPORT_BC20')
-                ->orWhere('jenis_layanan', 'IMPORT')
+            $q->whereIn('jenis_layanan', ['IMPORT_BC20', 'IMPORT', 'IMPOR'])
                 ->orWhereNull('jenis_layanan');
         })->whereNull('ceisa_document_id')->get();
 
@@ -569,7 +568,7 @@ class BC20Controller extends Controller implements HasMiddleware
     }
 
     /**
-     * Unggah PDF/Gambar langsung dari Wizard BC 2.0 (Tab Dokumen / NOA / Freight)
+     * Unggah PDF/Gambar langsung dari Wizard BC 2.0 (Tab Dokumen / Re-upload per baris / NOA / Freight)
      */
     public function uploadWizardDocument(Request $request, CeisaDocument $bc20)
     {
@@ -579,6 +578,7 @@ class BC20Controller extends Controller implements HasMiddleware
             'nomor_dokumen' => 'nullable|string|max:100',
             'tanggal_dokumen' => 'nullable|date',
             'purpose' => 'nullable|string|in:dokumen,noa,freight',
+            'doc_index' => 'nullable|integer',
         ]);
 
         $shipment = $bc20->shipment ?? $this->workflowService->ensureShipmentForCeisaDocument($bc20);
@@ -597,7 +597,7 @@ class BC20Controller extends Controller implements HasMiddleware
         $notePrefix = match ($purpose) {
             'noa' => 'Notice of Arrival (NOA)',
             'freight' => 'Bukti Freight',
-            default => "Lampiran CEISA Kode {$kodeDok}",
+            default => "Lampiran CEISA 2.0 Kode {$kodeDok}",
         };
 
         $file = $request->file('file');
@@ -614,6 +614,7 @@ class BC20Controller extends Controller implements HasMiddleware
             'success' => true,
             'message' => 'Dokumen berhasil diunggah dan siap dipreview.',
             'preview_file' => $previewEntry,
+            'doc_index' => $request->has('doc_index') ? (int) $request->input('doc_index') : null,
             'doc_entry' => [
                 'kodeDokumen' => $kodeDok,
                 'nomorDokumen' => $validated['nomor_dokumen'] ?: pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME),
@@ -623,6 +624,260 @@ class BC20Controller extends Controller implements HasMiddleware
                 'linkedSeri' => '',
             ],
         ]);
+    }
+
+    /**
+     * Unggah bundle multi-file PDF / arsip ZIP dan otomatis deteksi jenis dokumen pabean
+     */
+    public function uploadWizardBundle(Request $request, CeisaDocument $bc20)
+    {
+        $validated = $request->validate([
+            'bundle_files' => 'nullable|array',
+            'bundle_files.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png,webp,zip|max:51200',
+            'file' => 'nullable|file|mimes:pdf,jpg,jpeg,png,webp,zip|max:51200',
+            'current_dokumen' => 'nullable|string',
+        ]);
+
+        $shipment = $bc20->shipment ?? $this->workflowService->ensureShipmentForCeisaDocument($bc20);
+        $rawFiles = [];
+        if ($request->hasFile('bundle_files')) {
+            $rawFiles = $request->file('bundle_files');
+        } elseif ($request->hasFile('file')) {
+            $rawFiles = [$request->file('file')];
+        }
+
+        if (empty($rawFiles)) {
+            return response()->json(['success' => false, 'message' => 'Tidak ada berkas yang dipilih untuk diunggah.'], 422);
+        }
+
+        $filesToProcess = [];
+        $tempDirs = [];
+        foreach ($rawFiles as $rf) {
+            $ext = strtolower($rf->getClientOriginalExtension());
+            if ($ext === 'zip' && class_exists(\ZipArchive::class)) {
+                $zip = new \ZipArchive();
+                if ($zip->open($rf->getRealPath()) === true) {
+                    $tmpDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'genie_wiz_' . uniqid();
+                    @mkdir($tmpDir, 0755, true);
+                    $zip->extractTo($tmpDir);
+                    $zip->close();
+                    $tempDirs[] = $tmpDir;
+
+                    $it = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($tmpDir, \FilesystemIterator::SKIP_DOTS));
+                    foreach ($it as $subFile) {
+                        if ($subFile->isFile()) {
+                            $subExt = strtolower($subFile->getExtension());
+                            if (in_array($subExt, ['pdf', 'jpg', 'jpeg', 'png', 'webp'], true)) {
+                                $filesToProcess[] = new \Illuminate\Http\UploadedFile(
+                                    $subFile->getPathname(),
+                                    $subFile->getFilename(),
+                                    mime_content_type($subFile->getPathname()) ?: 'application/pdf',
+                                    null,
+                                    true
+                                );
+                            }
+                        }
+                    }
+                    continue;
+                }
+            }
+            $filesToProcess[] = $rf;
+        }
+
+        if (empty($filesToProcess)) {
+            return response()->json(['success' => false, 'message' => 'Tidak ada berkas PDF/gambar valid yang dapat diproses dari bundle.'], 422);
+        }
+
+        $currentDokumen = json_decode($request->input('current_dokumen', '[]'), true) ?: [];
+        $matchedRows = 0;
+        $addedRows = 0;
+
+        foreach ($filesToProcess as $file) {
+            $origName = $file->getClientOriginalName();
+            $text = '';
+            if (strtolower($file->getClientOriginalExtension()) === 'pdf' && class_exists(\Smalot\PdfParser\Parser::class)) {
+                try {
+                    $parser = new \Smalot\PdfParser\Parser();
+                    $pdfParsed = $parser->parseFile($file->getRealPath());
+                    $text = substr($pdfParsed->getText(), 0, 3000);
+                } catch (\Throwable $e) {
+                    // Ignore parse error, use filename
+                }
+            }
+
+            $classification = $this->classifyFileForCustoms($origName, $text, false);
+            $kodeDok = $classification['kode_dokumen'];
+            $slot = $classification['slot'];
+            $nomorDok = $classification['nomor_dokumen'];
+            $tglDok = $classification['tanggal_dokumen'];
+            $label = $classification['label'];
+
+            $doc = $this->workflowService->uploadDocument(
+                $shipment,
+                $slot,
+                $file,
+                "{$label}: {$nomorDok}"
+            );
+
+            // Cari apakah sudah ada baris dokumen di wizard dengan kodeDokumen sama DAN shipmentDocumentId masih kosong
+            $matchedIdx = -1;
+            foreach ($currentDokumen as $idx => $row) {
+                if (($row['kodeDokumen'] ?? '') === $kodeDok && empty($row['shipmentDocumentId'])) {
+                    $matchedIdx = $idx;
+                    break;
+                }
+            }
+
+            if ($matchedIdx !== -1) {
+                // Tautkan berkas fisik ke baris yang ada (misal dari tarikan CEISA metadata)
+                $currentDokumen[$matchedIdx]['shipmentDocumentId'] = $doc->id;
+                if (empty($currentDokumen[$matchedIdx]['nomorDokumen']) || $currentDokumen[$matchedIdx]['nomorDokumen'] === '-') {
+                    $currentDokumen[$matchedIdx]['nomorDokumen'] = $nomorDok;
+                }
+                if (empty($currentDokumen[$matchedIdx]['tanggalDokumen']) || $currentDokumen[$matchedIdx]['tanggalDokumen'] === '-') {
+                    $currentDokumen[$matchedIdx]['tanggalDokumen'] = $tglDok;
+                }
+                if ($kodeDok === '861') {
+                    $currentDokumen[$matchedIdx]['ecooStatus'] = 'Valid / Linked';
+                }
+                $matchedRows++;
+            } else {
+                // Tambahkan baris baru
+                $currentDokumen[] = [
+                    'seriDokumen' => count($currentDokumen) + 1,
+                    'kodeDokumen' => $kodeDok,
+                    'nomorDokumen' => $nomorDok,
+                    'tanggalDokumen' => $tglDok,
+                    'shipmentDocumentId' => $doc->id,
+                    'ecooStatus' => $kodeDok === '861' ? 'Valid / Linked' : '-',
+                    'linkedSeri' => '',
+                ];
+                $addedRows++;
+            }
+        }
+
+        // Hapus temp dirs
+        foreach ($tempDirs as $dir) {
+            if (is_dir($dir)) {
+                $filesIt = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS), \RecursiveIteratorIterator::CHILD_FIRST);
+                foreach ($filesIt as $f) {
+                    $f->isDir() ? @rmdir($f->getRealPath()) : @unlink($f->getRealPath());
+                }
+                @rmdir($dir);
+            }
+        }
+
+        // Re-number seri
+        foreach ($currentDokumen as $i => &$d) {
+            $d['seriDokumen'] = $i + 1;
+        }
+        unset($d);
+
+        // Ambil semua preview files yang aktif
+        $allPreviewFiles = $shipment->documents()
+            ->get()
+            ->filter(fn($d) => !empty($d->file_path) && Storage::disk('public')->exists($d->file_path))
+            ->sortByDesc(fn($d) => ($d->is_current ? 1 : 0) . '_' . optional($d->created_at)->timestamp)
+            ->map(fn($d) => $this->formatPreviewFileEntry($shipment, $d))
+            ->values()
+            ->all();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Bundle berhasil diproses! " . count($filesToProcess) . " berkas fisik diunggah ({$matchedRows} ditautkan ke metadata, {$addedRows} baris baru).",
+            'preview_files' => $allPreviewFiles,
+            'dokumen' => $currentDokumen,
+            'detected_count' => count($filesToProcess),
+        ]);
+    }
+
+    /**
+     * Klasifikasi otomatis file dokumen pabean berdasarkan nama berkas & teks
+     */
+    protected function classifyFileForCustoms(string $originalName, string $sampleText = '', bool $isExport = false): array
+    {
+        $upperName = strtoupper($originalName);
+        $upperText = strtoupper(substr($sampleText, 0, 3000));
+        $combined = $upperName . ' ' . $upperText;
+
+        // Aturan deteksi jenis dokumen pabean CEISA
+        if (str_contains($combined, 'INVOICE') || str_contains($combined, 'INV') || str_contains($combined, 'FAKTUR')) {
+            $kode = '380';
+            $slot = 'INVOICE';
+            $label = 'Commercial Invoice';
+        } elseif (str_contains($combined, 'PACKING') || str_contains($combined, 'PKL') || preg_match('/\bPL\b/i', $upperName) || str_contains($combined, 'WEIGHT LIST')) {
+            $kode = '217';
+            $slot = 'PACKING_LIST';
+            $label = 'Packing List';
+        } elseif (str_contains($combined, 'BILL OF LADING') || str_contains($combined, 'B/L') || preg_match('/\bBL\b/i', $upperName) || str_contains($combined, 'AWB') || str_contains($combined, 'AIR WAYBILL')) {
+            $kode = '705';
+            $slot = 'BL_AWB';
+            $label = 'Bill of Lading';
+        } elseif (str_contains($combined, 'BOOKING') || str_contains($combined, 'SHIPPING INSTRUCTION') || str_contains($combined, ' S/I') || str_contains($combined, 'BOOKING CONFIRMATION')) {
+            $kode = $isExport ? '705' : '740';
+            $slot = 'BL_AWB';
+            $label = $isExport ? 'Booking Confirmation (B/L)' : 'Delivery Order / Booking';
+        } elseif (str_contains($combined, 'ORIGIN') || str_contains($combined, 'COO') || str_contains($combined, 'SKA') || str_contains($combined, 'FORM E') || str_contains($combined, 'FORM D') || str_contains($combined, 'FORM AK')) {
+            $kode = '861';
+            $slot = 'COO_FORME';
+            $label = 'Certificate of Origin (e-COO)';
+        } elseif (str_contains($combined, 'INSURANCE') || str_contains($combined, 'ASURANSI') || str_contains($combined, 'POLIS') || str_contains($combined, 'MARINE')) {
+            $kode = '430';
+            $slot = 'INSURANCE';
+            $label = 'Polis Asuransi Kargo';
+        } elseif (str_contains($combined, 'SURVEYOR') || str_contains($combined, 'LS') || str_contains($combined, 'LAPORAN SURVEYOR')) {
+            $kode = '854';
+            $slot = 'PERIJINAN_LARTAS';
+            $label = 'Laporan Surveyor (LS)';
+        } elseif (str_contains($combined, 'POSTEL') || str_contains($combined, 'SDPPI') || str_contains($combined, 'KOMINFO')) {
+            $kode = '853';
+            $slot = 'PERIJINAN_LARTAS';
+            $label = 'Sertifikat SDPPI / Postel';
+        } elseif (str_contains($combined, 'PI') || str_contains($combined, 'PERSETUJUAN IMPOR') || str_contains($combined, 'KEMENDAG') || str_contains($combined, 'LARTAS')) {
+            $kode = '860';
+            $slot = 'PERIJINAN_LARTAS';
+            $label = 'Persetujuan Impor (PI Kemendag)';
+        } elseif (str_contains($combined, 'KARANTINA') || str_contains($combined, 'QUARANTINE') || str_contains($combined, 'PHYTOSANITARY') || str_contains($combined, 'HEALTH CERTIFICATE')) {
+            $kode = '814';
+            $slot = 'PERIJINAN_LARTAS';
+            $label = 'Sertifikat Karantina';
+        } else {
+            $kode = '999';
+            $slot = 'PERIJINAN_LARTAS';
+            $label = 'Dokumen Pelengkap';
+        }
+
+        // Deteksi nomor dokumen
+        $nomor = null;
+        if (preg_match('/(?:INV|INVOICE|NO|NUM|NOMOR)[_\-\s\.:#]*([A-Z0-9\-\/]{4,30})/i', $upperText, $m)) {
+            $nomor = trim($m[1]);
+        } elseif (preg_match('/(?:BL|B\/L|AWB)[_\-\s\.:#]*([A-Z0-9\-\/]{4,30})/i', $upperText, $m)) {
+            $nomor = trim($m[1]);
+        }
+
+        if (!$nomor) {
+            $baseName = pathinfo($originalName, PATHINFO_FILENAME);
+            $cleanName = preg_replace('/^(INVOICE|INV|PACKING_LIST|PACKING|PL|BL|AWB|COO|INSURANCE|DOC)[_\-\s]*/i', '', $baseName);
+            $nomor = !empty($cleanName) && strlen($cleanName) >= 3 ? strtoupper($cleanName) : strtoupper($baseName);
+        }
+
+        // Deteksi tanggal dokumen
+        $tanggal = null;
+        if (preg_match('/\b(202[0-9])[-_\.\/](0[1-9]|1[0-2])[-_\.\/](0[1-9]|[12][0-9]|3[01])\b/', $combined, $m)) {
+            $tanggal = "{$m[1]}-{$m[2]}-{$m[3]}";
+        } elseif (preg_match('/\b(0[1-9]|[12][0-9]|3[01])[-_\.\/](0[1-9]|1[0-2])[-_\.\/](202[0-9])\b/', $combined, $m)) {
+            $tanggal = "{$m[3]}-{$m[2]}-{$m[1]}";
+        } else {
+            $tanggal = date('Y-m-d');
+        }
+
+        return [
+            'kode_dokumen' => $kode,
+            'slot' => $slot,
+            'label' => $label,
+            'nomor_dokumen' => $nomor,
+            'tanggal_dokumen' => $tanggal,
+        ];
     }
 
     /**

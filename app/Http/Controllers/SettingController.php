@@ -360,4 +360,142 @@ class SettingController extends Controller implements HasMiddleware
 
         return back()->with('success', "Parameter [{$validated['key']}] berhasil diperbarui di basis data.");
     }
+
+    /**
+     * Simpan Pengaturan Konfigurasi MoM ERP (Surat Jalan, Email 4 Divisi, Deposit, & Retensi 10 Tahun)
+     */
+    public function updateMomConfig(Request $request)
+    {
+        $validated = $request->validate([
+            'surat_jalan_default_template' => 'nullable|string|in:fcl,lcl,inter_factory,empty_depo',
+            'surat_jalan_signee_name' => 'nullable|string|max:150',
+            'surat_jalan_emergency_phone' => 'nullable|string|max:50',
+            'surat_jalan_terms' => 'nullable|string|max:1000',
+            
+            // Divisi Marketing (Quotation & Sales)
+            'email_marketing_from_address' => 'nullable|email|max:150',
+            'email_marketing_from_name' => 'nullable|string|max:150',
+            'email_marketing_reply_to' => 'nullable|email|max:150',
+            'email_marketing_subject' => 'nullable|string|max:200',
+            'email_marketing_smtp_custom' => 'nullable|boolean',
+            'email_marketing_smtp_host' => 'nullable|string|max:150',
+            'email_marketing_smtp_port' => 'nullable|numeric',
+            'email_marketing_smtp_encryption' => 'nullable|string|in:tls,ssl,none',
+            'email_marketing_smtp_username' => 'nullable|string|max:150',
+            'email_marketing_smtp_password' => 'nullable|string|max:150',
+
+            // Divisi Finance (Invoice P19, Kwitansi, Deposit)
+            'email_finance_from_address' => 'nullable|email|max:150',
+            'email_finance_from_name' => 'nullable|string|max:150',
+            'email_finance_reply_to' => 'nullable|email|max:150',
+            'email_finance_subject' => 'nullable|string|max:200',
+            'email_finance_bank_info' => 'nullable|string|max:500',
+            'email_finance_smtp_custom' => 'nullable|boolean',
+            'email_finance_smtp_host' => 'nullable|string|max:150',
+            'email_finance_smtp_port' => 'nullable|numeric',
+            'email_finance_smtp_encryption' => 'nullable|string|in:tls,ssl,none',
+            'email_finance_smtp_username' => 'nullable|string|max:150',
+            'email_finance_smtp_password' => 'nullable|string|max:150',
+
+            // Divisi Dokumen (PIB/PEB Customs Draft)
+            'email_document_from_address' => 'nullable|email|max:150',
+            'email_document_from_name' => 'nullable|string|max:150',
+            'email_document_reply_to' => 'nullable|email|max:150',
+            'email_document_subject' => 'nullable|string|max:200',
+            'email_document_smtp_custom' => 'nullable|boolean',
+            'email_document_smtp_host' => 'nullable|string|max:150',
+            'email_document_smtp_port' => 'nullable|numeric',
+            'email_document_smtp_encryption' => 'nullable|string|in:tls,ssl,none',
+            'email_document_smtp_username' => 'nullable|string|max:150',
+            'email_document_smtp_password' => 'nullable|string|max:150',
+
+            // Divisi Traffic (ETA, Tracking, SPPB, Dispatch)
+            'email_traffic_from_address' => 'nullable|email|max:150',
+            'email_traffic_from_name' => 'nullable|string|max:150',
+            'email_traffic_reply_to' => 'nullable|email|max:150',
+            'email_traffic_subject' => 'nullable|string|max:200',
+            'email_traffic_smtp_custom' => 'nullable|boolean',
+            'email_traffic_smtp_host' => 'nullable|string|max:150',
+            'email_traffic_smtp_port' => 'nullable|numeric',
+            'email_traffic_smtp_encryption' => 'nullable|string|in:tls,ssl,none',
+            'email_traffic_smtp_username' => 'nullable|string|max:150',
+            'email_traffic_smtp_password' => 'nullable|string|max:150',
+
+            'backup_retention_years' => 'nullable|numeric|min:1|max:30',
+            'backup_schedule_time' => 'nullable|string|max:10',
+            'deposit_rekening_tujuan' => 'nullable|string|max:300',
+        ]);
+
+        // Tangani checkbox boolean kustom smtp untuk 4 divisi
+        $divisions = ['marketing', 'finance', 'document', 'traffic'];
+        foreach ($divisions as $div) {
+            $validated["email_{$div}_smtp_custom"] = $request->has("email_{$div}_smtp_custom") ? 1 : 0;
+        }
+
+        foreach ($validated as $key => $val) {
+            $group = 'logistics';
+            if (str_starts_with($key, 'email_')) $group = 'email';
+            elseif (str_starts_with($key, 'backup_')) $group = 'backup';
+            elseif (str_starts_with($key, 'deposit_')) $group = 'finance';
+
+            \App\Models\SystemSetting::set($key, $val, $group);
+        }
+
+        return redirect()->route('setting.index', ['tab' => 'mom_config'])
+            ->with('success', 'Konfigurasi Master MoM ERP (Template Surat Jalan, Email Divisi & Retensi) berhasil disimpan ke basis data.');
+    }
+
+    /**
+     * Eksekusi Manual Snapshot Backup Database & Retensi 10 Tahun (MoM Poin 11)
+     */
+    public function triggerManualBackup(Request $request)
+    {
+        try {
+            \Illuminate\Support\Facades\Artisan::call('backup:archive-10yr');
+            $output = \Illuminate\Support\Facades\Artisan::output();
+
+            return redirect()->route('setting.index', ['tab' => 'mom_config'])
+                ->with('success', 'Snapshot backup database & arsip manifest retensi 10 tahun berhasil dieksekusi secara instan!');
+        } catch (\Throwable $e) {
+            return redirect()->route('setting.index', ['tab' => 'mom_config'])
+                ->with('error', 'Gagal memicu backup database: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Tes Koneksi SMTP Server Per Divisi (AJAX)
+     */
+    public function testSmtpConnection(Request $request)
+    {
+        $request->validate([
+            'division' => 'required|string|in:marketing,finance,document,traffic',
+            'test_email' => 'nullable|email',
+            'smtp_host' => 'nullable|string|max:150',
+            'smtp_port' => 'nullable|numeric',
+            'smtp_encryption' => 'nullable|string|in:tls,ssl,none',
+            'smtp_username' => 'nullable|string|max:150',
+            'smtp_password' => 'nullable|string|max:150',
+            'from_address' => 'nullable|email|max:150',
+            'from_name' => 'nullable|string|max:150',
+        ]);
+
+        $runtimeConfig = [
+            'is_custom_smtp' => true,
+            'smtp_host' => $request->smtp_host,
+            'smtp_port' => $request->smtp_port ? (int) $request->smtp_port : null,
+            'smtp_encryption' => $request->smtp_encryption ?: 'tls',
+            'smtp_username' => $request->smtp_username,
+            'smtp_password' => $request->smtp_password,
+            'from_address' => $request->from_address,
+            'from_name' => $request->from_name,
+        ];
+
+        $result = \App\Services\DivisionMailService::testConnection(
+            $request->division,
+            $request->test_email,
+            $runtimeConfig
+        );
+
+        return response()->json($result);
+    }
 }

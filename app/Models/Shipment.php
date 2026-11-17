@@ -557,6 +557,71 @@ class Shipment extends Model
     }
 
     /**
+     * Hitung Status Prioritas Kerja (Urgent, High, Medium, Low) - Sesuai MoM Poin 10
+     */
+    public function getPriorityLevelAttribute(): string
+    {
+        $now = now();
+
+        // 1. URGENT: Free time tinggal <= 1 hari, atau Overdue SLA, atau SPJM Hold > 24 Jam
+        if ($this->free_time_expired_at && $this->free_time_expired_at->isPast()) {
+            return 'URGENT';
+        }
+        if ($this->free_time_expired_at && $this->free_time_expired_at->diffInDays($now) <= 1) {
+            return 'URGENT';
+        }
+        if ($this->customs_channel === 'MERAH' && $this->spjm_received && !$this->sppb_received) {
+            return 'URGENT';
+        }
+
+        // 2. HIGH: Jalur Merah, atau Free Time sisa 2-3 hari, atau DO expired besok
+        if ($this->customs_channel === 'MERAH' || $this->jalur === 'MERAH') {
+            return 'HIGH';
+        }
+        if ($this->free_time_expired_at && $this->free_time_expired_at->diffInDays($now) <= 3) {
+            return 'HIGH';
+        }
+        if ($this->do_expired_at && $this->do_expired_at->diffInDays($now) <= 1) {
+            return 'HIGH';
+        }
+
+        // 3. MEDIUM: Kapal sudah tiba (ATA) atau ETA <= 2 hari ke depan
+        if ($this->actual_arrival_date || ($this->eta_date && $this->eta_date->diffInDays($now) <= 2)) {
+            return 'MEDIUM';
+        }
+
+        return 'LOW';
+    }
+
+    /**
+     * Cek apakah pekerjaan mendekati atau melewati deadline (Overdue) - Sesuai MoM Poin 10
+     */
+    public function getIsOverdueAttribute(): bool
+    {
+        $now = now();
+        if ($this->closed_at) {
+            return false;
+        }
+
+        // Overdue jika free time kontainer sudah lewat
+        if ($this->free_time_expired_at && $this->free_time_expired_at->lt($now)) {
+            return true;
+        }
+
+        // Overdue jika DO expired lewat tapi kargo belum gate out
+        if ($this->do_expired_at && $this->do_expired_at->lt($now) && !$this->gate_out_date) {
+            return true;
+        }
+
+        // Overdue jika SLA status model bernilai 'late'
+        if (isset($this->sla_status) && $this->sla_status === 'late') {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Definisi 11 Tahapan Pipeline Operasional Genie - BC 2.0 (Impor - PIB)
      */
     public const STAGES_PIPELINE = [
@@ -920,5 +985,228 @@ class Shipment extends Model
             'DRAFT_REVIEW',
         ], true);
     }
+
+    /**
+     * Cek apakah moda transportasi adalah Udara / Penerbangan (Air Freight)
+     */
+    public function getIsAirFreightAttribute(): bool
+    {
+        $bl = strtoupper($this->attributes['nomor_bl_awb'] ?? '');
+        $carrier = strtoupper($this->attributes['nama_kapal'] ?? '');
+        $voyage = strtoupper($this->attributes['voyage_no'] ?? '');
+        $pol = strtoupper($this->attributes['pelabuhan_muat'] ?? '');
+        $pod = strtoupper($this->attributes['pelabuhan_bongkar'] ?? '');
+
+        if (str_contains($bl, 'AWB') || preg_match('/^\d{3}[-\s]?\d{7,8}$/', $bl)) {
+            return true;
+        }
+
+        if (preg_match('/\b(FLIGHT|AIR|AIRWAYS|AIRLINE|AIRLINES|GARUDA|LION|BATIK|SINGAPORE AIRLINES|CATHAY|EMIRATES|QATAR|BOEING|AIRBUS|LUFTHANSA|FEDEX|CARGOLUX)\b/', $carrier)) {
+            return true;
+        }
+
+        if (preg_match('/^(GA|SQ|MH|CX|EK|QR|CI|KE|JL|NH|TR|QZ|JT|ID|SJ|QG|LH|KL|AF|BA|TK|SV|FX|5X)[-\s]?\d{2,4}$/', $voyage)) {
+            return true;
+        }
+
+        if (str_contains($pol, 'AIRPORT') || str_contains($pod, 'AIRPORT') || str_contains($pol, 'BANDARA') || str_contains($pod, 'BANDARA')) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Tautan Pelacakan Langsung (Live Radar Pelayaran & Penerbangan)
+     */
+    public function getTrackingLinksAttribute(): array
+    {
+        $vessel = trim($this->attributes['nama_kapal'] ?? '');
+        $voyage = trim($this->attributes['voyage_no'] ?? '');
+        $blAwb = trim($this->attributes['nomor_bl_awb'] ?? '');
+        $vendor = $this->shippingVendor;
+        $vendorName = strtoupper($vendor?->name ?? $vessel);
+        $isAir = $this->is_air_freight;
+
+        $links = [];
+
+        if ($isAir) {
+            $flightNo = $voyage ?: $vessel;
+            $cleanFlight = preg_replace('/[^A-Za-z0-9]/', '', $flightNo);
+
+            if ($cleanFlight) {
+                $links['flightradar24'] = [
+                    'name' => 'Flightradar24',
+                    'url' => 'https://www.flightradar24.com/data/flights/' . urlencode($cleanFlight),
+                    'icon' => 'plane',
+                    'badge' => 'Live Radar',
+                ];
+                $links['flightaware'] = [
+                    'name' => 'FlightAware',
+                    'url' => 'https://www.flightaware.com/live/flight/' . urlencode($cleanFlight),
+                    'icon' => 'globe',
+                    'badge' => 'Flight Info',
+                ];
+            }
+
+            if ($blAwb) {
+                $cleanAwb = preg_replace('/[^0-9]/', '', $blAwb);
+                $links['aircargo'] = [
+                    'name' => 'Air Cargo Tracking',
+                    'url' => 'https://www.track-trace.com/aircargo',
+                    'icon' => 'box',
+                    'badge' => 'AWB Cargo',
+                ];
+            }
+        } else {
+            $cleanVessel = preg_replace('/[^\w\s-]/', '', $vessel);
+            if ($cleanVessel) {
+                $links['marinetraffic'] = [
+                    'name' => 'MarineTraffic AIS',
+                    'url' => 'https://www.marinetraffic.com/en/ais/index/search/all/keyword:' . urlencode($cleanVessel),
+                    'icon' => 'anchor',
+                    'badge' => 'Satelit AIS',
+                ];
+                $links['vesselfinder'] = [
+                    'name' => 'VesselFinder',
+                    'url' => 'https://www.vesselfinder.com/vessels?name=' . urlencode($cleanVessel),
+                    'icon' => 'navigation',
+                    'badge' => 'Ship Position',
+                ];
+            }
+
+            if ($vendor?->portal_url) {
+                $links['carrier_portal'] = [
+                    'name' => $vendor->name . ' Portal',
+                    'url' => $vendor->portal_url,
+                    'icon' => 'external-link',
+                    'badge' => 'Official Portal',
+                ];
+            } elseif (str_contains($vendorName, 'MAERSK')) {
+                $links['carrier_portal'] = [
+                    'name' => 'Maersk Tracking',
+                    'url' => $blAwb ? 'https://www.maersk.com/tracking/' . urlencode($blAwb) : 'https://www.maersk.com/tracking',
+                    'icon' => 'external-link',
+                    'badge' => 'Maersk Line',
+                ];
+            } elseif (str_contains($vendorName, 'MSC')) {
+                $links['carrier_portal'] = [
+                    'name' => 'MSC Tracking',
+                    'url' => $blAwb ? 'https://www.msc.com/en/track-a-shipment?reference=' . urlencode($blAwb) : 'https://www.msc.com/en/track-a-shipment',
+                    'icon' => 'external-link',
+                    'badge' => 'MSC Official',
+                ];
+            } elseif (str_contains($vendorName, 'ONE') || str_contains($vendorName, 'OCEAN NETWORK')) {
+                $links['carrier_portal'] = [
+                    'name' => 'ONE Line Tracking',
+                    'url' => $blAwb ? 'https://ecomm.one-line.com/one-ecom/manage-shipment/cargo-tracking?trackingNumber=' . urlencode($blAwb) : 'https://ecomm.one-line.com/one-ecom/manage-shipment/cargo-tracking',
+                    'icon' => 'external-link',
+                    'badge' => 'ONE Line',
+                ];
+            } elseif (str_contains($vendorName, 'CMA')) {
+                $links['carrier_portal'] = [
+                    'name' => 'CMA CGM Tracking',
+                    'url' => 'https://www.cma-cgm.com/ebusiness/tracking/search?SearchBy=BL&SearchValue=' . urlencode($blAwb),
+                    'icon' => 'external-link',
+                    'badge' => 'CMA CGM',
+                ];
+            } elseif (str_contains($vendorName, 'EVERGREEN')) {
+                $links['carrier_portal'] = [
+                    'name' => 'Evergreen Tracking',
+                    'url' => 'https://www.shipmentlink.com/servlet/TTrn_Tracking',
+                    'icon' => 'external-link',
+                    'badge' => 'ShipmentLink',
+                ];
+            } elseif (str_contains($vendorName, 'WAN HAI')) {
+                $links['carrier_portal'] = [
+                    'name' => 'Wan Hai Tracking',
+                    'url' => 'https://www.wanhai.com/views/cargoTrack/cargoTrack.xhtml',
+                    'icon' => 'external-link',
+                    'badge' => 'Wan Hai Lines',
+                ];
+            }
+
+            if ($blAwb) {
+                $links['tracktrace'] = [
+                    'name' => 'Universal Container Track',
+                    'url' => 'https://www.track-trace.com/container',
+                    'icon' => 'box',
+                    'badge' => 'B/L / Kontainer',
+                ];
+            }
+        }
+
+        return $links;
+    }
+
+    /**
+     * Informasi Status ETA & Kedatangan Terkini
+     */
+    public function getEtaStatusInfoAttribute(): array
+    {
+        if ($this->actual_arrival_date) {
+            return [
+                'status' => 'ARRIVED',
+                'label' => 'SANDAR / TIBA',
+                'color' => 'emerald',
+                'badge_class' => 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30',
+                'date_formatted' => $this->actual_arrival_date->format('d/m/Y H:i'),
+                'detail' => 'ATA: ' . $this->actual_arrival_date->format('d M Y, H:i'),
+                'is_arrived' => true,
+            ];
+        }
+
+        if ($this->eta_date) {
+            $now = now();
+            $eta = $this->eta_date;
+
+            if ($eta->isToday()) {
+                return [
+                    'status' => 'TODAY',
+                    'label' => 'TIBA HARI INI',
+                    'color' => 'amber',
+                    'badge_class' => 'bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/40 animate-pulse',
+                    'date_formatted' => $eta->format('d/m/Y H:i'),
+                    'detail' => 'ETA Hari Ini (' . $eta->format('H:i') . ')',
+                    'is_arrived' => false,
+                ];
+            }
+
+            if ($eta->isPast()) {
+                $daysPast = (int) $now->diffInDays($eta);
+                return [
+                    'status' => 'OVERDUE',
+                    'label' => 'OVERDUE',
+                    'color' => 'rose',
+                    'badge_class' => 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/30',
+                    'date_formatted' => $eta->format('d/m/Y H:i'),
+                    'detail' => 'Lewat ' . ($daysPast > 0 ? $daysPast . ' hari' : 'beberapa jam'),
+                    'is_arrived' => false,
+                ];
+            }
+
+            $daysRemaining = (int) $now->diffInDays($eta);
+            return [
+                'status' => 'SCHEDULED',
+                'label' => 'DALAM PERJALANAN',
+                'color' => 'sky',
+                'badge_class' => 'bg-sky-500/15 text-sky-700 dark:text-sky-400 border border-sky-500/30',
+                'date_formatted' => $eta->format('d/m/Y H:i'),
+                'detail' => 'ETA: ' . $eta->format('d M Y') . ' (' . ($daysRemaining > 0 ? $daysRemaining . ' hari lagi' : 'besok') . ')',
+                'is_arrived' => false,
+            ];
+        }
+
+        return [
+            'status' => 'UNKNOWN',
+            'label' => 'BELUM DISET',
+            'color' => 'slate',
+            'badge_class' => 'bg-black/5 dark:bg-white/10 text-black/50 dark:text-white/50 border border-black/10 dark:border-white/10',
+            'date_formatted' => '-',
+            'detail' => 'Jadwal belum ditentukan',
+            'is_arrived' => false,
+        ];
+    }
 }
+
 

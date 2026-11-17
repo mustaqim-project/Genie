@@ -11,9 +11,59 @@
 @endphp
 
 <script>
+// Safe global fallbacks agar template directives Alpine tidak pernah throw ReferenceError
+window.tab = 'ai';
+window.useAi = false;
+window.afterAction = 'fill_bc_form';
+window.scanning = false;
+window.scanned = false;
+window.showDetails = false;
+window.showSpecialDocs = false;
+window.bundleFileNames = [];
+window.detectedBundleFiles = [];
+window.crossValidation = null;
+window.fileNames = { bl: '', invoice: '', pl: '', coo: '', insurance: '', lartas: '' };
+window.detected = {
+    client_id: '',
+    client_name: '',
+    client_npwp: '',
+    exporter_name: '',
+    exporter_address: '',
+    shipping_vendor_id: '',
+    shipping_vendor_name: '',
+    type: '',
+    bl_number: '',
+    invoice_number: '',
+    vessel_name: '',
+    voyage_number: '',
+    port_of_loading: '',
+    port_of_discharge: '',
+    eta: '',
+    etd_date: '',
+    commodity_summary: '',
+    extraction_mode: 'RULE_ENGINE_NO_AI',
+    total_kontainer: 1,
+    nomor_kontainer: '',
+    total_kemasan: 0,
+    jenis_kemasan: '',
+    total_bruto: 0,
+    total_netto: 0,
+    currency: 'USD',
+    total_cif: 0,
+    total_fob: 0,
+    freight: 0,
+    ndbm_kurs: 15850,
+    items: []
+};
+window.showQuickClientModal = false;
+window.quickClient = { name: '', npwp: '', pic_name: '', phone: '' };
+window.quickClientLoading = false;
+window.quickClientError = '';
+
 if (!window.createProjectModalManagerRegistered) {
     window.createProjectModalManagerRegistered = true;
     window.createProjectModalManager = function createProjectModalManager(cfg = {}) {
+        if (typeof cfg !== 'object' || cfg === null) cfg = {};
         const pfx = cfg.pfx || '';
         const defType = cfg.defaultType || '';
         const lock = !!cfg.lockType;

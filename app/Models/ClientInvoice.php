@@ -18,6 +18,7 @@ class ClientInvoice extends Model
     protected $fillable = [
         'invoice_no',
         'shipment_id',
+        'quotation_id',
         'client_id',
         'tanggal',
         'jatuh_tempo',
@@ -28,6 +29,8 @@ class ClientInvoice extends Model
         'subtotal_idr',
         'ppn_jasa_idr',
         'total_tagihan_idr',
+        'deposit_deducted_idr',
+        'sisa_tagihan_idr',
         'status',
         'paid_at',
         'catatan_pembayaran',
@@ -45,11 +48,23 @@ class ClientInvoice extends Model
         'subtotal_idr' => 'decimal:2',
         'ppn_jasa_idr' => 'decimal:2',
         'total_tagihan_idr' => 'decimal:2',
+        'deposit_deducted_idr' => 'decimal:2',
+        'sisa_tagihan_idr' => 'decimal:2',
     ];
 
     public function shipment()
     {
         return $this->belongsTo(Shipment::class);
+    }
+
+    public function quotation()
+    {
+        return $this->belongsTo(Quotation::class);
+    }
+
+    public function depositUsages()
+    {
+        return $this->hasMany(ClientDepositUsage::class, 'client_invoice_id');
     }
 
     public function client()

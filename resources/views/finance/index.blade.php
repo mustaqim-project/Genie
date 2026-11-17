@@ -20,6 +20,16 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
+            <a href="{{ route('finance.deposits.index') }}" 
+               class="btn-apple-gray px-3.5 py-2 text-xs inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold hover:bg-emerald-50">
+                <i data-lucide="wallet" class="w-4 h-4"></i>
+                <span>Deposit Klien</span>
+            </a>
+            <a href="{{ route('finance.pnl') }}" 
+               class="btn-apple-gray px-3.5 py-2 text-xs inline-flex items-center gap-1.5 text-purple-600 dark:text-purple-400 font-semibold hover:bg-purple-50">
+                <i data-lucide="coins" class="w-4 h-4"></i>
+                <span>Laporan PnL</span>
+            </a>
             <a href="{{ route('finance.invoices.index') }}" 
                class="btn-apple-filled px-3.5 py-2 text-xs inline-flex items-center gap-1.5">
                 <i data-lucide="file-text" class="w-4 h-4"></i>

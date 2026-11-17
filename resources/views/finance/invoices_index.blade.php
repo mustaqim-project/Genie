@@ -6,6 +6,8 @@
 <div class="max-w-[1360px] mx-auto px-4 sm:px-6 space-y-6 pt-4 pb-28 lg:pb-12" 
      x-data="{ 
          showCreateModal: false, 
+         showSendMailModal: false,
+         mailTarget: { id: '', no: '', client: '', email: '', total: '', previewUrl: '', sendUrl: '' },
          talangan: 0, 
          pelayaran: 0, 
          ppjk: 1500000, 
@@ -32,6 +34,11 @@
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Rekapitulasi talangan pabean (reimbursable), biaya pelayaran, jasa freight forwarder / PPJK, dan PPN 1.1%.</p>
         </div>
         <div class="flex items-center gap-2">
+            <a href="{{ route('finance.deposits.index') }}" 
+               class="btn-apple-gray px-3.5 py-2 text-xs inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold hover:bg-emerald-50 dark:hover:bg-emerald-950/30">
+                <i data-lucide="wallet" class="w-4 h-4"></i>
+                <span>Kelola Deposit Klien</span>
+            </a>
             @can('create', \App\Models\ClientInvoice::class)
             <button type="button" @click="showCreateModal = true" class="btn-apple-filled">
                 <i data-lucide="plus" class="w-4 h-4"></i>
@@ -185,7 +192,12 @@
                                 Rp {{ number_format($inv->reimbursable_amount ?? $inv->talangan_pabean_idr ?? 0, 0, ',', '.') }}
                             </td>
                             <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900 dark:text-white tabular-nums" data-sort-value="{{ $inv->total_amount ?? $inv->total_tagihan_idr ?? 0 }}">
-                                Rp {{ number_format($inv->total_amount ?? $inv->total_tagihan_idr ?? 0, 0, ',', '.') }}
+                                Rp {{ number_format($inv->sisa_tagihan_idr ?? $inv->total_amount ?? $inv->total_tagihan_idr ?? 0, 0, ',', '.') }}
+                                @if(!empty($inv->deposit_deducted_idr) && $inv->deposit_deducted_idr > 0)
+                                    <div class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold font-sans mt-0.5">
+                                        - Potong Deposit: Rp {{ number_format($inv->deposit_deducted_idr, 0, ',', '.') }}
+                                    </div>
+                                @endif
                             </td>
                             <td class="py-3.5 px-4 text-center">
                                 @if($inv->status === 'PAID')
@@ -208,11 +220,32 @@
                                     <span>Detail</span>
                                     <i data-lucide="chevron-right" class="w-3 h-3"></i>
                                 </a>
+                                <button type="button" 
+                                        @click="showSendMailModal = true; mailTarget = { id: '{{ $inv->id }}', no: '{{ $inv->invoice_number ?? $inv->invoice_no }}', client: '{{ addslashes($inv->client?->name ?? '') }}', email: '{{ addslashes($inv->client?->email ?? '') }}', total: 'Rp {{ number_format($inv->total_tagihan ?? $inv->total_amount ?? 0, 0, ',', '.') }}', previewUrl: '{{ route('emails.preview.invoice', $inv->id) }}', sendUrl: '{{ route('finance.invoices.send-email', $inv->id) }}' }"
+                                        class="btn-apple-gray text-[11px] px-2.5 py-1 inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-400 font-semibold"
+                                        title="Kirim Email Tagihan Resmi (Divisi Finance)">
+                                    <i data-lucide="send" class="w-3 h-3"></i>
+                                    <span>Kirim Email</span>
+                                </button>
+                                <a href="{{ route('emails.preview.invoice', $inv->id) }}" target="_blank"
+                                   class="btn-apple-gray text-[11px] px-2.5 py-1 inline-flex items-center gap-1 text-purple-600 dark:text-purple-400"
+                                   title="Pratinjau Template Email Penagihan Invoice (Finance)">
+                                    <i data-lucide="eye" class="w-3 h-3"></i>
+                                    <span>Preview</span>
+                                </a>
                                 <a href="{{ route('pdf.invoice', $inv->id) }}" target="_blank"
                                    class="btn-apple-tinted text-[11px] px-2.5 py-1 inline-flex items-center gap-1">
                                     <i data-lucide="printer" class="w-3 h-3"></i>
                                     <span>PDF</span>
                                 </a>
+                                @if($inv->status !== 'PAID' && $inv->client && $inv->client->saldo_deposit_aktif > 0)
+                                    <a href="{{ route('finance.deposits.index', ['client_id' => $inv->client_id]) }}"
+                                       class="btn-apple-tinted text-[11px] px-2 py-1 inline-flex items-center gap-1 text-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200"
+                                       title="Potong dari Deposit Klien (Saldo: Rp {{ number_format($inv->client->saldo_deposit_aktif, 0, ',', '.') }})">
+                                        <i data-lucide="wallet" class="w-3 h-3 text-emerald-600"></i>
+                                        <span>Potong Deposit</span>
+                                    </a>
+                                @endif
                                 @if($inv->status !== 'PAID')
                                     <form action="{{ route('finance.invoices.pay', $inv->id) }}" method="POST" class="inline-block" onsubmit="return confirmSweetAlert(event, 'Tandai invoice {{ $inv->invoice_number ?? $inv->invoice_no }} sebagai lunas?', { isDanger: false, confirmText: 'Ya, Tandai Lunas', icon: 'question' })">
                                         @csrf
@@ -374,6 +407,117 @@
         </div>
     </div>
     @endcan
+
+    <!-- Modal Kirim Email Tagihan Invoice P19 (Divisi Finance) -->
+    <div x-show="showSendMailModal" 
+         class="fixed inset-0 z-[200] overflow-y-auto flex items-end sm:items-center justify-center p-0 sm:p-4 md:p-6"
+         role="dialog"
+         aria-modal="true"
+         x-cloak>
+        <div x-show="showSendMailModal"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-md"
+             @click="showSendMailModal = false"
+             aria-hidden="true"></div>
+
+        <div x-show="showSendMailModal"
+             x-transition:enter="transition ease-out duration-250"
+             x-transition:enter-start="opacity-0 translate-y-8 sm:translate-y-0 sm:scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave-end="opacity-0 translate-y-8 sm:translate-y-0 sm:scale-95"
+             class="relative z-10 bg-white dark:bg-[#1C1C1E] rounded-t-[28px] sm:rounded-3xl border border-slate-200/90 dark:border-white/10 shadow-2xl max-w-lg w-full p-6 text-xs space-y-4">
+            
+            <div class="sm:hidden w-12 h-1.5 bg-slate-200 dark:bg-white/20 rounded-full mx-auto -mt-2 mb-3"></div>
+
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/10">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-700 flex items-center justify-center font-bold">
+                        <i data-lucide="receipt" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900 dark:text-white">Kirim Tagihan Invoice P19 Resmi</h3>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Dikirim atas nama resmi Divisi Finance &amp; Billing</p>
+                    </div>
+                </div>
+                <button type="button" @click="showSendMailModal = false" class="btn-apple-gray !p-1.5 rounded-full">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <!-- Identitas Pengirim Resmi Divisi Finance -->
+            <div class="p-3 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200/80 dark:border-emerald-900/40 text-[11px] space-y-1">
+                <div class="flex items-center justify-between">
+                    <span class="font-semibold text-emerald-900 dark:text-emerald-300 flex items-center gap-1.5">
+                        <i data-lucide="badge-check" class="w-3.5 h-3.5 text-emerald-600"></i>
+                        <span>Divisi Pengirim: <strong>Finance &amp; Penagihan</strong></span>
+                    </span>
+                    <span class="px-2 py-0.5 rounded-md font-mono text-[10px] font-bold bg-emerald-200/80 dark:bg-emerald-900/60 text-emerald-900 dark:text-emerald-200">
+                        {{ \App\Models\SystemSetting::get('email_finance_from_address', 'finance@genie-logistics.id') }}
+                    </span>
+                </div>
+                <div class="text-slate-600 dark:text-slate-300">
+                    Nama Pengirim: <strong>{{ \App\Models\SystemSetting::get('email_finance_from_name', 'GENIE Finance & Penagihan') }}</strong> &bull; Reply-To: <span class="font-mono">{{ \App\Models\SystemSetting::get('email_finance_reply_to', 'finance@genie-logistics.id') }}</span>
+                </div>
+            </div>
+
+            <form :action="mailTarget.sendUrl" method="POST" class="space-y-3.5">
+                @csrf
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Invoice</label>
+                        <input type="text" :value="mailTarget.no" readonly class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 text-xs font-mono font-bold cursor-not-allowed">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Total Nominal</label>
+                        <input type="text" :value="mailTarget.total" readonly class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-emerald-700 dark:text-emerald-400 text-xs font-bold font-mono cursor-not-allowed">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Email Finance Klien Penerima <span class="text-rose-500">*</span></label>
+                    <input type="email" name="recipient_email" x-model="mailTarget.email" required placeholder="finance@klien.com" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white font-mono text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    <p class="text-[10px] text-slate-400 mt-1">Dapat disesuaikan ke alamat email departemen AP (Accounts Payable) klien.</p>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Catatan Tagihan / Batas Jatuh Tempo (Opsional)</label>
+                    <textarea name="custom_notes" rows="3" placeholder="Informasi tambahan mengenai termin pembayaran atau instruksi transfer..." class="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/15 dark:bg-[#2C2C2E] dark:text-white text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"></textarea>
+                </div>
+
+                <!-- Info Rekening Bank Otomatis Disertakan -->
+                <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 space-y-1 text-[11px] text-slate-600 dark:text-slate-300">
+                    <div class="flex items-center justify-between font-semibold">
+                        <span class="flex items-center gap-1.5 text-slate-800 dark:text-white">
+                            <i data-lucide="landmark" class="w-3.5 h-3.5 text-sky-600"></i>
+                            <span>Rekening Tujuan Transfer Resmi Terlampir</span>
+                        </span>
+                        <a :href="mailTarget.previewUrl" target="_blank" class="text-purple-600 dark:text-purple-400 hover:underline font-semibold flex items-center gap-1">
+                            <span>Preview Format Email</span>
+                            <i data-lucide="external-link" class="w-3 h-3"></i>
+                        </a>
+                    </div>
+                    <div class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
+                        {{ \Illuminate\Support\Str::limit(\App\Models\SystemSetting::get('email_finance_bank_info', 'Bank Mandiri: 141-00-9876543-2 a/n PT GENIE LOGISTIK INDONESIA'), 90) }}
+                    </div>
+                </div>
+
+                <div class="pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-end space-x-2">
+                    <button type="button" @click="showSendMailModal = false" class="btn-apple-gray">Batal</button>
+                    <button type="submit" class="btn-apple-filled !bg-emerald-600 hover:!bg-emerald-700 inline-flex items-center gap-1.5 text-white">
+                        <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                        <span>Kirim Tagihan Invoice Sekarang</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
 </div>
 @endsection

@@ -305,12 +305,30 @@ class DocumentExtractionService
             $content = (string) file_get_contents($path, false, null, 0, 10 * 1024 * 1024);
             $plainText = '';
 
-            // Perlindungan Catastrophic Regex Backtracking (AUDIT-CRIT-02)
-            $previousLimit = ini_get('pcre.backtrack_limit');
-            @ini_set('pcre.backtrack_limit', '1000000');
+            // Ekstraksi stream PDF secara deterministik via string offset untuk cegah Catastrophic Regex Backtracking (AUDIT-CRIT-02) & error PCRE quantifier limit
+            $offset = 0;
+            $contentLen = strlen($content);
+            $maxExtractedLength = 300000;
 
-            if (preg_match_all('/stream[\r\n]+([^\r\n]{0,2000000}?)[\r\n]+endstream/s', $content, $matches)) {
-                foreach ($matches[1] as $stream) {
+            while (($streamPos = strpos($content, 'stream', $offset)) !== false) {
+                $dataStart = $streamPos + 6;
+                // Lewati newline setelah token 'stream' (\r\n, \n, atau \r)
+                if ($dataStart < $contentLen && $content[$dataStart] === "\r") {
+                    $dataStart++;
+                }
+                if ($dataStart < $contentLen && $content[$dataStart] === "\n") {
+                    $dataStart++;
+                }
+
+                $endstreamPos = strpos($content, 'endstream', $dataStart);
+                if ($endstreamPos === false) {
+                    break;
+                }
+
+                $streamLength = $endstreamPos - $dataStart;
+                // Batasi per-stream maks 2MB untuk proteksi memori
+                if ($streamLength > 0 && $streamLength <= 2 * 1024 * 1024) {
+                    $stream = rtrim(substr($content, $dataStart, $streamLength), "\r\n");
                     $uncompressed = @gzuncompress($stream);
                     if ($uncompressed === false) {
                         $uncompressed = @gzinflate($stream);
@@ -324,8 +342,12 @@ class DocumentExtractionService
                         }
                     }
                 }
+
+                $offset = $endstreamPos + 9;
+                if (strlen($plainText) >= $maxExtractedLength) {
+                    break;
+                }
             }
-            @ini_set('pcre.backtrack_limit', $previousLimit ?: '1000000');
 
             if (!empty(trim($plainText))) {
                 return $plainText;
